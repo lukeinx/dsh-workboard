@@ -2,20 +2,24 @@
 
 [English](README.md)
 
-Bento 在 DeepSeek Harness 侧栏增加一个模块化工作台。内置今日横栏、待办、速记和时钟，零配置可用；Agent 可以在任意对话里读写你的待办和速记；其他插件可以注册自己的 widget。
+Bento 在 DeepSeek Harness 侧栏增加一个模块化工作台。内置今日横栏、待办、速记、ICS 日历、天气和时钟，零配置可用；Agent 可以在任意对话里读写你的待办和速记；其他插件可以注册自己的 widget。
 
-状态：早期（P0a）。下一步是天气、ICS 日历、编辑模式和多看板。MIT 许可。
+状态：早期（P0b）。MIT 许可。
 
 ## 内置 widget
 
 | widget | 档位 | 内容 |
 |---|---|---|
-| 今日 | 横栏 | 时间、问候、日期、ISO 周和每日格言，点格言换一条 |
+| 今日 | 横栏 | 时间、问候、日期、ISO 周、当前天气和每日格言，点格言换一条 |
 | 待办 | `l` `m` `t` | 未完成在前、已完成折叠；之前留下的未完成项标「结转」 |
 | 速记 | `l` `t` `m` `s` | 自动保存，当前行可转待办 |
+| 日历 | `t` `l` `s` `m` | 月视图和所选日期的日程，来自一个或多个 ICS 订阅，支持重复日程 |
+| 天气 | `m` `s` | 当前天气、今日最高最低、空气质量和接下来几小时 |
 | 时钟 | `m` `s` | 时间、问候、日期和年度进度 |
 
-数据留在本机 Harness profile 存储（`~/.dsh/storages/dsh_bento.json`），Bento 自身不发网络请求。
+点「编辑」可以拖动卡片、换尺寸、移除、打开 widget 设置，或从组件库添加。看板是标签页：「+」新建，双击重命名，编辑模式下可删除。
+
+数据留在本机 Harness profile 存储（`~/.dsh/storages/dsh_bento.json`）。网络请求只由 Host 发出：设置城市后，天气和城市搜索走 [Open-Meteo](https://open-meteo.com)（无需 key，数据 CC BY 4.0）；日历从你添加的 ICS 地址拉取。结果在 Host 缓存。
 
 ## Agent 工具
 
@@ -54,12 +58,18 @@ ctx.effect(() => ctx.slots.inject('bento.widget', () => ctx.slots.register({
 | `l` | 2 × 2 | 大 |
 | `w` | 4 × 1 | 通栏 |
 
-`sizes` 第一个为默认。其他 manifest 字段：`title: false` 隐藏卡片标题，`banner: true` 无框渲染。组件收到 `size` 和看板里该 widget 的 `config`。
+`sizes` 第一个为默认。其他 manifest 字段：
+
+- `title: false` 隐藏卡片标题，`banner: true` 无框渲染。
+- `description` 显示在组件库里。
+- `settings` 是设置弹窗的字段列表：`{key, type, label, default?, options?, placeholder?}`，`type` 可选 `text`、`textarea`、`select`（配 `options: [{value, label}]`）、`toggle`。label 可以是字符串，也可以是返回字符串的函数。
+
+组件收到 `size`、`config`（这张卡保存的设置）、`editing` 和 `openSettings()`。
 
 ## 开发
 
 ```sh
-npm run check   # 语法检查 + Host 端冒烟
+npm run check   # 语法检查 + Host 端冒烟 + ICS 测试
 ```
 
-文件：`index.js`（Host 端 `/api/dsh-bento/*` 路由、存储、Agent 工具）、`client.js`（侧栏入口、面板、内置 widget）、`cordis.patch.yml`、`locale/`、`icon.svg`。
+文件：`index.js`（Host 端 `/api/dsh-bento/*` 路由、存储、Agent 工具）、`lib/`（HTTP 缓存、天气、ICS 解析）、`client.js`（侧栏入口、面板、内置 widget）、`cordis.patch.yml`、`locale/`、`icon.svg`。

@@ -2,20 +2,24 @@
 
 [简体中文](README.zh.md)
 
-Bento adds a modular dashboard to the DeepSeek Harness sidebar. It ships with a today banner, to-dos, notes and a clock, works with zero configuration, and lets the agent read and change your to-dos and notes from any conversation. Other plugins can add their own widgets.
+Bento adds a modular dashboard to the DeepSeek Harness sidebar. It ships with a today banner, to-dos, notes, an ICS calendar, weather and a clock, works with zero configuration, and lets the agent read and change your to-dos and notes from any conversation. Other plugins can add their own widgets.
 
-Status: early (P0a). Weather, ICS calendar, edit mode and multiple boards are next. MIT licensed.
+Status: early (P0b). MIT licensed.
 
 ## Widgets
 
 | Widget | Sizes | What it shows |
 |---|---|---|
-| Today | banner | Time, greeting, date, ISO week and a daily quote; click the quote for another |
+| Today | banner | Time, greeting, date, ISO week, current weather and a daily quote; click the quote for another |
 | To-do | `l` `m` `t` | Open items first, completed items collapsed; unfinished items from earlier days are marked as carried over |
 | Notes | `l` `t` `m` `s` | Autosaving scratch note; turn the current line into a to-do |
+| Calendar | `t` `l` `s` `m` | Month grid and the selected day's events from one or more ICS subscriptions, recurring events included |
+| Weather | `m` `s` | Current conditions, today's high and low, air quality and the next hours |
 | Clock | `m` `s` | Time, greeting, date and year progress |
 
-Data stays on your machine, in the Harness profile storage (`~/.dsh/storages/dsh_bento.json`). Bento makes no network requests of its own.
+Choose **Edit** to drag cards, change sizes, remove cards, open a widget's settings or add widgets from the gallery. Boards are tabs: **+** adds one, double-click renames it, and edit mode can delete it.
+
+Data stays on your machine, in the Harness profile storage (`~/.dsh/storages/dsh_bento.json`). The Host makes the only network requests: weather and city search go to [Open-Meteo](https://open-meteo.com) (no key, data under CC BY 4.0) once you set a city, and calendars are fetched from the ICS addresses you add. Responses are cached on the Host.
 
 ## Agent tools
 
@@ -54,12 +58,18 @@ A complete bundle is in [`examples/hello-widget`](examples/hello-widget). A newl
 | `l` | 2 × 2 | Large |
 | `w` | 4 × 1 | Wide |
 
-The first entry of `sizes` is the default. Other manifest fields: `title: false` hides the card header; `banner: true` renders without a frame. The component receives `size` and the board's `config` for that widget.
+The first entry of `sizes` is the default. Other manifest fields:
+
+- `title: false` hides the card header; `banner: true` renders without a frame.
+- `description` is shown in the widget gallery.
+- `settings` is a list of fields for the settings dialog: `{key, type, label, default?, options?, placeholder?}` with `type` one of `text`, `textarea`, `select` (with `options: [{value, label}]`) or `toggle`. Labels can be strings or functions that return a string.
+
+The component receives `size`, `config` (the saved settings for this card), `editing` and `openSettings()`.
 
 ## Development
 
 ```sh
-npm run check   # syntax check and Host smoke test
+npm run check   # syntax check, Host smoke test and ICS tests
 ```
 
-Files: `index.js` (Host routes under `/api/dsh-bento/*`, storage, agent tools), `client.js` (sidebar entry, panel, built-in widgets), `cordis.patch.yml`, `locale/`, `icon.svg`.
+Files: `index.js` (Host routes under `/api/dsh-bento/*`, storage, agent tools), `lib/` (HTTP cache, weather, ICS parsing), `client.js` (sidebar entry, panel, built-in widgets), `cordis.patch.yml`, `locale/`, `icon.svg`.
