@@ -1,0 +1,26 @@
+{
+  "name": "dsh-bento",
+  "version": "0.0.1",
+  "private": true,
+  "description": "DeepSeek Harness plugin: a modular dashboard panel with clock, weather, quotes, todos, notes and calendar widgets.",
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": ["index.js", "client.js", "cordis.patch.yml", "locale/*.json", "icon.svg", "README.md"],
+  "scripts": {
+    "check": "node --check index.js && node --check client.js && node --check examples/hello-widget/client.js && node scripts/smoke.mjs"
+  },
+  "dsh": {
+    "bundle": { "patch": "./cordis.patch.yml" },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": ["@deepseek-ai/dsh-client-connection", "@deepseek-ai/dsh-client-locale"]
+    }
+  }
+}
