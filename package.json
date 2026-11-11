@@ -11,9 +11,9 @@
     "./locale/*.json": "./locale/*.json",
     "./icon": "./icon.svg"
   },
-  "files": ["index.js", "client.js", "cordis.patch.yml", "locale/*.json", "icon.svg", "README.md", "README.zh.md"],
+  "files": ["index.js", "client.js", "lib/*.js", "cordis.patch.yml", "locale/*.json", "icon.svg", "README.md", "README.zh.md"],
   "scripts": {
-    "check": "node --check index.js && node --check client.js && node --check examples/hello-widget/client.js && node scripts/smoke.mjs"
+    "check": "for f in index.js client.js lib/*.js examples/hello-widget/client.js; do node --check $f || exit 1; done && node scripts/smoke.mjs && TZ=Asia/Shanghai node scripts/smoke-ics.mjs"
   },
   "dsh": {
     "bundle": { "patch": "./cordis.patch.yml" },

@@ -1,6 +1,6 @@
 // 用假 ctx 运行 Host 端，确认路由、看板 / 待办 / 速记读写和 Agent 工具。
 import assert from 'node:assert/strict';
-import {apply} from '../index.js';
+import {apply, createStore, createHandlers} from '../index.js';
 
 const routes = new Map();
 const tools = new Map();
@@ -27,7 +27,7 @@ const value = async (method, payload) => {
 };
 
 const board = await value('board.get', {id: 'work'});
-assert.deepEqual(board.widgets.map(w => w.id), ['bento.today', 'bento.todo', 'bento.note']);
+assert.deepEqual(board.widgets.map(w => w.id), ['bento.today', 'bento.todo', 'bento.calendar', 'bento.note']);
 assert.ok(board.known.includes('bento.clock'));
 const saved = await value('board.put', {board: {...board, widgets: [...board.widgets, {id: 'hello.widget', size: 's'}], known: [...board.known, 'hello.widget']}});
 assert.deepEqual(await value('board.get', {id: 'work'}), saved);
@@ -56,4 +56,26 @@ await noteTool.execute({action: 'append', text: '- line two'});
 assert.equal((await value('note.get')).text, '- line one\n- line two');
 assert.equal((await noteTool.execute({action: 'read'})).text, '- line one\n- line two');
 assert.equal(todoTool.output.render({}, {ok: 1})[0].type, 'text');
+
+assert.deepEqual((await value('board.list')).map(b => b.id), ['work']);
+const life = await value('board.create', {title: 'Life'});
+assert.deepEqual((await value('board.list')).map(b => [b.id, b.title]), [['work', ''], [life.id, 'Life']]);
+await value('board.order', {order: [life.id, 'work']});
+assert.equal((await value('board.list'))[0].id, life.id);
+await value('board.delete', {id: 'work'});
+assert.deepEqual((await value('board.list')).map(b => b.id), [life.id]);
+assert.equal((await call('board.delete', {id: life.id})).error.code, 'dsh-bento/last-board');
+
+assert.deepEqual((await value('prefs.put', {prefs: {location: {name: 'Shenzhen', lat: 22.5, lon: 114.1}}})).location, {name: 'Shenzhen', lat: 22.5, lon: 114.1});
+assert.equal((await value('prefs.put', {prefs: {location: null}})).location, undefined);
+assert.equal((await call('prefs.put', {prefs: {'../x': 1}})).ok, false);
+
+// 日历：假数据源，一个成功一个失败。
+const ics = ['BEGIN:VCALENDAR', 'BEGIN:VEVENT', 'UID:1', 'SUMMARY:Sync', 'DTSTART:20261112T020000Z', 'DTEND:20261112T030000Z', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+const fetcher = {get: async url => { if (url.includes('bad')) throw new Error('HTTP 404'); return ics; }};
+const handlers = createHandlers(createStore({}), fetcher);
+const cal = await handlers['dsh-bento/calendar.events']({urls: ['https://a.example/x.ics', 'https://bad.example/y.ics'], from: Date.UTC(2026, 10, 11), to: Date.UTC(2026, 10, 13)});
+assert.deepEqual(cal.events.map(e => [e.title, e.source]), [['Sync', 0]]);
+assert.deepEqual(cal.errors.map(e => e.message), ['HTTP 404']);
+await assert.rejects(handlers['dsh-bento/calendar.events']({urls: [], from: 0, to: 365 * 86400_000}));
 console.log('smoke ok');

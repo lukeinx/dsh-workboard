@@ -1,4 +1,8 @@
-// Host 端：/api/dsh-bento/* 路由、看板 / 待办 / 速记存储、Agent 工具。
+// Host 端：/api/dsh-bento/* 路由、看板 / 待办 / 速记存储、天气与日历代理、Agent 工具。
+import {createFetcher} from './lib/http.js';
+import {getWeather, searchPlaces} from './lib/weather.js';
+import {parseICS, expandEvents} from './lib/ics.js';
+
 export const name = 'dsh-bento';
 export const inject = ['connection'];
 
@@ -12,14 +16,18 @@ const MAX_NOTE = 200_000;
 
 // storageDomain 要求 zod schema；插件不带 zod 依赖，用只实现 safeParse/parse 的透传对象，校验在本文件里做。
 const passthrough = {safeParse: data => ({success: true, data}), parse: data => data};
-const TABLES = ['boards', 'todos', 'notes'];
+const TABLES = ['boards', 'todos', 'notes', 'prefs'];
+const ICS_TTL = 15 * 60_000;
+const ICS_MAX_BYTES = 5_000_000;
+const MAX_RANGE = 62 * 86400_000;
+const MAX_BOARDS = 12;
 
-export const BUILTIN_WIDGETS = ['bento.today', 'bento.todo', 'bento.note', 'bento.clock'];
+export const BUILTIN_WIDGETS = ['bento.today', 'bento.todo', 'bento.note', 'bento.calendar', 'bento.weather', 'bento.clock'];
 
 export function defaultBoard(id) {
   return {
     apiVersion: 1, id, title: '',
-    widgets: [{id: 'bento.today', size: 'bar'}, {id: 'bento.todo', size: 'l'}, {id: 'bento.note', size: 'l'}],
+    widgets: [{id: 'bento.today', size: 'bar'}, {id: 'bento.todo', size: 'l'}, {id: 'bento.calendar', size: 't'}, {id: 'bento.note', size: 't'}],
     known: BUILTIN_WIDGETS,
   };
 }
@@ -69,6 +77,43 @@ export function createStore(ctx) {
     close: async () => { await ready; await domain?.close(); },
 
     getBoard: id => table('boards').get(id) ?? defaultBoard(id),
+    listBoards() {
+      const stored = new Map(table('boards').entries());
+      const saved = table('prefs').get('boards')?.order;
+      if (!stored.has('work') && (!saved || saved.includes('work'))) stored.set('work', defaultBoard('work'));
+      const order = saved ?? [];
+      const ids = [...new Set([...order.filter(id => stored.has(id)), ...stored.keys()])];
+      return ids.map(id => ({id, title: stored.get(id).title}));
+    },
+    async createBoard(title, known) {
+      if (this.listBoards().length >= MAX_BOARDS) throw new UserError('too-many', `at most ${MAX_BOARDS} boards`);
+      const id = `b${Date.now().toString(36)}`;
+      const board = await this.putBoard({...defaultBoard(id), title: String(title ?? ''), widgets: [], known: Array.isArray(known) ? known : BUILTIN_WIDGETS});
+      await this.putPrefs({boards: {order: [...this.listBoards().map(b => b.id).filter(x => x !== id), id]}});
+      return board;
+    },
+    async deleteBoard(id) {
+      const boards = this.listBoards();
+      if (boards.length <= 1) throw new UserError('last-board', 'cannot delete the last board');
+      if (!boards.some(b => b.id === id)) throw new UserError('not-found', `no board ${id}`);
+      await table('boards').delete(id);
+      await this.putPrefs({boards: {order: boards.map(b => b.id).filter(x => x !== id)}});
+      return true;
+    },
+    async orderBoards(order) {
+      if (!Array.isArray(order)) throw new UserError('bad-order', 'order must be an array');
+      await this.putPrefs({boards: {order: order.map(String)}});
+      return this.listBoards();
+    },
+    getPrefs: () => Object.fromEntries([...table('prefs').entries()]),
+    async putPrefs(patch) {
+      for (const [key, value] of Object.entries(patch ?? {})) {
+        if (!/^[a-z][a-zA-Z0-9]{0,31}$/.test(key)) throw new UserError('bad-pref', `invalid pref ${key}`);
+        if (value === null) await table('prefs').delete(key);
+        else await table('prefs').put(key, value);
+      }
+      return this.getPrefs();
+    },
     async putBoard(board) {
       if (!board || typeof board.id !== 'string' || !/^[a-zA-Z0-9_-]{1,64}$/.test(board.id) || !Array.isArray(board.widgets))
         throw new UserError('bad-board', 'board needs an id and a widgets array');
@@ -128,8 +173,42 @@ const reply = (rpcId, result) => Response.json({type: 'server-response', rpcId, 
 const ok = value => ({ok: true, value});
 const fail = (code, message) => ({ok: false, error: {code: `${NS}/${code}`, message, details: {}}});
 
-export function createHandlers(store) {
+function createCalendar(fetcher) {
+  const parsed = new Map();
+  return async ({urls, from, to}) => {
+    const start = Number(from);
+    const end = Number(to);
+    if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start || end - start > MAX_RANGE) throw new UserError('bad-range', 'invalid time range');
+    const list = (Array.isArray(urls) ? urls : String(urls ?? '').split(/\s+/)).map(u => String(u).trim()).filter(Boolean).slice(0, 10);
+    const errors = [];
+    const events = [];
+    await Promise.all(list.map(async (url, source) => {
+      try {
+        const text = await fetcher.get(url, {ttlMs: ICS_TTL, type: 'text', maxBytes: ICS_MAX_BYTES, timeoutMs: 15_000});
+        let hit = parsed.get(url);
+        if (!hit || hit.text !== text) { hit = {text, events: parseICS(text)}; parsed.set(url, hit); }
+        for (const e of expandEvents(hit.events, start, end)) events.push({...e, source});
+      } catch (error) {
+        errors.push({url, message: String(error?.message || error)});
+      }
+    }));
+    events.sort((a, b) => a.start - b.start || Number(b.allDay) - Number(a.allDay));
+    return {events: events.slice(0, 500), errors};
+  };
+}
+
+export function createHandlers(store, fetcher = createFetcher()) {
+  const calendar = createCalendar(fetcher);
   return {
+    'dsh-bento/board.list': () => store.listBoards(),
+    'dsh-bento/board.create': p => store.createBoard(p?.title, p?.known),
+    'dsh-bento/board.delete': p => store.deleteBoard(String(p?.id)),
+    'dsh-bento/board.order': p => store.orderBoards(p?.order),
+    'dsh-bento/prefs.get': () => store.getPrefs(),
+    'dsh-bento/prefs.put': p => store.putPrefs(p?.prefs),
+    'dsh-bento/weather.get': p => getWeather(fetcher, {lat: p?.lat, lon: p?.lon, unit: p?.unit}),
+    'dsh-bento/geo.search': p => searchPlaces(fetcher, {query: p?.query, lang: p?.lang}),
+    'dsh-bento/calendar.events': p => calendar({urls: p?.urls, from: p?.from, to: p?.to}),
     'dsh-bento/board.get': p => store.getBoard(String(p?.id || 'work')),
     'dsh-bento/board.put': p => store.putBoard(p?.board),
     'dsh-bento/todo.list': () => store.listTodos(),
