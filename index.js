@@ -2,6 +2,7 @@
 import {createFetcher} from './lib/http.js';
 import {getWeather, searchPlaces} from './lib/weather.js';
 import {parseICS, expandEvents} from './lib/ics.js';
+import {parseFeed} from './lib/feed.js';
 
 export const name = 'dsh-desk';
 export const inject = ['connection'];
@@ -17,15 +18,21 @@ const MAX_NOTE = 200_000;
 
 // storageDomain 要求 zod schema；插件不带 zod 依赖，用只实现 safeParse/parse 的透传对象，校验在本文件里做。
 const passthrough = {safeParse: data => ({success: true, data}), parse: data => data};
-const TABLES = ['boards', 'todos', 'notes', 'prefs'];
+const TABLES = ['boards', 'todos', 'notes', 'prefs', 'habits'];
 const ICS_TTL = 15 * 60_000;
 const ICS_MAX_BYTES = 5_000_000;
+const FEED_TTL = 15 * 60_000;
+const FEED_MAX_BYTES = 3_000_000;
 const MAX_RANGE = 62 * 86400_000;
 const MAX_BOARDS = 12;
+const MAX_HABITS = 30;
+const HABIT_DAYS_KEPT = 400;
+const DAY_KEY = /^\d{4}-\d{2}-\d{2}$/;
 
 export const BUILTIN_WIDGETS = [
   'desk.today', 'desk.todo', 'desk.note', 'desk.calendar', 'desk.weather', 'desk.clock',
   'desk.quote', 'desk.countdown', 'desk.worldclock', 'desk.focus', 'desk.links', 'desk.progress',
+  'desk.agents', 'desk.feed', 'desk.habits',
 ];
 
 export function defaultBoard(id) {
@@ -189,6 +196,30 @@ export function createStore(ctx) {
       return true;
     },
 
+    listHabits: () => [...table('habits').entries()].map(([, v]) => v).sort((a, b) => a.order - b.order || a.createdAt - b.createdAt),
+    async addHabit(name) {
+      if ([...table('habits').entries()].length >= MAX_HABITS) throw new UserError('too-many', `at most ${MAX_HABITS} habits`);
+      const now = Date.now();
+      const habit = {id: newId(), name: cleanText(name).slice(0, 80), createdAt: now, order: now, days: []};
+      await table('habits').put(habit.id, habit);
+      return habit;
+    },
+    async checkHabit(id, day, done) {
+      const habit = table('habits').get(String(id));
+      if (!habit) throw new UserError('not-found', `no habit with id ${id}`);
+      if (!DAY_KEY.test(String(day))) throw new UserError('bad-day', 'day must be YYYY-MM-DD');
+      const days = new Set(habit.days);
+      if (done ?? !days.has(day)) days.add(day); else days.delete(day);
+      const next = {...habit, days: [...days].sort().slice(-HABIT_DAYS_KEPT)};
+      await table('habits').put(next.id, next);
+      return next;
+    },
+    async removeHabit(id) {
+      if (!table('habits').get(String(id))) throw new UserError('not-found', `no habit with id ${id}`);
+      await table('habits').delete(String(id));
+      return true;
+    },
+
     getNote: () => table('notes').get(NOTE_KEY) ?? {text: '', updatedAt: 0},
     async putNote(text) {
       const note = {text: String(text ?? '').slice(0, MAX_NOTE), updatedAt: Date.now()};
@@ -230,9 +261,92 @@ function createCalendar(fetcher) {
   };
 }
 
-export function createHandlers(store, fetcher = createFetcher()) {
-  const calendar = createCalendar(fetcher);
+function createFeeds(fetcher) {
+  const parsed = new Map();
+  return async ({urls, limit}) => {
+    const list = (Array.isArray(urls) ? urls : String(urls ?? '').split(/\s+/)).map(u => String(u).trim()).filter(Boolean).slice(0, 8);
+    const max = Math.min(Math.max(Number(limit) || 30, 1), 60);
+    const errors = [];
+    const items = [];
+    await Promise.all(list.map(async (url, source) => {
+      try {
+        const text = await fetcher.get(url, {ttlMs: FEED_TTL, type: 'text', maxBytes: FEED_MAX_BYTES, timeoutMs: 15_000});
+        let hit = parsed.get(url);
+        if (!hit || hit.text !== text) { hit = {text, feed: parseFeed(text)}; parsed.set(url, hit); }
+        for (const item of hit.feed.items) items.push({...item, source, feed: hit.feed.title});
+      } catch (error) {
+        errors.push({url, message: String(error?.message || error)});
+      }
+    }));
+    items.sort((a, b) => b.date - a.date || a.source - b.source);
+    return {items: items.slice(0, max), errors};
+  };
+}
+
+const titleOf = summary => {
+  const value = summary?.projections?.values?.title;
+  return String(typeof value === 'string' ? value : value?.title ?? value?.value ?? '').slice(0, 200);
+};
+const toMs = iso => { const ms = Date.parse(iso ?? ''); return Number.isFinite(ms) ? ms : 0; };
+
+// 会话与定时任务来自 Harness 内置服务（sessionController / schedule），缺失时对应字段为 null。
+// 「等待确认」通过旁听 approval / user-questions 两个 waterfall 得到，只计数不作答。
+export function createAgentWatch(ctx) {
+  const waiting = new Map();
+  const mark = (id, delta) => {
+    if (!id) return;
+    const n = (waiting.get(id) ?? 0) + delta;
+    if (n > 0) waiting.set(id, n); else waiting.delete(id);
+  };
+  const passThrough = (id, next) => {
+    mark(id, 1);
+    let result;
+    try { result = next(); } catch (error) { mark(id, -1); throw error; }
+    return Promise.resolve(result).finally(() => mark(id, -1));
+  };
+  if (typeof ctx.on === 'function') {
+    ctx.on('approval/request', (req, next) => passThrough(req?.agent?.id, next));
+    ctx.on('user-questions/request', (req, next) => passThrough(req?.agent?.id, next));
+  }
+  let cached = null;
   return {
+    waiting,
+    async overview() {
+      if (cached && Date.now() - cached.at < 2000) return cached.value;
+      const controller = ctx.get?.('sessionController');
+      const schedule = ctx.get?.('schedule');
+      let sessions = null;
+      if (typeof controller?.list === 'function') {
+        const result = await controller.list({}, AbortSignal.timeout(8000));
+        sessions = (result?.items ?? [])
+          .filter(s => s && !s.blank && s.origin !== 'subagent' && !s.parentSessionId)
+          .map(s => ({id: s.sessionId, title: titleOf(s), running: Boolean(s.running), waiting: waiting.has(s.sessionId), updatedAt: Number(s.updatedAt) || 0, cwd: s.cwd ?? ''}))
+          .sort((a, b) => Number(b.waiting) - Number(a.waiting) || Number(b.running) - Number(a.running) || b.updatedAt - a.updatedAt)
+          .slice(0, 30);
+      }
+      let schedules = null;
+      if (typeof schedule?.catalog === 'function') {
+        schedules = (await schedule.catalog())
+          .filter(t => t && t.status === 'active')
+          .map(t => ({id: t.id, title: String(t.title ?? t.prompt ?? '').slice(0, 200), scheduledAt: toMs(t.scheduledAt), running: t.executionActive === true, lastAt: toMs(t.lastDelivery?.deliveredAt)}))
+          .slice(0, 20);
+      }
+      cached = {at: Date.now(), value: {sessions, schedules}};
+      return cached.value;
+    },
+  };
+}
+
+export function createHandlers(store, fetcher = createFetcher(), agents = null) {
+  const calendar = createCalendar(fetcher);
+  const feeds = createFeeds(fetcher);
+  return {
+    'dsh-desk/feed.get': p => feeds({urls: p?.urls, limit: p?.limit}),
+    'dsh-desk/agent.overview': () => (agents ? agents.overview() : {sessions: null, schedules: null}),
+    'dsh-desk/habit.list': () => store.listHabits(),
+    'dsh-desk/habit.add': p => store.addHabit(p?.name),
+    'dsh-desk/habit.check': p => store.checkHabit(p?.id, p?.day, p?.done),
+    'dsh-desk/habit.remove': p => store.removeHabit(p?.id),
     'dsh-desk/board.list': () => store.listBoards(),
     'dsh-desk/board.create': p => store.createBoard(p?.title, p?.known),
     'dsh-desk/board.delete': p => store.deleteBoard(String(p?.id)),
@@ -326,7 +440,7 @@ export function createTools(store) {
 
 export function apply(ctx) {
   const store = createStore(ctx);
-  const handlers = createHandlers(store);
+  const handlers = createHandlers(store, createFetcher(), createAgentWatch(ctx));
   ctx.effect(() => () => { void store.close(); }, 'dsh-desk: storage');
 
   // 共享通道 /api 只允许一个 interceptor，每个方法注册独立的 Fetch 路由。

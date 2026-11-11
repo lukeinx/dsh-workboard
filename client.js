@@ -11,6 +11,8 @@ window.__ModuleLoader__.load({
     const POLL_MS = 5000;
     const WEATHER_MS = 10 * 60_000;
     const CAL_MS = 15 * 60_000;
+    const FEED_MS = 15 * 60_000;
+    const AGENT_MS = 5000;
     // 尺寸档位：[列, 行]，行单位 80px；「横栏」半高，其余行数成对。
     const SIZES = {bar: [4, 1], s: [1, 2], m: [2, 2], t: [1, 4], l: [2, 4], w: [4, 2]};
 
@@ -45,6 +47,13 @@ window.__ModuleLoader__.load({
       f_workMin: '专注时长', f_breakMin: '休息时长', minutes: '{n} 分钟', focusDone: '专注结束，休息一下', breakDone: '休息结束，开始下一个专注',
       f_links: '链接（每行一个：名称 https://…）', addLinks: '添加链接',
       p_day: '今天', p_week: '本周', p_month: '本月', p_year: '今年',
+      agents: 'Agent', feed: '订阅', habits: '习惯打卡',
+      d_agents: '等你确认和运行中的会话、最近会话与即将触发的定时任务', d_feed: 'RSS / Atom 订阅，由 Host 拉取并缓存', d_habits: '每天打卡，显示最近一周和连续天数',
+      waitingYou: '等你确认', running: '运行中', untitledSession: '未命名会话', newSession: '新会话', schedules: '定时任务', executing: '执行中',
+      noSessions: '还没有会话', noActive: '没有进行中的会话', agentsUnavailable: '当前 Harness 不支持读取会话', activeCount: '{n} 个进行中',
+      f_showRecent: '显示最近会话', f_showSchedules: '显示定时任务',
+      f_feeds: '订阅地址（每行一个 RSS / Atom）', defaultFeeds: 'https://sspai.com/feed', feedError: '{n} 个订阅加载失败', noItems: '没有内容',
+      addHabit: '添加习惯', noHabits: '还没有习惯', streak: '连续 {n} 天', markDay: '{d} 打卡',
     };
     const en = {
       lang: 'en-US', title: 'Desk', loadFailed: 'Failed to load', empty: 'No widgets on this board yet',
@@ -77,6 +86,13 @@ window.__ModuleLoader__.load({
       f_workMin: 'Focus length', f_breakMin: 'Break length', minutes: '{n} min', focusDone: 'Focus session done. Take a break.', breakDone: 'Break is over. Ready for the next one.',
       f_links: 'Links, one per line: name https://…', addLinks: 'Add links',
       p_day: 'Today', p_week: 'This week', p_month: 'This month', p_year: 'This year',
+      agents: 'Agent', feed: 'Feeds', habits: 'Habits',
+      d_agents: 'Sessions waiting for you or running, recent sessions and upcoming scheduled tasks', d_feed: 'RSS / Atom feeds, fetched and cached by the Host', d_habits: 'Daily check-ins with the last week and your streak',
+      waitingYou: 'Needs you', running: 'Running', untitledSession: 'Untitled session', newSession: 'New session', schedules: 'Scheduled', executing: 'Running',
+      noSessions: 'No sessions yet', noActive: 'Nothing running', agentsUnavailable: 'This Harness does not expose sessions', activeCount: '{n} active',
+      f_showRecent: 'Show recent sessions', f_showSchedules: 'Show scheduled tasks',
+      f_feeds: 'Feed URLs, one RSS or Atom feed per line', defaultFeeds: 'https://hnrss.org/frontpage', feedError: '{n} feed(s) failed to load', noItems: 'Nothing here',
+      addHabit: 'Add a habit', noHabits: 'No habits yet', streak: '{n}-day streak', markDay: 'Check in for {d}',
     };
 
     // 公共领域的经典短句，按日期轮换。
@@ -298,6 +314,26 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 .bnt-prow span:last-child{text-align:right;color:var(--dsw-alias-label-primary)}
 .bnt-pbar{height:6px;border-radius:3px;background:var(--dsw-alias-bg-layer-2);overflow:hidden}
 .bnt-pbar i{display:block;height:100%;background:var(--dsw-alias-label-secondary);opacity:.5}
+
+.bnt-rowbtn{width:100%;text-align:left;border-radius:8px;color:inherit;text-decoration:none;box-sizing:border-box}
+.bnt-rowbtn:hover{background:var(--dsw-alias-bg-layer-2)}
+.bnt-dot{width:8px;height:8px;border-radius:4px;flex:none;background:var(--dsw-alias-border-l2)}
+.bnt-dot[data-state=running]{background:var(--dsw-alias-brand-primary)}
+.bnt-dot[data-state=waiting]{background:var(--dsw-alias-state-warn-primary)}
+.bnt-row[data-state=waiting] small{color:var(--dsw-alias-state-warn-primary)}
+.bnt-sect{font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary);padding:8px 2px 2px}
+.bnt-row time{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none}
+
+.bnt-hrow{display:flex;align-items:center;gap:10px;padding:5px 2px;border-radius:8px;min-width:0}
+.bnt-hrow:hover{background:var(--dsw-alias-bg-layer-2)}
+.bnt-hrow>b{flex:1;min-width:0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bnt-hrow small{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none;min-width:44px;text-align:right}
+.bnt-hdays{display:flex;gap:4px;flex:none}
+.bnt-hday{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--dsw-alias-border-l2);box-sizing:border-box;display:grid;place-items:center}
+.bnt-hday:hover{border-color:var(--dsw-alias-brand-primary)}
+.bnt-hday[data-today]{border-color:var(--dsw-alias-label-secondary)}
+.bnt-hday[data-done]{background:var(--dsw-alias-brand-primary);border-color:var(--dsw-alias-brand-primary);${onBrand('color')}}
+.bnt-hrow:hover .bnt-del{display:grid}
 
 @media (max-width:900px){.bnt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.bnt-card[data-c="4"]{grid-column:span 2}.bnt-today .bnt-quote,.bnt-today .bnt-qsep{display:none}}
 @media (max-width:600px){.bnt-grid{grid-template-columns:minmax(0,1fr)}.bnt-card{grid-column:auto!important}}
@@ -1110,10 +1146,150 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             })));
         }
 
+        const relTime = (ms, nowMs) => {
+          const rtf = new Intl.RelativeTimeFormat(t('lang'), {numeric: 'auto', style: 'short'});
+          const diff = ms - nowMs;
+          const abs = Math.abs(diff);
+          if (abs < 60_000) return rtf.format(0, 'second');
+          if (abs < 3_600_000) return rtf.format(Math.round(diff / 60_000), 'minute');
+          if (abs < 86_400_000) return rtf.format(Math.round(diff / 3_600_000), 'hour');
+          return rtf.format(Math.round(diff / 86_400_000), 'day');
+        };
+        const baseName = path => String(path ?? '').split('/').filter(Boolean).pop() ?? '';
+
+        function Agents({size, config}) {
+          useLocale();
+          const now = useNow();
+          const res = useRemote('agent.overview', {}, AGENT_MS);
+          const ui = ctx.get?.('uiWorkspace');
+          const v = res.value;
+          if (!v) return h('div', {className: 'bnt-blank'}, res.error || '…');
+          if (!v.sessions) return h('div', {className: 'bnt-blank'}, t('agentsUnavailable'));
+          const lang = t('lang');
+          const nowMs = now.getTime();
+          const active = v.sessions.filter(s => s.waiting || s.running);
+          const recent = config?.showRecent !== false;
+          const compact = size === 'm';
+          const sessions = compact ? (active.length || !recent ? active : v.sessions.slice(0, 2)) : (recent ? v.sessions.slice(0, 12) : active);
+          const schedules = !compact && config?.showSchedules !== false ? v.schedules ?? [] : [];
+          const sessionRow = s => {
+            const state = s.waiting ? 'waiting' : s.running ? 'running' : undefined;
+            const status = s.waiting ? t('waitingYou') : s.running ? t('running') : relTime(s.updatedAt, nowMs);
+            return h('button', {key: s.id, type: 'button', className: 'bnt-btn bnt-row bnt-rowbtn', 'data-state': state, title: s.cwd || undefined, onClick: () => ui?.openSession?.(s.id)},
+              h('span', {className: 'bnt-dot', 'data-state': state}),
+              h('div', null, h('b', null, s.title || t('untitledSession')), h('small', null, [status, baseName(s.cwd)].filter(Boolean).join(' · '))));
+          };
+          const taskRow = k => h('div', {key: k.id, className: 'bnt-row'},
+            h('span', {className: 'bnt-dot', 'data-state': k.running ? 'running' : undefined}),
+            h('div', null, h('b', null, k.title),
+              h('small', null, k.running ? t('executing') : `${relTime(k.scheduledAt, nowMs)} · ${new Date(k.scheduledAt).toLocaleString(lang, {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'})}`)));
+          return h(React.Fragment, null,
+            h('div', {className: 'bnt-rows'},
+              sessions.length ? sessions.map(sessionRow) : h('div', {className: 'bnt-blank'}, v.sessions.length ? t('noActive') : t('noSessions')),
+              schedules.length ? h('div', {className: 'bnt-sect'}, t('schedules')) : null,
+              schedules.map(taskRow)),
+            h('div', {className: 'bnt-notefoot'},
+              h('span', null, active.length ? fill(t('activeCount'), {n: active.length}) : ''),
+              typeof ui?.startSession === 'function' ? h('button', {type: 'button', className: 'bnt-btn', onClick: () => ui.startSession()}, t('newSession')) : null));
+        }
+        Agents.desk = {
+          apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_agents'),
+          settings: [
+            {key: 'showRecent', type: 'toggle', default: true, label: () => t('f_showRecent')},
+            {key: 'showSchedules', type: 'toggle', default: true, label: () => t('f_showSchedules')},
+          ],
+        };
+
+        function Feed({size, config}) {
+          useLocale();
+          const now = useNow();
+          const urls = String(config?.urls || t('defaultFeeds')).split(/\s+/).filter(Boolean);
+          const res = useRemote('feed.get', {urls, limit: 40}, FEED_MS);
+          const items = res.value?.items ?? [];
+          const failed = res.value?.errors?.length ?? 0;
+          const many = urls.length > 1;
+          return h(React.Fragment, null,
+            h('div', {className: 'bnt-rows'},
+              items.length ? null : h('div', {className: 'bnt-blank'}, res.pending ? '…' : res.error || t('noItems')),
+              items.map((it, i) => h(it.link ? 'a' : 'div', {key: i, className: 'bnt-row bnt-rowbtn', title: it.title, ...(it.link ? {href: it.link, target: '_blank', rel: 'noopener noreferrer'} : {})},
+                h('div', null, h('b', null, it.title || it.link),
+                  size === 'w' && !many ? null : h('small', null, [many ? it.feed : '', it.date ? relTime(it.date, now.getTime()) : ''].filter(Boolean).join(' · '))),
+                size === 'w' && !many && it.date ? h('time', null, relTime(it.date, now.getTime())) : null))),
+            failed ? h('div', {className: 'bnt-calerr', title: res.value.errors.map(e => `${e.url}: ${e.message}`).join('\n')}, fill(t('feedError'), {n: failed})) : null);
+        }
+        Feed.desk = {
+          apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_feed'),
+          settings: [{key: 'urls', type: 'textarea', label: () => t('f_feeds'), default: () => t('defaultFeeds')}],
+        };
+
+        function Habits({size}) {
+          useLocale();
+          const now = useNow();
+          const [habits, setHabits] = useState(null);
+          const [text, setText] = useState('');
+          const [error, setError] = useState('');
+          const fail = e => setError(String(e?.message || e));
+          const load = () => call('habit.list').then(list => { setHabits(list); setError(''); }, fail);
+          useEffect(() => {
+            load();
+            window.addEventListener('focus', load);
+            return () => window.removeEventListener('focus', load);
+          }, []);
+          const lang = t('lang');
+          const count = size === 't' ? 5 : 7;
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          const keys = Array.from({length: count}, (_, i) => dayKey(new Date(today.getFullYear(), today.getMonth(), today.getDate() - (count - 1 - i))));
+          const todayKey = keys[count - 1];
+          const streak = habit => {
+            const done = new Set(habit.days);
+            const d = new Date(today);
+            if (!done.has(dayKey(d))) d.setDate(d.getDate() - 1);
+            let n = 0;
+            while (done.has(dayKey(d))) { n++; d.setDate(d.getDate() - 1); }
+            return n;
+          };
+          const toggle = (habit, day) => {
+            const done = !habit.days.includes(day);
+            setHabits(list => list.map(x => (x.id === habit.id ? {...x, days: done ? [...x.days, day] : x.days.filter(k => k !== day)} : x)));
+            call('habit.check', {id: habit.id, day, done}).then(next => setHabits(list => list.map(x => (x.id === next.id ? next : x))), e => { fail(e); load(); });
+          };
+          const remove = habit => {
+            setHabits(list => list.filter(x => x.id !== habit.id));
+            call('habit.remove', {id: habit.id}).catch(e => { fail(e); load(); });
+          };
+          const submit = e => {
+            if (e.key !== 'Enter' || e.nativeEvent.isComposing || !text.trim()) return;
+            const name = text.trim();
+            setText('');
+            call('habit.add', {name}).then(habit => setHabits(list => [...(list ?? []), habit]), err => { setText(name); fail(err); });
+          };
+          return h(React.Fragment, null,
+            h('div', {className: 'bnt-rows'},
+              habits && !habits.length ? h('div', {className: 'bnt-blank'}, t('noHabits')) : null,
+              (habits ?? []).map(habit => {
+                const n = streak(habit);
+                return h('div', {key: habit.id, className: 'bnt-hrow'},
+                  h('b', {title: habit.name}, habit.name),
+                  h('div', {className: 'bnt-hdays'}, keys.map(k => {
+                    const done = habit.days.includes(k);
+                    const label = fill(t('markDay'), {d: keyDate(k).toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'})});
+                    return h('button', {key: k, type: 'button', className: 'bnt-btn bnt-hday', 'data-done': done ? '' : undefined, 'data-today': k === todayKey ? '' : undefined,
+                      'aria-label': label, 'aria-pressed': done, title: label, onClick: () => toggle(habit, k)}, done ? h(Icon.check) : null);
+                  })),
+                  size === 't' ? null : h('small', {className: 'bnt-num'}, n ? fill(t('streak'), {n}) : ''),
+                  h('button', {type: 'button', className: 'bnt-btn bnt-del', 'aria-label': t('remove'), title: t('remove'), onClick: () => remove(habit)}, h(Icon.x)));
+              })),
+            error ? h('div', {className: 'bnt-calerr'}, error) : null,
+            h('label', {className: 'bnt-add'}, h(Icon.plus),
+              h('input', {value: text, placeholder: t('addHabit'), enterKeyHint: 'done', onChange: e => setText(e.target.value), onKeyDown: submit})));
+        }
+        Habits.desk = {apiVersion: 1, sizes: ['m', 'l', 't', 'w'], description: () => t('d_habits')};
+
         const builtins = [
           ['desk.today', 'today', Today], ['desk.todo', 'todo', Todo], ['desk.note', 'note', Note], ['desk.calendar', 'calendar', Calendar],
           ['desk.weather', 'weather', Weather], ['desk.clock', 'clock', Clock], ['desk.quote', 'quote', Quote], ['desk.countdown', 'countdown', Countdown],
           ['desk.worldclock', 'worldclock', WorldClock], ['desk.focus', 'focus', Focus], ['desk.links', 'links', Links], ['desk.progress', 'progress', Progress],
+          ['desk.agents', 'agents', Agents], ['desk.feed', 'feed', Feed], ['desk.habits', 'habits', Habits],
         ];
         const BUILTIN_IDS = new Set(builtins.map(([id]) => id));
 

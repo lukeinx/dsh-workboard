@@ -2,7 +2,7 @@
 
 [简体中文](README.zh.md)
 
-Desk (`@lukeinx/dsh-desk`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with twelve widgets, including a today banner, to-dos, notes, an ICS calendar, weather, a world clock, countdowns and a focus timer, works with zero configuration, and lets the agent read and change your to-dos and notes from any conversation. Other plugins can add their own widgets.
+Desk (`@lukeinx/dsh-desk`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with fifteen widgets, including a today banner, to-dos, notes, an ICS calendar, weather, an agent session monitor, feeds, habits and a focus timer, works with zero configuration, and lets the agent read and change your to-dos and notes from any conversation. Other plugins can add their own widgets.
 
 Status: early (P0b). MIT licensed.
 
@@ -22,6 +22,9 @@ Status: early (P0b). MIT licensed.
 | Focus | `m` `s` | Pomodoro timer that keeps running across boards and panels, notifies when done and counts today's sessions |
 | Links | `m` `s` `w` `t` `l` | One `name URL` per line; only http, https and mailto |
 | Time progress | `m` `s` `w` | How much of today, this week, month and year has passed |
+| Agent | `t` `l` `m` `w` | Sessions waiting for you first, then running and recent ones; click to open. Upcoming scheduled tasks and a new-session button |
+| Feeds | `t` `l` `m` `w` | RSS / Atom, several feeds merged by date; defaults to Hacker News (English) or sspai (Chinese) |
+| Habits | `m` `l` `t` `w` | Check in for any day of the last week, with your current streak |
 
 The default board holds Today, To-do, Calendar and Notes; add the rest from the gallery. Built-in widgets added by an upgrade appear only in the gallery and are not placed on existing boards.
 

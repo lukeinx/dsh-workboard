@@ -1,6 +1,6 @@
 // 用假 ctx 运行 Host 端，确认路由、看板 / 待办 / 速记读写和 Agent 工具。
 import assert from 'node:assert/strict';
-import {apply, createStore, createHandlers, migrateLegacy} from '../index.js';
+import {apply, createStore, createHandlers, createAgentWatch, migrateLegacy} from '../index.js';
 
 const routes = new Map();
 const tools = new Map();
@@ -104,4 +104,51 @@ assert.equal(fresh.table('todos').get('t1').text, 'old');
 assert.equal(fresh.table('prefs').get('unit'), 'c');
 assert.equal(await migrateLegacy(fresh, fakeDomain({todos: {t2: {id: 't2'}}})), false);
 assert.equal(fresh.table('todos').get('t2'), undefined);
+// 习惯：增删、按天切换、非法日期。
+const habit = await value('habit.add', {name: '  read   20 pages '});
+assert.equal(habit.name, 'read 20 pages');
+assert.deepEqual((await value('habit.check', {id: habit.id, day: '2026-11-11'})).days, ['2026-11-11']);
+assert.deepEqual((await value('habit.check', {id: habit.id, day: '2026-11-10', done: true})).days, ['2026-11-10', '2026-11-11']);
+assert.deepEqual((await value('habit.check', {id: habit.id, day: '2026-11-11'})).days, ['2026-11-10']);
+assert.equal((await call('habit.check', {id: habit.id, day: 'yesterday'})).error.code, 'dsh-desk/bad-day');
+assert.deepEqual((await value('habit.list')).map(h => h.id), [habit.id]);
+await value('habit.remove', {id: habit.id});
+assert.deepEqual(await value('habit.list'), []);
+
+// 订阅：两个源按时间合并，失败的源进 errors。
+const rss = '<rss version="2.0"><channel><title>R</title><item><title>Old</title><link>https://r.example/1</link><pubDate>Mon, 09 Nov 2026 10:00:00 GMT</pubDate></item></channel></rss>';
+const atomFeed = '<feed xmlns="http://www.w3.org/2005/Atom"><title>A</title><entry><title>New</title><link href="https://a.example/2"/><updated>2026-11-11T10:00:00Z</updated></entry></feed>';
+const feedFetcher = {get: async url => { if (url.includes('bad')) throw new Error('HTTP 500'); return url.includes('atom') ? atomFeed : rss; }};
+const feed = await createHandlers(createStore({}), feedFetcher)['dsh-desk/feed.get']({urls: ['https://x.example/rss', 'https://x.example/atom', 'https://bad.example/f']});
+assert.deepEqual(feed.items.map(i => [i.title, i.feed, i.link]), [['New', 'A', 'https://a.example/2'], ['Old', 'R', 'https://r.example/1']]);
+assert.deepEqual(feed.errors.map(e => e.message), ['HTTP 500']);
+
+// Agent 概览：假 sessionController / schedule，等待确认时标 waiting，答复后清除。
+const listeners = new Map();
+const summaries = [
+  {sessionId: 's1', updatedAt: 3, running: false, blank: false, projections: {values: {title: 'Idle chat'}}},
+  {sessionId: 's2', updatedAt: 1, running: true, blank: false, projections: {values: {title: {title: 'Busy'}}}},
+  {sessionId: 's3', updatedAt: 2, running: false, blank: false},
+  {sessionId: 'sub', updatedAt: 9, running: true, blank: false, origin: 'subagent', parentSessionId: 's2'},
+  {sessionId: 'empty', updatedAt: 9, running: false, blank: true},
+];
+const tasks = [
+  {id: 'k1', title: 'Daily report', status: 'active', scheduledAt: '2026-11-12T01:00:00.000Z', executionActive: true},
+  {id: 'k2', title: 'Done', status: 'completed', scheduledAt: '2026-11-01T01:00:00.000Z'},
+];
+const agentCtx = {
+  on: (name, fn) => { listeners.set(name, fn); return () => {}; },
+  get: key => (key === 'sessionController' ? {list: async () => ({items: summaries})} : key === 'schedule' ? {catalog: async () => tasks} : undefined),
+};
+const agentHandlers = createHandlers(createStore({}), feedFetcher, createAgentWatch(agentCtx));
+let answer;
+const pending = listeners.get('approval/request')({agent: {id: 's3'}, toolName: 'bash'}, () => new Promise(r => { answer = r; }));
+let overview = await agentHandlers['dsh-desk/agent.overview']();
+assert.deepEqual(overview.sessions.map(s => [s.id, s.title, s.running, s.waiting]), [['s3', '', false, true], ['s2', 'Busy', true, false], ['s1', 'Idle chat', false, false]]);
+assert.deepEqual(overview.schedules.map(t => [t.id, t.running, t.scheduledAt]), [['k1', true, Date.UTC(2026, 10, 12, 1)]]);
+answer('allowed-once');
+assert.equal(await pending, 'allowed-once');
+assert.equal(createAgentWatch(agentCtx).waiting.size, 0);
+assert.deepEqual(await createHandlers(createStore({}), feedFetcher)['dsh-desk/agent.overview'](), {sessions: null, schedules: null});
+
 console.log('smoke ok');
