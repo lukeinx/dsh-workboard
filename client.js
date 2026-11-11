@@ -75,6 +75,8 @@ window.__ModuleLoader__.load({
       {zh: '把这句话写在心上：每一天都是一年中最好的一天。', en: 'Write it on your heart that every day is the best day in the year.', by: {zh: '爱默生', en: 'Ralph Waldo Emerson'}},
     ];
 
+    const onBrand = prop => `${prop}:#fff;${prop}:oklch(from var(--dsw-alias-brand-primary) clamp(0,(.65 - l)*1000,1) 0 0)`;
+
     const CSS = `
 .bnt-page{height:100%;overflow:auto;background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font-size:13px}
 .bnt-inner{max-width:1120px;margin:0 auto;padding:20px 24px 32px;box-sizing:border-box}
@@ -112,7 +114,7 @@ window.__ModuleLoader__.load({
 .bnt-list li:hover{background:var(--dsw-alias-bg-layer-2)}
 .bnt-ck{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--dsw-alias-border-l2);flex:none;display:grid;place-items:center;box-sizing:border-box}
 .bnt-ck:hover{border-color:var(--dsw-alias-brand-primary)}
-.bnt-list li[data-done] .bnt-ck{background:var(--dsw-alias-brand-primary);border-color:var(--dsw-alias-brand-primary);color:#fff}
+.bnt-list li[data-done] .bnt-ck{background:var(--dsw-alias-brand-primary);border-color:var(--dsw-alias-brand-primary);${onBrand('color')}}
 .bnt-list li[data-done] .bnt-tx{color:var(--dsw-alias-label-secondary);text-decoration:line-through}
 .bnt-tx{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bnt-tag{font-size:11px;padding:0 6px;border-radius:5px;flex:none;white-space:nowrap;background:color-mix(in srgb,var(--dsw-alias-state-warn-primary) 14%,transparent);color:var(--dsw-alias-state-warn-primary)}
@@ -142,7 +144,7 @@ window.__ModuleLoader__.load({
 .bnt-action{appearance:none;font:inherit;height:30px;padding:0 12px;border-radius:8px;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}
 .bnt-action:hover{border-color:var(--dsw-alias-border-l2)}
 .bnt-action:disabled{opacity:.5;cursor:default}
-.bnt-action[data-primary]{background:var(--dsw-alias-brand-primary);border-color:transparent;color:#fff}
+.bnt-action[data-primary]{background:var(--dsw-alias-brand-primary);border-color:transparent;${onBrand('color')}}
 .bnt-action[data-danger]{color:var(--dsw-alias-state-error-primary)}
 .bnt-card{position:relative}
 .bnt-grid[data-editing] .bnt-card{border-style:dashed;border-color:var(--dsw-alias-border-l2);cursor:grab}
@@ -205,9 +207,9 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 .bnt-day:hover{background:var(--dsw-alias-bg-layer-2)}
 .bnt-day[data-out]{opacity:.4}
 .bnt-day[data-selected]{background:var(--dsw-alias-bg-layer-2)}
-.bnt-day[data-today]{background:var(--dsw-alias-brand-primary);color:#fff;font-weight:600}
+.bnt-day[data-today]{background:var(--dsw-alias-brand-primary);${onBrand('color')};font-weight:600}
 .bnt-day[data-has]::after{content:'';position:absolute;bottom:2px;width:4px;height:4px;border-radius:2px;background:var(--dsw-alias-brand-primary)}
-.bnt-day[data-today][data-has]::after{background:#fff}
+.bnt-day[data-today][data-has]::after{${onBrand('background')}}
 .bnt-events{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:2px}
 .bnt-cal[data-big] .bnt-events{border-top:1px solid var(--dsw-alias-border-l1);padding-top:8px}
 .bnt-evhead{font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary);padding:4px 2px 2px}
