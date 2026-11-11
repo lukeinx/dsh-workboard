@@ -1,35 +1,65 @@
-# dsh-bento
+# Bento for DeepSeek Harness
 
-DeepSeek Harness 插件：在 Harness 侧栏增加「Bento」面板，模块化展示时钟、天气、格言、待办、速记、日历等 widget，支持多看板、可视化编辑、第三方插件扩展和 Agent 生成 widget。面向社区开源，MIT 许可。
+[简体中文](README.zh.md)
 
-状态：技术验证完成，面板骨架 + 时钟 widget。方案、mock 和进度见材料区 `.materials/`（iCloud `Vibe/dsh-bento/`）。
+Bento adds a modular dashboard to the DeepSeek Harness sidebar. It ships with a today banner, to-dos, notes and a clock, works with zero configuration, and lets the agent read and change your to-dos and notes from any conversation. Other plugins can add their own widgets.
 
-## 结构
+Status: early (P0a). Weather, ICS calendar, edit mode and multiple boards are next. MIT licensed.
 
-| 文件 | 职责 |
-|---|---|
-| `index.js` | Host 端：每个方法一条 `POST /api/dsh-bento/*` Fetch 路由（`/api` 共享通道只允许一个 interceptor）；看板存 `storageDomain`（域名 `dsh_bento`）；`bento_status` Agent 工具 |
-| `client.js` | Web 端：`sidebar.panellist` 入口 + `main` 面板，面板声明子 slot `bento.widget`；内置 widget 也走这个 slot |
-| `examples/hello-widget/` | 独立 bundle 向 `bento.widget` 注册 widget 的示例 |
-| `cordis.patch.yml`、`locale/`、`icon.svg` | 插入行、显示名称与描述、图标 |
+## Widgets
 
-## 写一个 widget
+| Widget | Sizes | What it shows |
+|---|---|---|
+| Today | banner | Time, greeting, date, ISO week and a daily quote; click the quote for another |
+| To-do | `l` `m` `t` | Open items first, completed items collapsed; unfinished items from earlier days are marked as carried over |
+| Notes | `l` `t` `m` `s` | Autosaving scratch note; turn the current line into a to-do |
+| Clock | `m` `s` | Time, greeting, date and year progress |
 
-在自己的 bundle 的 `client.js` 里注册到 `bento.widget`：manifest 挂在组件的静态属性 `bento` 上（slot 注册参数只保留 `id`、`order`、`label`），组件收到 `size` 属性。
+Data stays on your machine, in the Harness profile storage (`~/.dsh/storages/dsh_bento.json`). Bento makes no network requests of its own.
+
+## Agent tools
+
+- `bento_todos` — `list`, `add`, `complete`, `reopen`, `remove`
+- `bento_note` — `read`, `append`, `replace`
+
+The page refreshes every 5 seconds while it is visible, so changes made by the agent appear without a reload.
+
+## Install
+
+In a Harness conversation, ask the agent to install the bundle with `plugin_manager install_bundle` pointing at this directory. A local directory is linked, not copied.
+
+## Write a widget
+
+A widget is a React component that another bundle registers into the `bento.widget` slot from its `client.js`. Put the manifest on the component's static `bento` property; the slot registration itself keeps only `id`, `order` and `label`.
 
 ```js
+function Hello({size, config}) {
+  return h('b', null, `Hello (${size})`);
+}
 Hello.bento = {apiVersion: 1, sizes: ['m', 's']};
+
 ctx.effect(() => ctx.slots.inject('bento.widget', () => ctx.slots.register({
   name: 'bento.widget', id: 'hello.widget', order: 100, label: 'Hello',
 }, Hello)), 'hello widget');
 ```
 
-尺寸档位：`s` 1×1、`m` 2×1、`tall` 1×2、`l` 2×2、`wide` 4×1，`sizes` 第一个为默认。
+A complete bundle is in [`examples/hello-widget`](examples/hello-widget). A newly installed widget is added to the board once.
 
-## 开发
+| Size | Columns × rows | |
+|---|---|---|
+| `bar` | 4 × ½ | Frameless banner |
+| `s` | 1 × 1 | Small |
+| `m` | 2 × 1 | Medium |
+| `t` | 1 × 2 | Tall |
+| `l` | 2 × 2 | Large |
+| `w` | 4 × 1 | Wide |
+
+The first entry of `sizes` is the default. Other manifest fields: `title: false` hides the card header; `banner: true` renders without a frame. The component receives `size` and the board's `config` for that widget.
+
+## Development
 
 ```sh
-npm run check   # 语法检查 + Host 端冒烟
+npm run check   # syntax check and Host smoke test
 ```
 
-安装：在 Harness 里用 `plugin_manager install_bundle` 指向本目录（示例 widget 指向 `examples/hello-widget`）。本地目录是链接安装。安装后用 `bento_status` 工具或 Client `Slots.listSubTree`（root `bento.widget`）查看已注册 widget。
+Files: `index.js` (Host routes under `/api/dsh-bento/*`, storage, agent tools), `client.js` (sidebar entry, panel, built-in widgets), `cordis.patch.yml`, `locale/`, `icon.svg`.
