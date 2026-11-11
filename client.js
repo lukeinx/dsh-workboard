@@ -1,13 +1,13 @@
 window.__ModuleLoader__.load({
-  id: 'dsh-bento',
+  id: 'dsh-desk',
   factory(require) {
     const React = require('react');
     const h = React.createElement;
     const {useEffect, useRef, useState, useSyncExternalStore} = React;
 
-    const NS = 'dsh-bento';
-    const PANEL = 'dsh-bento';
-    const SLOT = 'bento.widget';
+    const NS = 'dsh-desk';
+    const PANEL = 'dsh-desk';
+    const SLOT = 'desk.widget';
     const POLL_MS = 5000;
     const WEATHER_MS = 10 * 60_000;
     const CAL_MS = 15 * 60_000;
@@ -15,7 +15,7 @@ window.__ModuleLoader__.load({
     const SIZES = {bar: [4, 1], s: [1, 2], m: [2, 2], t: [1, 4], l: [2, 4], w: [4, 2]};
 
     const zh = {
-      lang: 'zh-CN', title: 'Bento', loadFailed: '加载失败', empty: '看板上还没有 widget',
+      lang: 'zh-CN', title: '工作台', loadFailed: '加载失败', empty: '看板上还没有 widget',
       today: '今日', clock: '时钟', todo: '待办', note: '速记', calendar: '日历', weather: '天气',
       d_today: '问候、时间、天气、格言合成一条横栏', d_todo: '未完成自动结转，Agent 可读写', d_note: '自动保存，当前行可转待办',
       d_calendar: 'ICS 订阅的日程与月历', d_weather: 'Open-Meteo 天气与空气质量', d_clock: '时间、问候与年度进度',
@@ -35,7 +35,7 @@ window.__ModuleLoader__.load({
       celsius: '摄氏 °C', fahrenheit: '华氏 °F', monday: '周一', sunday: '周日', searchCity: '搜索城市', noResults: '没有找到', clear: '清除',
     };
     const en = {
-      lang: 'en-US', title: 'Bento', loadFailed: 'Failed to load', empty: 'No widgets on this board yet',
+      lang: 'en-US', title: 'Desk', loadFailed: 'Failed to load', empty: 'No widgets on this board yet',
       today: 'Today', clock: 'Clock', todo: 'To-do', note: 'Notes', calendar: 'Calendar', weather: 'Weather',
       d_today: 'Greeting, time, weather and a quote in one banner', d_todo: 'Unfinished items carry over; the agent can read and edit', d_note: 'Autosaves; turn the current line into a to-do',
       d_calendar: 'Events from ICS subscriptions and a month view', d_weather: 'Weather and air quality from Open-Meteo', d_clock: 'Time, greeting and year progress',
@@ -354,10 +354,10 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
     return {
       inject: ['slots', 'connection', 'locale'],
       apply(ctx) {
-        ctx.effect(() => ctx.locale.register(NS, {zh, en}), 'dsh-bento: dictionaries');
+        ctx.effect(() => ctx.locale.register(NS, {zh, en}), 'dsh-desk: dictionaries');
         const t = ctx.locale.bind(NS);
         const call = async (method, payload = {}) => {
-          const result = await ctx.connection.rpc.call('/api', `dsh-bento/${method}`, payload);
+          const result = await ctx.connection.rpc.call('/api', `dsh-desk/${method}`, payload);
           if (result?.ok === true) return result.value;
           throw new Error(result?.error?.message || t('loadFailed'));
         };
@@ -471,7 +471,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
               h('span', {className: 'bnt-qtext'}, zhQuote ? q.zh : q.en),
               h('cite', null, `— ${zhQuote ? q.by.zh : q.by.en}`)) : null);
         }
-        Today.bento = {
+        Today.desk = {
           apiVersion: 1, sizes: ['bar'], banner: true, description: () => t('d_today'),
           settings: [
             {key: 'name', type: 'text', scope: 'global', label: () => t('f_name')},
@@ -494,7 +494,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             h('span', {className: 'bnt-muted'}, `${now.toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'})} · ${fill(t('week'), {n: isoWeek(now)})}`),
             size === 's' ? null : h('div', {className: 'bnt-yearbar', title: fill(t('year'), {n: yearPct})}, h('i', {style: {width: `${yearPct}%`}})));
         }
-        Clock.bento = {apiVersion: 1, sizes: ['m', 's'], title: false, description: () => t('d_clock'), settings: [{key: 'name', type: 'text', scope: 'global', label: () => t('f_name')}]};
+        Clock.desk = {apiVersion: 1, sizes: ['m', 's'], title: false, description: () => t('d_clock'), settings: [{key: 'name', type: 'text', scope: 'global', label: () => t('f_name')}]};
 
         function TodoRow({todo, today}) {
           return h('li', {'data-done': todo.done ? '' : undefined},
@@ -530,7 +530,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             h('label', {className: 'bnt-add'}, h(Icon.plus),
               h('input', {value: text, placeholder: t('addTodo'), enterKeyHint: 'done', onChange: e => setText(e.target.value), onKeyDown: submit})));
         }
-        Todo.bento = {apiVersion: 1, sizes: ['l', 'm', 't'], description: () => t('d_todo')};
+        Todo.desk = {apiVersion: 1, sizes: ['l', 'm', 't'], description: () => t('d_todo')};
 
         function Note() {
           useLocale();
@@ -574,7 +574,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             h('div', {className: 'bnt-notefoot'}, h('span', null, status),
               h('button', {type: 'button', className: 'bnt-btn', onMouseDown: e => e.preventDefault(), onClick: lineToTodo}, t('lineToTodo'))));
         }
-        Note.bento = {apiVersion: 1, sizes: ['l', 't', 'm', 's'], description: () => t('d_note')};
+        Note.desk = {apiVersion: 1, sizes: ['l', 't', 'm', 's'], description: () => t('d_note')};
 
         function Weather({size, openSettings}) {
           useLocale();
@@ -600,7 +600,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             size === 's' ? null : h('div', {className: 'bnt-wxhours bnt-num'}, w.hours.slice(0, 6).map(x => h('div', {key: x.time},
               h('span', null, x.time), h(WxIcon, {code: x.code, size: 18}), h('b', null, deg(x.temp))))));
         }
-        Weather.bento = {apiVersion: 1, sizes: ['m', 's'], description: () => t('d_weather'), settings: LOCATION_FIELDS};
+        Weather.desk = {apiVersion: 1, sizes: ['m', 's'], description: () => t('d_weather'), settings: LOCATION_FIELDS};
 
         const dayKey = v => { const d = new Date(v); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
         const keyDate = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
@@ -685,7 +685,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             urls.length ? h('div', {className: 'bnt-events'}, list(sel, sel === todayKey ? t('todayEvents') : selDate.toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'}))) : null,
             footer);
         }
-        Calendar.bento = {
+        Calendar.desk = {
           apiVersion: 1, sizes: ['t', 'l', 's', 'm'], description: () => t('d_calendar'),
           settings: [
             {key: 'calendarUrls', type: 'textarea', scope: 'global', label: () => t('f_urls'), placeholder: 'https://…/calendar.ics'},
@@ -697,7 +697,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
         function widgetList() {
           return ctx.slots.entries(SLOT).map(entry => {
             const {id, label} = entry.options;
-            const manifest = entry.component?.bento ?? {};
+            const manifest = entry.component?.desk ?? {};
             const sizes = (Array.isArray(manifest.sizes) ? manifest.sizes : []).filter(s => SIZES[s]);
             return {
               id: id ?? '',
@@ -962,16 +962,16 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
         ctx.effect(() => ctx.slots.inject('main', () => ctx.slots.register({
           name: 'main', key: PANEL, locale: NS, inject: () => ({}),
           children: {[SLOT]: {kind: 'list', scope: 'root'}},
-        }, Panel)), 'dsh-bento: main panel');
+        }, Panel)), 'dsh-desk: main panel');
         ctx.effect(() => ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
           name: 'sidebar.panellist', id: PANEL, order: 30, label: () => t('title'),
-        }, PanelIcon)), 'dsh-bento: sidebar entry');
+        }, PanelIcon)), 'dsh-desk: sidebar entry');
 
-        const builtins = [['bento.today', 'today', Today], ['bento.todo', 'todo', Todo], ['bento.note', 'note', Note], ['bento.calendar', 'calendar', Calendar], ['bento.weather', 'weather', Weather], ['bento.clock', 'clock', Clock]];
+        const builtins = [['desk.today', 'today', Today], ['desk.todo', 'todo', Todo], ['desk.note', 'note', Note], ['desk.calendar', 'calendar', Calendar], ['desk.weather', 'weather', Weather], ['desk.clock', 'clock', Clock]];
         builtins.forEach(([id, key, component], i) => {
           ctx.effect(() => ctx.slots.inject(SLOT, () => ctx.slots.register({
             name: SLOT, id, order: (i + 1) * 10, label: () => t(key),
-          }, component)), `dsh-bento: ${id} widget`);
+          }, component)), `dsh-desk: ${id} widget`);
         });
       },
     };

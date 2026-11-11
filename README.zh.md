@@ -1,8 +1,8 @@
-# Bento · DeepSeek Harness 工作台
+# 工作台 · DeepSeek Harness
 
 [English](README.md)
 
-Bento 在 DeepSeek Harness 侧栏增加一个模块化工作台。内置今日横栏、待办、速记、ICS 日历、天气和时钟，零配置可用；Agent 可以在任意对话里读写你的待办和速记；其他插件可以注册自己的 widget。
+工作台（`@lukeinx/dsh-desk`）在 DeepSeek Harness 侧栏增加一个模块化工作台。内置今日横栏、待办、速记、ICS 日历、天气和时钟，零配置可用；Agent 可以在任意对话里读写你的待办和速记；其他插件可以注册自己的 widget。
 
 状态：早期（P0b）。MIT 许可。
 
@@ -19,12 +19,12 @@ Bento 在 DeepSeek Harness 侧栏增加一个模块化工作台。内置今日�
 
 点「编辑」可以拖动卡片、换尺寸、移除、打开 widget 设置，或从组件库添加。看板是标签页：「+」新建，双击重命名，编辑模式下可删除。
 
-数据留在本机 Harness profile 存储（`~/.dsh/storages/dsh_bento.json`）。网络请求只由 Host 发出：设置城市后，天气和城市搜索走 [Open-Meteo](https://open-meteo.com)（无需 key，数据 CC BY 4.0）；日历从你添加的 ICS 地址拉取。结果在 Host 缓存。
+数据留在本机 Harness profile 存储（`~/.dsh/storages/dsh_desk.json`）。旧版 `dsh-bento` 的数据（`dsh_bento.json`）会在首次启动时复制过来，旧文件保留不动。网络请求只由 Host 发出：设置城市后，天气和城市搜索走 [Open-Meteo](https://open-meteo.com)（无需 key，数据 CC BY 4.0）；日历从你添加的 ICS 地址拉取。结果在 Host 缓存。
 
 ## Agent 工具
 
-- `bento_todos`：`list`、`add`、`complete`、`reopen`、`remove`
-- `bento_note`：`read`、`append`、`replace`
+- `desk_todos`：`list`、`add`、`complete`、`reopen`、`remove`
+- `desk_note`：`read`、`append`、`replace`
 
 页面可见时每 5 秒刷新，Agent 的改动不用刷新页面就会出现。
 
@@ -34,16 +34,16 @@ Bento 在 DeepSeek Harness 侧栏增加一个模块化工作台。内置今日�
 
 ## 写一个 widget
 
-widget 是一个 React 组件，由其他 bundle 在 `client.js` 里注册到 `bento.widget` slot。manifest 挂在组件的静态属性 `bento` 上；slot 注册参数只保留 `id`、`order`、`label`。
+widget 是一个 React 组件，由其他 bundle 在 `client.js` 里注册到 `desk.widget` slot。manifest 挂在组件的静态属性 `desk` 上；slot 注册参数只保留 `id`、`order`、`label`。
 
 ```js
 function Hello({size, config}) {
   return h('b', null, `Hello (${size})`);
 }
-Hello.bento = {apiVersion: 1, sizes: ['m', 's']};
+Hello.desk = {apiVersion: 1, sizes: ['m', 's']};
 
-ctx.effect(() => ctx.slots.inject('bento.widget', () => ctx.slots.register({
-  name: 'bento.widget', id: 'hello.widget', order: 100, label: 'Hello',
+ctx.effect(() => ctx.slots.inject('desk.widget', () => ctx.slots.register({
+  name: 'desk.widget', id: 'hello.widget', order: 100, label: 'Hello',
 }, Hello)), 'hello widget');
 ```
 
@@ -72,4 +72,4 @@ ctx.effect(() => ctx.slots.inject('bento.widget', () => ctx.slots.register({
 npm run check   # 语法检查 + Host 端冒烟 + ICS 测试
 ```
 
-文件：`index.js`（Host 端 `/api/dsh-bento/*` 路由、存储、Agent 工具）、`lib/`（HTTP 缓存、天气、ICS 解析）、`client.js`（侧栏入口、面板、内置 widget）、`cordis.patch.yml`、`locale/`、`icon.svg`。
+文件：`index.js`（Host 端 `/api/dsh-desk/*` 路由、存储、Agent 工具）、`lib/`（HTTP 缓存、天气、ICS 解析）、`client.js`（侧栏入口、面板、内置 widget）、`cordis.patch.yml`、`locale/`、`icon.svg`。

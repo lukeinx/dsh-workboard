@@ -1,8 +1,8 @@
 {
-  "name": "dsh-bento-hello-widget",
+  "name": "dsh-desk-hello-widget",
   "version": "0.0.1",
   "private": true,
-  "description": "Example Bento widget contributed by a separate DeepSeek Harness bundle.",
+  "description": "Example Desk widget contributed by a separate DeepSeek Harness bundle.",
   "type": "module",
   "license": "MIT",
   "exports": {

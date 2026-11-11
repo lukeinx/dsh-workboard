@@ -1,5 +1,5 @@
 window.__ModuleLoader__.load({
-  id: 'dsh-bento-hello-widget',
+  id: 'dsh-desk-hello-widget',
   factory(require) {
     const React = require('react');
     const h = React.createElement;
@@ -10,14 +10,14 @@ window.__ModuleLoader__.load({
         h('span', {style: {color: 'var(--dsw-alias-label-secondary)', fontSize: 12}}, `size: ${size}`));
     }
 
-    Hello.bento = {apiVersion: 1, sizes: ['m', 's']};
+    Hello.desk = {apiVersion: 1, sizes: ['m', 's']};
 
     return {
       inject: ['slots'],
       apply(ctx) {
-        ctx.effect(() => ctx.slots.inject('bento.widget', () => ctx.slots.register({
-          name: 'bento.widget', id: 'hello.widget', order: 100, label: 'Hello',
-        }, Hello)), 'dsh-bento-hello-widget: widget');
+        ctx.effect(() => ctx.slots.inject('desk.widget', () => ctx.slots.register({
+          name: 'desk.widget', id: 'hello.widget', order: 100, label: 'Hello',
+        }, Hello)), 'dsh-desk-hello-widget: widget');
       },
     };
   },

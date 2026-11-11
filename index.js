@@ -1,14 +1,15 @@
-// Host 端：/api/dsh-bento/* 路由、看板 / 待办 / 速记存储、天气与日历代理、Agent 工具。
+// Host 端：/api/dsh-desk/* 路由、看板 / 待办 / 速记存储、天气与日历代理、Agent 工具。
 import {createFetcher} from './lib/http.js';
 import {getWeather, searchPlaces} from './lib/weather.js';
 import {parseICS, expandEvents} from './lib/ics.js';
 
-export const name = 'dsh-bento';
+export const name = 'dsh-desk';
 export const inject = ['connection'];
 
-const NS = 'dsh-bento';
+const NS = 'dsh-desk';
 // storageDomain 的域名与表名必须匹配 /^[a-z][a-z0-9_]*$/。
-const DOMAIN = 'dsh_bento';
+const DOMAIN = 'dsh_desk';
+const LEGACY_DOMAIN = 'dsh_bento';
 const NOTE_KEY = 'inbox';
 const DONE_KEEP_MS = 7 * 86400_000;
 const MAX_TEXT = 2000;
@@ -22,12 +23,12 @@ const ICS_MAX_BYTES = 5_000_000;
 const MAX_RANGE = 62 * 86400_000;
 const MAX_BOARDS = 12;
 
-export const BUILTIN_WIDGETS = ['bento.today', 'bento.todo', 'bento.note', 'bento.calendar', 'bento.weather', 'bento.clock'];
+export const BUILTIN_WIDGETS = ['desk.today', 'desk.todo', 'desk.note', 'desk.calendar', 'desk.weather', 'desk.clock'];
 
 export function defaultBoard(id) {
   return {
     apiVersion: 1, id, title: '',
-    widgets: [{id: 'bento.today', size: 'bar'}, {id: 'bento.todo', size: 'l'}, {id: 'bento.calendar', size: 't'}, {id: 'bento.note', size: 't'}],
+    widgets: [{id: 'desk.today', size: 'bar'}, {id: 'desk.todo', size: 'l'}, {id: 'desk.calendar', size: 't'}, {id: 'desk.note', size: 't'}],
     known: BUILTIN_WIDGETS,
   };
 }
@@ -42,6 +43,28 @@ function memoryTable() {
   };
 }
 
+const legacyWidgetId = id => (typeof id === 'string' && id.startsWith('bento.') ? `desk.${id.slice(6)}` : id);
+
+// 仅在新域为空时复制旧版 dsh-bento 的数据；JSON 后端只在写入时落盘，打开不存在的旧域不会留下空文件。
+export async function migrateLegacy(domain, legacy) {
+  try {
+    if (TABLES.some(t => [...domain.table(t).entries()].length)) return false;
+    let copied = false;
+    for (const t of TABLES) {
+      for (const [key, value] of legacy.table(t).entries()) {
+        const record = t === 'boards' && value && typeof value === 'object'
+          ? {...value, widgets: (value.widgets ?? []).map(w => ({...w, id: legacyWidgetId(w?.id)})), known: (value.known ?? []).map(legacyWidgetId)}
+          : value;
+        await domain.table(t).put(key, record);
+        copied = true;
+      }
+    }
+    return copied;
+  } finally {
+    await legacy.close();
+  }
+}
+
 export function createStore(ctx) {
   let domain = null;
   const memory = Object.fromEntries(TABLES.map(t => [t, memoryTable()]));
@@ -51,11 +74,18 @@ export function createStore(ctx) {
   const ready = (async () => {
     const facility = ctx.get?.('storageDomain');
     if (!facility) { state.error = 'storageDomain unavailable'; return; }
+    const spec = name => ({name, version: 1, tables: Object.fromEntries(TABLES.map(t => [t, {valueSchema: passthrough}]))});
     try {
-      domain = await facility.open({name: DOMAIN, version: 1, tables: Object.fromEntries(TABLES.map(t => [t, {valueSchema: passthrough}]))});
+      domain = await facility.open(spec(DOMAIN));
       state.backend = 'storageDomain';
     } catch (error) {
       state.error = String(error?.message || error);
+      return;
+    }
+    try {
+      await migrateLegacy(domain, await facility.open(spec(LEGACY_DOMAIN)));
+    } catch (error) {
+      state.error = `legacy migration failed: ${error?.message || error}`;
     }
   })();
 
@@ -200,23 +230,23 @@ function createCalendar(fetcher) {
 export function createHandlers(store, fetcher = createFetcher()) {
   const calendar = createCalendar(fetcher);
   return {
-    'dsh-bento/board.list': () => store.listBoards(),
-    'dsh-bento/board.create': p => store.createBoard(p?.title, p?.known),
-    'dsh-bento/board.delete': p => store.deleteBoard(String(p?.id)),
-    'dsh-bento/board.order': p => store.orderBoards(p?.order),
-    'dsh-bento/prefs.get': () => store.getPrefs(),
-    'dsh-bento/prefs.put': p => store.putPrefs(p?.prefs),
-    'dsh-bento/weather.get': p => getWeather(fetcher, {lat: p?.lat, lon: p?.lon, unit: p?.unit}),
-    'dsh-bento/geo.search': p => searchPlaces(fetcher, {query: p?.query, lang: p?.lang}),
-    'dsh-bento/calendar.events': p => calendar({urls: p?.urls, from: p?.from, to: p?.to}),
-    'dsh-bento/board.get': p => store.getBoard(String(p?.id || 'work')),
-    'dsh-bento/board.put': p => store.putBoard(p?.board),
-    'dsh-bento/todo.list': () => store.listTodos(),
-    'dsh-bento/todo.add': p => store.addTodo(p?.text),
-    'dsh-bento/todo.update': p => store.updateTodo(p?.id, {text: p?.text, done: p?.done}),
-    'dsh-bento/todo.remove': p => store.removeTodo(p?.id),
-    'dsh-bento/note.get': () => store.getNote(),
-    'dsh-bento/note.put': p => store.putNote(p?.text),
+    'dsh-desk/board.list': () => store.listBoards(),
+    'dsh-desk/board.create': p => store.createBoard(p?.title, p?.known),
+    'dsh-desk/board.delete': p => store.deleteBoard(String(p?.id)),
+    'dsh-desk/board.order': p => store.orderBoards(p?.order),
+    'dsh-desk/prefs.get': () => store.getPrefs(),
+    'dsh-desk/prefs.put': p => store.putPrefs(p?.prefs),
+    'dsh-desk/weather.get': p => getWeather(fetcher, {lat: p?.lat, lon: p?.lon, unit: p?.unit}),
+    'dsh-desk/geo.search': p => searchPlaces(fetcher, {query: p?.query, lang: p?.lang}),
+    'dsh-desk/calendar.events': p => calendar({urls: p?.urls, from: p?.from, to: p?.to}),
+    'dsh-desk/board.get': p => store.getBoard(String(p?.id || 'work')),
+    'dsh-desk/board.put': p => store.putBoard(p?.board),
+    'dsh-desk/todo.list': () => store.listTodos(),
+    'dsh-desk/todo.add': p => store.addTodo(p?.text),
+    'dsh-desk/todo.update': p => store.updateTodo(p?.id, {text: p?.text, done: p?.done}),
+    'dsh-desk/todo.remove': p => store.removeTodo(p?.id),
+    'dsh-desk/note.get': () => store.getNote(),
+    'dsh-desk/note.put': p => store.putNote(p?.text),
   };
 }
 
@@ -239,8 +269,8 @@ const textResult = value => [{type: 'text', text: typeof value === 'string' ? va
 export function createTools(store) {
   return [
     {
-      name: 'bento_todos',
-      description: 'Read or change the to-do list on the user\'s Bento dashboard. `list` returns open items and items completed in the last 7 days, each with an id. Use `add` with `text`; `complete`, `reopen` and `remove` with the `id` from `list`.',
+      name: 'desk_todos',
+      description: 'Read or change the to-do list on the user\'s Desk dashboard. `list` returns open items and items completed in the last 7 days, each with an id. Use `add` with `text`; `complete`, `reopen` and `remove` with the `id` from `list`.',
       parameters: {
         type: 'object',
         properties: {
@@ -263,8 +293,8 @@ export function createTools(store) {
       },
     },
     {
-      name: 'bento_note',
-      description: 'Read or change the scratch note on the user\'s Bento dashboard (plain text, usually Markdown). `read` returns the note; `append` adds `text` as a new line at the end; `replace` overwrites the whole note with `text`, so read it first.',
+      name: 'desk_note',
+      description: 'Read or change the scratch note on the user\'s Desk dashboard (plain text, usually Markdown). `read` returns the note; `append` adds `text` as a new line at the end; `replace` overwrites the whole note with `text`, so read it first.',
       parameters: {
         type: 'object',
         properties: {
@@ -294,7 +324,7 @@ export function createTools(store) {
 export function apply(ctx) {
   const store = createStore(ctx);
   const handlers = createHandlers(store);
-  ctx.effect(() => () => { void store.close(); }, 'dsh-bento: storage');
+  ctx.effect(() => () => { void store.close(); }, 'dsh-desk: storage');
 
   // 共享通道 /api 只允许一个 interceptor，每个方法注册独立的 Fetch 路由。
   for (const method of Object.keys(handlers)) {
@@ -303,9 +333,9 @@ export function apply(ctx) {
       methods: ['POST'],
       requestBody: 'buffered',
       fetch: request => handleRequest(request, handlers, store),
-    }), `dsh-bento: ${method}`);
+    }), `dsh-desk: ${method}`);
   }
 
   const tools = ctx.get('tools');
-  if (tools) for (const tool of createTools(store)) ctx.effect(() => tools.register(tool), `dsh-bento: ${tool.name} tool`);
+  if (tools) for (const tool of createTools(store)) ctx.effect(() => tools.register(tool), `dsh-desk: ${tool.name} tool`);
 }

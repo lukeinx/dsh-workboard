@@ -1,5 +1,5 @@
 {
-  "name": "dsh-bento",
+  "name": "@lukeinx/dsh-desk",
   "version": "0.0.1",
   "private": true,
   "description": "DeepSeek Harness plugin: a modular dashboard panel with clock, weather, quotes, todos, notes and calendar widgets.",

@@ -1,8 +1,8 @@
-# Bento for DeepSeek Harness
+# Desk for DeepSeek Harness
 
 [简体中文](README.zh.md)
 
-Bento adds a modular dashboard to the DeepSeek Harness sidebar. It ships with a today banner, to-dos, notes, an ICS calendar, weather and a clock, works with zero configuration, and lets the agent read and change your to-dos and notes from any conversation. Other plugins can add their own widgets.
+Desk (`@lukeinx/dsh-desk`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with a today banner, to-dos, notes, an ICS calendar, weather and a clock, works with zero configuration, and lets the agent read and change your to-dos and notes from any conversation. Other plugins can add their own widgets.
 
 Status: early (P0b). MIT licensed.
 
@@ -19,12 +19,12 @@ Status: early (P0b). MIT licensed.
 
 Choose **Edit** to drag cards, change sizes, remove cards, open a widget's settings or add widgets from the gallery. Boards are tabs: **+** adds one, double-click renames it, and edit mode can delete it.
 
-Data stays on your machine, in the Harness profile storage (`~/.dsh/storages/dsh_bento.json`). The Host makes the only network requests: weather and city search go to [Open-Meteo](https://open-meteo.com) (no key, data under CC BY 4.0) once you set a city, and calendars are fetched from the ICS addresses you add. Responses are cached on the Host.
+Data stays on your machine, in the Harness profile storage (`~/.dsh/storages/dsh_desk.json`). Data from the earlier `dsh-bento` version (`dsh_bento.json`) is copied over on first start; the old file is left in place. The Host makes the only network requests: weather and city search go to [Open-Meteo](https://open-meteo.com) (no key, data under CC BY 4.0) once you set a city, and calendars are fetched from the ICS addresses you add. Responses are cached on the Host.
 
 ## Agent tools
 
-- `bento_todos` — `list`, `add`, `complete`, `reopen`, `remove`
-- `bento_note` — `read`, `append`, `replace`
+- `desk_todos` — `list`, `add`, `complete`, `reopen`, `remove`
+- `desk_note` — `read`, `append`, `replace`
 
 The page refreshes every 5 seconds while it is visible, so changes made by the agent appear without a reload.
 
@@ -34,16 +34,16 @@ In a Harness conversation, ask the agent to install the bundle with `plugin_mana
 
 ## Write a widget
 
-A widget is a React component that another bundle registers into the `bento.widget` slot from its `client.js`. Put the manifest on the component's static `bento` property; the slot registration itself keeps only `id`, `order` and `label`.
+A widget is a React component that another bundle registers into the `desk.widget` slot from its `client.js`. Put the manifest on the component's static `desk` property; the slot registration itself keeps only `id`, `order` and `label`.
 
 ```js
 function Hello({size, config}) {
   return h('b', null, `Hello (${size})`);
 }
-Hello.bento = {apiVersion: 1, sizes: ['m', 's']};
+Hello.desk = {apiVersion: 1, sizes: ['m', 's']};
 
-ctx.effect(() => ctx.slots.inject('bento.widget', () => ctx.slots.register({
-  name: 'bento.widget', id: 'hello.widget', order: 100, label: 'Hello',
+ctx.effect(() => ctx.slots.inject('desk.widget', () => ctx.slots.register({
+  name: 'desk.widget', id: 'hello.widget', order: 100, label: 'Hello',
 }, Hello)), 'hello widget');
 ```
 
@@ -72,4 +72,4 @@ The component receives `size`, `config` (the saved settings for this card), `edi
 npm run check   # syntax check, Host smoke test and ICS tests
 ```
 
-Files: `index.js` (Host routes under `/api/dsh-bento/*`, storage, agent tools), `lib/` (HTTP cache, weather, ICS parsing), `client.js` (sidebar entry, panel, built-in widgets), `cordis.patch.yml`, `locale/`, `icon.svg`.
+Files: `index.js` (Host routes under `/api/dsh-desk/*`, storage, agent tools), `lib/` (HTTP cache, weather, ICS parsing), `client.js` (sidebar entry, panel, built-in widgets), `cordis.patch.yml`, `locale/`, `icon.svg`.
