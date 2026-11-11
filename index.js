@@ -23,7 +23,10 @@ const ICS_MAX_BYTES = 5_000_000;
 const MAX_RANGE = 62 * 86400_000;
 const MAX_BOARDS = 12;
 
-export const BUILTIN_WIDGETS = ['desk.today', 'desk.todo', 'desk.note', 'desk.calendar', 'desk.weather', 'desk.clock'];
+export const BUILTIN_WIDGETS = [
+  'desk.today', 'desk.todo', 'desk.note', 'desk.calendar', 'desk.weather', 'desk.clock',
+  'desk.quote', 'desk.countdown', 'desk.worldclock', 'desk.focus', 'desk.links', 'desk.progress',
+];
 
 export function defaultBoard(id) {
   return {

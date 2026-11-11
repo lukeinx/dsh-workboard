@@ -2,7 +2,7 @@
 
 [简体中文](README.zh.md)
 
-Desk (`@lukeinx/dsh-desk`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with a today banner, to-dos, notes, an ICS calendar, weather and a clock, works with zero configuration, and lets the agent read and change your to-dos and notes from any conversation. Other plugins can add their own widgets.
+Desk (`@lukeinx/dsh-desk`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with twelve widgets, including a today banner, to-dos, notes, an ICS calendar, weather, a world clock, countdowns and a focus timer, works with zero configuration, and lets the agent read and change your to-dos and notes from any conversation. Other plugins can add their own widgets.
 
 Status: early (P0b). MIT licensed.
 
@@ -16,6 +16,14 @@ Status: early (P0b). MIT licensed.
 | Calendar | `t` `l` `s` `m` | Month grid and the selected day's events from one or more ICS subscriptions, recurring events included |
 | Weather | `m` `s` | Current conditions, today's high and low, air quality and the next hours |
 | Clock | `m` `s` | Time, greeting, date and year progress |
+| Quote | `m` `w` `s` | A daily quote; click for another. Your own quotes are shared with the Today banner |
+| Countdown | `m` `s` `t` | Days until the weekend, month end, year end and your own dates; `12-25` without a year repeats yearly |
+| World clock | `m` `s` `w` `t` | Time in several IANA zones with the offset and day difference from local |
+| Focus | `m` `s` | Pomodoro timer that keeps running across boards and panels, notifies when done and counts today's sessions |
+| Links | `m` `s` `w` `t` `l` | One `name URL` per line; only http, https and mailto |
+| Time progress | `m` `s` `w` | How much of today, this week, month and year has passed |
+
+The default board holds Today, To-do, Calendar and Notes; add the rest from the gallery. Built-in widgets added by an upgrade appear only in the gallery and are not placed on existing boards.
 
 Choose **Edit** to drag cards, change sizes, remove cards, open a widget's settings or add widgets from the gallery. Boards are tabs: **+** adds one, double-click renames it, and edit mode can delete it.
 

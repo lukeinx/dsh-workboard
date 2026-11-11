@@ -33,6 +33,18 @@ window.__ModuleLoader__.load({
       size_bar: '横栏', size_s: '小 1×1', size_m: '中 2×1', size_t: '竖 1×2', size_l: '大 2×2', size_w: '通栏 4×1',
       f_name: '称呼', f_location: '城市', f_unit: '温度单位', f_showWeather: '显示天气', f_showQuote: '显示格言', f_urls: 'ICS 订阅地址（每行一个）', f_weekStart: '每周开始于',
       celsius: '摄氏 °C', fahrenheit: '华氏 °F', monday: '周一', sunday: '周日', searchCity: '搜索城市', noResults: '没有找到', clear: '清除',
+      quote: '格言', countdown: '倒数日', worldclock: '世界时钟', focus: '专注', links: '快捷链接', progress: '时间进度',
+      d_quote: '每日一句，点一下换一条，可换成自己的句子', d_countdown: '距周末、月底、年底和你设定的日子还有几天', d_worldclock: '多个时区的当前时间',
+      d_focus: '番茄钟，结束时发系统通知', d_links: '常用网址一键打开', d_progress: '今天、本周、本月、今年已过去多少',
+      f_quotes: '自定义格言（每行一条：句子 — 作者；留空用内置）',
+      f_events: '日子（每行一个，如 2026-12-25 圣诞节；只写 12-25 则每年重复）', f_builtinCountdown: '显示周末、月底、年底',
+      weekend: '周末', monthEnd: '月底', yearEnd: '年底', dayUnit: '天', dayUnits: '天', isToday: '今天', addEvents: '添加日子',
+      f_zones: '时区（每行一个：IANA 时区 名称）', tomorrowShort: '明天', yesterdayShort: '昨天', hoursDiff: '{n} 小时', sameTime: '同本地',
+      defaultZones: 'America/Los_Angeles 旧金山\nEurope/London 伦敦\nAsia/Tokyo 东京',
+      focusWork: '专注', focusBreak: '休息', start: '开始', pause: '暂停', resume: '继续', reset: '重置', skip: '跳过', pomos: '今日 {n} 个番茄',
+      f_workMin: '专注时长', f_breakMin: '休息时长', minutes: '{n} 分钟', focusDone: '专注结束，休息一下', breakDone: '休息结束，开始下一个专注',
+      f_links: '链接（每行一个：名称 https://…）', addLinks: '添加链接',
+      p_day: '今天', p_week: '本周', p_month: '本月', p_year: '今年',
     };
     const en = {
       lang: 'en-US', title: 'Desk', loadFailed: 'Failed to load', empty: 'No widgets on this board yet',
@@ -53,6 +65,18 @@ window.__ModuleLoader__.load({
       size_bar: 'Banner', size_s: 'Small 1×1', size_m: 'Medium 2×1', size_t: 'Tall 1×2', size_l: 'Large 2×2', size_w: 'Wide 4×1',
       f_name: 'Your name', f_location: 'City', f_unit: 'Temperature unit', f_showWeather: 'Show weather', f_showQuote: 'Show quote', f_urls: 'ICS subscription URLs, one per line', f_weekStart: 'Week starts on',
       celsius: 'Celsius °C', fahrenheit: 'Fahrenheit °F', monday: 'Monday', sunday: 'Sunday', searchCity: 'Search for a city', noResults: 'No matches', clear: 'Clear',
+      quote: 'Quote', countdown: 'Countdown', worldclock: 'World clock', focus: 'Focus', links: 'Links', progress: 'Time progress',
+      d_quote: 'A daily quote; click for another, or use your own', d_countdown: 'Days until the weekend, month end, year end and your own dates', d_worldclock: 'Current time in several time zones',
+      d_focus: 'Pomodoro timer with a system notification when it ends', d_links: 'Open the sites you use most', d_progress: 'How much of today, this week, month and year has passed',
+      f_quotes: 'Your own quotes, one per line: text — author (empty uses the built-in set)',
+      f_events: 'Dates, one per line, e.g. 2026-12-25 Christmas; 12-25 alone repeats every year', f_builtinCountdown: 'Show weekend, month end and year end',
+      weekend: 'Weekend', monthEnd: 'Month end', yearEnd: 'Year end', dayUnit: 'day', dayUnits: 'days', isToday: 'Today', addEvents: 'Add dates',
+      f_zones: 'Time zones, one per line: IANA zone and a name', tomorrowShort: 'Tomorrow', yesterdayShort: 'Yesterday', hoursDiff: '{n}h', sameTime: 'Same as local',
+      defaultZones: 'America/New_York New York\nEurope/London London\nAsia/Tokyo Tokyo',
+      focusWork: 'Focus', focusBreak: 'Break', start: 'Start', pause: 'Pause', resume: 'Resume', reset: 'Reset', skip: 'Skip', pomos: '{n} today',
+      f_workMin: 'Focus length', f_breakMin: 'Break length', minutes: '{n} min', focusDone: 'Focus session done. Take a break.', breakDone: 'Break is over. Ready for the next one.',
+      f_links: 'Links, one per line: name https://…', addLinks: 'Add links',
+      p_day: 'Today', p_week: 'This week', p_month: 'This month', p_year: 'This year',
     };
 
     // 公共领域的经典短句，按日期轮换。
@@ -73,6 +97,17 @@ window.__ModuleLoader__.load({
       {zh: '好的开始是成功的一半。', en: 'Well begun is half done.', by: {zh: '亚里士多德', en: 'Aristotle'}},
       {zh: '温故而知新，可以为师矣。', en: 'Review the old to learn the new, and you may be a teacher.', by: {zh: '孔子', en: 'Confucius'}},
       {zh: '把这句话写在心上：每一天都是一年中最好的一天。', en: 'Write it on your heart that every day is the best day in the year.', by: {zh: '爱默生', en: 'Ralph Waldo Emerson'}},
+      {zh: '知之者不如好之者，好之者不如乐之者。', en: 'To know it is not as good as to love it; to love it is not as good as to delight in it.', by: {zh: '孔子', en: 'Confucius'}},
+      {zh: '博学之，审问之，慎思之，明辨之，笃行之。', en: 'Study broadly, inquire carefully, reflect deeply, discern clearly, practise earnestly.', by: {zh: '《中庸》', en: 'The Doctrine of the Mean'}},
+      {zh: '合抱之木，生于毫末；九层之台，起于累土。', en: 'A tree as wide as an embrace grows from a tiny shoot; a nine-storey tower rises from a heap of earth.', by: {zh: '老子', en: 'Laozi'}},
+      {zh: '锲而舍之，朽木不折；锲而不舍，金石可镂。', en: 'Give up carving and even rotten wood will not break; keep carving and even metal and stone can be engraved.', by: {zh: '荀子', en: 'Xunzi'}},
+      {zh: '业精于勤，荒于嬉。', en: 'Mastery comes from diligence and is lost to idleness.', by: {zh: '韩愈', en: 'Han Yu'}},
+      {zh: '纸上得来终觉浅，绝知此事要躬行。', en: 'What comes from books stays shallow; to truly know a thing, you must do it.', by: {zh: '陆游', en: 'Lu You'}},
+      {zh: '路漫漫其修远兮，吾将上下而求索。', en: 'The road ahead is long and far; I will search high and low.', by: {zh: '屈原', en: 'Qu Yuan'}},
+      {zh: '天行健，君子以自强不息。', en: 'As heaven moves with vigour, the noble person strives without ceasing.', by: {zh: '《周易》', en: 'I Ching'}},
+      {zh: '阻碍行动的，反而推动行动；挡在路上的，就成了路。', en: 'The impediment to action advances action. What stands in the way becomes the way.', by: {zh: '马可·奥勒留', en: 'Marcus Aurelius'}},
+      {zh: '别再争论好人应当怎样，去做一个好人。', en: 'Waste no more time arguing what a good man should be. Be one.', by: {zh: '马可·奥勒留', en: 'Marcus Aurelius'}},
+      {zh: '做得好胜过说得好。', en: 'Well done is better than well said.', by: {zh: '富兰克林', en: 'Benjamin Franklin'}},
     ];
 
     const onBrand = prop => `${prop}:#fff;${prop}:oklch(from var(--dsw-alias-brand-primary) clamp(0,(.65 - l)*1000,1) 0 0)`;
@@ -220,6 +255,49 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 .bnt-evtime{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none;min-width:80px}
 .bnt-evtitle{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bnt-calerr{font-size:12px;color:var(--dsw-alias-state-warn-primary)}
+
+.bnt-rows{display:flex;flex-direction:column;gap:2px;overflow:auto;flex:1;min-height:0}
+.bnt-row{display:flex;align-items:center;gap:10px;padding:4px 2px;min-width:0}
+.bnt-row>div{flex:1;min-width:0;display:flex;flex-direction:column}
+.bnt-row b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bnt-row small,.bnt-hero small,.bnt-cols small{font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bnt-row .bnt-big{font-size:20px;font-weight:600;flex:none}
+.bnt-row .bnt-big small{font-size:12px;font-weight:400;margin-left:2px}
+.bnt-row[data-dim]{color:var(--dsw-alias-label-secondary)}
+.bnt-hero{display:flex;flex-direction:column;justify-content:center;height:100%;gap:2px;min-width:0}
+.bnt-hero .bnt-big{font-size:36px;font-weight:600;letter-spacing:-1px;line-height:1.1}
+.bnt-hero .bnt-big small{font-size:14px;font-weight:400;letter-spacing:0;margin-left:4px}
+.bnt-cols{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:12px;height:100%;align-items:center}
+.bnt-cols>div{display:flex;flex-direction:column;min-width:0;gap:2px}
+.bnt-cols .bnt-big{font-size:28px;font-weight:600;letter-spacing:-.5px;line-height:1.1}
+
+.bnt-qcard{display:flex;flex-direction:column;justify-content:center;gap:8px;width:100%;height:100%;text-align:left;min-height:0}
+.bnt-qcard .bnt-qtext{margin:0;font-size:16px;line-height:1.55;font-family:"New York","Songti SC",Georgia,serif;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.bnt-qcard[data-size=s] .bnt-qtext{font-size:14px;-webkit-line-clamp:4}
+.bnt-qcard[data-size=w] .bnt-qtext{font-size:18px;-webkit-line-clamp:2}
+.bnt-qcard cite{font-style:normal;font-size:12px;color:var(--dsw-alias-label-secondary)}
+
+.bnt-focus{display:flex;flex-direction:column;justify-content:center;gap:6px;height:100%;min-width:0}
+.bnt-focus .bnt-big{font-size:40px;font-weight:600;letter-spacing:-1px;line-height:1.05}
+.bnt-focus[data-size=s] .bnt-big{font-size:32px}
+.bnt-focus[data-running] .bnt-big{color:var(--dsw-alias-brand-primary)}
+.bnt-fhead{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.bnt-fhead b{font-size:14px;font-weight:600;color:var(--dsw-alias-label-primary)}
+.bnt-fbtns{display:flex;align-items:center;gap:6px}
+.bnt-fbtns .bnt-action{height:28px;padding:0 10px}
+
+.bnt-links{display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:4px;overflow:auto;align-content:start;flex:1;min-height:0}
+.bnt-link{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;border-radius:8px;color:inherit;text-decoration:none;min-width:0}
+.bnt-link:hover{background:var(--dsw-alias-bg-layer-2)}
+.bnt-link i{width:32px;height:32px;border-radius:8px;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);box-sizing:border-box;display:grid;place-items:center;font-style:normal;font-weight:600;color:var(--dsw-alias-label-secondary)}
+.bnt-link span{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+.bnt-prog{display:grid;grid-template-columns:max-content minmax(0,1fr) max-content;align-content:center;align-items:center;gap:10px;height:100%;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.bnt-prog[data-size=s]{gap:6px 8px}
+.bnt-prow{display:contents}
+.bnt-prow span:last-child{text-align:right;color:var(--dsw-alias-label-primary)}
+.bnt-pbar{height:6px;border-radius:3px;background:var(--dsw-alias-bg-layer-2);overflow:hidden}
+.bnt-pbar i{display:block;height:100%;background:var(--dsw-alias-label-secondary);opacity:.5}
 
 @media (max-width:900px){.bnt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.bnt-card[data-c="4"]{grid-column:span 2}.bnt-today .bnt-quote,.bnt-today .bnt-qsep{display:none}}
 @media (max-width:600px){.bnt-grid{grid-template-columns:minmax(0,1fr)}.bnt-card{grid-column:auto!important}}
@@ -438,6 +516,19 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           {key: 'unit', type: 'select', scope: 'global', default: 'c', label: () => t('f_unit'), options: [{value: 'c', label: () => t('celsius')}, {value: 'f', label: () => t('fahrenheit')}]},
         ];
 
+        // 自定义格言每行「句子 — 作者」，作者可省略；为空时用内置一组。
+        const quoteAt = (prefs, index) => {
+          const own = String(prefs.quotes ?? '').split('\n').map(s => s.trim()).filter(Boolean).map(line => {
+            const m = line.match(/^(.*\S)\s+(?:——|—|--|–)\s*(.+)$/);
+            return m ? {text: m[1], by: m[2]} : {text: line, by: ''};
+          });
+          if (own.length) return own[index % own.length];
+          const q = QUOTES[index % QUOTES.length];
+          const zhQuote = t('lang').startsWith('zh');
+          return {text: zhQuote ? q.zh : q.en, by: zhQuote ? q.by.zh : q.by.en};
+        };
+        const QUOTE_FIELD = {key: 'quotes', type: 'textarea', scope: 'global', label: () => t('f_quotes')};
+
         function Today({config, openSettings}) {
           useLocale();
           const now = useNow();
@@ -447,8 +538,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           const showQuote = config?.showQuote !== false;
           const wx = useWeather(showWeather ? prefs : {});
           const lang = t('lang');
-          const q = QUOTES[(dayOfYear(now) + offset) % QUOTES.length];
-          const zhQuote = lang.startsWith('zh');
+          const q = quoteAt(prefs, dayOfYear(now) + offset);
           const w = wx.value;
           let weather = null;
           if (showWeather && !wx.loc) weather = h('button', {type: 'button', className: 'bnt-btn bnt-cta', onClick: openSettings}, t('setCity'));
@@ -470,8 +560,8 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             weather,
             showQuote ? h('span', {className: 'bnt-sep bnt-qsep'}) : null,
             showQuote ? h('button', {type: 'button', className: 'bnt-btn bnt-quote', title: t('nextQuote'), onClick: () => setOffset(o => o + 1)},
-              h('span', {className: 'bnt-qtext'}, zhQuote ? q.zh : q.en),
-              h('cite', null, `— ${zhQuote ? q.by.zh : q.by.en}`)) : null);
+              h('span', {className: 'bnt-qtext'}, q.text),
+              q.by ? h('cite', null, `— ${q.by}`) : null) : null);
         }
         Today.desk = {
           apiVersion: 1, sizes: ['bar'], banner: true, description: () => t('d_today'),
@@ -480,6 +570,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             ...LOCATION_FIELDS,
             {key: 'showWeather', type: 'toggle', default: true, label: () => t('f_showWeather')},
             {key: 'showQuote', type: 'toggle', default: true, label: () => t('f_showQuote')},
+            QUOTE_FIELD,
           ],
         };
 
@@ -696,6 +787,220 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           ],
         };
 
+        function Quote({size}) {
+          useLocale();
+          const now = useNow();
+          const prefs = usePrefs();
+          const [offset, setOffset] = useState(0);
+          const q = quoteAt(prefs, dayOfYear(now) + offset + 1);
+          return h('button', {type: 'button', className: 'bnt-btn bnt-qcard', 'data-size': size, title: t('nextQuote'), onClick: () => setOffset(o => o + 1)},
+            h('span', {className: 'bnt-qtext'}, q.text),
+            q.by ? h('cite', null, `— ${q.by}`) : null);
+        }
+        Quote.desk = {apiVersion: 1, sizes: ['m', 'w', 's'], title: false, description: () => t('d_quote'), settings: [QUOTE_FIELD]};
+
+        const DATE_LINE = /^(?:(\d{4})[-/.])?(\d{1,2})[-/.](\d{1,2})(?:\s+(.*))?$/;
+        function countdownItems(config, now) {
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          const items = [];
+          if (config.builtin !== false) {
+            const weekend = new Date(today);
+            if (today.getDay() !== 0) weekend.setDate(today.getDate() + 6 - today.getDay());
+            items.push({name: t('weekend'), date: weekend}, {name: t('monthEnd'), date: new Date(today.getFullYear(), today.getMonth() + 1, 0)}, {name: t('yearEnd'), date: new Date(today.getFullYear(), 11, 31)});
+          }
+          for (const line of String(config.events ?? '').split('\n')) {
+            const m = line.trim().match(DATE_LINE);
+            if (!m) continue;
+            const [, y, mo, d, name] = m.map((v, i) => (i >= 1 && i <= 3 && v ? Number(v) : v));
+            let date = null;
+            for (let yr = y ?? today.getFullYear(); yr <= (y ?? today.getFullYear() + 8); yr++) {
+              const c = new Date(yr, mo - 1, d);
+              if (c.getMonth() === mo - 1 && c >= today) { date = c; break; }
+            }
+            if (date) items.push({name: name?.trim() || date.toLocaleDateString(t('lang'), {month: 'long', day: 'numeric'}), date});
+          }
+          return items.map(x => ({...x, days: Math.round((x.date - today) / 86400000)})).sort((a, b) => a.days - b.days).slice(0, 20);
+        }
+
+        function Countdown({size, config, openSettings}) {
+          useLocale();
+          const now = useNow();
+          const lang = t('lang');
+          const items = countdownItems(config ?? {}, now);
+          if (!items.length) return h('div', {className: 'bnt-hero'}, h('button', {type: 'button', className: 'bnt-btn bnt-cta', style: {alignSelf: 'flex-start'}, onClick: openSettings}, t('addEvents')));
+          const num = x => (x.days === 0 ? [t('isToday')] : [x.days, h('small', {key: 'u'}, x.days === 1 ? t('dayUnit') : t('dayUnits'))]);
+          const when = x => x.date.toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'});
+          if (size === 's') {
+            const x = items[0];
+            return h('div', {className: 'bnt-hero'}, h('small', null, x.name), h('span', {className: 'bnt-big bnt-num'}, ...num(x)), h('small', null, when(x)));
+          }
+          return h('div', {className: 'bnt-rows'}, items.map((x, i) => h('div', {key: i, className: 'bnt-row'},
+            h('div', null, h('b', null, x.name), h('small', null, when(x))),
+            h('span', {className: 'bnt-big bnt-num'}, ...num(x)))));
+        }
+        Countdown.desk = {
+          apiVersion: 1, sizes: ['m', 's', 't'], description: () => t('d_countdown'),
+          settings: [
+            {key: 'events', type: 'textarea', label: () => t('f_events'), placeholder: '2026-12-25 …'},
+            {key: 'builtin', type: 'toggle', default: true, label: () => t('f_builtinCountdown')},
+          ],
+        };
+
+        function zoneParts(zone, date) {
+          const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', {timeZone: zone, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric'})
+            .formatToParts(date).map(x => [x.type, x.value]));
+          return {y: +p.year, mo: +p.month, d: +p.day, h: +p.hour % 24, mi: +p.minute};
+        }
+        function parseZones(text) {
+          return String(text ?? '').split('\n').map(s => s.trim()).filter(Boolean).map(line => {
+            const [zone, ...rest] = line.split(/\s+/);
+            try { new Intl.DateTimeFormat('en-US', {timeZone: zone}); } catch { return null; }
+            return {zone, name: rest.join(' ') || zone.split('/').pop().replace(/_/g, ' ')};
+          }).filter(Boolean).slice(0, 8);
+        }
+
+        function WorldClock({size, config}) {
+          useLocale();
+          const now = useNow();
+          const zones = parseZones(config?.zones || t('defaultZones'));
+          const asUtc = p => Date.UTC(p.y, p.mo - 1, p.d, p.h, p.mi);
+          const local = {y: now.getFullYear(), mo: now.getMonth() + 1, d: now.getDate(), h: now.getHours(), mi: now.getMinutes()};
+          const rows = zones.map(z => {
+            const p = zoneParts(z.zone, now);
+            const diffH = Math.round((asUtc(p) - asUtc(local)) / 1_800_000) / 2;
+            const dayDiff = Math.round((Date.UTC(p.y, p.mo - 1, p.d) - Date.UTC(local.y, local.mo - 1, local.d)) / 86400000);
+            const day = dayDiff > 0 ? t('tomorrowShort') : dayDiff < 0 ? t('yesterdayShort') : '';
+            const diff = diffH === 0 ? t('sameTime') : fill(t('hoursDiff'), {n: `${diffH > 0 ? '+' : '−'}${Math.abs(diffH)}`});
+            return {...z, time: `${pad(p.h)}:${pad(p.mi)}`, sub: [day, diff].filter(Boolean).join(' · '), night: p.h < 6 || p.h >= 22};
+          });
+          if (size === 'w') return h('div', {className: 'bnt-cols'}, rows.map((r, i) => h('div', {key: i},
+            h('small', null, r.name), h('span', {className: 'bnt-big bnt-num'}, r.time), h('small', null, r.sub))));
+          return h('div', {className: 'bnt-rows'}, rows.map((r, i) => h('div', {key: i, className: 'bnt-row', 'data-dim': r.night ? '' : undefined},
+            h('div', null, h('b', null, r.name), size === 's' ? null : h('small', null, r.sub)),
+            h('span', {className: 'bnt-big bnt-num'}, r.time))));
+        }
+        WorldClock.desk = {
+          apiVersion: 1, sizes: ['m', 's', 'w', 't'], description: () => t('d_worldclock'),
+          settings: [{key: 'zones', type: 'textarea', label: () => t('f_zones'), default: () => t('defaultZones')}],
+        };
+
+        // 专注计时存在全局 prefs，切换看板或离开面板不中断；到点由模块级定时器收尾。
+        const FOCUS_IDLE = {mode: 'work', endsAt: null, left: null, total: null, day: '', count: 0};
+        const focusState = prefs => ({...FOCUS_IDLE, ...(prefs.focus && typeof prefs.focus === 'object' ? prefs.focus : {})});
+        const notify = text => {
+          try { if (typeof Notification !== 'undefined' && Notification.permission === 'granted') new Notification(t('title'), {body: text}); } catch { /* 通知不可用 */ }
+        };
+        const finishFocus = at => {
+          const f = focusState(prefsStore.getSnapshot().values);
+          if (f.endsAt !== at) return;
+          const day = dayKey(Date.now());
+          const wasWork = f.mode === 'work';
+          prefsStore.put({focus: {...FOCUS_IDLE, mode: wasWork ? 'break' : 'work', day, count: (f.day === day ? f.count : 0) + (wasWork ? 1 : 0)}}).catch(() => {});
+          if (Date.now() - at < 60_000) notify(wasWork ? t('focusDone') : t('breakDone'));
+        };
+        ctx.effect(() => {
+          let timer = null;
+          let armed = null;
+          const check = () => {
+            const at = focusState(prefsStore.getSnapshot().values).endsAt;
+            if (at === armed) return;
+            clearTimeout(timer);
+            armed = at;
+            if (at) timer = setTimeout(() => finishFocus(at), Math.max(0, at - Date.now()));
+          };
+          const off = prefsStore.subscribe(check);
+          check();
+          return () => { off(); clearTimeout(timer); };
+        }, 'dsh-desk: focus timer');
+
+        function Focus({size, config}) {
+          useLocale();
+          const now = useNow();
+          const prefs = usePrefs();
+          const f = focusState(prefs);
+          const length = mode => (Number(mode === 'work' ? config?.workMin : config?.breakMin) || (mode === 'work' ? 25 : 5)) * 60_000;
+          const running = Boolean(f.endsAt);
+          const paused = !running && f.left != null;
+          const left = running ? Math.max(0, f.endsAt - now.getTime()) : (f.left ?? length(f.mode));
+          const total = f.total || length(f.mode);
+          const secs = Math.ceil(left / 1000);
+          const count = f.day === dayKey(now) ? f.count : 0;
+          const put = patch => { prefsStore.put({focus: {...f, ...patch}}).catch(() => {}); };
+          const start = () => {
+            if (typeof Notification !== 'undefined' && Notification.permission === 'default') Promise.resolve().then(() => Notification.requestPermission()).catch(() => {});
+            put({endsAt: Date.now() + left, left: null, total: paused ? total : length(f.mode)});
+          };
+          const btn = (key, text, onClick, primary) => h('button', {key, type: 'button', className: 'bnt-action', 'data-primary': primary ? '' : undefined, onClick}, text);
+          return h('div', {className: 'bnt-focus', 'data-size': size, 'data-running': running ? '' : undefined},
+            h('div', {className: 'bnt-fhead'}, h('b', null, f.mode === 'work' ? t('focusWork') : t('focusBreak')),
+              size === 's' ? null : h('span', {className: 'bnt-num'}, fill(t('pomos'), {n: count}))),
+            h('span', {className: 'bnt-big bnt-num'}, `${pad(Math.floor(secs / 60))}:${pad(secs % 60)}`),
+            size === 's' ? null : h('div', {className: 'bnt-pbar'}, h('i', {style: {width: `${Math.min(100, Math.max(0, (1 - left / total) * 100))}%`}})),
+            h('div', {className: 'bnt-fbtns'},
+              running ? btn('p', t('pause'), () => put({endsAt: null, left: Math.max(0, f.endsAt - Date.now())}), true) : btn('s', paused ? t('resume') : t('start'), start, true),
+              size === 's' ? null : running || paused
+                ? btn('r', t('reset'), () => put({endsAt: null, left: null, total: null}))
+                : btn('k', t('skip'), () => put({mode: f.mode === 'work' ? 'break' : 'work', endsAt: null, left: null, total: null}))));
+        }
+        const minuteOptions = list => list.map(n => ({value: String(n), label: () => fill(t('minutes'), {n})}));
+        Focus.desk = {
+          apiVersion: 1, sizes: ['m', 's'], title: false, description: () => t('d_focus'),
+          settings: [
+            {key: 'workMin', type: 'select', default: '25', label: () => t('f_workMin'), options: minuteOptions([15, 20, 25, 30, 45, 50, 60, 90])},
+            {key: 'breakMin', type: 'select', default: '5', label: () => t('f_breakMin'), options: minuteOptions([3, 5, 10, 15, 20])},
+          ],
+        };
+
+        function parseLinks(text) {
+          return String(text ?? '').split('\n').map(s => s.trim()).filter(Boolean).map(line => {
+            const tokens = line.split(/\s+/);
+            let i = tokens.findIndex(x => /^(https?:\/\/|mailto:)/i.test(x));
+            if (i < 0) i = tokens.findIndex(x => /^[\w-]+(\.[\w-]+)+(\/\S*)?$/.test(x));
+            if (i < 0) return null;
+            const href = /^(https?:|mailto:)/i.test(tokens[i]) ? tokens[i] : `https://${tokens[i]}`;
+            let host;
+            try {
+              const u = new URL(href);
+              if (!['http:', 'https:', 'mailto:'].includes(u.protocol)) return null;
+              host = u.hostname.replace(/^www\./, '') || u.pathname;
+            } catch { return null; }
+            return {href, name: [...tokens.slice(0, i), ...tokens.slice(i + 1)].join(' ') || host};
+          }).filter(Boolean).slice(0, 48);
+        }
+
+        function Links({config, openSettings}) {
+          useLocale();
+          const links = parseLinks(config?.links);
+          if (!links.length) return h('div', {className: 'bnt-hero'}, h('button', {type: 'button', className: 'bnt-btn bnt-cta', style: {alignSelf: 'flex-start'}, onClick: openSettings}, t('addLinks')));
+          return h('div', {className: 'bnt-links'}, links.map((l, i) => h('a', {key: i, className: 'bnt-link', href: l.href, target: '_blank', rel: 'noopener noreferrer', title: l.href},
+            h('i', null, ([...l.name][0] ?? '?').toUpperCase()), h('span', null, l.name))));
+        }
+        Links.desk = {
+          apiVersion: 1, sizes: ['m', 's', 'w', 't', 'l'], description: () => t('d_links'),
+          settings: [{key: 'links', type: 'textarea', label: () => t('f_links'), placeholder: 'GitHub https://github.com'}],
+        };
+
+        function Progress({size}) {
+          useLocale();
+          const now = useNow();
+          const prefs = usePrefs();
+          const weekStart = prefs.weekStart != null ? Number(prefs.weekStart) : (t('lang').startsWith('zh') ? 1 : 0);
+          const [y, m, d] = [now.getFullYear(), now.getMonth(), now.getDate()];
+          const back = (now.getDay() - weekStart + 7) % 7;
+          const spans = [
+            ['p_day', new Date(y, m, d), new Date(y, m, d + 1)],
+            ['p_week', new Date(y, m, d - back), new Date(y, m, d - back + 7)],
+            ['p_month', new Date(y, m, 1), new Date(y, m + 1, 1)],
+            ['p_year', new Date(y, 0, 1), new Date(y + 1, 0, 1)],
+          ];
+          return h('div', {className: 'bnt-prog', 'data-size': size}, spans.map(([key, a, b]) => {
+            const pct = Math.min(100, Math.max(0, (now - a) / (b - a) * 100));
+            return h('div', {key, className: 'bnt-prow'}, h('span', null, t(key)),
+              h('div', {className: 'bnt-pbar'}, h('i', {style: {width: `${pct}%`}})), h('span', {className: 'bnt-num'}, `${Math.floor(pct)}%`));
+          }));
+        }
+        Progress.desk = {apiVersion: 1, sizes: ['m', 's', 'w'], description: () => t('d_progress')};
+
         function widgetList() {
           return ctx.slots.entries(SLOT).map(entry => {
             const {id, label} = entry.options;
@@ -805,6 +1110,13 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             })));
         }
 
+        const builtins = [
+          ['desk.today', 'today', Today], ['desk.todo', 'todo', Todo], ['desk.note', 'note', Note], ['desk.calendar', 'calendar', Calendar],
+          ['desk.weather', 'weather', Weather], ['desk.clock', 'clock', Clock], ['desk.quote', 'quote', Quote], ['desk.countdown', 'countdown', Countdown],
+          ['desk.worldclock', 'worldclock', WorldClock], ['desk.focus', 'focus', Focus], ['desk.links', 'links', Links], ['desk.progress', 'progress', Progress],
+        ];
+        const BUILTIN_IDS = new Set(builtins.map(([id]) => id));
+
         function Panel({renderSlot}) {
           useLocale();
           const list = useSyncExternalStore(widgets.subscribe, widgets.getSnapshot, widgets.getSnapshot);
@@ -841,12 +1153,13 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             setBoards(bs => bs?.map(b => (b.id === next.id ? {id: next.id, title: next.title} : b)));
             call('board.put', {board: next}).catch(fail);
           };
-          // 新安装插件的 widget 自动加入一次；记入 known 后用户移除不再回来。
+          // 新安装插件的 widget 自动加入一次；记入 known 后用户移除不再回来。升级带来的新内置 widget 只进组件库。
           useEffect(() => {
             if (!board) return;
             const known = new Set(board.known ?? []);
             const fresh = list.filter(w => w.id && !known.has(w.id));
-            if (fresh.length) saveBoard({...board, widgets: [...board.widgets, ...fresh.map(w => ({id: w.id, size: w.sizes[0]}))], known: [...known, ...fresh.map(w => w.id)]});
+            const placed = fresh.filter(w => !BUILTIN_IDS.has(w.id));
+            if (fresh.length) saveBoard({...board, widgets: [...board.widgets, ...placed.map(w => ({id: w.id, size: w.sizes[0]}))], known: [...known, ...fresh.map(w => w.id)]});
           }, [board, list]);
 
           const boardTitle = b => b.title || (b.id === 'work' ? t('work') : t('untitled'));
@@ -969,7 +1282,6 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           name: 'sidebar.panellist', id: PANEL, order: 30, label: () => t('title'),
         }, PanelIcon)), 'dsh-desk: sidebar entry');
 
-        const builtins = [['desk.today', 'today', Today], ['desk.todo', 'todo', Todo], ['desk.note', 'note', Note], ['desk.calendar', 'calendar', Calendar], ['desk.weather', 'weather', Weather], ['desk.clock', 'clock', Clock]];
         builtins.forEach(([id, key, component], i) => {
           ctx.effect(() => ctx.slots.inject(SLOT, () => ctx.slots.register({
             name: SLOT, id, order: (i + 1) * 10, label: () => t(key),
