@@ -3,6 +3,10 @@ import {createFetcher} from './lib/http.js';
 import {getWeather, searchPlaces} from './lib/weather.js';
 import {parseICS, expandEvents} from './lib/ics.js';
 import {parseFeed} from './lib/feed.js';
+import {randomUUID} from 'node:crypto';
+import {homedir} from 'node:os';
+import {stat} from 'node:fs/promises';
+import {isAbsolute} from 'node:path';
 
 export const name = 'dsh-desk';
 export const inject = ['connection'];
@@ -18,7 +22,7 @@ const MAX_NOTE = 200_000;
 
 // storageDomain 要求 zod schema；插件不带 zod 依赖，用只实现 safeParse/parse 的透传对象，校验在本文件里做。
 const passthrough = {safeParse: data => ({success: true, data}), parse: data => data};
-const TABLES = ['boards', 'todos', 'notes', 'prefs', 'habits'];
+const TABLES = ['boards', 'todos', 'notes', 'prefs', 'habits', 'inbox'];
 const ICS_TTL = 15 * 60_000;
 const ICS_MAX_BYTES = 5_000_000;
 const FEED_TTL = 15 * 60_000;
@@ -28,11 +32,15 @@ const MAX_BOARDS = 12;
 const MAX_HABITS = 30;
 const HABIT_DAYS_KEPT = 400;
 const DAY_KEY = /^\d{4}-\d{2}-\d{2}$/;
+const MAX_INBOX = 200;
+const MAX_INBOX_TEXT = 4000;
+const MAX_PROMPT = 20_000;
 
 export const BUILTIN_WIDGETS = [
   'desk.today', 'desk.todo', 'desk.note', 'desk.calendar', 'desk.weather', 'desk.clock',
   'desk.quote', 'desk.countdown', 'desk.worldclock', 'desk.focus', 'desk.links', 'desk.progress',
   'desk.agents', 'desk.feed', 'desk.habits',
+  'desk.prompt', 'desk.inbox',
 ];
 
 export function defaultBoard(id) {
@@ -236,6 +244,26 @@ export function createStore(ctx) {
       return true;
     },
 
+    listInbox: () => [...table('inbox').entries()].map(([, v]) => v).sort((a, b) => a.createdAt - b.createdAt),
+    async addInbox(text) {
+      const value = String(text ?? '').trim().slice(0, MAX_INBOX_TEXT);
+      if (!value) throw new UserError('empty-text', 'text is required');
+      if ([...table('inbox').entries()].length >= MAX_INBOX) throw new UserError('too-many', `at most ${MAX_INBOX} inbox items`);
+      const item = {id: newId(), text: value, createdAt: Date.now()};
+      await table('inbox').put(item.id, item);
+      return item;
+    },
+    async removeInbox(id) {
+      if (!table('inbox').get(String(id))) throw new UserError('not-found', `no inbox item with id ${id}`);
+      await table('inbox').delete(String(id));
+      return true;
+    },
+    async clearInbox() {
+      const ids = [...table('inbox').entries()].map(([k]) => k);
+      for (const id of ids) await table('inbox').delete(id);
+      return ids.length;
+    },
+
     getNote: () => table('notes').get(NOTE_KEY) ?? {text: '', updatedAt: 0},
     async putNote(text) {
       const note = {text: String(text ?? '').slice(0, MAX_NOTE), updatedAt: Date.now()};
@@ -353,12 +381,44 @@ export function createAgentWatch(ctx) {
   };
 }
 
-export function createHandlers(store, fetcher = createFetcher(), agents = null) {
+export async function resolveDir(raw) {
+  const text = String(raw ?? '').trim();
+  if (!text) return undefined;
+  const path = text === '~' ? homedir() : text.startsWith('~/') ? `${homedir()}${text.slice(1)}` : text;
+  if (!isAbsolute(path)) throw new UserError('bad-dir', `not an absolute path: ${text}`);
+  const info = await stat(path).catch(() => null);
+  if (!info?.isDirectory()) throw new UserError('bad-dir', `not a directory: ${text}`);
+  return path;
+}
+
+// 新开一个会话并直接发送 prompt；页面随后用 uiWorkspace.openSession 打开它。
+export function createLauncher(ctx) {
+  return async ({prompt, cwd, timeZone}) => {
+    const text = String(prompt ?? '').trim().slice(0, MAX_PROMPT);
+    if (!text) throw new UserError('empty-text', 'prompt is required');
+    const controller = ctx.get?.('sessionController');
+    if (typeof controller?.create !== 'function' || typeof controller?.prompt !== 'function') throw new UserError('unavailable', 'this Harness cannot start sessions');
+    const dir = await resolveDir(cwd);
+    const {sessionId} = await controller.create(dir ? {cwd: dir} : {});
+    await controller.prompt({requestId: randomUUID(), sessionId, mode: 'queue', content: [{type: 'text', text}], ...(timeZone ? {clientTimeZone: String(timeZone)} : {})}, AbortSignal.timeout(15_000));
+    return {sessionId};
+  };
+}
+
+export function createHandlers(store, fetcher = createFetcher(), agents = null, launch = null) {
   const calendar = createCalendar(fetcher);
   const feeds = createFeeds(fetcher);
   return {
     'dsh-desk/feed.get': p => feeds({urls: p?.urls, limit: p?.limit}),
     'dsh-desk/agent.overview': () => (agents ? agents.overview() : {sessions: null, schedules: null}),
+    'dsh-desk/agent.start': async p => {
+      if (!launch) throw new UserError('unavailable', 'this Harness cannot start sessions');
+      return launch({prompt: p?.prompt, cwd: p?.cwd, timeZone: p?.timeZone});
+    },
+    'dsh-desk/inbox.list': () => store.listInbox(),
+    'dsh-desk/inbox.add': p => store.addInbox(p?.text),
+    'dsh-desk/inbox.remove': p => store.removeInbox(p?.id),
+    'dsh-desk/inbox.clear': () => store.clearInbox(),
     'dsh-desk/habit.list': () => store.listHabits(),
     'dsh-desk/habit.add': p => store.addHabit(p?.name),
     'dsh-desk/habit.check': p => store.checkHabit(p?.id, p?.day, p?.done),
@@ -452,12 +512,36 @@ export function createTools(store) {
         throw new Error(`unknown action ${action}`);
       },
     },
+    {
+      name: 'desk_inbox',
+      description: 'Read or change the inbox on the user\'s Desk dashboard, where the user drops links, ideas and requests to deal with later. `list` returns items oldest first, each with an id; `add` stores `text`; `remove` deletes one item by `id` once it has been handled; `clear` deletes every item.',
+      parameters: {
+        type: 'object',
+        properties: {
+          action: {type: 'string', enum: ['list', 'add', 'remove', 'clear']},
+          text: {type: 'string', description: 'Item text, for add.'},
+          id: {type: 'string', description: 'Item id from list, for remove.'},
+        },
+        required: ['action'],
+        additionalProperties: false,
+      },
+      output: {schema: {type: 'object'}, render: (_args, value) => textResult(value)},
+      async execute(args) {
+        await store.ready;
+        const {action, text, id} = args ?? {};
+        if (action === 'list') return {items: store.listInbox().map(({id, text, createdAt}) => ({id, text, addedAt: new Date(createdAt).toISOString()}))};
+        if (action === 'add') return {added: await store.addInbox(text)};
+        if (action === 'remove') return {removed: await store.removeInbox(id)};
+        if (action === 'clear') return {cleared: await store.clearInbox()};
+        throw new Error(`unknown action ${action}`);
+      },
+    },
   ];
 }
 
 export function apply(ctx) {
   const store = createStore(ctx);
-  const handlers = createHandlers(store, createFetcher(), createAgentWatch(ctx));
+  const handlers = createHandlers(store, createFetcher(), createAgentWatch(ctx), createLauncher(ctx));
   ctx.effect(() => () => { void store.close(); }, 'dsh-desk: storage');
 
   // 共享通道 /api 只允许一个 interceptor，每个方法注册独立的 Fetch 路由。

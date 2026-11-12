@@ -1,6 +1,6 @@
 // 用假 ctx 运行 Host 端，确认路由、看板 / 待办 / 速记读写和 Agent 工具。
 import assert from 'node:assert/strict';
-import {apply, createStore, createHandlers, createAgentWatch, migrateLegacy} from '../index.js';
+import {apply, createStore, createHandlers, createAgentWatch, createLauncher, migrateLegacy} from '../index.js';
 
 const routes = new Map();
 const tools = new Map();
@@ -155,5 +155,29 @@ answer('allowed-once');
 assert.equal(await pending, 'allowed-once');
 assert.equal(createAgentWatch(agentCtx).waiting.size, 0);
 assert.deepEqual(await createHandlers(createStore({}), feedFetcher)['dsh-desk/agent.overview'](), {sessions: null, schedules: null});
+
+// 收集箱：保留换行、工具增删清空。
+const inboxItem = await value('inbox.add', {text: '  https://example.com\nread later  '});
+assert.equal(inboxItem.text, 'https://example.com\nread later');
+assert.equal((await call('inbox.add', {text: ' '})).error.code, 'dsh-desk/empty-text');
+const inboxTool = tools.get('desk_inbox');
+await inboxTool.execute({action: 'add', text: 'idea'});
+assert.deepEqual((await inboxTool.execute({action: 'list'})).items.map(i => i.text), ['https://example.com\nread later', 'idea']);
+await inboxTool.execute({action: 'remove', id: inboxItem.id});
+assert.deepEqual((await value('inbox.list')).map(i => i.text), ['idea']);
+assert.equal((await inboxTool.execute({action: 'clear'})).cleared, 1);
+assert.deepEqual(await value('inbox.list'), []);
+
+// 新开会话：先 create 再 prompt，cwd 必须是已存在的绝对目录。
+const created = [];
+const prompted = [];
+const launchCtx = {get: key => (key === 'sessionController' ? {create: async r => { created.push(r); return {sessionId: 'new1'}; }, prompt: async r => { prompted.push(r); return {accepted: true}; }} : undefined)};
+const launchHandlers = createHandlers(createStore({}), feedFetcher, null, createLauncher(launchCtx));
+assert.deepEqual(await launchHandlers['dsh-desk/agent.start']({prompt: ' hi ', cwd: '/tmp'}), {sessionId: 'new1'});
+assert.deepEqual(created, [{cwd: '/tmp'}]);
+assert.deepEqual([prompted[0].sessionId, prompted[0].mode, prompted[0].content], ['new1', 'queue', [{type: 'text', text: 'hi'}]]);
+await assert.rejects(launchHandlers['dsh-desk/agent.start']({prompt: 'x', cwd: 'relative/dir'}), /absolute/);
+await assert.rejects(launchHandlers['dsh-desk/agent.start']({prompt: 'x', cwd: '/definitely/missing'}), /not a directory/);
+await assert.rejects(createHandlers(createStore({}))['dsh-desk/agent.start']({prompt: 'x'}), /cannot start/);
 
 console.log('smoke ok');

@@ -54,6 +54,12 @@ window.__ModuleLoader__.load({
       f_showRecent: '显示最近会话', f_showSchedules: '显示定时任务',
       f_feeds: '订阅地址（每行一个 RSS / Atom）', defaultFeeds: 'https://sspai.com/feed', feedError: '{n} 个订阅加载失败', noItems: '没有内容',
       addHabit: '添加习惯', noHabits: '还没有习惯', streak: '连续 {n} 天', markDay: '{d} 打卡',
+      prompt: 'Prompt 快启', inbox: '收集箱',
+      d_prompt: '一句话或预设模板直接开新会话', d_inbox: '随手收集链接和想法，一键交给 Agent 处理；Agent 可读写',
+      promptPlaceholder: '让 Agent 做点什么，回车发送', sending: '发送中…', f_presets: '预设（每行一个：名称 | prompt）', f_cwd: '工作目录（留空用默认）',
+      defaultPresets: '今日计划 | 读取我 Desk 上的待办和收集箱，帮我排出今天最该做的三件事\n整理收集箱 | 用 desk_inbox 读取我的收集箱，逐条整理成待办或给出处理建议，处理完的条目移除\n周报草稿 | 读取我 Desk 上本周完成的待办，写一份简短的周报草稿',
+      inboxPlaceholder: '收集一条，回车保存', inboxEmpty: '收集箱是空的', toAgent: '交给 Agent', inboxCount: '{n} 条',
+      inboxPrompt: '用 desk_inbox 工具读取我的收集箱，逐条处理：能直接回答或完成的就完成；需要我跟进的用 desk_todos 转成待办；链接先读一下再给一句话摘要。处理完的条目用 desk_inbox remove 移除，最后汇总你做了什么。',
     };
     const en = {
       lang: 'en-US', title: 'Desk', loadFailed: 'Failed to load', empty: 'No widgets on this board yet',
@@ -93,6 +99,12 @@ window.__ModuleLoader__.load({
       f_showRecent: 'Show recent sessions', f_showSchedules: 'Show scheduled tasks',
       f_feeds: 'Feed URLs, one RSS or Atom feed per line', defaultFeeds: 'https://hnrss.org/frontpage', feedError: '{n} feed(s) failed to load', noItems: 'Nothing here',
       addHabit: 'Add a habit', noHabits: 'No habits yet', streak: '{n}-day streak', markDay: 'Check in for {d}',
+      prompt: 'Quick prompt', inbox: 'Inbox',
+      d_prompt: 'Start a new session from a line of text or a preset', d_inbox: 'Collect links and ideas, then hand them to the agent; the agent can read and edit',
+      promptPlaceholder: 'Ask the agent something, Enter to send', sending: 'Sending…', f_presets: 'Presets, one per line: name | prompt', f_cwd: 'Working directory (empty uses the default)',
+      defaultPresets: 'Plan today | Read my Desk to-dos and inbox and pick the three things I should do today\nSort inbox | Use desk_inbox to read my inbox, turn each item into a to-do or a suggestion, and remove the items you handled\nWeekly note | Read the to-dos I completed on Desk this week and draft a short weekly update',
+      inboxPlaceholder: 'Capture something, Enter to save', inboxEmpty: 'Inbox is empty', toAgent: 'Hand to agent', inboxCount: '{n} items',
+      inboxPrompt: 'Use the desk_inbox tool to read my inbox and work through it: finish what you can answer or do directly; turn anything I need to follow up into a to-do with desk_todos; read links and give a one-line summary. Remove handled items with desk_inbox remove, then summarize what you did.',
     };
 
     // 公共领域的经典短句，按日期轮换。
@@ -334,6 +346,21 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 .bnt-hday[data-today]{border-color:var(--dsw-alias-label-secondary)}
 .bnt-hday[data-done]{background:var(--dsw-alias-brand-primary);border-color:var(--dsw-alias-brand-primary);${onBrand('color')}}
 .bnt-hrow:hover .bnt-del{display:grid}
+
+.bnt-prompt{display:flex;flex-direction:column;gap:8px;height:100%;min-height:0}
+.bnt-prompt textarea{flex:1;min-height:36px;resize:none;border:1px solid var(--dsw-alias-border-l1);outline:none;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary);border-radius:8px;padding:8px 10px;font:inherit;line-height:1.5}
+.bnt-prompt textarea:focus{border-color:var(--dsw-alias-brand-primary)}
+.bnt-chips{display:flex;flex-wrap:wrap;gap:6px;overflow:auto;min-height:0;flex:none;max-height:100%}
+.bnt-prompt[data-size=s] .bnt-chips,.bnt-prompt[data-size=t] .bnt-chips{flex-direction:column;flex-wrap:nowrap}
+.bnt-chip{height:26px;padding:0 10px;border-radius:13px;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:left;flex:none}
+.bnt-chip:hover{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary)}
+.bnt-chip:disabled{opacity:.5;cursor:default}
+.bnt-inrow{display:flex;align-items:flex-start;gap:8px;padding:6px 4px;border-radius:8px;min-width:0}
+.bnt-inrow:hover{background:var(--dsw-alias-bg-layer-2)}
+.bnt-inrow>span{flex:1;min-width:0;white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.45}
+.bnt-inrow small{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none;line-height:1.45}
+.bnt-inrow:hover .bnt-del{display:grid}
+.bnt-inrow:hover small{display:none}
 
 @media (max-width:900px){.bnt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.bnt-card[data-c="4"]{grid-column:span 2}.bnt-today .bnt-quote,.bnt-today .bnt-qsep{display:none}}
 @media (max-width:600px){.bnt-grid{grid-template-columns:minmax(0,1fr)}.bnt-card{grid-column:auto!important}}
@@ -1287,11 +1314,105 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
         }
         Habits.desk = {apiVersion: 1, sizes: ['m', 'l', 't', 'w'], description: () => t('d_habits')};
 
+        // 新开会话并直接发送；Host 不支持时退回到把 prompt 预填进新会话草稿。
+        const launch = async (prompt, cwd) => {
+          const ui = ctx.get?.('uiWorkspace');
+          try {
+            const {sessionId} = await call('agent.start', {prompt, cwd: cwd || undefined, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone});
+            ui?.openSession?.(sessionId);
+          } catch (error) {
+            if (typeof ui?.startSession !== 'function' || !/cannot start sessions/.test(String(error?.message))) throw error;
+            ui.startSession(undefined, {prompt, whenDraftExists: 'replace'});
+          }
+        };
+        const parsePresets = text => String(text ?? '').split('\n').map(line => {
+          const i = line.indexOf('|');
+          const name = (i < 0 ? line : line.slice(0, i)).trim();
+          const prompt = (i < 0 ? line : line.slice(i + 1)).trim();
+          return name && prompt ? {name, prompt} : null;
+        }).filter(Boolean).slice(0, 20);
+
+        function Prompt({size, config}) {
+          useLocale();
+          const [text, setText] = useState('');
+          const [busy, setBusy] = useState(false);
+          const [error, setError] = useState('');
+          const presets = parsePresets(config?.presets ?? t('defaultPresets'));
+          const send = prompt => {
+            if (busy || !prompt.trim()) return;
+            setBusy(true);
+            setError('');
+            launch(prompt.trim(), config?.cwd).then(() => setText(''), e => setError(String(e?.message || e))).finally(() => setBusy(false));
+          };
+          const onKeyDown = e => {
+            if (e.key !== 'Enter' || e.shiftKey || e.nativeEvent.isComposing) return;
+            e.preventDefault();
+            send(text);
+          };
+          return h('div', {className: 'bnt-prompt', 'data-size': size},
+            size === 's' ? null : h('textarea', {value: text, placeholder: t('promptPlaceholder'), disabled: busy, spellCheck: false, onChange: e => setText(e.target.value), onKeyDown}),
+            presets.length ? h('div', {className: 'bnt-chips'}, presets.map((p, i) => h('button', {key: i, type: 'button', className: 'bnt-btn bnt-chip', title: p.prompt, disabled: busy, onClick: () => send(p.prompt)}, p.name))) : null,
+            busy || error ? h('div', {className: error ? 'bnt-calerr' : 'bnt-muted', style: {fontSize: 12}}, error || t('sending')) : null);
+        }
+        Prompt.desk = {
+          apiVersion: 1, sizes: ['m', 'w', 'l', 't', 's'], description: () => t('d_prompt'),
+          settings: [
+            {key: 'presets', type: 'textarea', label: () => t('f_presets'), default: () => t('defaultPresets')},
+            {key: 'cwd', type: 'text', label: () => t('f_cwd'), placeholder: '~/Vibe/project'},
+          ],
+        };
+
+        function Inbox({size}) {
+          useLocale();
+          const now = useNow();
+          const [items, setItems] = useState(null);
+          const [text, setText] = useState('');
+          const [error, setError] = useState('');
+          const [busy, setBusy] = useState(false);
+          const fail = e => setError(String(e?.message || e));
+          const load = () => { if (!document.hidden) call('inbox.list').then(list => { setItems(list); setError(''); }, fail); };
+          useEffect(() => {
+            load();
+            const id = setInterval(load, POLL_MS);
+            window.addEventListener('focus', load);
+            return () => { clearInterval(id); window.removeEventListener('focus', load); };
+          }, []);
+          const submit = e => {
+            if (e.key !== 'Enter' || e.nativeEvent.isComposing || !text.trim()) return;
+            const value = text.trim();
+            setText('');
+            call('inbox.add', {text: value}).then(item => setItems(list => [...(list ?? []), item]), err => { setText(value); fail(err); });
+          };
+          const remove = item => {
+            setItems(list => list.filter(x => x.id !== item.id));
+            call('inbox.remove', {id: item.id}).catch(e => { fail(e); load(); });
+          };
+          const handOff = () => {
+            setBusy(true);
+            launch(t('inboxPrompt')).catch(fail).finally(() => setBusy(false));
+          };
+          const list = items ?? [];
+          return h(React.Fragment, null,
+            h('div', {className: 'bnt-rows'},
+              items && !list.length ? h('div', {className: 'bnt-blank'}, t('inboxEmpty')) : null,
+              [...list].reverse().map(item => h('div', {key: item.id, className: 'bnt-inrow', title: item.text},
+                h('span', null, item.text),
+                size === 't' ? null : h('small', null, relTime(item.createdAt, now.getTime())),
+                h('button', {type: 'button', className: 'bnt-btn bnt-del', 'aria-label': t('remove'), title: t('remove'), onClick: () => remove(item)}, h(Icon.x))))),
+            error ? h('div', {className: 'bnt-calerr'}, error) : null,
+            h('label', {className: 'bnt-add'}, h(Icon.plus),
+              h('input', {value: text, placeholder: t('inboxPlaceholder'), enterKeyHint: 'done', onChange: e => setText(e.target.value), onKeyDown: submit})),
+            list.length ? h('div', {className: 'bnt-notefoot'}, h('span', null, fill(t('inboxCount'), {n: list.length})),
+              h('button', {type: 'button', className: 'bnt-btn', disabled: busy, onClick: handOff}, busy ? t('sending') : t('toAgent'))) : null);
+        }
+        Inbox.desk = {apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_inbox')};
+
         const builtins = [
           ['desk.today', 'today', Today], ['desk.todo', 'todo', Todo], ['desk.note', 'note', Note], ['desk.calendar', 'calendar', Calendar],
           ['desk.weather', 'weather', Weather], ['desk.clock', 'clock', Clock], ['desk.quote', 'quote', Quote], ['desk.countdown', 'countdown', Countdown],
           ['desk.worldclock', 'worldclock', WorldClock], ['desk.focus', 'focus', Focus], ['desk.links', 'links', Links], ['desk.progress', 'progress', Progress],
           ['desk.agents', 'agents', Agents], ['desk.feed', 'feed', Feed], ['desk.habits', 'habits', Habits],
+          ['desk.prompt', 'prompt', Prompt], ['desk.inbox', 'inbox', Inbox],
         ];
         const BUILTIN_IDS = new Set(builtins.map(([id]) => id));
 
