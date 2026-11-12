@@ -1,6 +1,6 @@
 # Workboard
 
-**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 31 widgets out of the box, and your agent builds the rest.**
+**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 31 widgets out of the box — and your agent builds the rest.**
 
 [简体中文](README.zh.md) · MIT
 
@@ -10,121 +10,147 @@
 
 ### 31 widgets, ready to use
 
-To-dos, calendar, weather, feeds, markets, Git, GitHub, usage stats, agent sessions and more. Most work with no setup; a few need something only you know, such as your city, a calendar link or a ticker. Open the gallery, search, and add as many as you like.
+Open the widget gallery, search, and drop cards straight onto your board across four categories:
+
+- **Agent workflows**: active and waiting sessions, running goals and background jobs, quick prompts, inbox, token usage and cost estimates, deliverables, scheduled tasks, and pinned sessions
+- **Productivity & dev tools**: to-dos, scratch notes, ICS calendar, Pomodoro focus timer, quick links, Git repos, GitHub PRs and issues, system monitor, network speed and latency, clipboard history, and recent files
+- **Daily essentials**: Today banner, clock, world clock, weather, countdowns, time progress, habit tracker, and photo frame
+- **News & markets**: multi-source trending lists, RSS / Atom feeds, stocks / forex / crypto markets, and daily quotes
+
+Most widgets work with zero configuration; a few only ask for essentials like your city, an ICS calendar URL, or ticker symbols.
 
 ![Widget gallery](docs/images/gallery-en.png)
 
-### Your agent makes new widgets
+### Your agent builds the rest
 
-Describe a card in a sentence and choose **Hand to agent**. The agent writes the widget and puts it on the board you have open. From then on, the sparkle button on the card asks for changes, and **Ask agent to fix** hands any runtime error back to the agent. Custom widgets run in a sandbox with no access to your page, cookies or the network, except for the addresses each widget declares.
+Describe the card you want in a sentence and click **Hand to agent**. The agent writes the widget and places it directly onto your open board. Click the sparkle button on any custom card to ask for changes, or **Ask agent to fix** to hand runtime errors back to the agent.
+
+Custom widgets run inside an isolated sandbox with no access to the host page, cookies, or undeclared network endpoints — they can only fetch URL prefixes explicitly declared by the widget.
 
 ![Generate a widget with the agent](docs/images/generate-en.png)
 
-### Modular, adaptive, minimal
+### Built for agent workflows
 
-Cards snap to a four-column grid in six sizes. Drag them around, resize them, and split them across tabbed boards. The layout reflows to the window width and follows the Harness light or dark theme. Cards show one thing each, with no ornaments.
-
-<img src="docs/images/narrow-en.png" alt="Narrow window in dark theme" width="480">
-
-### Built for agent work
-
-A board of agent widgets shows the sessions waiting for you, running goals and jobs, token usage, deliverables and scheduled tasks. The agent can also read and change your to-dos, notes and inbox from any conversation, through built-in tools.
+Monitor sessions waiting for your approval, active goals and background jobs, token usage, deliverables, and scheduled tasks on a single board. Going the other way, your agent can read and update your to-dos, notes, inbox, and custom widgets from any conversation using built-in tools.
 
 ![Agent widgets](docs/images/agent-en.png)
 
+### Modular, adaptive, minimal
+
+Cards snap to a four-column grid across six sizes. Drag to rearrange, resize on the fly, and organize widgets across tabbed boards. The layout reflows smoothly to narrow windows and follows the Harness light and dark themes. Each card does one job with zero visual clutter.
+
+<img src="docs/images/narrow-en.png" alt="Narrow window in dark theme" width="480">
+
 ### Local and private
 
-Your data stays in the Harness profile on your machine. The Host makes every network request and caches it; the page itself never calls third parties.
+All boards and personal data stay in your local Harness profile. Every external network request is proxied and cached by the Host — the browser page never connects to third-party services directly.
 
 ## Quick start
 
+Clone the repository:
+
 ```sh
-git clone https://github.com/lukeinx/dsh-workboard.git
+git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 ```
 
-Then, in a Harness conversation, ask the agent to install it:
+Then ask your agent in a Harness conversation to install it:
 
 > Install the bundle at `~/dsh-workboard` with plugin_manager.
 
-Open **Workboard** in the sidebar. The first board holds Today, To-do, Calendar and Notes. Choose **Edit**, then **Add widget** for the rest.
+Open **Workboard** from the sidebar. The default board starts with Today, To-do, Calendar, and Notes. Click **Edit** → **Add widget** to browse the gallery or ask the agent to build a custom card.
 
 ## For AI agents
 
-If you are an agent working with Workboard:
+If you are an agent interacting with Workboard:
 
-- **Install**: `plugin_manager install_bundle` with this directory. A local directory is linked, not copied.
-- **Tools**: `workboard_todos` (`list` `add` `complete` `reopen` `remove`), `workboard_note` (`read` `append` `replace`), `workboard_inbox` (`list` `add` `remove` `clear`), `workboard_widget` (`list` `get` `create` `update` `set_data` `remove`).
-- **Build a widget**: load the `workboard-widget` skill ([`skills/workboard-widget.md`](skills/workboard-widget.md)) before calling `workboard_widget`. It covers sizes, the `window.workboard` API, the sandbox and the theme variables.
-- **Limits**: at most 50 custom widgets, each with up to 200 KB of HTML and 200 KB of data. The page polls every 5 seconds, so your changes appear without a reload.
-- **Data**: `~/.dsh/storages/dsh_workboard.json`.
+- **Install**: call `plugin_manager install_bundle` with this repository path (local directories are linked rather than copied).
+- **Built-in tools**:
+  - `workboard_todos`: `list` · `add` · `complete` · `reopen` · `remove`
+  - `workboard_note`: `read` · `append` · `replace`
+  - `workboard_inbox`: `list` · `add` · `remove` · `clear`
+  - `workboard_widget`: `list` · `get` · `create` · `update` · `set_data` · `remove`
+- **Build a custom widget**: load the `workboard-widget` skill ([`skills/workboard-widget.md`](skills/workboard-widget.md)) before calling `workboard_widget`. It documents card sizes, the `window.workboard` bridge API, sandbox rules, and theme tokens.
+- **Limits & live sync**: up to 50 custom widgets, each with up to 200 KB of HTML and 200 KB of JSON data. The UI polls every 5 seconds, so your changes appear without reloading the page.
+- **Storage**: `~/.dsh/storages/dsh_workboard.json`.
 
 ## Reference
 
 <details>
-<summary><b>All 31 widgets</b></summary>
+<summary><b>All 31 built-in widgets</b></summary>
 
 | Widget | Sizes | What it shows |
 |---|---|---|
-| Today | banner | Time, greeting, date, ISO week, current weather and a daily quote from the built-in set, Hitokoto or your own; click the quote for another |
-| To-do | `l` `m` `t` | Open items first, completed items collapsed; unfinished items from earlier days are marked as carried over |
-| Notes | `l` `t` `m` `s` | Autosaving scratch note; turn the current line into a to-do |
-| Calendar | `t` `l` `s` `m` | Month grid and the selected day's events from one or more ICS subscriptions, recurring events included |
-| Weather | `m` `s` | Current conditions, today's high and low, air quality and the next hours |
-| Clock | `m` `s` | Time, greeting, date and year progress |
-| Quote | `m` `w` `s` | A daily quote; click for another. The source is shared with the Today banner |
-| Countdown | `m` `s` `t` | Days until the weekend, month end, year end and your own dates; `12-25` without a year repeats yearly |
-| World clock | `m` `s` `w` `t` | Time in several IANA zones with the offset and day difference from local |
-| Focus | `m` `s` | Pomodoro timer that keeps running across boards and panels, notifies when done and counts today's sessions |
-| Links | `m` `s` `w` `t` `l` | One `name URL` per line; only http, https and mailto |
-| Time progress | `m` `s` `w` | How much of today, this week, month and year has passed |
-| Agent | `t` `l` `m` `w` | Sessions waiting for you first, then running and recent ones; upcoming scheduled tasks and a new-session button |
-| Feeds | `t` `l` `m` `w` | RSS / Atom, several feeds merged by date; opened items turn grey |
-| Habits | `m` `l` `t` `w` | Check in for any day of the last week, with your current streak |
-| Quick prompt | `m` `w` `l` `t` `s` | Type or pick a preset to start a new session and send it right away in the chosen workspace |
-| Inbox | `t` `l` `m` `w` | Things you jot down, handed to the agent to sort with one click |
-| Usage | `l` `t` `m` `w` `s` | Tokens, requests, cache hits and a per-model breakdown from local session logs; estimated cost once you enter prices |
-| Running | `t` `l` `m` `w` | Goals and background jobs across sessions; open the session or stop a job |
-| Git repos | `t` `l` `m` `w` | Branch, changes, ahead / behind and branches whose upstream is gone; defaults to the Harness workspaces |
-| GitHub | `t` `l` `m` `w` | PRs awaiting your review, your PRs and issues assigned to you, through your signed-in `gh` |
-| System | `m` `s` `t` `l` `w` | CPU, memory, disk, battery and a five-minute CPU sparkline |
-| Photo frame | `m` `s` `t` `l` `w` | Cycles through photos in a local folder (`~/Pictures` by default) |
-| Markets | `t` `m` `s` `l` `w` | Exchange rates (`USD/CNY`), China / Hong Kong / US stocks (`sh600519`, `hk00700`, `usAAPL`) and crypto (`BTC`, `cg:<id>`) |
-| Trending | `l` `t` `m` `w` | Hot lists, one tab per source: Weibo, Zhihu, 36Kr, sspai, Hacker News, GitHub Trending, Product Hunt and Reddit; Bilibili and V2EX optional |
-| Outputs | `t` `l` `m` `w` | Files the agent presented as deliverables, newest first; open, reveal in Finder or jump to the session |
-| Scheduled tasks | `t` `l` `m` `w` | All scheduled tasks with their recurrence and next run; run now, pause, resume or delete |
-| Pinned sessions | `t` `l` `m` `w` | Sessions you pin, with each one's latest message |
-| Recent files | `t` `l` `m` `w` | Newest files in `~/Downloads` and `~/Desktop` or your own folders; open, reveal, or hand a file to the agent |
-| Clipboard | `t` `l` `m` `w` | Recent text you copied while the panel is open; copy again or send it with a preset such as Translate |
-| Network | `m` `s` `t` `l` `w` | Download and upload speed, local and public IP, system proxy and latency to the sites you list |
+| **DeepSeek (Agent workflows)** | | |
+| Agent | `t` `l` `m` `w` | Sessions waiting for your input first, followed by running and recent sessions, upcoming scheduled tasks, and a new-session button |
+| Running | `t` `l` `m` `w` | Active goals and background jobs across sessions; jump to the session or stop a job |
+| Quick prompt | `m` `w` `l` `t` `s` | Type a prompt or pick a preset to launch a new session right away in the chosen workspace |
+| Inbox | `t` `l` `m` `w` | Quick capture for links and thoughts; hand everything to the agent to triage with one click |
+| Usage | `l` `t` `m` `w` `s` | Token counts, request totals, cache hit rate, and per-model breakdown from local session logs, plus cost estimates when prices are set |
+| Outputs | `t` `l` `m` `w` | Deliverables presented by the agent, newest first; open, reveal in Finder, or jump to the source session |
+| Scheduled tasks | `t` `l` `m` `w` | All scheduled tasks with recurrence and next run time; run now, pause, resume, or delete |
+| Pinned sessions | `t` `l` `m` `w` | Your pinned sessions with a preview of each session's latest message |
+| **Productivity & tools** | | |
+| To-do | `l` `m` `t` | Open items on top, completed items collapsed; unfinished items from earlier days are badged as carried over |
+| Notes | `l` `t` `m` `s` | Autosaving scratchpad; turn the current line into a to-do with one click |
+| Calendar | `t` `l` `s` `m` | Month grid and selected day's schedule from one or more ICS subscriptions, including recurring events |
+| Focus | `m` `s` | Pomodoro timer that keeps running across boards and panels, sends a system notification when done, and tracks today's completed sessions |
+| Links | `m` `s` `w` `t` `l` | One `name URL` per line (`http`, `https`, and `mailto` only) |
+| Git repos | `t` `l` `m` `w` | Current branch, uncommitted changes, ahead / behind counts, and branches whose upstream is gone; defaults to your Harness workspaces |
+| GitHub | `t` `l` `m` `w` | PRs awaiting your review, your open PRs, and issues assigned to you via your signed-in `gh` CLI |
+| System | `m` `s` `t` `l` `w` | CPU, memory, disk, battery, and a 5-minute CPU load sparkline |
+| Recent files | `t` `l` `m` `w` | Newest files in `~/Downloads`, `~/Desktop`, or custom folders; open, reveal, or hand a file to the agent |
+| Clipboard | `t` `l` `m` `w` | Text copied while the panel is open; copy again or send to the agent with a preset like Translate |
+| Network | `m` `s` `t` `l` `w` | Live download / upload throughput, local and public IP, system proxy status, and latency to configured hosts |
+| **Daily** | | |
+| Today | `bar` | Time, greeting, date, ISO week, current weather, and a daily quote (built-in, Hitokoto, or custom; click for another) |
+| Clock | `m` `s` | Current time, greeting, date, and year progress |
+| World clock | `m` `s` `w` `t` | Current time across multiple IANA time zones with local offset and day difference |
+| Weather | `m` `s` | Current conditions, today's high and low, air quality, and hourly forecast |
+| Countdown | `m` `s` `t` | Days until the weekend, month end, year end, and custom dates (`MM-DD` without a year repeats annually) |
+| Time progress | `m` `s` `w` | Percentage of today, this week, this month, and this year elapsed |
+| Habits | `m` `l` `t` `w` | Check in for any day of the past week and track your current streak |
+| Photo frame | `m` `s` `t` `l` `w` | Cycles through photos from a local folder (`~/Pictures` by default) |
+| **News & markets** | | |
+| Trending | `l` `t` `m` `w` | Tabbed hot lists from Weibo, Zhihu, 36Kr, sspai, Hacker News, GitHub Trending, Product Hunt, and Reddit (Bilibili and V2EX optional) |
+| Feeds | `t` `l` `m` `w` | Multiple RSS / Atom feeds merged chronologically; visited items dim automatically |
+| Markets | `t` `m` `s` `l` `w` | Forex (`USD/CNY`), China / HK / US equities (`sh600519`, `hk00700`, `usAAPL`), and crypto (`BTC`, `cg:<id>`) |
+| Quote | `m` `w` `s` | A daily quote (click for another), sharing its source setting with the Today banner |
 
-Agent, Quick prompt and Inbox share one workspace choice. Settings shared by several widgets (your name, week start, city, temperature unit, quote source) are also under Settings → Workboard. Built-in widgets added by an upgrade appear only in the gallery and are not placed on existing boards.
+Note: Agent, Quick prompt, and Inbox share the same default workspace selection. Shared preferences (your name, week start day, city, temperature unit, and quote source) can also be configured under **Settings → Workboard**. New built-in widgets added in future updates appear in the gallery without altering existing boards.
 
 </details>
 
 <details>
 <summary><b>Network requests and local reads</b></summary>
 
-The Host makes the only network requests and caches the responses:
+All external network requests are made and cached by the Host:
 
-- Weather and city search: [Open-Meteo](https://open-meteo.com), only once you set a city
-- Quotes: [Hitokoto](https://hitokoto.cn), only when you choose it as the quote source
-- Calendars and feeds: the ICS and RSS / Atom addresses you add
-- Markets: Tencent quotes (`qt.gtimg.cn`) for stocks, [open.er-api.com](https://open.er-api.com) for exchange rates, [CoinGecko](https://www.coingecko.com) for crypto
-- GitHub: the local `gh` CLI with its existing sign-in
-- Trending: the sites' own web endpoints for Weibo, Zhihu, 36Kr, sspai, Bilibili and V2EX (unofficial, may break when a site changes), the [HN Algolia API](https://hn.algolia.com/api), the GitHub Trending page, and the Product Hunt and Reddit feeds; cached for 10 minutes
-- Network: your public IP from [ipinfo.io](https://ipinfo.io) (falling back to [ip.sb](https://ip.sb)), and latency to the sites you list, through `curl` and the system proxy when one is set
-- Custom widgets: only the http(s) address prefixes each widget declares, cached for 30 seconds
+- **Weather & city search**: [Open-Meteo](https://open-meteo.com), requested only after you set a city
+- **Quotes**: [Hitokoto](https://hitokoto.cn), requested only when selected as the quote source
+- **Calendars & feeds**: the ICS and RSS / Atom URLs you configure
+- **Markets**: Tencent Finance (`qt.gtimg.cn`) for equities, [open.er-api.com](https://open.er-api.com) for exchange rates, and [CoinGecko](https://www.coingecko.com) for crypto
+- **GitHub**: uses your local `gh` CLI and its existing sign-in
+- **Trending**: public web endpoints for Weibo, Zhihu, 36Kr, sspai, Bilibili, and V2EX (unofficial and may break if a site changes), the [HN Algolia API](https://hn.algolia.com/api), the GitHub Trending page, and official Product Hunt and Reddit feeds; cached for 10 minutes
+- **Network**: public IP from [ipinfo.io](https://ipinfo.io) (falling back to [ip.sb](https://ip.sb)) and host latency via `curl`, respecting the system proxy when set
+- **Custom widgets**: limited to the `http(s)` URL prefixes declared in each widget's `fetch` allowlist; cached for 30 seconds
 
-Some widgets only read your machine. Usage and Outputs read the session logs under `~/.dsh/sessions`. Git repos runs `git status`, and runs `git fetch` only when you choose Fetch. System uses `vm_stat` and `pmset` on macOS. Photo frame uses `sips` on macOS to shrink photos, cached in the system temp directory. Recent files lists only the top level of each folder. Clipboard reads `pbpaste` (macOS) or `wl-paste` / `xclip` (Linux) every 2 seconds while the card is shown, and keeps history in memory only.
+Widgets that only read local state:
 
-Data from earlier versions named `@lukeinx/dsh-desk` or `dsh-bento` is copied over on first start; the old files are left in place.
+- **Usage & Outputs**: read local session logs under `~/.dsh/sessions`
+- **Git repos**: runs `git status` locally, and only runs `git fetch` when you click Fetch
+- **System**: uses `vm_stat` and `pmset` on macOS
+- **Photo frame**: uses `sips` on macOS to generate thumbnails cached in the system temp directory
+- **Recent files**: lists only the top level of each configured folder
+- **Clipboard**: polls `pbpaste` (macOS) or `wl-paste` / `xclip` (Linux) every 2 seconds while the card is visible; history stays in memory only
+
+Data from earlier package names (`@lukeinx/dsh-desk` or `dsh-bento`) is migrated automatically on first launch while leaving the original files untouched.
 
 </details>
 
 <details>
 <summary><b>Write a widget in another bundle</b></summary>
 
-A widget is a React component that another bundle registers into the `workboard.widget` slot from its `client.js`. Put the manifest on the component's static `workboard` property; the slot registration itself keeps only `id`, `order` and `label`.
+Another bundle can register a React component into the `workboard.widget` slot from its `client.js`. Attach the widget manifest to the component's static `workboard` property; the slot registration itself only needs `id`, `order`, and `label`:
 
 ```js
 function Hello({size, config}) {
@@ -137,9 +163,9 @@ ctx.effect(() => ctx.slots.inject('workboard.widget', () => ctx.slots.register({
 }, Hello)), 'hello widget');
 ```
 
-A complete bundle is in [`examples/hello-widget`](examples/hello-widget). A newly installed widget is added once, to the board that is open; other boards only list it in the gallery.
+See [`examples/hello-widget`](examples/hello-widget) for a complete bundle. A newly installed external widget is automatically placed once on the currently open board; other boards can add it from the gallery.
 
-| Size | Columns × rows | |
+| Size | Columns × rows | Description |
 |---|---|---|
 | `bar` | 4 × ½ | Frameless banner |
 | `s` | 1 × 1 | Small |
@@ -150,44 +176,47 @@ A complete bundle is in [`examples/hello-widget`](examples/hello-widget). A newl
 
 Manifest fields:
 
-- `sizes` lists the allowed sizes; `defaultSize` must be one of them and defaults to the first.
-- `title: false` hides the card header; `banner: true` renders without a frame.
-- `description` is shown in the widget gallery.
-- `category` groups the widget in the gallery: `daily` (Daily), `agent` (DeepSeek), `news` (News) or `tools` (Productivity & tools). Anything else goes under Plugins.
-- `settings` lists the fields of the settings dialog: `{key, type, label, default?, options?, placeholder?}`, with `type` one of `text`, `textarea`, `select` (with `options: [{value, label}]`) or `toggle`. Labels can be strings or functions that return a string.
+- `sizes`: allowed size keys; `defaultSize` must be one of them and defaults to the first entry.
+- `title: false`: hides the card header; `banner: true`: renders without a card frame.
+- `description`: summary shown in the widget gallery.
+- `category`: gallery section — `daily` (Daily), `agent` (DeepSeek), `news` (News), or `tools` (Productivity & tools). Any other value appears under Plugins.
+- `settings`: fields for the card settings dialog: `{key, type, label, default?, options?, placeholder?}`, where `type` is `text`, `textarea`, `select` (with `options: [{value, label}]`), or `toggle`. Labels may be strings or functions returning a string.
 
-The component receives `size`, `config` (the saved settings for this card), `editing` and `openSettings()`.
+The component receives `{size, config, editing, openSettings}` as props.
 
 </details>
 
 ## Development
 
 ```sh
-npm run check   # syntax check, Host smoke test and ICS tests
+npm run check   # syntax check, Host smoke test, and ICS parser tests
 ```
 
-`index.js` holds the Host routes under `/api/dsh-workboard/*`, storage and agent tools. `client.js` holds the sidebar entry, the panel and the built-in widgets. `lib/` holds the data sources and parsers, and `skills/workboard-widget.md` is the agent's guide to writing widgets.
+- `index.js`: Host routes (`/api/dsh-workboard/*`), storage tables, and agent tools
+- `client.js`: sidebar entry, board container, and the 31 built-in widgets
+- `lib/`: data fetchers, parsers, and system probes
+- `skills/workboard-widget.md`: agent skill for building custom widgets
 
 ## Acknowledgments
 
-Workboard is built on these projects and services. Content from feeds and hot lists belongs to its publishers.
+Workboard builds on the following projects and services. Feed and trending content belongs to its respective publishers.
 
-| Project or data | Used for | License or terms |
+| Project or service | Used for | License or terms |
 |---|---|---|
-| [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) | Plugin host, theme tokens, React runtime | MIT |
-| [React](https://react.dev) | All widgets, provided by Harness | MIT |
-| [Feather Icons](https://feathericons.com) | Some icon paths are adapted from it | MIT |
-| [Open-Meteo](https://open-meteo.com) | Weather, air quality and city search | Data under CC BY 4.0 |
-| [Hitokoto](https://hitokoto.cn) | Chinese quotes, optional | Public API |
-| [ExchangeRate-API](https://www.exchangerate-api.com) (`open.er-api.com`) | Exchange rates | Free open access, attribution required |
-| [CoinGecko](https://www.coingecko.com) | Crypto prices | Public API, attribution required |
-| Tencent Finance (`qt.gtimg.cn`) | China, Hong Kong and US stock quotes | Unofficial endpoint |
-| [HN Algolia API](https://hn.algolia.com/api), [hnrss.org](https://hnrss.org) | Hacker News hot list and the default English feed | Public API and feeds |
-| Weibo, Zhihu, 36Kr, sspai, Bilibili, V2EX, GitHub Trending, Product Hunt, Reddit | Trending lists | Sites' public pages, feeds and unofficial endpoints |
-| [ifanr](https://www.ifanr.com), [Ruan Yifeng's blog](https://www.ruanyifeng.com/blog/) | Default Chinese feeds | Publishers' RSS feeds |
-| [GitHub CLI](https://cli.github.com) | GitHub widget | MIT |
-| [ipinfo.io](https://ipinfo.io), [ip.sb](https://ip.sb) | Public IP in the Network widget | Public API |
-| Classical texts (Laozi, Confucius, Xunzi and others) | Built-in quotes | Public domain |
+| [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) | Plugin host, theme tokens, and React runtime | MIT |
+| [React](https://react.dev) | Widget rendering, provided by Harness | MIT |
+| [Feather Icons](https://feathericons.com) | Selected icon paths adapted from Feather | MIT |
+| [Open-Meteo](https://open-meteo.com) | Weather, air quality, and city search | Data under CC BY 4.0 |
+| [Hitokoto](https://hitokoto.cn) | Optional Chinese quotes | Public API |
+| [ExchangeRate-API](https://www.exchangerate-api.com) (`open.er-api.com`) | Foreign exchange rates | Free open access (attribution required) |
+| [CoinGecko](https://www.coingecko.com) | Cryptocurrency prices | Public API (attribution required) |
+| Tencent Finance (`qt.gtimg.cn`) | China, Hong Kong, and US stock quotes | Unofficial endpoint |
+| [HN Algolia API](https://hn.algolia.com/api), [hnrss.org](https://hnrss.org) | Hacker News hot list and default English feed | Public API and feeds |
+| Weibo, Zhihu, 36Kr, sspai, Bilibili, V2EX, GitHub Trending, Product Hunt, Reddit | Trending lists | Public pages, feeds, and unofficial endpoints |
+| [ifanr](https://www.ifanr.com), [Ruan Yifeng's blog](https://www.ruanyifeng.com/blog/) | Default Chinese RSS feeds | Publishers' RSS feeds |
+| [GitHub CLI](https://cli.github.com) | GitHub widget data | MIT |
+| [ipinfo.io](https://ipinfo.io), [ip.sb](https://ip.sb) | Public IP lookup in the Network widget | Public API |
+| Classical texts (Laozi, Confucius, Xunzi, and others) | Built-in quotes | Public domain |
 
 ## License
 

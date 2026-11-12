@@ -1,6 +1,6 @@
 # 工作台 Workboard
 
-**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台。内置 31 个 widget，开箱即用；不够的，让 Agent 现做。**
+**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 31 个 widget，开箱即用；不够用的，让 Agent 现做。**
 
 [English](README.md) · MIT
 
@@ -10,121 +10,147 @@
 
 ### 内置 31 个 widget，开箱即用
 
-待办、日历、天气、订阅、行情、Git、GitHub、用量统计、Agent 会话等。大多数不用配置，少数只需要填只有你知道的信息，比如城市、日历链接或股票代码。打开组件库，可以搜索，可以连续添加。
+覆盖四大场景，打开组件库即可搜索、预览并连续添加到看板：
+
+- **Agent 协作**：待确认与运行中会话、长程目标与后台作业、Prompt 快启、收集箱、Token 用量与费用估算、产出物、定时任务、收藏会话
+- **效率与开发**：待办、速记、ICS 日历、专注番茄钟、快捷链接、Git 工作区、GitHub（PR / Issue）、系统状态、网络测速、剪贴板、最近文件
+- **日常桌面**：今日横栏、时钟、世界时钟、天气、倒数日、时间进度、习惯打卡、本机相框
+- **资讯与行情**：多源热榜、RSS / Atom 订阅、A 股 / 港股 / 美股 / 汇率 / 加密货币行情、每日格言
+
+绝大多数零配置即用；少数仅需填入城市、日历订阅链接或股票代码等个人信息。
 
 ![组件库](docs/images/gallery-zh.png)
 
-### 让 Agent 做新的 widget
+### 不够用的，让 Agent 现做
 
-用一句话描述想要的卡片，点「交给 Agent」，Agent 写好后卡片直接出现在你打开的看板上。之后点卡片上的星光按钮就能让 Agent 修改；运行出错时，「让 Agent 修复」把错误交回给它。自定义 widget 运行在沙箱里，访问不到页面和 cookie，也不能联网，只能请求它自己声明过的地址。
+用一句话描述想要的卡片，点击 **交给 Agent**，写好后自动放上当前看板。后续点卡片上的星光按钮即可让 Agent 微调；若运行报错，点 **让 Agent 修复** 即可把错误交回给它处理。
+
+自定义 widget 运行在独立沙箱内，无法访问宿主页面、Cookie 或未授权网络，只能通过 Host 请求该卡片显式声明的接口地址。
 
 ![用 Agent 生成 widget](docs/images/generate-zh.png)
 
-### 模块化、自适应、简约
+### 专为 Agent 工作流打造
 
-卡片吸附在四列网格上，有六种尺寸，可以拖动、换尺寸，分在多个标签页看板里。布局随窗口宽度重排，明暗主题跟随 Harness。每张卡片只讲一件事，没有多余装饰。
-
-<img src="docs/images/narrow-zh.png" alt="窄窗口与深色主题" width="480">
-
-### 为 Agent 工作而生
-
-一块 Agent 看板就能看到等你确认的会话、进行中的目标和后台作业、token 用量、产出物和定时任务。Agent 也能在任意对话里通过内置工具读写你的待办、速记和收集箱。
+一块看板集中呈现需要你确认的会话、进行中的长程目标与后台作业、Token 用量、交付产出物和定时任务。反过来，Agent 也能在任意对话中通过内置工具直接读写你的待办、速记、收集箱与自定义卡片。
 
 ![Agent 类 widget](docs/images/agent-zh.png)
 
-### 数据留在本机
+### 模块化、自适应、克制
 
-数据存在本机的 Harness profile 里。所有网络请求都由 Host 发出并缓存，页面本身不直连任何第三方。
+卡片吸附在四列网格上，提供六种尺寸档位，支持拖拽排布、自由缩放，并可按主题拆分到多个标签页看板。布局随窗口宽度自动重排，明暗主题跟随 Harness 切换。每张卡片只聚焦一件事，不设多余装饰。
+
+<img src="docs/images/narrow-zh.png" alt="窄窗口与深色主题" width="480">
+
+### 数据留在本机，隐私可控
+
+所有看板与个人数据均保存在本机 Harness profile 中。外部网络请求统一由 Host 端发出并缓存，前端页面不直连任何第三方服务。
 
 ## 快速开始
 
+克隆仓库到本机：
+
 ```sh
-git clone https://github.com/lukeinx/dsh-workboard.git
+git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 ```
 
-然后在 Harness 对话里让 Agent 安装：
+在 Harness 对话中让 Agent 安装：
 
 > 用 plugin_manager 安装 `~/dsh-workboard` 这个 bundle。
 
-在侧栏打开「工作台」。默认看板有今日、待办、日历和速记，点「编辑」→「添加 widget」添加其余的。
+安装后在左侧边栏打开 **工作台**。初始看板包含「今日」「待办」「日历」和「速记」；点击右上角 **编辑** → **添加 widget** 即可添加更多组件，或让 Agent 生成新卡片。
 
 ## 写给 AI Agent
 
 如果你是在操作工作台的 Agent：
 
-- **安装**：`plugin_manager install_bundle` 指向本目录。本地目录是链接安装，不复制。
-- **工具**：`workboard_todos`（`list` `add` `complete` `reopen` `remove`）、`workboard_note`（`read` `append` `replace`）、`workboard_inbox`（`list` `add` `remove` `clear`）、`workboard_widget`（`list` `get` `create` `update` `set_data` `remove`）。
-- **做 widget**：调用 `workboard_widget` 前先加载 `workboard-widget` skill（[`skills/workboard-widget.md`](skills/workboard-widget.md)），里面有尺寸、`window.workboard` API、沙箱规则和主题变量。
-- **限制**：最多 50 个自定义 widget，每个 HTML 和数据各不超过 200 KB。页面每 5 秒轮询，你的改动不用刷新就会出现。
-- **数据**：`~/.dsh/storages/dsh_workboard.json`。
+- **安装**：调用 `plugin_manager install_bundle` 指向本仓库目录（本地目录以软链接挂载，不复制文件）。
+- **内置工具**：
+  - `workboard_todos`：`list` · `add` · `complete` · `reopen` · `remove`
+  - `workboard_note`：`read` · `append` · `replace`
+  - `workboard_inbox`：`list` · `add` · `remove` · `clear`
+  - `workboard_widget`：`list` · `get` · `create` · `update` · `set_data` · `remove`
+- **构建自定义 widget**：调用 `workboard_widget` 前先加载 `workboard-widget` skill（[`skills/workboard-widget.md`](skills/workboard-widget.md)），内含尺寸规范、`window.workboard` API、沙箱约束与主题变量。
+- **配额与同步**：最多 50 个自定义 widget，单个 widget 的 HTML 与数据各不超过 200 KB。前端每 5 秒轮询一次，修改无需刷新页面即可生效。
+- **存储路径**：`~/.dsh/storages/dsh_workboard.json`。
 
 ## 参考
 
 <details>
-<summary><b>全部 31 个 widget</b></summary>
+<summary><b>全部 31 个内置 widget</b></summary>
 
-| widget | 档位 | 内容 |
+| Widget | 档位 | 说明 |
 |---|---|---|
-| 今日 | 横栏 | 时间、问候、日期、ISO 周、当前天气和每日格言（内置、一言或自定义），点格言换一条 |
-| 待办 | `l` `m` `t` | 未完成在前、已完成折叠；之前留下的未完成项标「结转」 |
-| 速记 | `l` `t` `m` `s` | 自动保存，当前行可转待办 |
-| 日历 | `t` `l` `s` `m` | 月视图和所选日期的日程，来自一个或多个 ICS 订阅，支持重复日程 |
-| 天气 | `m` `s` | 当前天气、今日最高最低、空气质量和接下来几小时 |
-| 时钟 | `m` `s` | 时间、问候、日期和年度进度 |
-| 格言 | `m` `w` `s` | 每日一句，点一下换一条；来源与今日横栏共用 |
-| 倒数日 | `m` `s` `t` | 距周末、月底、年底和自定日子的天数；`12-25` 这样不写年份则每年重复 |
-| 世界时钟 | `m` `s` `w` `t` | 多个 IANA 时区的时间、与本地的时差和日期差 |
-| 专注 | `m` `s` | 番茄钟，切换看板或离开面板不中断，结束时发系统通知，记录今日个数 |
-| 快捷链接 | `m` `s` `w` `t` `l` | 每行「名称 网址」，只接受 http / https / mailto |
-| 时间进度 | `m` `s` `w` | 今天、本周、本月、今年已过去的比例 |
-| Agent | `t` `l` `m` `w` | 等你确认的会话排最前，其次运行中和最近会话；即将触发的定时任务；一键新开会话 |
-| 订阅 | `t` `l` `m` `w` | RSS / Atom，多个源按时间合并；打开过的条目变灰 |
-| 习惯打卡 | `m` `l` `t` `w` | 最近一周可点选补卡，显示连续天数 |
-| Prompt 快启 | `m` `w` `l` `t` `s` | 输入或点预设，直接在选定工作区新开会话并发送 |
-| 收集箱 | `t` `l` `m` `w` | 随手丢进来的事情，一键交给 Agent 整理 |
-| 用量 | `l` `t` `m` `w` `s` | 从本机会话日志统计 token、请求数、缓存命中和按模型拆分；填单价后估算花费 |
-| 运行中 | `t` `l` `m` `w` | 各会话的长任务目标和后台作业，可打开会话或停止作业 |
-| Git 工作区 | `t` `l` `m` `w` | 各仓库的分支、改动、领先 / 落后和上游已删除的分支；默认取 Harness 工作区 |
-| GitHub | `t` `l` `m` `w` | 等我 review 的 PR、我的 PR 和指派给我的 issue，用本机已登录的 `gh` |
-| 系统状态 | `m` `s` `t` `l` `w` | CPU、内存、磁盘、电池和最近 5 分钟的 CPU 曲线 |
-| 相框 | `m` `s` `t` `l` `w` | 轮播本机文件夹（默认 `~/Pictures`）里的照片 |
-| 行情 | `t` `m` `s` `l` `w` | 汇率（`USD/CNY`）、A 股 / 港股 / 美股（`sh600519`、`hk00700`、`usAAPL`）和加密货币（`BTC`、`cg:<id>`） |
-| 热榜 | `l` `t` `m` `w` | 每个信源一个标签：微博、知乎、36 氪、少数派、Hacker News、GitHub Trending、Product Hunt 和 Reddit；B 站和 V2EX 可选 |
-| 产出物 | `t` `l` `m` `w` | Agent 交付的文件，按时间倒序；点击打开，也可以在 Finder 中定位或跳到对应会话 |
-| 定时任务 | `t` `l` `m` `w` | 全部定时任务的周期和下次运行时间；立即运行、暂停、恢复或删除 |
-| 收藏会话 | `t` `l` `m` `w` | 你收藏的会话和各自最新一条消息 |
-| 最近文件 | `t` `l` `m` `w` | `~/Downloads`、`~/Desktop` 或自定文件夹里最新的文件；打开、定位或交给 Agent |
-| 剪贴板 | `t` `l` `m` `w` | 面板打开期间复制过的文本；再次复制，或带上「翻译」等预设发给 Agent |
-| 网络 | `m` `s` `t` `l` `w` | 上下行速率、本机和公网 IP、系统代理，以及到你所列站点的延迟 |
+| **DeepSeek（Agent 协作）** | | |
+| Agent | `t` `l` `m` `w` | 等你确认的会话置顶，其次为运行中和最近会话；展示即将触发的定时任务，支持一键新开会话 |
+| 运行中 | `t` `l` `m` `w` | 汇总各会话的长程目标（Goals）与后台作业（Jobs），可直接跳转会话或停止作业 |
+| Prompt 快启 | `m` `w` `l` `t` `s` | 输入提示词或点击预设，直接在指定工作区新开会话并发送 |
+| 收集箱 | `t` `l` `m` `w` | 随手记下的想法与链接，一键交给 Agent 归类整理 |
+| 用量 | `l` `t` `m` `w` `s` | 从本机会话日志统计 Token、请求数、缓存命中率及各模型占比；填入单价后可估算花费 |
+| 产出物 | `t` `l` `m` `w` | 按时间倒序展示 Agent 交付的文件；支持直接打开、在 Finder 中定位或跳回原会话 |
+| 定时任务 | `t` `l` `m` `w` | 查看所有定时任务的执行周期与下次触发时间；支持立即运行、暂停、恢复与删除 |
+| 收藏会话 | `t` `l` `m` `w` | 固定常用会话并展示最新一条消息预览 |
+| **效率与工具** | | |
+| 待办 | `l` `m` `t` | 未完成项置顶、已完成项折叠；跨天未完成项自动标记「结转」 |
+| 速记 | `l` `t` `m` `s` | 自动保存的随手记，光标所在行可一键转为待办 |
+| 日历 | `t` `l` `s` `m` | 月视图与当日日程列表，支持订阅多个 ICS 地址并展开重复规则 |
+| 专注 | `m` `s` | 番茄钟，切换看板或离开面板不中断，到点发送系统通知并统计今日专注次数 |
+| 快捷链接 | `m` `s` `w` `t` `l` | 每行一条「名称 网址」，仅允许 `http`、`https` 与 `mailto` |
+| Git 工作区 | `t` `l` `m` `w` | 展示各仓库当前分支、未提交改动、领先 / 落后提交数及上游已删除分支；默认读取 Harness 工作区 |
+| GitHub | `t` `l` `m` `w` | 复用本机已登录的 `gh` CLI，展示待你 Review 的 PR、你发起的 PR 以及指派给你的 Issue |
+| 系统状态 | `m` `s` `t` `l` `w` | 实时查看 CPU、内存、磁盘、电池状态及最近 5 分钟 CPU 负载曲线 |
+| 最近文件 | `t` `l` `m` `w` | 列出 `~/Downloads`、`~/Desktop` 或指定文件夹的最新文件；支持打开、定位或直接发给 Agent |
+| 剪贴板 | `t` `l` `m` `w` | 记录面板打开期间复制过的文本；支持一键重复制，或套用「翻译」等预设发给 Agent |
+| 网络 | `m` `s` `t` `l` `w` | 实时上下行速率、本机与公网 IP、系统代理状态，以及到指定站点的连接延迟 |
+| **日常** | | |
+| 今日 | 横栏 | 时间、问候语、日期、ISO 周数、当前天气与每日格言（支持内置、一言或自定义，点击切换） |
+| 时钟 | `m` `s` | 当前时间、问候语、日期与年度进度条 |
+| 世界时钟 | `m` `s` `w` `t` | 对照多个 IANA 时区的当前时间、与本地时差及跨日状态 |
+| 天气 | `m` `s` | 当前天气、今日高低温、空气质量（AQI）及未来数小时预报 |
+| 倒数日 | `m` `s` `t` | 距离周末、月底、年底及自定义日期的天数；不带年份（如 `12-25`）时按每年重复计算 |
+| 时间进度 | `m` `s` `w` | 今日、本周、本月与本年已度过的百分比 |
+| 习惯打卡 | `m` `l` `t` `w` | 支持最近一周打卡与补卡，自动计算当前连续达成天数 |
+| 相框 | `m` `s` `t` `l` `w` | 轮播本机文件夹（默认 `~/Pictures`）中的照片 |
+| **资讯与行情** | | |
+| 热榜 | `l` `t` `m` `w` | 多信源分标签聚合：微博、知乎、36 氪、少数派、Hacker News、GitHub Trending、Product Hunt、Reddit（可选 B 站、V2EX） |
+| 订阅 | `t` `l` `m` `w` | 聚合多个 RSS / Atom 订阅源并按时间混排，已读条目自动变灰 |
+| 行情 | `t` `m` `s` `l` `w` | 支持汇率（`USD/CNY`）、A 股 / 港股 / 美股（`sh600519`、`hk00700`、`usAAPL`）与加密货币（`BTC`、`cg:<id>`） |
+| 格言 | `m` `w` `s` | 每日一句，点击换一条，信源与今日横栏共享 |
 
-Agent、Prompt 快启和收集箱共用同一个工作区选择。多个 widget 共用的设置（称呼、每周起始日、城市、温度单位、格言来源）也可以在「设置 → 工作台」里改。升级后新增的内置 widget 只出现在组件库，不会自动加入已有看板。
-
-</details>
-
-<details>
-<summary><b>网络请求与本机读取</b></summary>
-
-网络请求只由 Host 发出，结果在 Host 缓存：
-
-- 天气和城市搜索：[Open-Meteo](https://open-meteo.com)，设置城市后才请求
-- 格言：[一言](https://hitokoto.cn)，仅在格言来源选了一言时请求
-- 日历和订阅：你添加的 ICS 与 RSS / Atom 地址
-- 行情：股票走腾讯行情 `qt.gtimg.cn`，汇率走 [open.er-api.com](https://open.er-api.com)，加密货币走 [CoinGecko](https://www.coingecko.com)
-- GitHub：通过本机 `gh` CLI，用它已有的登录
-- 热榜：微博、知乎、36 氪、少数派、B 站、V2EX 走各站网页接口（非官方，站点改版可能失效），Hacker News 走 [HN Algolia API](https://hn.algolia.com/api)，GitHub 走 Trending 页，Product Hunt 和 Reddit 走订阅源；缓存 10 分钟
-- 网络：公网 IP 走 [ipinfo.io](https://ipinfo.io)（失败时换 [ip.sb](https://ip.sb)），延迟测你列出的站点，都用 `curl`，设置了系统代理时经过代理
-- 自定义 widget：只请求各自声明的 http(s) 地址前缀，缓存 30 秒
-
-有几个 widget 只读本机。用量和产出物读 `~/.dsh/sessions` 下的会话日志；Git 工作区运行 `git status`，只在你点「获取远端」时执行 `git fetch`；系统状态在 macOS 用 `vm_stat` 和 `pmset`；相框在 macOS 用 `sips` 缩小照片，缓存在系统临时目录；最近文件只列各文件夹第一层；剪贴板在卡片显示期间每 2 秒读一次 `pbpaste`（macOS）或 `wl-paste` / `xclip`（Linux），历史只存在内存。
-
-旧版 `@lukeinx/dsh-desk` 或 `dsh-bento` 的数据会在首次启动时复制过来，旧文件保留不动。
+注：Agent、Prompt 快启与收集箱共用同一个默认工作区选择。多个组件共用的偏好（称呼、每周起始日、城市、温度单位、格言来源）也可在「设置 → 工作台」中统一修改。版本升级新增的内置 widget 仅加入组件库，不会改动已有看板。
 
 </details>
 
 <details>
-<summary><b>在另一个 bundle 里写 widget</b></summary>
+<summary><b>网络请求与本机读取说明</b></summary>
 
-widget 是一个 React 组件，由其他 bundle 在 `client.js` 里注册到 `workboard.widget` slot。manifest 挂在组件的静态属性 `workboard` 上；slot 注册参数只保留 `id`、`order`、`label`。
+所有外部网络请求均由 Host 端发出并缓存：
+
+- **天气与城市搜索**：[Open-Meteo](https://open-meteo.com)，仅在设置城市后请求
+- **格言**：[一言](https://hitokoto.cn)，仅在格言来源设为「一言」时请求
+- **日历与订阅**：仅请求你添加的 ICS 与 RSS / Atom 地址
+- **行情**：股票走腾讯行情接口（`qt.gtimg.cn`），汇率走 [open.er-api.com](https://open.er-api.com)，加密货币走 [CoinGecko](https://www.coingecko.com)
+- **GitHub**：调用本机 `gh` CLI，复用其已有登录态
+- **热榜**：微博、知乎、36 氪、少数派、B 站、V2EX 使用各站公开网页接口（非官方，站点改版可能失效）；Hacker News 使用 [HN Algolia API](https://hn.algolia.com/api)；GitHub 读取 Trending 页面；Product Hunt 与 Reddit 读取官方订阅源；结果缓存 10 分钟
+- **网络**：公网 IP 查询使用 [ipinfo.io](https://ipinfo.io)（失败时回退至 [ip.sb](https://ip.sb)），站点延迟通过 `curl` 测算（配置了系统代理时自动走代理）
+- **自定义 widget**：仅可请求各自在 `fetch` 字段声明的 `http(s)` 地址前缀，Host 缓存 30 秒
+
+仅读取本机数据的组件：
+
+- **用量 / 产出物**：读取 `~/.dsh/sessions` 下的会话日志
+- **Git 工作区**：默认仅执行 `git status`，点击「获取远端」时才执行 `git fetch`
+- **系统状态**：在 macOS 上调用 `vm_stat` 与 `pmset`
+- **相框**：在 macOS 上用 `sips` 生成缩略图并缓存在系统临时目录
+- **最近文件**：仅列出目标文件夹顶层文件，不递归扫描
+- **剪贴板**：仅在卡片可见期间每 2 秒读取一次 `pbpaste`（macOS）或 `wl-paste` / `xclip`（Linux），历史仅保存在内存中，不落盘
+
+首次启动时会自动迁移早期版本（`@lukeinx/dsh-desk` 或 `dsh-bento`）的数据，原文件保留不动。
+
+</details>
+
+<details>
+<summary><b>在外部 bundle 中扩展 widget</b></summary>
+
+其他插件 bundle 可在 `client.js` 中将 React 组件注册到 `workboard.widget` slot。widget 元信息（manifest）挂在组件的静态属性 `workboard` 上，slot 注册参数仅需保留 `id`、`order` 和 `label`：
 
 ```js
 function Hello({size, config}) {
@@ -137,57 +163,60 @@ ctx.effect(() => ctx.slots.inject('workboard.widget', () => ctx.slots.register({
 }, Hello)), 'hello widget');
 ```
 
-完整示例见 [`examples/hello-widget`](examples/hello-widget)。新装的 widget 只自动加入当前打开的看板一次，其他看板只在组件库里出现。
+完整示例见 [`examples/hello-widget`](examples/hello-widget)。新安装的第三方 widget 会在首次加载时自动加入当前打开的看板一次，其余看板可在组件库中手动添加。
 
-| 档位 | 列 × 行 | |
+| 档位 | 网格（列 × 行） | 形态 |
 |---|---|---|
 | `bar` | 4 × ½ | 无框横栏 |
-| `s` | 1 × 1 | 小 |
-| `m` | 2 × 1 | 中 |
-| `t` | 1 × 2 | 竖 |
-| `l` | 2 × 2 | 大 |
+| `s` | 1 × 1 | 小卡 |
+| `m` | 2 × 1 | 中卡 |
+| `t` | 1 × 2 | 竖卡 |
+| `l` | 2 × 2 | 大卡 |
 | `w` | 4 × 1 | 通栏 |
 
-manifest 字段：
+Manifest 字段说明：
 
-- `sizes` 列出允许的尺寸；`defaultSize` 须在其中，默认取第一个。
-- `title: false` 隐藏卡片标题，`banner: true` 无框渲染。
-- `description` 显示在组件库里。
-- `category` 决定在组件库里的分组：`daily`（日常）、`agent`（DeepSeek）、`news`（资讯）、`tools`（效率与工具）；其他值归入「插件」。
-- `settings` 是设置弹窗的字段列表：`{key, type, label, default?, options?, placeholder?}`，`type` 可选 `text`、`textarea`、`select`（配 `options: [{value, label}]`）、`toggle`。label 可以是字符串，也可以是返回字符串的函数。
+- `sizes`：支持的尺寸档位数组；`defaultSize` 须包含在其中，默认取第一项。
+- `title: false`：隐藏卡片标题栏；`banner: true`：无边框渲染。
+- `description`：组件库中展示的简介。
+- `category`：组件库分组，可选 `daily`（日常）、`agent`（DeepSeek）、`news`（资讯）、`tools`（效率与工具），其他值归入「插件」。
+- `settings`：卡片设置项数组 `{key, type, label, default?, options?, placeholder?}`，`type` 支持 `text`、`textarea`、`select`（需配 `options: [{value, label}]`）与 `toggle`。`label` 支持字符串或返回字符串的函数。
 
-组件收到 `size`、`config`（这张卡保存的设置）、`editing` 和 `openSettings()`。
+组件渲染时会收到 `{size, config, editing, openSettings}` 属性。
 
 </details>
 
 ## 开发
 
 ```sh
-npm run check   # 语法检查 + Host 端冒烟 + ICS 测试
+npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 ```
 
-`index.js` 是 Host 端 `/api/dsh-workboard/*` 路由、存储和 Agent 工具；`client.js` 是侧栏入口、面板和内置 widget；`lib/` 是各数据源与解析器；`skills/workboard-widget.md` 是 Agent 写 widget 的指南。
+- `index.js`：Host 端 `/api/dsh-workboard/*` 路由、数据存储与 Agent 工具注册
+- `client.js`：侧栏入口、看板容器与 31 个内置 widget
+- `lib/`：各数据源请求、解析与系统采样模块
+- `skills/workboard-widget.md`：供 Agent 编写自定义 widget 的规范指南
 
 ## 致谢
 
-工作台建立在下列项目和服务之上。订阅和热榜里的内容归各自发布者所有。
+工作台基于以下开源项目与公共服务构建。订阅源与热榜内容归各发布者所有。
 
-| 项目或数据 | 用途 | 许可或条款 |
+| 项目 / 服务 | 用途 | 许可 / 条款 |
 |---|---|---|
-| [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) | 插件宿主、主题变量、React 运行时 | MIT |
-| [React](https://react.dev) | 所有 widget，由 Harness 提供 | MIT |
-| [Feather Icons](https://feathericons.com) | 部分图标路径改编自此 | MIT |
-| [Open-Meteo](https://open-meteo.com) | 天气、空气质量和城市搜索 | 数据 CC BY 4.0 |
-| [一言](https://hitokoto.cn) | 中文格言（可选） | 公开 API |
-| [ExchangeRate-API](https://www.exchangerate-api.com)（`open.er-api.com`） | 汇率 | 免费开放接口，需署名 |
-| [CoinGecko](https://www.coingecko.com) | 加密货币价格 | 公开 API，需署名 |
-| 腾讯财经行情（`qt.gtimg.cn`） | A 股、港股、美股行情 | 非官方接口 |
-| [HN Algolia API](https://hn.algolia.com/api)、[hnrss.org](https://hnrss.org) | Hacker News 热榜和默认英文订阅 | 公开 API 与订阅源 |
-| 微博、知乎、36 氪、少数派、B 站、V2EX、GitHub Trending、Product Hunt、Reddit | 热榜 | 各站公开页面、订阅源与非官方接口 |
-| [爱范儿](https://www.ifanr.com)、[阮一峰的网络日志](https://www.ruanyifeng.com/blog/) | 默认中文订阅 | 发布者的 RSS |
-| [GitHub CLI](https://cli.github.com) | GitHub widget | MIT |
-| [ipinfo.io](https://ipinfo.io)、[ip.sb](https://ip.sb) | 网络 widget 里的公网 IP | 公开 API |
-| 经典文献（老子、孔子、荀子等） | 内置格言 | 公有领域 |
+| [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) | 插件宿主、主题变量与 React 运行时 | MIT |
+| [React](https://react.dev) | 组件渲染（由 Harness 提供） | MIT |
+| [Feather Icons](https://feathericons.com) | 部分图标路径改编自该项目 | MIT |
+| [Open-Meteo](https://open-meteo.com) | 天气、空气质量与城市搜索 | CC BY 4.0 |
+| [一言](https://hitokoto.cn) | 可选中文格言接口 | 公开 API |
+| [ExchangeRate-API](https://www.exchangerate-api.com)（`open.er-api.com`） | 汇率数据 | 免费开放接口（需署名） |
+| [CoinGecko](https://www.coingecko.com) | 加密货币行情 | 公开 API（需署名） |
+| 腾讯财经行情（`qt.gtimg.cn`） | A 股、港股、美股实时行情 | 非官方接口 |
+| [HN Algolia API](https://hn.algolia.com/api)、[hnrss.org](https://hnrss.org) | Hacker News 热榜与默认英文订阅源 | 公开 API 与订阅源 |
+| 微博、知乎、36 氪、少数派、B 站、V2EX、GitHub Trending、Product Hunt、Reddit | 多源热榜 | 公开页面、订阅源与非官方接口 |
+| [爱范儿](https://www.ifanr.com)、[阮一峰的网络日志](https://www.ruanyifeng.com/blog/) | 默认中文 RSS 订阅源 | 发布者 RSS |
+| [GitHub CLI](https://cli.github.com) | GitHub widget 数据源 | MIT |
+| [ipinfo.io](https://ipinfo.io)、[ip.sb](https://ip.sb) | 网络 widget 公网 IP 查询 | 公开 API |
+| 经典文献（老子、孔子、荀子等） | 内置格言库 | 公有领域 |
 
 ## 许可
 
