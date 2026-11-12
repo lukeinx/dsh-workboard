@@ -1,6 +1,11 @@
 // 用假 ctx 运行 Host 端，确认路由、看板 / 待办 / 速记读写和 Agent 工具。
 import assert from 'node:assert/strict';
+import {mkdtempSync, mkdirSync, writeFileSync, rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {zstdCompressSync} from 'node:zlib';
 import {apply, createStore, createHandlers, createAgentWatch, createLauncher, migrateLegacy} from '../index.js';
+import {createUsage, zstdFrames} from '../lib/usage.js';
 
 const routes = new Map();
 const tools = new Map();
@@ -179,5 +184,31 @@ assert.deepEqual([prompted[0].sessionId, prompted[0].mode, prompted[0].content],
 await assert.rejects(launchHandlers['dsh-desk/agent.start']({prompt: 'x', cwd: 'relative/dir'}), /absolute/);
 await assert.rejects(launchHandlers['dsh-desk/agent.start']({prompt: 'x', cwd: '/definitely/missing'}), /not a directory/);
 await assert.rejects(createHandlers(createStore({}))['dsh-desk/agent.start']({prompt: 'x'}), /cannot start/);
+
+// 用量：多 frame zstd 日志（末尾半个 frame 模拟正在写入）+ 未压缩日志；不报 usage 的请求只计请求数。
+const usageRoot = mkdtempSync(join(tmpdir(), 'desk-usage-'));
+const t0 = new Date(2026, 10, 12, 10).getTime();
+const msg = (time, provider, model, usage) => JSON.stringify({type: 'assistant/message', seq: 1, time, data: {message: {role: 'assistant', source: {kind: 'model', provider, model}}, ...(usage ? {usage} : {})}});
+mkdirSync(join(usageRoot, 'ws', 'session-a'), {recursive: true});
+const frameA = zstdCompressSync(Buffer.from(`${JSON.stringify({type: 'session', version: 4})}\n${msg(t0, 'p1', 'm1', {inputTokens: 10, outputTokens: 5, cacheReadTokens: 100})}\n`));
+const frameB = zstdCompressSync(Buffer.from(`${msg(t0 + 1000, 'cursor', 'opus')}\n${msg(t0 - 86400_000, 'p1', 'm1', {inputTokens: 1, outputTokens: 1})}\n`));
+const partial = zstdCompressSync(Buffer.from(`${msg(t0, 'p1', 'm1', {inputTokens: 999, outputTokens: 999})}\n`));
+writeFileSync(join(usageRoot, 'ws', 'session-a', 'session.v4.jsonl.zstd'), Buffer.concat([frameA, frameB, partial.subarray(0, partial.length - 3)]));
+assert.equal(zstdFrames(Buffer.concat([frameA, frameB])).length, 2);
+mkdirSync(join(usageRoot, 'ws', 'session-b'), {recursive: true});
+writeFileSync(join(usageRoot, 'ws', 'session-b', 'session.v4.jsonl'), `${msg(t0, 'p1', 'm1', {inputTokens: 2, outputTokens: 3, cacheWriteTokens: 4})}\n`);
+const usage = createUsage({root: usageRoot, now: () => t0});
+const usageHandlers = createHandlers(createStore({}), feedFetcher, null, null, {usage});
+const sum = await usageHandlers['dsh-desk/usage.get']({days: 7});
+assert.equal(sum.today, '2026-11-12');
+assert.equal(sum.files, 2);
+assert.deepEqual(sum.rows.map(r => [r.day, r.provider, r.model, r.requests, r.reported, r.input, r.output, r.cacheRead, r.cacheWrite]), [
+  ['2026-11-11', 'p1', 'm1', 1, 1, 1, 1, 0, 0],
+  ['2026-11-12', 'p1', 'm1', 2, 2, 12, 8, 100, 4],
+  ['2026-11-12', 'cursor', 'opus', 1, 0, 0, 0, 0, 0],
+]);
+assert.deepEqual((await usageHandlers['dsh-desk/usage.get']({days: 1})).rows.map(r => r.day), ['2026-11-12', '2026-11-12']);
+await assert.rejects(createHandlers(createStore({}))['dsh-desk/usage.get']({}), /not available/);
+rmSync(usageRoot, {recursive: true, force: true});
 
 console.log('smoke ok');

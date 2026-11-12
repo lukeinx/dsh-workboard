@@ -13,6 +13,7 @@ window.__ModuleLoader__.load({
     const CAL_MS = 15 * 60_000;
     const FEED_MS = 15 * 60_000;
     const AGENT_MS = 5000;
+    const USAGE_MS = 60_000;
     // 尺寸档位：[列, 行]，行单位 80px；「横栏」半高，其余行数成对。
     const SIZES = {bar: [4, 1], s: [1, 2], m: [2, 2], t: [1, 4], l: [2, 4], w: [4, 2]};
 
@@ -54,7 +55,11 @@ window.__ModuleLoader__.load({
       f_showRecent: '显示最近会话', f_showSchedules: '显示定时任务',
       f_feeds: '订阅地址（每行一个 RSS / Atom）', defaultFeeds: 'https://sspai.com/feed', feedError: '{n} 个订阅加载失败', noItems: '没有内容',
       addHabit: '添加习惯', noHabits: '还没有习惯', streak: '连续 {n} 天', markDay: '{d} 打卡',
-      prompt: 'Prompt 快启', inbox: '收集箱',
+      prompt: 'Prompt 快启', inbox: '收集箱', usage: '用量',
+      d_usage: '每天的请求数与 token，按模型拆分，可按单价估算费用', u_today: '今日 token', u_requests: '{n} 次请求', u_cache: '缓存命中 {n}%', u_cost: '约 ${n}',
+      u_vs: '昨日 {n}', u_range_1: '今天', u_range_7: '7 天', u_range_30: '30 天', u_model: '模型', u_req: '请求', u_tok: 'token',
+      u_unreported: '{n} 次请求未上报 token（{p}）', u_none: '这段时间没有请求', u_day: '{d}：{t} token，{r} 次请求',
+      f_prices: '单价（每行一个：模型 输入 输出 [缓存读] [缓存写]，美元 / 百万 token；模型可写前缀）',
       d_prompt: '一句话或预设模板直接开新会话', d_inbox: '随手收集链接和想法，一键交给 Agent 处理；Agent 可读写',
       promptPlaceholder: '让 Agent 做点什么，回车发送', sending: '发送中…', f_presets: '预设（每行一个：名称 | prompt）', f_cwd: '工作目录（留空用默认）',
       defaultPresets: '今日计划 | 读取我 Desk 上的待办和收集箱，帮我排出今天最该做的三件事\n整理收集箱 | 用 desk_inbox 读取我的收集箱，逐条整理成待办或给出处理建议，处理完的条目移除\n周报草稿 | 读取我 Desk 上本周完成的待办，写一份简短的周报草稿',
@@ -99,7 +104,11 @@ window.__ModuleLoader__.load({
       f_showRecent: 'Show recent sessions', f_showSchedules: 'Show scheduled tasks',
       f_feeds: 'Feed URLs, one RSS or Atom feed per line', defaultFeeds: 'https://hnrss.org/frontpage', feedError: '{n} feed(s) failed to load', noItems: 'Nothing here',
       addHabit: 'Add a habit', noHabits: 'No habits yet', streak: '{n}-day streak', markDay: 'Check in for {d}',
-      prompt: 'Quick prompt', inbox: 'Inbox',
+      prompt: 'Quick prompt', inbox: 'Inbox', usage: 'Usage',
+      d_usage: 'Requests and tokens per day, split by model, with optional cost estimates', u_today: 'Tokens today', u_requests: '{n} requests', u_cache: '{n}% cache hits', u_cost: '≈ ${n}',
+      u_vs: 'Yesterday {n}', u_range_1: 'Today', u_range_7: '7 days', u_range_30: '30 days', u_model: 'Model', u_req: 'Requests', u_tok: 'Tokens',
+      u_unreported: '{n} requests reported no tokens ({p})', u_none: 'No requests in this period', u_day: '{d}: {t} tokens, {r} requests',
+      f_prices: 'Prices, one per line: model input output [cache read] [cache write], USD per million tokens; a model prefix matches',
       d_prompt: 'Start a new session from a line of text or a preset', d_inbox: 'Collect links and ideas, then hand them to the agent; the agent can read and edit',
       promptPlaceholder: 'Ask the agent something, Enter to send', sending: 'Sending…', f_presets: 'Presets, one per line: name | prompt', f_cwd: 'Working directory (empty uses the default)',
       defaultPresets: 'Plan today | Read my Desk to-dos and inbox and pick the three things I should do today\nSort inbox | Use desk_inbox to read my inbox, turn each item into a to-do or a suggestion, and remove the items you handled\nWeekly note | Read the to-dos I completed on Desk this week and draft a short weekly update',
@@ -361,6 +370,23 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 .bnt-inrow small{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none;line-height:1.45}
 .bnt-inrow:hover .bnt-del{display:grid}
 .bnt-inrow:hover small{display:none}
+.bnt-usage{display:flex;flex-direction:column;gap:10px;height:100%;min-height:0}
+.bnt-usage[data-size=m],.bnt-usage[data-size=w]{flex-direction:row;align-items:stretch;gap:16px}
+.bnt-usage .bnt-hero{flex:none;justify-content:flex-start;height:auto}
+.bnt-usage[data-size=m] .bnt-hero,.bnt-usage[data-size=w] .bnt-hero,.bnt-usage[data-size=s] .bnt-hero{justify-content:center}
+.bnt-bars{flex:1;min-width:0;min-height:48px;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:3px;align-items:end}
+.bnt-bars>span{display:flex;align-items:flex-end;height:100%;min-height:0}
+.bnt-bars i{display:block;width:100%;min-height:2px;border-radius:3px 3px 1px 1px;background:var(--dsw-alias-label-secondary);opacity:.35}
+.bnt-bars>span[data-today] i{background:var(--dsw-alias-brand-primary);opacity:1}
+.bnt-seg{display:flex;gap:2px;flex:none}
+.bnt-seg button{height:24px;padding:0 8px;border-radius:6px;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.bnt-seg button[aria-pressed=true]{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
+.bnt-table{display:grid;grid-template-columns:minmax(0,1fr) max-content max-content;gap:4px 12px;font-size:12px;overflow:auto;min-height:0;align-content:start}
+.bnt-table>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bnt-table>span:not(:nth-child(3n+1)){text-align:right}
+.bnt-table>.bnt-th{color:var(--dsw-alias-label-secondary)}
+.bnt-table small{color:var(--dsw-alias-label-secondary);margin-left:6px}
+.bnt-foot-note{font-size:11px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 @media (max-width:900px){.bnt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.bnt-card[data-c="4"]{grid-column:span 2}.bnt-today .bnt-quote,.bnt-today .bnt-qsep{display:none}}
 @media (max-width:600px){.bnt-grid{grid-template-columns:minmax(0,1fr)}.bnt-card{grid-column:auto!important}}
@@ -1407,12 +1433,87 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
         }
         Inbox.desk = {apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_inbox')};
 
+        const compact = v => new Intl.NumberFormat(t('lang'), {notation: 'compact', maximumFractionDigits: 1}).format(v);
+        const parsePrices = text => String(text ?? '').split('\n').map(line => {
+          const [model, ...rest] = line.trim().split(/\s+/);
+          const n = rest.map(Number);
+          return model && n.length >= 2 && n.every(Number.isFinite) ? {model, input: n[0], output: n[1], cacheRead: n[2] ?? n[0], cacheWrite: n[3] ?? n[0]} : null;
+        }).filter(Boolean);
+        const priceOf = (prices, model) => prices.filter(p => model === p.model || model.startsWith(p.model)).sort((a, b) => b.model.length - a.model.length)[0];
+        const tokensOf = r => r.input + r.output + r.cacheRead + r.cacheWrite;
+        const costOf = (r, p) => (p ? (r.input * p.input + r.output * p.output + r.cacheRead * p.cacheRead + r.cacheWrite * p.cacheWrite) / 1e6 : 0);
+        const shiftDay = (key, n) => { const d = keyDate(key); d.setDate(d.getDate() + n); return dayKey(d); };
+
+        function Usage({size, config}) {
+          useLocale();
+          const [range, setRange] = useState(7);
+          const res = useRemote('usage.get', {days: 30}, USAGE_MS);
+          const v = res.value;
+          if (!v) return h('div', {className: 'bnt-blank'}, res.error || '…');
+          const prices = parsePrices(config?.prices);
+          const sum = rows => rows.reduce((a, r) => {
+            for (const k of ['requests', 'reported', 'input', 'output', 'cacheRead', 'cacheWrite']) a[k] += r[k];
+            a.cost += costOf(r, priceOf(prices, r.model));
+            return a;
+          }, {requests: 0, reported: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: 0});
+          const today = sum(v.rows.filter(r => r.day === v.today));
+          const yesterday = sum(v.rows.filter(r => r.day === shiftDay(v.today, -1)));
+          const days = size === 'm' || size === 't' ? 7 : 14;
+          const series = Array.from({length: days}, (_, i) => {
+            const day = shiftDay(v.today, i - days + 1);
+            const rows = v.rows.filter(r => r.day === day);
+            return {day, tokens: rows.reduce((a, r) => a + tokensOf(r), 0), requests: rows.reduce((a, r) => a + r.requests, 0)};
+          });
+          const peak = Math.max(1, ...series.map(x => x.tokens));
+          const lang = t('lang');
+          const bars = h('div', {className: 'bnt-bars'}, series.map(x => h('span', {key: x.day, 'data-today': x.day === v.today ? '' : undefined,
+            title: fill(t('u_day'), {d: keyDate(x.day).toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'}), t: compact(x.tokens), r: x.requests})},
+          h('i', {style: {height: `${Math.round(x.tokens / peak * 100)}%`}}))));
+          const cacheBase = today.input + today.cacheRead + today.cacheWrite;
+          const meta = [fill(t('u_requests'), {n: today.requests}), cacheBase ? fill(t('u_cache'), {n: Math.round(today.cacheRead / cacheBase * 100)}) : '', today.cost ? fill(t('u_cost'), {n: today.cost.toFixed(2)}) : ''].filter(Boolean);
+          const hero = h('div', {className: 'bnt-hero'},
+            h('small', null, t('u_today')),
+            h('span', {className: 'bnt-big bnt-num'}, compact(tokensOf(today))),
+            h('small', {className: 'bnt-num'}, size === 's' ? meta[0] : meta.join(' · ')),
+            size === 's' || size === 'm' ? null : h('small', {className: 'bnt-num'}, fill(t('u_vs'), {n: compact(tokensOf(yesterday))})));
+          if (size === 's') return h('div', {className: 'bnt-usage', 'data-size': size}, hero);
+          if (size === 'm' || size === 'w') return h('div', {className: 'bnt-usage', 'data-size': size}, hero, bars);
+          const from = shiftDay(v.today, 1 - range);
+          const models = new Map();
+          for (const r of v.rows) {
+            if (r.day < from) continue;
+            const key = `${r.provider}\t${r.model}`;
+            models.set(key, [...(models.get(key) ?? []), r]);
+          }
+          const table = [...models.values()].map(rows => ({...sum(rows), model: rows[0].model, provider: rows[0].provider})).sort((a, b) => b.requests - a.requests);
+          const silentReq = table.reduce((a, m) => a + m.requests - m.reported, 0);
+          const silentBy = [...new Set(table.filter(m => m.requests > m.reported).map(m => m.provider || m.model))].join(', ');
+          return h('div', {className: 'bnt-usage', 'data-size': size},
+            hero, bars,
+            h('div', {className: 'bnt-seg'}, [1, 7, 30].map(n => h('button', {key: n, type: 'button', className: 'bnt-btn', 'aria-pressed': range === n, onClick: () => setRange(n)}, t(`u_range_${n}`)))),
+            table.length ? h('div', {className: 'bnt-table bnt-num'},
+              h('span', {className: 'bnt-th'}, t('u_model')), h('span', {className: 'bnt-th'}, t('u_req')), h('span', {className: 'bnt-th'}, t('u_tok')),
+              table.flatMap(m => {
+                const p = priceOf(prices, m.model);
+                return [
+                  h('span', {key: `${m.provider}${m.model}n`, title: `${m.provider} / ${m.model}`}, m.model || m.provider, size === 't' ? null : h('small', null, m.provider)),
+                  h('span', {key: `${m.provider}${m.model}r`}, m.requests),
+                  h('span', {key: `${m.provider}${m.model}t`, title: p ? fill(t('u_cost'), {n: m.cost.toFixed(2)}) : undefined}, m.reported ? compact(tokensOf(m)) : '–'),
+                ];
+              })) : h('div', {className: 'bnt-blank'}, t('u_none')),
+            silentReq ? h('div', {className: 'bnt-foot-note', title: silentBy}, fill(t('u_unreported'), {n: silentReq, p: silentBy})) : null);
+        }
+        Usage.desk = {
+          apiVersion: 1, sizes: ['l', 't', 'm', 'w', 's'], defaultSize: 'm', description: () => t('d_usage'),
+          settings: [{key: 'prices', type: 'textarea', label: () => t('f_prices'), placeholder: 'claude-opus 15 75 1.5 18.75'}],
+        };
+
         const builtins = [
           ['desk.today', 'today', Today], ['desk.todo', 'todo', Todo], ['desk.note', 'note', Note], ['desk.calendar', 'calendar', Calendar],
           ['desk.weather', 'weather', Weather], ['desk.clock', 'clock', Clock], ['desk.quote', 'quote', Quote], ['desk.countdown', 'countdown', Countdown],
           ['desk.worldclock', 'worldclock', WorldClock], ['desk.focus', 'focus', Focus], ['desk.links', 'links', Links], ['desk.progress', 'progress', Progress],
           ['desk.agents', 'agents', Agents], ['desk.feed', 'feed', Feed], ['desk.habits', 'habits', Habits],
-          ['desk.prompt', 'prompt', Prompt], ['desk.inbox', 'inbox', Inbox],
+          ['desk.prompt', 'prompt', Prompt], ['desk.inbox', 'inbox', Inbox], ['desk.usage', 'usage', Usage],
         ];
         const BUILTIN_IDS = new Set(builtins.map(([id]) => id));
 

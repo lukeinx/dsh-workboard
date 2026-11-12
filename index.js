@@ -3,10 +3,11 @@ import {createFetcher} from './lib/http.js';
 import {getWeather, searchPlaces} from './lib/weather.js';
 import {parseICS, expandEvents} from './lib/ics.js';
 import {parseFeed} from './lib/feed.js';
+import {createUsage} from './lib/usage.js';
 import {randomUUID} from 'node:crypto';
 import {homedir} from 'node:os';
 import {stat} from 'node:fs/promises';
-import {isAbsolute} from 'node:path';
+import {isAbsolute, join} from 'node:path';
 
 export const name = 'dsh-desk';
 export const inject = ['connection'];
@@ -40,7 +41,7 @@ export const BUILTIN_WIDGETS = [
   'desk.today', 'desk.todo', 'desk.note', 'desk.calendar', 'desk.weather', 'desk.clock',
   'desk.quote', 'desk.countdown', 'desk.worldclock', 'desk.focus', 'desk.links', 'desk.progress',
   'desk.agents', 'desk.feed', 'desk.habits',
-  'desk.prompt', 'desk.inbox',
+  'desk.prompt', 'desk.inbox', 'desk.usage',
 ];
 
 export function defaultBoard(id) {
@@ -405,7 +406,9 @@ export function createLauncher(ctx) {
   };
 }
 
-export function createHandlers(store, fetcher = createFetcher(), agents = null, launch = null) {
+export const dshHome = () => process.env.DSH_HOME || join(homedir(), '.dsh');
+
+export function createHandlers(store, fetcher = createFetcher(), agents = null, launch = null, services = {}) {
   const calendar = createCalendar(fetcher);
   const feeds = createFeeds(fetcher);
   return {
@@ -414,6 +417,10 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
     'dsh-desk/agent.start': async p => {
       if (!launch) throw new UserError('unavailable', 'this Harness cannot start sessions');
       return launch({prompt: p?.prompt, cwd: p?.cwd, timeZone: p?.timeZone});
+    },
+    'dsh-desk/usage.get': async p => {
+      if (!services.usage) throw new UserError('unavailable', 'usage is not available');
+      return services.usage.summary({days: p?.days});
     },
     'dsh-desk/inbox.list': () => store.listInbox(),
     'dsh-desk/inbox.add': p => store.addInbox(p?.text),
@@ -541,7 +548,8 @@ export function createTools(store) {
 
 export function apply(ctx) {
   const store = createStore(ctx);
-  const handlers = createHandlers(store, createFetcher(), createAgentWatch(ctx), createLauncher(ctx));
+  const services = {usage: createUsage({root: join(dshHome(), 'sessions')})};
+  const handlers = createHandlers(store, createFetcher(), createAgentWatch(ctx), createLauncher(ctx), services);
   ctx.effect(() => () => { void store.close(); }, 'dsh-desk: storage');
 
   // 共享通道 /api 只允许一个 interceptor，每个方法注册独立的 Fetch 路由。
