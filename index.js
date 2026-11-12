@@ -28,8 +28,9 @@ export const inject = ['connection'];
 
 const NS = 'dsh-workboard';
 // storageDomain 的域名与表名必须匹配 /^[a-z][a-z0-9_]*$/。
-const DOMAIN = 'dsh_desk';
-const LEGACY_DOMAIN = 'dsh_bento';
+const DOMAIN = 'dsh_workboard';
+// 按顺序尝试，复制成功一个即停：dsh-desk 时期在前，更早的 dsh-bento 在后。
+const LEGACY_DOMAINS = ['dsh_desk', 'dsh_bento'];
 const NOTE_KEY = 'inbox';
 const DONE_KEEP_MS = 7 * 86400_000;
 const MAX_TEXT = 2000;
@@ -55,21 +56,21 @@ const MAX_READ_BATCH = 200;
 const MAX_PROMPT = 20_000;
 const WIDGET_FETCH_TTL = 30_000;
 const MAX_WIDGET_ERROR = 2000;
-// 自定义 widget 在 desk.widget slot 里的 id 前缀；与 client.js 一致。
+// 自定义 widget 在 workboard.widget slot 里的 id 前缀；与 client.js 一致。
 export const CUSTOM_PREFIX = 'custom.';
 
 export const BUILTIN_WIDGETS = [
-  'desk.today', 'desk.todo', 'desk.note', 'desk.calendar', 'desk.weather', 'desk.clock',
-  'desk.quote', 'desk.countdown', 'desk.worldclock', 'desk.focus', 'desk.links', 'desk.progress',
-  'desk.agents', 'desk.feed', 'desk.habits',
-  'desk.prompt', 'desk.inbox', 'desk.usage', 'desk.running', 'desk.git', 'desk.github', 'desk.system', 'desk.photo', 'desk.market', 'desk.trending',
-  'desk.outputs', 'desk.schedules', 'desk.pinned', 'desk.files', 'desk.clipboard', 'desk.network',
+  'workboard.today', 'workboard.todo', 'workboard.note', 'workboard.calendar', 'workboard.weather', 'workboard.clock',
+  'workboard.quote', 'workboard.countdown', 'workboard.worldclock', 'workboard.focus', 'workboard.links', 'workboard.progress',
+  'workboard.agents', 'workboard.feed', 'workboard.habits',
+  'workboard.prompt', 'workboard.inbox', 'workboard.usage', 'workboard.running', 'workboard.git', 'workboard.github', 'workboard.system', 'workboard.photo', 'workboard.market', 'workboard.trending',
+  'workboard.outputs', 'workboard.schedules', 'workboard.pinned', 'workboard.files', 'workboard.clipboard', 'workboard.network',
 ];
 
 export function defaultBoard(id) {
   return {
     apiVersion: 1, id, title: '',
-    widgets: [{id: 'desk.today', size: 'bar'}, {id: 'desk.todo', size: 'l'}, {id: 'desk.calendar', size: 't'}, {id: 'desk.note', size: 't'}],
+    widgets: [{id: 'workboard.today', size: 'bar'}, {id: 'workboard.todo', size: 'l'}, {id: 'workboard.calendar', size: 't'}, {id: 'workboard.note', size: 't'}],
     known: BUILTIN_WIDGETS,
   };
 }
@@ -84,18 +85,27 @@ function memoryTable() {
   };
 }
 
-const legacyWidgetId = id => (typeof id === 'string' && id.startsWith('bento.') ? `desk.${id.slice(6)}` : id);
+const legacyWidgetId = id => (typeof id === 'string' ? id.replace(/^(bento|desk)\./, 'workboard.') : id);
+// 旧版自定义 widget 的沙箱全局对象叫 desk；只改写它的成员访问和 window.desk，不碰同名的 class 或文案。
+const legacyWidgetHtml = html => (typeof html === 'string'
+  ? html.replace(/(?<![\w$.])desk(?=\s*(?:\?\.|\.|\[))|(?<=\bwindow\.)desk\b/g, 'workboard')
+  : html);
 
-// 仅在新域为空时复制旧版 dsh-bento 的数据；JSON 后端只在写入时落盘，打开不存在的旧域不会留下空文件。
+const legacyRecord = (t, value) => {
+  if (!value || typeof value !== 'object') return value;
+  if (t === 'boards') return {...value, widgets: (value.widgets ?? []).map(w => ({...w, id: legacyWidgetId(w?.id)})), known: (value.known ?? []).map(legacyWidgetId)};
+  if (t === 'widgets') return {...value, html: legacyWidgetHtml(value.html)};
+  return value;
+};
+
+// 仅在新域为空时复制旧域的数据；JSON 后端只在写入时落盘，打开不存在的旧域不会留下空文件。
 export async function migrateLegacy(domain, legacy) {
   try {
     if (TABLES.some(t => [...domain.table(t).entries()].length)) return false;
     let copied = false;
     for (const t of TABLES) {
       for (const [key, value] of legacy.table(t).entries()) {
-        const record = t === 'boards' && value && typeof value === 'object'
-          ? {...value, widgets: (value.widgets ?? []).map(w => ({...w, id: legacyWidgetId(w?.id)})), known: (value.known ?? []).map(legacyWidgetId)}
-          : value;
+        const record = legacyRecord(t, value);
         await domain.table(t).put(key, record);
         copied = true;
       }
@@ -124,7 +134,7 @@ export function createStore(ctx) {
       return;
     }
     try {
-      await migrateLegacy(domain, await facility.open(spec(LEGACY_DOMAIN)));
+      for (const name of LEGACY_DOMAINS) if (await migrateLegacy(domain, await facility.open(spec(name)))) break;
     } catch (error) {
       state.error = `legacy migration failed: ${error?.message || error}`;
     }
@@ -689,7 +699,7 @@ export function createRunning(ctx, now = Date.now) {
     kill({id, sessionId}) {
       const jobs = ctx.get?.('jobs');
       if (typeof jobs?.kill !== 'function') throw new UserError('unavailable', 'background jobs are not available');
-      return {result: jobs.kill(String(id), sessionId ? String(sessionId) : undefined, 'stopped from Desk')};
+      return {result: jobs.kill(String(id), sessionId ? String(sessionId) : undefined, 'stopped from Workboard')};
     },
   };
 }
@@ -936,8 +946,8 @@ const toolWidget = w => ({...widgetSummary(w), updatedAt: iso(w.updatedAt), last
 export function createTools(store) {
   return [
     {
-      name: 'desk_todos',
-      description: 'Read or change the to-do list on the user\'s Desk dashboard. `list` returns open items and items completed in the last 7 days, each with an id. Use `add` with `text`; `complete`, `reopen` and `remove` with the `id` from `list`.',
+      name: 'workboard_todos',
+      description: 'Read or change the to-do list on the user\'s Workboard dashboard. `list` returns open items and items completed in the last 7 days, each with an id. Use `add` with `text`; `complete`, `reopen` and `remove` with the `id` from `list`.',
       parameters: {
         type: 'object',
         properties: {
@@ -960,8 +970,8 @@ export function createTools(store) {
       },
     },
     {
-      name: 'desk_note',
-      description: 'Read or change the scratch note on the user\'s Desk dashboard (plain text, usually Markdown). `read` returns the note; `append` adds `text` as a new line at the end; `replace` overwrites the whole note with `text`, so read it first.',
+      name: 'workboard_note',
+      description: 'Read or change the scratch note on the user\'s Workboard dashboard (plain text, usually Markdown). `read` returns the note; `append` adds `text` as a new line at the end; `replace` overwrites the whole note with `text`, so read it first.',
       parameters: {
         type: 'object',
         properties: {
@@ -986,8 +996,8 @@ export function createTools(store) {
       },
     },
     {
-      name: 'desk_inbox',
-      description: 'Read or change the inbox on the user\'s Desk dashboard, where the user drops links, ideas and requests to deal with later. `list` returns items oldest first, each with an id; `add` stores `text`; `remove` deletes one item by `id` once it has been handled; `clear` deletes every item.',
+      name: 'workboard_inbox',
+      description: 'Read or change the inbox on the user\'s Workboard dashboard, where the user drops links, ideas and requests to deal with later. `list` returns items oldest first, each with an id; `add` stores `text`; `remove` deletes one item by `id` once it has been handled; `clear` deletes every item.',
       parameters: {
         type: 'object',
         properties: {
@@ -1010,8 +1020,8 @@ export function createTools(store) {
       },
     },
     {
-      name: 'desk_widget',
-      description: 'Create and change custom widgets on the user\'s Desk dashboard: sandboxed HTML cards shown on their boards. Load the `desk-widget` skill before writing or changing `html`. `list` returns each widget with its last runtime error; `get` returns the full definition and saved data; `create` needs `title` and `html`; `update` changes only the fields given for `id`; `set_data` replaces the saved data; `remove` deletes the widget from the library and every board.',
+      name: 'workboard_widget',
+      description: 'Create and change custom widgets on the user\'s Workboard dashboard: sandboxed HTML cards shown on their boards. Load the `workboard-widget` skill before writing or changing `html`. `list` returns each widget with its last runtime error; `get` returns the full definition and saved data; `create` needs `title` and `html`; `update` changes only the fields given for `id`; `set_data` replaces the saved data; `remove` deletes the widget from the library and every board.',
       parameters: {
         type: 'object',
         properties: {
@@ -1023,9 +1033,9 @@ export function createTools(store) {
           sizes: {type: 'array', items: {type: 'string', enum: ['bar', 's', 'm', 't', 'l', 'w']}, description: 'Allowed card sizes; defaults to ["m"].'},
           defaultSize: {type: 'string', enum: ['bar', 's', 'm', 't', 'l', 'w'], description: 'Size when added; defaults to the first of sizes.'},
           header: {type: 'boolean', description: 'false hides the card title bar.'},
-          settings: {type: 'array', items: SETTING_ITEM, description: 'Fields the user edits in the card settings dialog; values arrive as desk.config.'},
-          fetch: {type: 'array', items: {type: 'string'}, description: 'http(s) URL prefixes that desk.fetch may request.'},
-          data: {type: 'object', additionalProperties: true, description: 'Saved data, arriving as desk.data; for create, update and set_data.'},
+          settings: {type: 'array', items: SETTING_ITEM, description: 'Fields the user edits in the card settings dialog; values arrive as workboard.config.'},
+          fetch: {type: 'array', items: {type: 'string'}, description: 'http(s) URL prefixes that workboard.fetch may request.'},
+          data: {type: 'object', additionalProperties: true, description: 'Saved data, arriving as workboard.data; for create, update and set_data.'},
         },
         required: ['action'],
         additionalProperties: false,
@@ -1067,8 +1077,8 @@ export function createTools(store) {
 }
 
 const SKILL = {
-  name: 'desk-widget',
-  description: 'Build, change or fix a custom widget on the user\'s Desk dashboard in DeepSeek Harness with the desk_widget tool: a sandboxed HTML card that can show web API data, data the agent writes, or a small interactive tool. Use when the user asks to add, make, generate, change or fix a Desk (工作台) widget or card.',
+  name: 'workboard-widget',
+  description: 'Build, change or fix a custom widget on the user\'s Workboard dashboard in DeepSeek Harness with the workboard_widget tool: a sandboxed HTML card that can show web API data, data the agent writes, or a small interactive tool. Use when the user asks to add, make, generate, change or fix a Workboard (工作台) widget or card.',
   source: 'custom',
 };
 
@@ -1112,7 +1122,7 @@ export function apply(ctx) {
 
   const skills = ctx.get?.('skills');
   if (typeof skills?.register === 'function') {
-    const content = readFileSync(new URL('./skills/desk-widget.md', import.meta.url), 'utf8');
-    ctx.effect(() => skills.register({...SKILL, content}), 'dsh-workboard: desk-widget skill');
+    const content = readFileSync(new URL('./skills/workboard-widget.md', import.meta.url), 'utf8');
+    ctx.effect(() => skills.register({...SKILL, content}), 'dsh-workboard: workboard-widget skill');
   }
 }

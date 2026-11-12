@@ -47,8 +47,8 @@ const value = async (method, payload) => {
 };
 
 const board = await value('board.get', {id: 'work'});
-assert.deepEqual(board.widgets.map(w => w.id), ['desk.today', 'desk.todo', 'desk.calendar', 'desk.note']);
-assert.ok(board.known.includes('desk.clock'));
+assert.deepEqual(board.widgets.map(w => w.id), ['workboard.today', 'workboard.todo', 'workboard.calendar', 'workboard.note']);
+assert.ok(board.known.includes('workboard.clock'));
 const saved = await value('board.put', {board: {...board, widgets: [...board.widgets, {id: 'hello.widget', size: 's'}], known: [...board.known, 'hello.widget']}});
 assert.deepEqual(await value('board.get', {id: 'work'}), saved);
 assert.equal((await call('board.put', {board: {id: '../x', widgets: []}})).ok, false);
@@ -66,8 +66,8 @@ assert.equal((await call('todo.remove', {id: b.id})).error.code, 'dsh-workboard/
 assert.equal((await value('note.get')).text, '');
 await value('note.put', {text: '- line one'});
 
-const todoTool = tools.get('desk_todos');
-const noteTool = tools.get('desk_note');
+const todoTool = tools.get('workboard_todos');
+const noteTool = tools.get('workboard_note');
 const added = await todoTool.execute({action: 'add', text: 'from agent'});
 await todoTool.execute({action: 'complete', id: added.added.id});
 todos = (await todoTool.execute({action: 'list'})).todos;
@@ -80,7 +80,7 @@ assert.equal(todoTool.output.render({}, {ok: 1})[0].type, 'text');
 assert.deepEqual((await value('board.list')).map(b => b.id), ['work']);
 const life = await value('board.create', {title: 'Life'});
 assert.deepEqual((await value('board.list')).map(b => [b.id, b.title]), [['work', ''], [life.id, 'Life']]);
-const adopted = await value('board.adopt', {id: life.id, known: ['plug.a', 'desk.clock'], place: [{id: 'plug.a', size: 'm'}]});
+const adopted = await value('board.adopt', {id: life.id, known: ['plug.a', 'workboard.clock'], place: [{id: 'plug.a', size: 'm'}]});
 assert.deepEqual(adopted.widgets, [{id: 'plug.a', size: 'm'}]);
 const work = await value('board.get', {id: 'work'});
 assert.ok(work.known.includes('plug.a') && !work.widgets.some(w => w.id === 'plug.a'));
@@ -104,7 +104,7 @@ assert.deepEqual(cal.events.map(e => [e.title, e.source]), [['Sync', 0]]);
 assert.deepEqual(cal.errors.map(e => e.message), ['HTTP 404']);
 await assert.rejects(handlers['dsh-workboard/calendar.events']({urls: [], from: 0, to: 365 * 86400_000}));
 
-// 旧版 dsh_bento 数据：新域为空时复制并改写内置 widget id，已有数据时不动。
+// 更早的 dsh_bento 数据：新域为空时复制并改写内置 widget id，已有数据时不动。
 const fakeDomain = (data = {}) => {
   const tables = new Map();
   let closed = false;
@@ -123,12 +123,20 @@ const fresh = fakeDomain();
 const legacy = fakeDomain(legacyData);
 assert.equal(await migrateLegacy(fresh, legacy), true);
 assert.ok(legacy.closed);
-assert.deepEqual(fresh.table('boards').get('work').widgets.map(w => w.id), ['desk.today', 'hello.widget']);
-assert.deepEqual(fresh.table('boards').get('work').known, ['desk.today', 'hello.widget']);
+assert.deepEqual(fresh.table('boards').get('work').widgets.map(w => w.id), ['workboard.today', 'hello.widget']);
+assert.deepEqual(fresh.table('boards').get('work').known, ['workboard.today', 'hello.widget']);
 assert.equal(fresh.table('todos').get('t1').text, 'old');
 assert.equal(fresh.table('prefs').get('unit'), 'c');
 assert.equal(await migrateLegacy(fresh, fakeDomain({todos: {t2: {id: 't2'}}})), false);
 assert.equal(fresh.table('todos').get('t2'), undefined);
+// 旧版 dsh_desk 数据：widget id 和自定义 widget 里的沙箱对象一并改名。
+const fromDesk = fakeDomain();
+assert.equal(await migrateLegacy(fromDesk, fakeDomain({
+  boards: {work: {apiVersion: 1, id: 'work', widgets: [{id: 'desk.todo', size: 'l'}, {id: 'custom.w', size: 'm'}], known: ['desk.todo']}},
+  widgets: {w: {id: 'w', html: '<div class="desk">desk</div><script>desk.on(r); n.textContent = desk.config?.goal ?? desk["data"]; window.desk.save(1); my.desk.x = 1;</script>'}},
+})), true);
+assert.deepEqual(fromDesk.table('boards').get('work').widgets.map(w => w.id), ['workboard.todo', 'custom.w']);
+assert.equal(fromDesk.table('widgets').get('w').html, '<div class="desk">desk</div><script>workboard.on(r); n.textContent = workboard.config?.goal ?? workboard["data"]; window.workboard.save(1); my.desk.x = 1;</script>');
 // 习惯：增删、按天切换、非法日期。
 const habit = await value('habit.add', {name: '  read   20 pages '});
 assert.equal(habit.name, 'read 20 pages');
@@ -187,7 +195,7 @@ assert.deepEqual(await createHandlers(createStore({}), feedFetcher)['dsh-workboa
 const inboxItem = await value('inbox.add', {text: '  https://example.com\nread later  '});
 assert.equal(inboxItem.text, 'https://example.com\nread later');
 assert.equal((await call('inbox.add', {text: ' '})).error.code, 'dsh-workboard/empty-text');
-const inboxTool = tools.get('desk_inbox');
+const inboxTool = tools.get('workboard_inbox');
 await inboxTool.execute({action: 'add', text: 'idea'});
 assert.deepEqual((await inboxTool.execute({action: 'list'})).items.map(i => i.text), ['https://example.com\nread later', 'idea']);
 await inboxTool.execute({action: 'remove', id: inboxItem.id});
@@ -213,7 +221,7 @@ assert.deepEqual(await createHandlers(createStore({}), feedFetcher, null, null, 
 assert.equal(await createHandlers(createStore({}), feedFetcher, null, null, {workspaces: createWorkspaces({get: () => undefined})})['dsh-workboard/workspace.list'](), null);
 
 // 用量：多 frame zstd 日志（末尾半个 frame 模拟正在写入）+ 未压缩日志；不报 usage 的请求只计请求数。
-const usageRoot = mkdtempSync(join(tmpdir(), 'desk-usage-'));
+const usageRoot = mkdtempSync(join(tmpdir(), 'workboard-usage-'));
 const t0 = new Date(2026, 10, 12, 10).getTime();
 const msg = (time, provider, model, usage) => JSON.stringify({type: 'assistant/message', seq: 1, time, data: {message: {role: 'assistant', source: {kind: 'model', provider, model}}, ...(usage ? {usage} : {})}});
 mkdirSync(join(usageRoot, 'ws', 'session-a'), {recursive: true});
@@ -255,11 +263,11 @@ const running = await runHandlers['dsh-workboard/running.get']();
 assert.deepEqual(running.goals.map(g => [g.sessionId, g.title, g.objective, g.phase, g.rounds, g.maxRounds, g.armed]), [['s1', 'Widgets', 'Ship widgets', 'active', 2, 10, true]]);
 assert.deepEqual(running.jobs.map(j => [j.id, j.sessionId, j.status]), [['bash-1', 's1', 'running'], ['bash-2', '', 'failed']]);
 assert.deepEqual(await runHandlers['dsh-workboard/running.kill']({id: 'bash-1', sessionId: 's1'}), {result: 'requested'});
-assert.deepEqual(killedJobs, [['bash-1', 's1', 'stopped from Desk']]);
+assert.deepEqual(killedJobs, [['bash-1', 's1', 'stopped from Workboard']]);
 assert.deepEqual(await createHandlers(createStore({}), feedFetcher, null, null, {running: createRunning({get: () => undefined})})['dsh-workboard/running.get'](), {goals: null, jobs: null});
 
 // Git：真实仓库，领先 1 个提交、一处改动、一个未跟踪文件、一个上游已删除的分支；工作区里的非仓库跳过，设置里的非仓库报错。
-const gitRoot = mkdtempSync(join(tmpdir(), 'desk-git-'));
+const gitRoot = mkdtempSync(join(tmpdir(), 'workboard-git-'));
 const g = (cwd, ...args) => execFileSync('git', args, {cwd, stdio: 'pipe', env: {...process.env, GIT_AUTHOR_NAME: 't', GIT_AUTHOR_EMAIL: 't@t', GIT_COMMITTER_NAME: 't', GIT_COMMITTER_EMAIL: 't@t'}});
 mkdirSync(join(gitRoot, 'remote.git'));
 g(join(gitRoot, 'remote.git'), 'init', '--bare', '-q', '-b', 'main');
@@ -314,7 +322,7 @@ assert.ok(sv.cpu >= 0 && sv.cpu <= 1 && sv.cores > 0 && sv.disk.total > sv.disk.
 assert.equal(sv.history.length, 1);
 
 // 相框：跳过隐藏目录和图库包，顺序轮播会回绕；macOS 走 sips 转码并缓存；不存在的文件夹报 bad-dir。
-const picRoot = mkdtempSync(join(tmpdir(), 'desk-photo-'));
+const picRoot = mkdtempSync(join(tmpdir(), 'workboard-photo-'));
 for (const d of ['a', '.hidden', 'Lib.photoslibrary', 'a/b']) mkdirSync(join(picRoot, d), {recursive: true});
 for (const f of ['1.jpg', 'a/2.PNG', 'a/b/3.heic', 'a/notes.txt', '.hidden/4.jpg', 'Lib.photoslibrary/5.jpg', '.6.jpg']) writeFileSync(join(picRoot, f), f);
 assert.deepEqual((await findPhotos(picRoot)).map(p => p.slice(picRoot.length + 1)), ['1.jpg', 'a/2.PNG', 'a/b/3.heic']);
@@ -383,21 +391,21 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
 
 // 自定义 widget：脚本语法检查、增改删、数据、错误回报、联网白名单，删除时清理看板。
 {
-  assert.ok(skills.get('desk-widget')?.content.includes('window.desk'));
+  assert.ok(skills.get('workboard-widget')?.content.includes('window.workboard'));
   assert.deepEqual(checkHtml('<div></div><script>const a = 1;</script>'), {errors: [], warnings: []});
   assert.match(checkHtml('<p>x</p>\n<script>\nconst a = ;\n</script>').errors[0], /^line 3: SyntaxError/);
   assert.match(checkHtml('<script src="https://cdn.x/y.js"></script>').errors[0], /external scripts/);
   assert.equal(checkHtml('<script type="application/json">{not js</script>').errors.length, 0);
   assert.equal(checkHtml('<img src="https://x/y.png"><script>fetch("/a")</script>').warnings.length, 2);
-  assert.equal(checkHtml('<script>desk.fetch("https://x")</script>').warnings.length, 0);
+  assert.equal(checkHtml('<script>workboard.fetch("https://x")</script>').warnings.length, 0);
   assert.throws(() => cleanSpec({title: 'x', html: '<b></b>', sizes: ['huge']}), /sizes/);
   assert.equal(cleanSpec({title: 't', html: 'h', sizes: ['l', 'm'], defaultSize: 's'}).defaultSize, 'l');
   assert.equal(allowedUrl('https://api.github.com/repos/a/b', ['https://api.github.com/repos/']), 'https://api.github.com/repos/a/b');
   assert.throws(() => allowedUrl('https://api.github.com.evil.io/x', ['https://api.github.com/']), /not under/);
 
-  const tool = tools.get('desk_widget');
+  const tool = tools.get('workboard_widget');
   await assert.rejects(tool.execute({action: 'create', title: 'Bad', html: '<script>if (</script>'}), /html not saved/);
-  const {created, warnings} = await tool.execute({action: 'create', id: 'stars', title: '  Stars  ', html: '<b id=n></b><script>n.textContent = desk.config.repo</script>',
+  const {created, warnings} = await tool.execute({action: 'create', id: 'stars', title: '  Stars  ', html: '<b id=n></b><script>n.textContent = workboard.config.repo</script>',
     sizes: ['s', 'm'], settings: [{key: 'repo', type: 'text', label: 'Repo', default: 'a/b'}], fetch: ['https://api.example.com/']});
   assert.deepEqual(warnings, []);
   assert.equal(created.title, 'Stars');
@@ -488,7 +496,7 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
 
 // 产出物：交付与新建文档合并去重，子 Agent 归到父会话，代码文件和失败的写入不算。
 {
-  const root = mkdtempSync(join(tmpdir(), 'desk-out-'));
+  const root = mkdtempSync(join(tmpdir(), 'workboard-out-'));
   const docs = join(root, 'docs');
   mkdirSync(docs);
   writeFileSync(join(docs, 'plan.md'), '# plan');

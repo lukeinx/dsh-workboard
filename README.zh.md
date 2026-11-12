@@ -50,7 +50,7 @@ Agent、Prompt 快启和收集箱共用同一个工作区选择，选项来自 H
 
 多个 widget 共用的设置（称呼、每周起始日、城市与温度单位、格言来源）也可以在「设置 → 工作台」里改（插件详情页的「打开设置」在主区域打开同一页），看板上没有对应卡片时也找得到；两处改的是同一份数据。
 
-数据留在本机 Harness profile 存储（`~/.dsh/storages/dsh_desk.json`）。旧版 `dsh-bento` 的数据（`dsh_bento.json`）会在首次启动时复制过来，旧文件保留不动。网络请求只由 Host 发出，结果在 Host 缓存：
+数据留在本机 Harness profile 存储（`~/.dsh/storages/dsh_workboard.json`）。旧版 `@lukeinx/dsh-desk`（`dsh_desk.json`）或 `dsh-bento`（`dsh_bento.json`）的数据会在首次启动时复制过来，内置 widget id 和自定义 widget 脚本同步改名，旧文件保留不动。网络请求只由 Host 发出，结果在 Host 缓存：
 
 - 天气和城市搜索：[Open-Meteo](https://open-meteo.com)（无需 key，数据 CC BY 4.0），设置城市后才请求
 - 格言：[一言](https://hitokoto.cn)，仅在格言来源选了一言时请求
@@ -66,10 +66,10 @@ Agent、Prompt 快启和收集箱共用同一个工作区选择，选项来自 H
 
 ## Agent 工具
 
-- `desk_todos`：`list`、`add`、`complete`、`reopen`、`remove`
-- `desk_note`：`read`、`append`、`replace`
-- `desk_inbox`：`list`、`add`、`remove`、`clear`
-- `desk_widget`：自定义 widget 的 `list`、`get`、`create`、`update`、`set_data`、`remove`；配套的 `desk-widget` skill 告诉 Agent 怎么写
+- `workboard_todos`：`list`、`add`、`complete`、`reopen`、`remove`
+- `workboard_note`：`read`、`append`、`replace`
+- `workboard_inbox`：`list`、`add`、`remove`、`clear`
+- `workboard_widget`：自定义 widget 的 `list`、`get`、`create`、`update`、`set_data`、`remove`；配套的 `workboard-widget` skill 告诉 Agent 怎么写
 
 页面可见时每 5 秒刷新，Agent 的改动不用刷新页面就会出现。
 
@@ -77,9 +77,9 @@ Agent、Prompt 快启和收集箱共用同一个工作区选择，选项来自 H
 
 在组件库里选 **用 Agent 生成**（空看板上也有），描述想要的卡片后发送：会打开一个新会话由 Agent 制作，做好后出现在你当时打开的看板上，组件库里归在 **我的**。也可以在任何对话里直接让 Agent 给工作台做一个 widget。
 
-自定义 widget 是 Agent 写的 HTML，运行在沙箱 iframe 里：访问不到 Harness 页面、cookie、浏览器存储，也不能直接联网，样式跟随 Harness 主题。它只能通过 `window.desk` 使用 Desk：读自己的设置和已保存数据、请求 widget 声明过的 http(s) 地址前缀（由 Host 发出并缓存 30 秒）、保存自己的数据、打开链接、打开一个需要你确认发送的新会话草稿。
+自定义 widget 是 Agent 写的 HTML，运行在沙箱 iframe 里：访问不到 Harness 页面、cookie、浏览器存储，也不能直接联网，样式跟随 Harness 主题。它只能通过 `window.workboard` 使用工作台：读自己的设置和已保存数据、请求 widget 声明过的 http(s) 地址前缀（由 Host 发出并缓存 30 秒）、保存自己的数据、打开链接、打开一个需要你确认发送的新会话草稿。
 
-自定义卡片标题栏（或编辑模式）里的星光按钮可以让 Agent 修改；编辑模式里还有 **源码**，可以直接改 HTML、查看声明的地址或删除 widget。运行出错时卡片上会显示错误和 **让 Agent 修复**，Agent 也能通过 `desk_widget` 看到最近一次错误。定义和数据与 Desk 其余数据存在一起；最多 50 个，每个 HTML 和数据各不超过 200 KB。
+自定义卡片标题栏（或编辑模式）里的星光按钮可以让 Agent 修改；编辑模式里还有 **源码**，可以直接改 HTML、查看声明的地址或删除 widget。运行出错时卡片上会显示错误和 **让 Agent 修复**，Agent 也能通过 `workboard_widget` 看到最近一次错误。定义和数据与工作台其余数据存在一起；最多 50 个，每个 HTML 和数据各不超过 200 KB。
 
 ## 安装
 
@@ -87,16 +87,16 @@ Agent、Prompt 快启和收集箱共用同一个工作区选择，选项来自 H
 
 ## 写一个 widget
 
-widget 是一个 React 组件，由其他 bundle 在 `client.js` 里注册到 `desk.widget` slot。manifest 挂在组件的静态属性 `desk` 上；slot 注册参数只保留 `id`、`order`、`label`。
+widget 是一个 React 组件，由其他 bundle 在 `client.js` 里注册到 `workboard.widget` slot。manifest 挂在组件的静态属性 `workboard` 上；slot 注册参数只保留 `id`、`order`、`label`。
 
 ```js
 function Hello({size, config}) {
   return h('b', null, `Hello (${size})`);
 }
-Hello.desk = {apiVersion: 1, sizes: ['m', 's']};
+Hello.workboard = {apiVersion: 1, sizes: ['m', 's']};
 
-ctx.effect(() => ctx.slots.inject('desk.widget', () => ctx.slots.register({
-  name: 'desk.widget', id: 'hello.widget', order: 100, label: 'Hello',
+ctx.effect(() => ctx.slots.inject('workboard.widget', () => ctx.slots.register({
+  name: 'workboard.widget', id: 'hello.widget', order: 100, label: 'Hello',
 }, Hello)), 'hello widget');
 ```
 
@@ -126,4 +126,4 @@ ctx.effect(() => ctx.slots.inject('desk.widget', () => ctx.slots.register({
 npm run check   # 语法检查 + Host 端冒烟 + ICS 测试
 ```
 
-文件：`index.js`（Host 端 `/api/dsh-workboard/*` 路由、存储、Agent 工具）、`skills/desk-widget.md`（Agent 编写 widget 的指南）、`lib/`（HTTP 缓存、自定义 widget 校验、天气、ICS 与订阅解析、会话日志用量、子进程、Git、GitHub、系统状态、相框、行情、热榜）、`client.js`（侧栏入口、面板、内置 widget）、`cordis.patch.yml`、`locale/`、`icon.svg`。
+文件：`index.js`（Host 端 `/api/dsh-workboard/*` 路由、存储、Agent 工具）、`skills/workboard-widget.md`（Agent 编写 widget 的指南）、`lib/`（HTTP 缓存、自定义 widget 校验、天气、ICS 与订阅解析、会话日志用量、子进程、Git、GitHub、系统状态、相框、行情、热榜）、`client.js`（侧栏入口、面板、内置 widget）、`cordis.patch.yml`、`locale/`、`icon.svg`。

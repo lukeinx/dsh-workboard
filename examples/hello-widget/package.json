@@ -2,7 +2,7 @@
   "name": "dsh-workboard-hello-widget",
   "version": "0.0.1",
   "private": true,
-  "description": "Example Desk widget contributed by a separate DeepSeek Harness bundle.",
+  "description": "Example Workboard widget contributed by a separate DeepSeek Harness bundle.",
   "type": "module",
   "license": "MIT",
   "exports": {

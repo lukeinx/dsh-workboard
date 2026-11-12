@@ -1,8 +1,8 @@
-# Desk for DeepSeek Harness
+# Workboard for DeepSeek Harness
 
 [简体中文](README.zh.md)
 
-Desk (`dsh-workboard`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with 31 widgets, including a today banner, to-dos, notes, an ICS calendar, weather, an agent session monitor, quick prompts, usage stats, Git repositories, system status, markets, outputs, scheduled tasks and network, works with zero configuration, and lets the agent read and change your to-dos, notes and inbox from any conversation. The agent can also build new widgets from a sentence, and other plugins can add their own.
+Workboard (`dsh-workboard`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with 31 widgets, including a today banner, to-dos, notes, an ICS calendar, weather, an agent session monitor, quick prompts, usage stats, Git repositories, system status, markets, outputs, scheduled tasks and network, works with zero configuration, and lets the agent read and change your to-dos, notes and inbox from any conversation. The agent can also build new widgets from a sentence, and other plugins can add their own.
 
 Status: early (P0b). MIT licensed.
 
@@ -48,9 +48,9 @@ The default board holds Today, To-do, Calendar and Notes; add the rest from the 
 
 Choose **Edit** to drag cards, change sizes, remove cards, open a widget's settings or add widgets from the gallery, which groups them into Daily, Agent, News and Productivity & tools, can be searched and stays open so you can add several. Boards are tabs: **+** adds one, double-click renames it, and edit mode can delete it.
 
-Settings shared by several widgets (your name, week start, city and temperature unit, quote source) are also under Settings → Desk (**Open settings** on the plugin's detail page opens the same page in the main area), so they stay reachable when no card that uses them is on a board. Both places edit the same values.
+Settings shared by several widgets (your name, week start, city and temperature unit, quote source) are also under Settings → Workboard (**Open settings** on the plugin's detail page opens the same page in the main area), so they stay reachable when no card that uses them is on a board. Both places edit the same values.
 
-Data stays on your machine, in the Harness profile storage (`~/.dsh/storages/dsh_desk.json`). Data from the earlier `dsh-bento` version (`dsh_bento.json`) is copied over on first start; the old file is left in place. The Host makes the only network requests and caches the responses:
+Data stays on your machine, in the Harness profile storage (`~/.dsh/storages/dsh_workboard.json`). Data from earlier versions named `@lukeinx/dsh-desk` (`dsh_desk.json`) or `dsh-bento` (`dsh_bento.json`) is copied over on first start, with built-in widget IDs and custom widget scripts updated; the old files are left in place. The Host makes the only network requests and caches the responses:
 
 - Weather and city search: [Open-Meteo](https://open-meteo.com) (no key, data under CC BY 4.0), only once you set a city
 - Quotes: [Hitokoto](https://hitokoto.cn) (Chinese), only when you choose it as the quote source
@@ -66,20 +66,20 @@ Usage counts the usage fields in the logs. Some providers do not report tokens; 
 
 ## Agent tools
 
-- `desk_todos` — `list`, `add`, `complete`, `reopen`, `remove`
-- `desk_note` — `read`, `append`, `replace`
-- `desk_inbox` — `list`, `add`, `remove`, `clear`
-- `desk_widget` — `list`, `get`, `create`, `update`, `set_data`, `remove` custom widgets; the `desk-widget` skill tells the agent how to write them
+- `workboard_todos` — `list`, `add`, `complete`, `reopen`, `remove`
+- `workboard_note` — `read`, `append`, `replace`
+- `workboard_inbox` — `list`, `add`, `remove`, `clear`
+- `workboard_widget` — `list`, `get`, `create`, `update`, `set_data`, `remove` custom widgets; the `workboard-widget` skill tells the agent how to write them
 
 The page refreshes every 5 seconds while it is visible, so changes made by the agent appear without a reload.
 
 ## Generate a widget with the agent
 
-In the widget gallery choose **Generate with agent** (also offered on an empty board), describe the card, and send it: a new session opens where the agent builds the widget, and it appears on the board you had open, under **Mine** in the gallery. You can also just ask for a Desk widget in any conversation.
+In the widget gallery choose **Generate with agent** (also offered on an empty board), describe the card, and send it: a new session opens where the agent builds the widget, and it appears on the board you had open, under **Mine** in the gallery. You can also just ask for a Workboard widget in any conversation.
 
-A custom widget is HTML that the agent writes. It runs in a sandboxed frame with no access to the Harness page, cookies, browser storage or the network, and is styled with the Harness theme. It reaches Desk only through `window.desk`: its settings and saved data, requests to the http(s) address prefixes the widget declares (made by the Host, cached for 30 seconds), saving its own data, opening links, and opening a new session draft that you send yourself.
+A custom widget is HTML that the agent writes. It runs in a sandboxed frame with no access to the Harness page, cookies, browser storage or the network, and is styled with the Harness theme. It reaches Workboard only through `window.workboard`: its settings and saved data, requests to the http(s) address prefixes the widget declares (made by the Host, cached for 30 seconds), saving its own data, opening links, and opening a new session draft that you send yourself.
 
-On a custom card, the sparkle in the header (or in edit mode) asks the agent to change it; edit mode also has **Source**, where you can edit the HTML, see the declared addresses, or delete the widget. Runtime errors show on the card with **Ask agent to fix**, and the agent sees the last error through `desk_widget`. Definitions and data are stored with the rest of Desk; at most 50 widgets of 200 KB HTML and 200 KB data each.
+On a custom card, the sparkle in the header (or in edit mode) asks the agent to change it; edit mode also has **Source**, where you can edit the HTML, see the declared addresses, or delete the widget. Runtime errors show on the card with **Ask agent to fix**, and the agent sees the last error through `workboard_widget`. Definitions and data are stored with the rest of Workboard; at most 50 widgets of 200 KB HTML and 200 KB data each.
 
 ## Install
 
@@ -87,16 +87,16 @@ In a Harness conversation, ask the agent to install the bundle with `plugin_mana
 
 ## Write a widget
 
-A widget is a React component that another bundle registers into the `desk.widget` slot from its `client.js`. Put the manifest on the component's static `desk` property; the slot registration itself keeps only `id`, `order` and `label`.
+A widget is a React component that another bundle registers into the `workboard.widget` slot from its `client.js`. Put the manifest on the component's static `workboard` property; the slot registration itself keeps only `id`, `order` and `label`.
 
 ```js
 function Hello({size, config}) {
   return h('b', null, `Hello (${size})`);
 }
-Hello.desk = {apiVersion: 1, sizes: ['m', 's']};
+Hello.workboard = {apiVersion: 1, sizes: ['m', 's']};
 
-ctx.effect(() => ctx.slots.inject('desk.widget', () => ctx.slots.register({
-  name: 'desk.widget', id: 'hello.widget', order: 100, label: 'Hello',
+ctx.effect(() => ctx.slots.inject('workboard.widget', () => ctx.slots.register({
+  name: 'workboard.widget', id: 'hello.widget', order: 100, label: 'Hello',
 }, Hello)), 'hello widget');
 ```
 
@@ -126,4 +126,4 @@ The component receives `size`, `config` (the saved settings for this card), `edi
 npm run check   # syntax check, Host smoke test and ICS tests
 ```
 
-Files: `index.js` (Host routes under `/api/dsh-workboard/*`, storage, agent tools), `skills/desk-widget.md` (the agent's widget-writing guide), `lib/` (HTTP cache, custom widget validation, weather, ICS and feed parsing, session-log usage, subprocesses, Git, GitHub, system status, photos, markets, trending), `client.js` (sidebar entry, panel, built-in widgets), `cordis.patch.yml`, `locale/`, `icon.svg`.
+Files: `index.js` (Host routes under `/api/dsh-workboard/*`, storage, agent tools), `skills/workboard-widget.md` (the agent's widget-writing guide), `lib/` (HTTP cache, custom widget validation, weather, ICS and feed parsing, session-log usage, subprocesses, Git, GitHub, system status, photos, markets, trending), `client.js` (sidebar entry, panel, built-in widgets), `cordis.patch.yml`, `locale/`, `icon.svg`.

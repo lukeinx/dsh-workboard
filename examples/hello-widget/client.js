@@ -10,13 +10,13 @@ window.__ModuleLoader__.load({
         h('span', {style: {color: 'var(--dsw-alias-label-secondary)', fontSize: 12}}, `size: ${size}`));
     }
 
-    Hello.desk = {apiVersion: 1, sizes: ['m', 's']};
+    Hello.workboard = {apiVersion: 1, sizes: ['m', 's']};
 
     return {
       inject: ['slots'],
       apply(ctx) {
-        ctx.effect(() => ctx.slots.inject('desk.widget', () => ctx.slots.register({
-          name: 'desk.widget', id: 'hello.widget', order: 100, label: 'Hello',
+        ctx.effect(() => ctx.slots.inject('workboard.widget', () => ctx.slots.register({
+          name: 'workboard.widget', id: 'hello.widget', order: 100, label: 'Hello',
         }, Hello)), 'dsh-workboard-hello-widget: widget');
       },
     };

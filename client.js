@@ -9,7 +9,7 @@ window.__ModuleLoader__.load({
     const PANEL = 'dsh-workboard';
     const SETTINGS_PANEL = 'dsh-workboard-settings';
     const PACKAGE = 'dsh-workboard';
-    const SLOT = 'desk.widget';
+    const SLOT = 'workboard.widget';
     const POLL_MS = 5000;
     const WEATHER_MS = 10 * 60_000;
     const QUOTE_MS = 6 * 3600_000;
@@ -100,16 +100,16 @@ window.__ModuleLoader__.load({
       f_prices: '单价（每行一个：模型 输入 输出 [缓存读] [缓存写]，美元 / 百万 token；模型可写前缀）',
       d_prompt: '一句话或预设模板直接开新会话', d_inbox: '随手收集链接和想法，一键交给 Agent 处理；Agent 可读写',
       promptPlaceholder: '让 Agent 做点什么，回车发送', sending: '发送中…', f_presets: '预设（每行一个：名称 | prompt）', f_cwd: '工作目录（留空用默认）', ws_label: '工作区', ws_default: '默认工作区',
-      defaultPresets: '今日计划 | 读取我 Desk 上的待办和收集箱，帮我排出今天最该做的三件事\n整理收集箱 | 用 desk_inbox 读取我的收集箱，逐条整理成待办或给出处理建议，处理完的条目移除\n周报草稿 | 读取我 Desk 上本周完成的待办，写一份简短的周报草稿',
+      defaultPresets: '今日计划 | 读取我工作台上的待办和收集箱，帮我排出今天最该做的三件事\n整理收集箱 | 用 workboard_inbox 读取我的收集箱，逐条整理成待办或给出处理建议，处理完的条目移除\n周报草稿 | 读取我工作台上本周完成的待办，写一份简短的周报草稿',
       inboxPlaceholder: '收集一条，回车保存', inboxEmpty: '收集箱是空的', toAgent: '交给 Agent', inboxCount: '{n} 条',
-      inboxPrompt: '用 desk_inbox 工具读取我的收集箱，逐条处理：能直接回答或完成的就完成；需要我跟进的用 desk_todos 转成待办；链接先读一下再给一句话摘要。处理完的条目用 desk_inbox remove 移除，最后汇总你做了什么。',
+      inboxPrompt: '用 workboard_inbox 工具读取我的收集箱，逐条处理：能直接回答或完成的就完成；需要我跟进的用 workboard_todos 转成待办；链接先读一下再给一句话摘要。处理完的条目用 workboard_inbox remove 移除，最后汇总你做了什么。',
       cat_mine: '我的', gen_card: '用 Agent 生成', gen_hint: '说一句想要什么，Agent 做好后放到当前看板',
       gen_title: '用 Agent 生成 widget', gen_go: '交给 Agent', gen_placeholder: '想在工作台上看到什么？写清楚数据和样子，回车发送',
       gen_examples: '离下班还有多久，下班时间可以设置\n比特币和以太坊的价格与 24 小时涨跌\n我关注的 GitHub 仓库的 Star 数\n喝水记录：点一下记一杯，显示今天喝了几杯\n人民币与常用外币的换算器',
-      gen_prompt: '请为我的 Desk 工作台做一个 widget：{desc}\n\n先加载 desk-widget skill，按其中的流程用 desk_widget 工具创建。',
+      gen_prompt: '请为我的工作台做一个 widget：{desc}\n\n先加载 workboard-widget skill，按其中的流程用 workboard_widget 工具创建。',
       cw_edit: '让 Agent 修改', cw_editTitle: '让 Agent 修改「{title}」', cw_editPlaceholder: '想怎么改？比如换成竖版布局、加一个刷新按钮',
-      cw_editPrompt: '请修改我 Desk 工作台上的 widget「{title}」（id：{id}）：{desc}\n\n先加载 desk-widget skill，用 desk_widget get 读取当前定义后再改。',
-      cw_fix: '让 Agent 修复', cw_fixPrompt: '我 Desk 工作台上的 widget「{title}」（id：{id}）运行出错：\n{error}\n\n请先加载 desk-widget skill，用 desk_widget get 读取当前定义，找到原因后修复。',
+      cw_editPrompt: '请修改我的工作台上的 widget「{title}」（id：{id}）：{desc}\n\n先加载 workboard-widget skill，用 workboard_widget get 读取当前定义后再改。',
+      cw_fix: '让 Agent 修复', cw_fixPrompt: '我的工作台上的 widget「{title}」（id：{id}）运行出错：\n{error}\n\n请先加载 workboard-widget skill，用 workboard_widget get 读取当前定义，找到原因后修复。',
       cw_source: '源码', cw_title: '标题', cw_delete: '删除 widget', cw_fetch: '可访问的地址', cw_none: '无',
       outputs: '产出物', d_outputs: 'Agent 交付和新建的文档，点开即用，可回到来源会话',
       o_presented: '交付', o_reveal: '定位', o_session: '会话', o_none: '还没有产出物', o_count: '{n} 个文件', o_missing: '已删除',
@@ -135,7 +135,7 @@ window.__ModuleLoader__.load({
       f_targets: '测速站点（每行一个：名称 https://…）', defaultTargets: '百度 https://www.baidu.com\nGitHub https://github.com\nGoogle https://www.google.com',
     };
     const en = {
-      lang: 'en-US', title: 'Desk', loadFailed: 'Failed to load', empty: 'No widgets on this board yet',
+      lang: 'en-US', title: 'Workboard', loadFailed: 'Failed to load', empty: 'No widgets on this board yet',
       today: 'Today', clock: 'Clock', todo: 'To-do', note: 'Notes', calendar: 'Calendar', weather: 'Weather',
       d_today: 'Greeting, time, weather and a quote in one banner', d_todo: 'Unfinished items carry over; the agent can read and edit', d_note: 'Autosaves; turn the current line into a to-do',
       d_calendar: 'Events from ICS subscriptions and a month view', d_weather: 'Weather and air quality from Open-Meteo', d_clock: 'Time, greeting and year progress',
@@ -201,16 +201,16 @@ window.__ModuleLoader__.load({
       f_prices: 'Prices, one per line: model input output [cache read] [cache write], USD per million tokens; a model prefix matches',
       d_prompt: 'Start a new session from a line of text or a preset', d_inbox: 'Collect links and ideas, then hand them to the agent; the agent can read and edit',
       promptPlaceholder: 'Ask the agent something, Enter to send', sending: 'Sending…', f_presets: 'Presets, one per line: name | prompt', f_cwd: 'Working directory (empty uses the default)', ws_label: 'Workspace', ws_default: 'Default workspace',
-      defaultPresets: 'Plan today | Read my Desk to-dos and inbox and pick the three things I should do today\nSort inbox | Use desk_inbox to read my inbox, turn each item into a to-do or a suggestion, and remove the items you handled\nWeekly note | Read the to-dos I completed on Desk this week and draft a short weekly update',
+      defaultPresets: 'Plan today | Read my Workboard to-dos and inbox and pick the three things I should do today\nSort inbox | Use workboard_inbox to read my inbox, turn each item into a to-do or a suggestion, and remove the items you handled\nWeekly note | Read the to-dos I completed on Workboard this week and draft a short weekly update',
       inboxPlaceholder: 'Capture something, Enter to save', inboxEmpty: 'Inbox is empty', toAgent: 'Hand to agent', inboxCount: '{n} items',
-      inboxPrompt: 'Use the desk_inbox tool to read my inbox and work through it: finish what you can answer or do directly; turn anything I need to follow up into a to-do with desk_todos; read links and give a one-line summary. Remove handled items with desk_inbox remove, then summarize what you did.',
+      inboxPrompt: 'Use the workboard_inbox tool to read my inbox and work through it: finish what you can answer or do directly; turn anything I need to follow up into a to-do with workboard_todos; read links and give a one-line summary. Remove handled items with workboard_inbox remove, then summarize what you did.',
       cat_mine: 'Mine', gen_card: 'Generate with agent', gen_hint: 'Describe what you want; the agent builds it and puts it on this board',
       gen_title: 'Generate a widget with the agent', gen_go: 'Hand to agent', gen_placeholder: 'What should this card show? Describe the data and the look, Enter to send',
       gen_examples: 'Time left until I finish work, with the end time as a setting\nBitcoin and Ether prices with 24-hour change\nStar count of the GitHub repositories I follow\nWater log: tap to add a glass, show today\'s count\nCurrency converter for the currencies I use',
-      gen_prompt: 'Make a widget for my Desk dashboard: {desc}\n\nLoad the desk-widget skill first and create it with the desk_widget tool following that skill.',
+      gen_prompt: 'Make a widget for my Workboard dashboard: {desc}\n\nLoad the workboard-widget skill first and create it with the workboard_widget tool following that skill.',
       cw_edit: 'Ask agent to change', cw_editTitle: 'Ask the agent to change “{title}”', cw_editPlaceholder: 'What should change? For example a taller layout or a refresh button',
-      cw_editPrompt: 'Change the widget “{title}” (id: {id}) on my Desk dashboard: {desc}\n\nLoad the desk-widget skill first, read the current definition with desk_widget get, then change it.',
-      cw_fix: 'Ask agent to fix', cw_fixPrompt: 'The widget “{title}” (id: {id}) on my Desk dashboard fails:\n{error}\n\nLoad the desk-widget skill, read the current definition with desk_widget get, find the cause and fix it.',
+      cw_editPrompt: 'Change the widget “{title}” (id: {id}) on my Workboard dashboard: {desc}\n\nLoad the workboard-widget skill first, read the current definition with workboard_widget get, then change it.',
+      cw_fix: 'Ask agent to fix', cw_fixPrompt: 'The widget “{title}” (id: {id}) on my Workboard dashboard fails:\n{error}\n\nLoad the workboard-widget skill, read the current definition with workboard_widget get, find the cause and fix it.',
       cw_source: 'Source', cw_title: 'Title', cw_delete: 'Delete widget', cw_fetch: 'Allowed addresses', cw_none: 'none',
       outputs: 'Outputs', d_outputs: 'Documents the agent presented or created; open them or jump back to the session',
       o_presented: 'Presented', o_reveal: 'Reveal', o_session: 'Session', o_none: 'No outputs yet', o_count: '{n} files', o_missing: 'Deleted',
@@ -270,359 +270,359 @@ window.__ModuleLoader__.load({
     const onBrand = prop => `${prop}:#fff;${prop}:oklch(from var(--dsw-alias-brand-primary) clamp(0,(.65 - l)*1000,1) 0 0)`;
 
     const CSS = `
-.bnt-page{height:100%;overflow:auto;background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font-size:13px}
-.bnt-inner{max-width:1120px;margin:0 auto;padding:0 24px 32px;box-sizing:border-box}
-.bnt-error{color:var(--dsw-alias-state-error-primary);font-size:12px;margin-bottom:8px}
-.bnt-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:80px;grid-auto-flow:row dense;gap:16px}
-.bnt-card{grid-column:span var(--c);grid-row:span var(--r);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:12px;padding:16px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;box-sizing:border-box}
-.bnt-card[data-banner]{background:none;border-color:transparent;padding:0 4px;overflow:visible}
-.bnt-card>header{display:flex;align-items:center;gap:8px;margin:-2px 0 10px;min-height:24px}
-.bnt-card>header h3{margin:0;font-size:14px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bnt-body{flex:1;min-height:0;display:flex;flex-direction:column}
-.bnt-empty{display:grid;place-items:center;min-height:300px;color:var(--dsw-alias-label-secondary);border:1.5px dashed var(--dsw-alias-border-l2);border-radius:12px}
-.bnt-muted{color:var(--dsw-alias-label-secondary)}
-.bnt-num{font-variant-numeric:tabular-nums}
-.bnt-btn{appearance:none;border:0;background:none;color:inherit;font:inherit;padding:0;cursor:pointer}
+.wb-page{height:100%;overflow:auto;background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font-size:13px}
+.wb-inner{max-width:1120px;margin:0 auto;padding:0 24px 32px;box-sizing:border-box}
+.wb-error{color:var(--dsw-alias-state-error-primary);font-size:12px;margin-bottom:8px}
+.wb-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:80px;grid-auto-flow:row dense;gap:16px}
+.wb-card{grid-column:span var(--c);grid-row:span var(--r);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:12px;padding:16px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;box-sizing:border-box}
+.wb-card[data-banner]{background:none;border-color:transparent;padding:0 4px;overflow:visible}
+.wb-card>header{display:flex;align-items:center;gap:8px;margin:-2px 0 10px;min-height:24px}
+.wb-card>header h3{margin:0;font-size:14px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-body{flex:1;min-height:0;display:flex;flex-direction:column}
+.wb-empty{display:grid;place-items:center;min-height:300px;color:var(--dsw-alias-label-secondary);border:1.5px dashed var(--dsw-alias-border-l2);border-radius:12px}
+.wb-muted{color:var(--dsw-alias-label-secondary)}
+.wb-num{font-variant-numeric:tabular-nums}
+.wb-btn{appearance:none;border:0;background:none;color:inherit;font:inherit;padding:0;cursor:pointer}
 
-.bnt-today{display:flex;align-items:center;gap:28px;height:100%;min-width:0}
-.bnt-today>*{flex:none}
-.bnt-today .bnt-tclock{display:grid;grid-template-columns:auto auto;grid-template-areas:"time greet" "time date";column-gap:14px;align-items:center}
-.bnt-today .bnt-time{grid-area:time;font-size:44px;font-weight:600;letter-spacing:-1px;line-height:1}
-.bnt-today .bnt-greet{grid-area:greet;align-self:end;font-size:15px;font-weight:600}
-.bnt-today .bnt-date{grid-area:date;align-self:start;color:var(--dsw-alias-label-secondary)}
-.bnt-sep{width:1px;align-self:stretch;margin:14px 0;background:var(--dsw-alias-border-l1)}
-.bnt-quote{flex:1!important;min-width:0;text-align:left}
-.bnt-quote .bnt-qtext{display:block;margin:0;font-size:15px;line-height:1.5;font-family:"New York","Songti SC",Georgia,serif;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.bnt-quote cite{display:block;font-style:normal;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.wb-today{display:flex;align-items:center;gap:28px;height:100%;min-width:0}
+.wb-today>*{flex:none}
+.wb-today .wb-tclock{display:grid;grid-template-columns:auto auto;grid-template-areas:"time greet" "time date";column-gap:14px;align-items:center}
+.wb-today .wb-time{grid-area:time;font-size:44px;font-weight:600;letter-spacing:-1px;line-height:1}
+.wb-today .wb-greet{grid-area:greet;align-self:end;font-size:15px;font-weight:600}
+.wb-today .wb-date{grid-area:date;align-self:start;color:var(--dsw-alias-label-secondary)}
+.wb-sep{width:1px;align-self:stretch;margin:14px 0;background:var(--dsw-alias-border-l1)}
+.wb-quote{flex:1!important;min-width:0;text-align:left}
+.wb-quote .wb-qtext{display:block;margin:0;font-size:15px;line-height:1.5;font-family:"New York","Songti SC",Georgia,serif;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wb-quote cite{display:block;font-style:normal;font-size:12px;color:var(--dsw-alias-label-secondary)}
 
-.bnt-clock{display:flex;flex-direction:column;justify-content:center;height:100%}
-.bnt-clock .bnt-time{font-size:44px;font-weight:600;letter-spacing:-1px;line-height:1.1;margin:4px 0 6px}
-.bnt-clock[data-size=s] .bnt-time{font-size:32px}
-.bnt-yearbar{height:4px;border-radius:2px;background:var(--dsw-alias-bg-layer-2);margin-top:12px;overflow:hidden}
-.bnt-yearbar i{display:block;height:100%;background:var(--dsw-alias-label-secondary);opacity:.5}
+.wb-clock{display:flex;flex-direction:column;justify-content:center;height:100%}
+.wb-clock .wb-time{font-size:44px;font-weight:600;letter-spacing:-1px;line-height:1.1;margin:4px 0 6px}
+.wb-clock[data-size=s] .wb-time{font-size:32px}
+.wb-yearbar{height:4px;border-radius:2px;background:var(--dsw-alias-bg-layer-2);margin-top:12px;overflow:hidden}
+.wb-yearbar i{display:block;height:100%;background:var(--dsw-alias-label-secondary);opacity:.5}
 
-.bnt-list{list-style:none;margin:0;padding:0;overflow:auto;flex:1}
-.bnt-list li{display:flex;align-items:center;gap:10px;padding:7px 4px;border-radius:8px;min-width:0}
-.bnt-list li:hover{background:var(--dsw-alias-bg-layer-2)}
-.bnt-ck{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--dsw-alias-border-l2);flex:none;display:grid;place-items:center;box-sizing:border-box}
-.bnt-ck:hover{border-color:var(--dsw-alias-brand-primary)}
-.bnt-list li[data-done] .bnt-ck{background:var(--dsw-alias-brand-primary);border-color:var(--dsw-alias-brand-primary);${onBrand('color')}}
-.bnt-list li[data-done] .bnt-tx{color:var(--dsw-alias-label-secondary);text-decoration:line-through}
-.bnt-tx{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bnt-tag{font-size:11px;padding:0 6px;border-radius:5px;flex:none;white-space:nowrap;background:color-mix(in srgb,var(--dsw-alias-state-warn-primary) 14%,transparent);color:var(--dsw-alias-state-warn-primary)}
-.bnt-del{display:none;flex:none;width:24px;height:24px;border-radius:6px;color:var(--dsw-alias-label-secondary);place-items:center}
-.bnt-list li:hover .bnt-del{display:grid}
-.bnt-del:hover{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-state-error-primary)}
-.bnt-donetoggle{font-size:12px;color:var(--dsw-alias-label-secondary);padding:6px 4px;display:flex;align-items:center;gap:4px}
-.bnt-donetoggle svg{transition:transform .15s}
-.bnt-donetoggle[aria-expanded=true] svg{transform:rotate(90deg)}
-.bnt-add{display:flex;align-items:center;gap:10px;padding:8px 4px 0;border-top:1px solid var(--dsw-alias-border-l1);margin-top:6px;color:var(--dsw-alias-label-secondary)}
-.bnt-add input{flex:1;border:0;background:none;outline:none;padding:6px 0;color:var(--dsw-alias-label-primary);font:inherit}
-.bnt-blank{color:var(--dsw-alias-label-secondary);padding:7px 4px}
+.wb-list{list-style:none;margin:0;padding:0;overflow:auto;flex:1}
+.wb-list li{display:flex;align-items:center;gap:10px;padding:7px 4px;border-radius:8px;min-width:0}
+.wb-list li:hover{background:var(--dsw-alias-bg-layer-2)}
+.wb-ck{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--dsw-alias-border-l2);flex:none;display:grid;place-items:center;box-sizing:border-box}
+.wb-ck:hover{border-color:var(--dsw-alias-brand-primary)}
+.wb-list li[data-done] .wb-ck{background:var(--dsw-alias-brand-primary);border-color:var(--dsw-alias-brand-primary);${onBrand('color')}}
+.wb-list li[data-done] .wb-tx{color:var(--dsw-alias-label-secondary);text-decoration:line-through}
+.wb-tx{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wb-tag{font-size:11px;padding:0 6px;border-radius:5px;flex:none;white-space:nowrap;background:color-mix(in srgb,var(--dsw-alias-state-warn-primary) 14%,transparent);color:var(--dsw-alias-state-warn-primary)}
+.wb-del{display:none;flex:none;width:24px;height:24px;border-radius:6px;color:var(--dsw-alias-label-secondary);place-items:center}
+.wb-list li:hover .wb-del{display:grid}
+.wb-del:hover{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-state-error-primary)}
+.wb-donetoggle{font-size:12px;color:var(--dsw-alias-label-secondary);padding:6px 4px;display:flex;align-items:center;gap:4px}
+.wb-donetoggle svg{transition:transform .15s}
+.wb-donetoggle[aria-expanded=true] svg{transform:rotate(90deg)}
+.wb-add{display:flex;align-items:center;gap:10px;padding:8px 4px 0;border-top:1px solid var(--dsw-alias-border-l1);margin-top:6px;color:var(--dsw-alias-label-secondary)}
+.wb-add input{flex:1;border:0;background:none;outline:none;padding:6px 0;color:var(--dsw-alias-label-primary);font:inherit}
+.wb-blank{color:var(--dsw-alias-label-secondary);padding:7px 4px}
 
-.bnt-note{flex:1;resize:none;border:0;outline:none;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary);border-radius:8px;padding:10px 12px;line-height:1.65;font:inherit;font-size:13px;min-height:0}
-.bnt-notefoot{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--dsw-alias-label-secondary);margin-top:8px;min-height:18px}
-.bnt-notefoot button{color:var(--dsw-alias-brand-primary)}
-.bnt-wsel{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:none;width:20px;height:20px;border-radius:6px;color:var(--dsw-alias-label-secondary);opacity:.55}
-.bnt-wsel:hover,.bnt-wsel:focus-within{opacity:1;background:var(--dsw-alias-bg-layer-2)}
-.bnt-wsel[data-set]{color:var(--dsw-alias-brand-primary);opacity:.9}
-.bnt-wsel select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:12px}
-.bnt-footact{display:flex;align-items:center;gap:6px;flex:none}
-.bnt-pbox{position:relative;flex:1;min-height:0;display:flex}
-.bnt-pbox .bnt-wsel{position:absolute;right:6px;bottom:6px}
-.bnt-pbox[data-ws] textarea{padding-right:30px}
+.wb-note{flex:1;resize:none;border:0;outline:none;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary);border-radius:8px;padding:10px 12px;line-height:1.65;font:inherit;font-size:13px;min-height:0}
+.wb-notefoot{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--dsw-alias-label-secondary);margin-top:8px;min-height:18px}
+.wb-notefoot button{color:var(--dsw-alias-brand-primary)}
+.wb-wsel{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:none;width:20px;height:20px;border-radius:6px;color:var(--dsw-alias-label-secondary);opacity:.55}
+.wb-wsel:hover,.wb-wsel:focus-within{opacity:1;background:var(--dsw-alias-bg-layer-2)}
+.wb-wsel[data-set]{color:var(--dsw-alias-brand-primary);opacity:.9}
+.wb-wsel select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:12px}
+.wb-footact{display:flex;align-items:center;gap:6px;flex:none}
+.wb-pbox{position:relative;flex:1;min-height:0;display:flex}
+.wb-pbox .wb-wsel{position:absolute;right:6px;bottom:6px}
+.wb-pbox[data-ws] textarea{padding-right:30px}
 
-.bnt-head{display:flex;align-items:center;gap:8px;padding:20px 0 16px;flex-wrap:wrap}
-.bnt-head[data-editing]{position:sticky;top:0;z-index:5;background:var(--dsw-alias-bg-base)}
-.bnt-head:not([data-editing]) .bnt-newboard{opacity:0;transition:opacity .15s}
-.bnt-head:hover .bnt-newboard,.bnt-head .bnt-newboard:focus-visible{opacity:1}
-.bnt-tabs{display:flex;align-items:center;gap:2px;flex-wrap:wrap;min-width:0}
-.bnt-tab{position:relative;height:30px;padding:0 12px;border-radius:8px;color:var(--dsw-alias-label-secondary);font-weight:500;white-space:nowrap}
-.bnt-tab:hover{color:var(--dsw-alias-label-primary)}
-.bnt-tab[aria-selected=true]{color:var(--dsw-alias-label-primary)}
-.bnt-tab[aria-selected=true]::after{content:'';position:absolute;left:12px;right:12px;bottom:2px;height:2px;border-radius:1px;background:var(--dsw-alias-brand-primary)}
-.bnt-tabinput{height:30px;width:120px;box-sizing:border-box;padding:0 10px;border-radius:8px;border:1px solid var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);font:inherit;font-weight:500;outline:none}
-.bnt-iconbtn{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--dsw-alias-label-secondary)}
-.bnt-iconbtn:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
-.bnt-spacer{flex:1}
-.bnt-action{appearance:none;font:inherit;height:30px;padding:0 12px;border-radius:8px;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}
-.bnt-action:hover{border-color:var(--dsw-alias-border-l2)}
-.bnt-action:disabled{opacity:.5;cursor:default}
-.bnt-action[data-primary]{background:var(--dsw-alias-brand-primary);border-color:transparent;${onBrand('color')}}
-.bnt-action[data-danger]{color:var(--dsw-alias-state-error-primary)}
-.bnt-card{position:relative}
-.bnt-grid[data-editing] .bnt-card{border-style:dashed;border-color:var(--dsw-alias-border-l2);cursor:grab}
-.bnt-grid[data-editing] .bnt-card[data-banner]{padding:0 12px}
-.bnt-grid[data-editing] .bnt-body{pointer-events:none;opacity:.5}
-.bnt-card[data-dragging]{opacity:.35}
-.bnt-card[data-drop=before]{box-shadow:-4px 0 0 0 var(--dsw-alias-brand-primary)}
-.bnt-card[data-drop=after]{box-shadow:4px 0 0 0 var(--dsw-alias-brand-primary)}
-.bnt-tools{position:absolute;top:8px;right:8px;z-index:2;display:flex;align-items:center;gap:2px;padding:2px;border-radius:8px;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);cursor:default}
-.bnt-tools select{height:24px;border:0;background:none;color:var(--dsw-alias-label-primary);font:inherit;font-size:12px;outline:none;cursor:pointer}
-.bnt-tools button{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;color:var(--dsw-alias-label-secondary)}
-.bnt-tools button:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
-.bnt-addtile{grid-column:span 1;grid-row:span 2;border:1.5px dashed var(--dsw-alias-border-l2);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--dsw-alias-label-secondary)}
-.bnt-addtile:hover{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary)}
-.bnt-cta{color:var(--dsw-alias-brand-primary)}
+.wb-head{display:flex;align-items:center;gap:8px;padding:20px 0 16px;flex-wrap:wrap}
+.wb-head[data-editing]{position:sticky;top:0;z-index:5;background:var(--dsw-alias-bg-base)}
+.wb-head:not([data-editing]) .wb-newboard{opacity:0;transition:opacity .15s}
+.wb-head:hover .wb-newboard,.wb-head .wb-newboard:focus-visible{opacity:1}
+.wb-tabs{display:flex;align-items:center;gap:2px;flex-wrap:wrap;min-width:0}
+.wb-tab{position:relative;height:30px;padding:0 12px;border-radius:8px;color:var(--dsw-alias-label-secondary);font-weight:500;white-space:nowrap}
+.wb-tab:hover{color:var(--dsw-alias-label-primary)}
+.wb-tab[aria-selected=true]{color:var(--dsw-alias-label-primary)}
+.wb-tab[aria-selected=true]::after{content:'';position:absolute;left:12px;right:12px;bottom:2px;height:2px;border-radius:1px;background:var(--dsw-alias-brand-primary)}
+.wb-tabinput{height:30px;width:120px;box-sizing:border-box;padding:0 10px;border-radius:8px;border:1px solid var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);font:inherit;font-weight:500;outline:none}
+.wb-iconbtn{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--dsw-alias-label-secondary)}
+.wb-iconbtn:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
+.wb-spacer{flex:1}
+.wb-action{appearance:none;font:inherit;height:30px;padding:0 12px;border-radius:8px;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);display:inline-flex;align-items:center;gap:6px;cursor:pointer;white-space:nowrap}
+.wb-action:hover{border-color:var(--dsw-alias-border-l2)}
+.wb-action:disabled{opacity:.5;cursor:default}
+.wb-action[data-primary]{background:var(--dsw-alias-brand-primary);border-color:transparent;${onBrand('color')}}
+.wb-action[data-danger]{color:var(--dsw-alias-state-error-primary)}
+.wb-card{position:relative}
+.wb-grid[data-editing] .wb-card{border-style:dashed;border-color:var(--dsw-alias-border-l2);cursor:grab}
+.wb-grid[data-editing] .wb-card[data-banner]{padding:0 12px}
+.wb-grid[data-editing] .wb-body{pointer-events:none;opacity:.5}
+.wb-card[data-dragging]{opacity:.35}
+.wb-card[data-drop=before]{box-shadow:-4px 0 0 0 var(--dsw-alias-brand-primary)}
+.wb-card[data-drop=after]{box-shadow:4px 0 0 0 var(--dsw-alias-brand-primary)}
+.wb-tools{position:absolute;top:8px;right:8px;z-index:2;display:flex;align-items:center;gap:2px;padding:2px;border-radius:8px;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);cursor:default}
+.wb-tools select{height:24px;border:0;background:none;color:var(--dsw-alias-label-primary);font:inherit;font-size:12px;outline:none;cursor:pointer}
+.wb-tools button{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;color:var(--dsw-alias-label-secondary)}
+.wb-tools button:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
+.wb-addtile{grid-column:span 1;grid-row:span 2;border:1.5px dashed var(--dsw-alias-border-l2);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--dsw-alias-label-secondary)}
+.wb-addtile:hover{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary)}
+.wb-cta{color:var(--dsw-alias-brand-primary)}
 
-.bnt-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.35);display:grid;place-items:center;padding:24px}
-.bnt-modal{width:min(520px,100%);max-height:80vh;overflow:auto;box-sizing:border-box;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:14px;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:14px;font-size:13px}
-.bnt-modal h2{margin:0;font-size:16px;font-weight:600}
-.bnt-field{display:flex;flex-direction:column;gap:6px}
-.bnt-field>span{font-size:12px;color:var(--dsw-alias-label-secondary)}
-.bnt-check{display:flex;align-items:center;gap:8px}
-.bnt-input{box-sizing:border-box;width:100%;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;color:var(--dsw-alias-label-primary);font:inherit;padding:7px 10px;outline:none}
-.bnt-input:focus{border-color:var(--dsw-alias-brand-primary)}
-textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
-.bnt-loc{display:flex;align-items:center;gap:8px}
-.bnt-loc b{font-weight:600}
-.bnt-results{display:flex;flex-direction:column}
-.bnt-results button{text-align:left;padding:6px 8px;border-radius:6px}
-.bnt-results button:hover{background:var(--dsw-alias-bg-layer-2)}
-.bnt-foot{display:flex;justify-content:flex-end;align-items:center;gap:8px}
-.bnt-settings{display:flex;flex-direction:column;gap:20px;color:var(--dsw-alias-label-primary);font-size:13px}
-.bnt-settings h2{margin:0;font-size:16px;line-height:24px;font-weight:500}
-.bnt-cfgmain{max-width:640px;margin:0 auto;padding:48px clamp(16px,4vw,48px) 32px}
-.bnt-settings>section{display:flex;flex-direction:column;gap:12px}
-.bnt-settings h3{margin:0;font-size:13px;font-weight:600}
-.bnt-settings .bnt-foot{justify-content:flex-start;flex-direction:row-reverse}
-.bnt-modal[data-wide]{width:min(760px,100%);height:min(640px,80vh);overflow:hidden}
-.bnt-gtop{display:flex;flex-direction:column;gap:10px;flex:none}
-.bnt-gbody{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:16px;margin:0 -4px;padding:0 4px}
-.bnt-gsec h3{margin:0 0 8px;font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}
-.bnt-ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
-.bnt-gcard{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border:1px solid var(--dsw-alias-border-l1);border-radius:10px;text-align:left;min-width:0}
-.bnt-gcard:hover:not(:disabled){border-color:var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-2)}
-.bnt-gcard:disabled{opacity:.5;cursor:default}
-.bnt-gname{display:flex;align-items:center;gap:8px}
-.bnt-gname b{flex:1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bnt-gname svg{color:var(--dsw-alias-label-secondary);flex:none}
-.bnt-gcard:hover:not(:disabled) .bnt-gname svg{color:var(--dsw-alias-brand-primary)}
-.bnt-gcard small{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wb-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.35);display:grid;place-items:center;padding:24px}
+.wb-modal{width:min(520px,100%);max-height:80vh;overflow:auto;box-sizing:border-box;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);border:1px solid var(--dsw-alias-border-l1);border-radius:14px;padding:20px;box-shadow:0 12px 40px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:14px;font-size:13px}
+.wb-modal h2{margin:0;font-size:16px;font-weight:600}
+.wb-field{display:flex;flex-direction:column;gap:6px}
+.wb-field>span{font-size:12px;color:var(--dsw-alias-label-secondary)}
+.wb-check{display:flex;align-items:center;gap:8px}
+.wb-input{box-sizing:border-box;width:100%;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;color:var(--dsw-alias-label-primary);font:inherit;padding:7px 10px;outline:none}
+.wb-input:focus{border-color:var(--dsw-alias-brand-primary)}
+textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
+.wb-loc{display:flex;align-items:center;gap:8px}
+.wb-loc b{font-weight:600}
+.wb-results{display:flex;flex-direction:column}
+.wb-results button{text-align:left;padding:6px 8px;border-radius:6px}
+.wb-results button:hover{background:var(--dsw-alias-bg-layer-2)}
+.wb-foot{display:flex;justify-content:flex-end;align-items:center;gap:8px}
+.wb-settings{display:flex;flex-direction:column;gap:20px;color:var(--dsw-alias-label-primary);font-size:13px}
+.wb-settings h2{margin:0;font-size:16px;line-height:24px;font-weight:500}
+.wb-cfgmain{max-width:640px;margin:0 auto;padding:48px clamp(16px,4vw,48px) 32px}
+.wb-settings>section{display:flex;flex-direction:column;gap:12px}
+.wb-settings h3{margin:0;font-size:13px;font-weight:600}
+.wb-settings .wb-foot{justify-content:flex-start;flex-direction:row-reverse}
+.wb-modal[data-wide]{width:min(760px,100%);height:min(640px,80vh);overflow:hidden}
+.wb-gtop{display:flex;flex-direction:column;gap:10px;flex:none}
+.wb-gbody{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:16px;margin:0 -4px;padding:0 4px}
+.wb-gsec h3{margin:0 0 8px;font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}
+.wb-ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.wb-gcard{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border:1px solid var(--dsw-alias-border-l1);border-radius:10px;text-align:left;min-width:0}
+.wb-gcard:hover:not(:disabled){border-color:var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-2)}
+.wb-gcard:disabled{opacity:.5;cursor:default}
+.wb-gname{display:flex;align-items:center;gap:8px}
+.wb-gname b{flex:1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-gname svg{color:var(--dsw-alias-label-secondary);flex:none}
+.wb-gcard:hover:not(:disabled) .wb-gname svg{color:var(--dsw-alias-brand-primary)}
+.wb-gcard small{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
-.bnt-wx{display:flex;flex-direction:column;height:100%;min-height:0;gap:8px;color:var(--dsw-alias-label-primary)}
-.bnt-wxnow{display:flex;align-items:center;gap:12px;min-width:0}
-.bnt-wxnow svg{color:var(--dsw-alias-label-secondary);flex:none}
-.bnt-wxt{font-size:36px;font-weight:600;letter-spacing:-1px;line-height:1}
-.bnt-wxmeta{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:12px;color:var(--dsw-alias-label-secondary)}
-.bnt-wxmeta b{font-size:13px;font-weight:600;color:var(--dsw-alias-label-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bnt-wxhours{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin-top:auto;text-align:center;font-size:12px;color:var(--dsw-alias-label-secondary)}
-.bnt-wxhours>div{display:flex;flex-direction:column;align-items:center;gap:4px}
-.bnt-wxhours b{font-weight:500;color:var(--dsw-alias-label-primary)}
-.bnt-wxmini{display:flex;align-items:center;gap:10px;line-height:1.5}
-.bnt-wxmini svg{color:var(--dsw-alias-label-secondary)}
-.bnt-wxmini .bnt-wxt{font-size:24px;letter-spacing:-.5px}
-.bnt-aqi{font-size:11px;padding:0 6px;border-radius:5px;white-space:nowrap;background:color-mix(in srgb,var(--dsw-alias-state-success-primary) 14%,transparent);color:var(--dsw-alias-state-success-primary)}
-.bnt-aqi[data-level=warn]{background:color-mix(in srgb,var(--dsw-alias-state-warn-primary) 14%,transparent);color:var(--dsw-alias-state-warn-primary)}
-.bnt-aqi[data-level=bad]{background:color-mix(in srgb,var(--dsw-alias-state-error-primary) 12%,transparent);color:var(--dsw-alias-state-error-primary)}
+.wb-wx{display:flex;flex-direction:column;height:100%;min-height:0;gap:8px;color:var(--dsw-alias-label-primary)}
+.wb-wxnow{display:flex;align-items:center;gap:12px;min-width:0}
+.wb-wxnow svg{color:var(--dsw-alias-label-secondary);flex:none}
+.wb-wxt{font-size:36px;font-weight:600;letter-spacing:-1px;line-height:1}
+.wb-wxmeta{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.wb-wxmeta b{font-size:13px;font-weight:600;color:var(--dsw-alias-label-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-wxhours{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin-top:auto;text-align:center;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.wb-wxhours>div{display:flex;flex-direction:column;align-items:center;gap:4px}
+.wb-wxhours b{font-weight:500;color:var(--dsw-alias-label-primary)}
+.wb-wxmini{display:flex;align-items:center;gap:10px;line-height:1.5}
+.wb-wxmini svg{color:var(--dsw-alias-label-secondary)}
+.wb-wxmini .wb-wxt{font-size:24px;letter-spacing:-.5px}
+.wb-aqi{font-size:11px;padding:0 6px;border-radius:5px;white-space:nowrap;background:color-mix(in srgb,var(--dsw-alias-state-success-primary) 14%,transparent);color:var(--dsw-alias-state-success-primary)}
+.wb-aqi[data-level=warn]{background:color-mix(in srgb,var(--dsw-alias-state-warn-primary) 14%,transparent);color:var(--dsw-alias-state-warn-primary)}
+.wb-aqi[data-level=bad]{background:color-mix(in srgb,var(--dsw-alias-state-error-primary) 12%,transparent);color:var(--dsw-alias-state-error-primary)}
 
-.bnt-cal{display:flex;flex-direction:column;height:100%;min-height:0;gap:8px}
-.bnt-calnav{display:flex;align-items:center;gap:2px}
-.bnt-calnav .bnt-btn:first-child{flex:1;text-align:left;font-weight:600}
-.bnt-calnav .bnt-iconbtn{width:24px;height:24px}
-.bnt-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;text-align:center;font-size:12px}
-.bnt-wd{color:var(--dsw-alias-label-secondary);font-size:11px;padding-bottom:2px}
-.bnt-day{height:26px;border-radius:6px;display:grid;place-items:center;position:relative;color:var(--dsw-alias-label-primary)}
-.bnt-day:hover{background:var(--dsw-alias-bg-layer-2)}
-.bnt-day[data-out]{opacity:.4}
-.bnt-day[data-selected]{background:var(--dsw-alias-bg-layer-2)}
-.bnt-day[data-today]{background:var(--dsw-alias-brand-primary);${onBrand('color')};font-weight:600}
-.bnt-day[data-has]::after{content:'';position:absolute;bottom:2px;width:4px;height:4px;border-radius:2px;background:var(--dsw-alias-brand-primary)}
-.bnt-day[data-today][data-has]::after{${onBrand('background')}}
-.bnt-events{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:2px}
-.bnt-cal[data-big] .bnt-events{border-top:1px solid var(--dsw-alias-border-l1);padding-top:8px}
-.bnt-evhead{font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary);padding:4px 2px 2px}
-.bnt-ev{display:flex;align-items:center;gap:8px;padding:4px 2px;min-width:0}
-.bnt-ev i{width:3px;align-self:stretch;border-radius:2px;background:var(--dsw-alias-border-l2);flex:none}
-.bnt-ev[data-state=now] i{background:var(--dsw-alias-brand-primary)}
-.bnt-ev[data-state=past]{color:var(--dsw-alias-label-secondary)}
-.bnt-evtime{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none;min-width:80px}
-.bnt-evtitle{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.bnt-calerr{font-size:12px;color:var(--dsw-alias-state-warn-primary)}
+.wb-cal{display:flex;flex-direction:column;height:100%;min-height:0;gap:8px}
+.wb-calnav{display:flex;align-items:center;gap:2px}
+.wb-calnav .wb-btn:first-child{flex:1;text-align:left;font-weight:600}
+.wb-calnav .wb-iconbtn{width:24px;height:24px}
+.wb-month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;text-align:center;font-size:12px}
+.wb-wd{color:var(--dsw-alias-label-secondary);font-size:11px;padding-bottom:2px}
+.wb-day{height:26px;border-radius:6px;display:grid;place-items:center;position:relative;color:var(--dsw-alias-label-primary)}
+.wb-day:hover{background:var(--dsw-alias-bg-layer-2)}
+.wb-day[data-out]{opacity:.4}
+.wb-day[data-selected]{background:var(--dsw-alias-bg-layer-2)}
+.wb-day[data-today]{background:var(--dsw-alias-brand-primary);${onBrand('color')};font-weight:600}
+.wb-day[data-has]::after{content:'';position:absolute;bottom:2px;width:4px;height:4px;border-radius:2px;background:var(--dsw-alias-brand-primary)}
+.wb-day[data-today][data-has]::after{${onBrand('background')}}
+.wb-events{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:2px}
+.wb-cal[data-big] .wb-events{border-top:1px solid var(--dsw-alias-border-l1);padding-top:8px}
+.wb-evhead{font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary);padding:4px 2px 2px}
+.wb-ev{display:flex;align-items:center;gap:8px;padding:4px 2px;min-width:0}
+.wb-ev i{width:3px;align-self:stretch;border-radius:2px;background:var(--dsw-alias-border-l2);flex:none}
+.wb-ev[data-state=now] i{background:var(--dsw-alias-brand-primary)}
+.wb-ev[data-state=past]{color:var(--dsw-alias-label-secondary)}
+.wb-evtime{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none;min-width:80px}
+.wb-evtitle{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wb-calerr{font-size:12px;color:var(--dsw-alias-state-warn-primary)}
 
-.bnt-rows{display:flex;flex-direction:column;gap:2px;overflow:auto;flex:1;min-height:0}
-.bnt-row{display:flex;align-items:center;gap:10px;padding:4px 2px;min-width:0}
-.bnt-row>div{flex:1;min-width:0;display:flex;flex-direction:column}
-.bnt-row b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bnt-row small,.bnt-hero small,.bnt-cols small{font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bnt-row .bnt-big{font-size:20px;font-weight:600;flex:none}
-.bnt-row .bnt-big small{font-size:12px;font-weight:400;margin-left:2px}
-.bnt-row[data-dim]{color:var(--dsw-alias-label-secondary)}
-.bnt-row[data-read] b{font-weight:400;color:var(--dsw-alias-label-secondary)}
-.bnt-hero{display:flex;flex-direction:column;justify-content:center;height:100%;gap:2px;min-width:0}
-.bnt-hero .bnt-big{font-size:36px;font-weight:600;letter-spacing:-1px;line-height:1.1}
-.bnt-hero .bnt-big small{font-size:14px;font-weight:400;letter-spacing:0;margin-left:4px}
-.bnt-cols{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:12px;height:100%;align-items:center}
-.bnt-cols>div{display:flex;flex-direction:column;min-width:0;gap:2px}
-.bnt-cols .bnt-big{font-size:28px;font-weight:600;letter-spacing:-.5px;line-height:1.1}
+.wb-rows{display:flex;flex-direction:column;gap:2px;overflow:auto;flex:1;min-height:0}
+.wb-row{display:flex;align-items:center;gap:10px;padding:4px 2px;min-width:0}
+.wb-row>div{flex:1;min-width:0;display:flex;flex-direction:column}
+.wb-row b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-row small,.wb-hero small,.wb-cols small{font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-row .wb-big{font-size:20px;font-weight:600;flex:none}
+.wb-row .wb-big small{font-size:12px;font-weight:400;margin-left:2px}
+.wb-row[data-dim]{color:var(--dsw-alias-label-secondary)}
+.wb-row[data-read] b{font-weight:400;color:var(--dsw-alias-label-secondary)}
+.wb-hero{display:flex;flex-direction:column;justify-content:center;height:100%;gap:2px;min-width:0}
+.wb-hero .wb-big{font-size:36px;font-weight:600;letter-spacing:-1px;line-height:1.1}
+.wb-hero .wb-big small{font-size:14px;font-weight:400;letter-spacing:0;margin-left:4px}
+.wb-cols{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:12px;height:100%;align-items:center}
+.wb-cols>div{display:flex;flex-direction:column;min-width:0;gap:2px}
+.wb-cols .wb-big{font-size:28px;font-weight:600;letter-spacing:-.5px;line-height:1.1}
 
-.bnt-qcard{display:flex;flex-direction:column;justify-content:center;gap:8px;width:100%;height:100%;text-align:left;min-height:0}
-.bnt-qcard .bnt-qtext{margin:0;font-size:16px;line-height:1.55;font-family:"New York","Songti SC",Georgia,serif;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
-.bnt-qcard[data-size=s] .bnt-qtext{font-size:14px;-webkit-line-clamp:4}
-.bnt-qcard[data-size=w] .bnt-qtext{font-size:18px;-webkit-line-clamp:2}
-.bnt-qcard cite{font-style:normal;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.wb-qcard{display:flex;flex-direction:column;justify-content:center;gap:8px;width:100%;height:100%;text-align:left;min-height:0}
+.wb-qcard .wb-qtext{margin:0;font-size:16px;line-height:1.55;font-family:"New York","Songti SC",Georgia,serif;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.wb-qcard[data-size=s] .wb-qtext{font-size:14px;-webkit-line-clamp:4}
+.wb-qcard[data-size=w] .wb-qtext{font-size:18px;-webkit-line-clamp:2}
+.wb-qcard cite{font-style:normal;font-size:12px;color:var(--dsw-alias-label-secondary)}
 
-.bnt-focus{display:flex;flex-direction:column;justify-content:center;gap:6px;height:100%;min-width:0}
-.bnt-focus .bnt-big{font-size:40px;font-weight:600;letter-spacing:-1px;line-height:1.05}
-.bnt-focus[data-size=s] .bnt-big{font-size:32px}
-.bnt-focus[data-running] .bnt-big{color:var(--dsw-alias-brand-primary)}
-.bnt-fhead{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dsw-alias-label-secondary)}
-.bnt-fhead b{font-size:14px;font-weight:600;color:var(--dsw-alias-label-primary)}
-.bnt-fbtns{display:flex;align-items:center;gap:6px}
-.bnt-fbtns .bnt-action{height:28px;padding:0 10px}
+.wb-focus{display:flex;flex-direction:column;justify-content:center;gap:6px;height:100%;min-width:0}
+.wb-focus .wb-big{font-size:40px;font-weight:600;letter-spacing:-1px;line-height:1.05}
+.wb-focus[data-size=s] .wb-big{font-size:32px}
+.wb-focus[data-running] .wb-big{color:var(--dsw-alias-brand-primary)}
+.wb-fhead{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.wb-fhead b{font-size:14px;font-weight:600;color:var(--dsw-alias-label-primary)}
+.wb-fbtns{display:flex;align-items:center;gap:6px}
+.wb-fbtns .wb-action{height:28px;padding:0 10px}
 
-.bnt-links{display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:4px;overflow:auto;align-content:start;flex:1;min-height:0}
-.bnt-link{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;border-radius:8px;color:inherit;text-decoration:none;min-width:0}
-.bnt-link:hover{background:var(--dsw-alias-bg-layer-2)}
-.bnt-link i{width:32px;height:32px;border-radius:8px;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);box-sizing:border-box;display:grid;place-items:center;font-style:normal;font-weight:600;color:var(--dsw-alias-label-secondary)}
-.bnt-link span{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wb-links{display:grid;grid-template-columns:repeat(auto-fill,minmax(68px,1fr));gap:4px;overflow:auto;align-content:start;flex:1;min-height:0}
+.wb-link{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 4px;border-radius:8px;color:inherit;text-decoration:none;min-width:0}
+.wb-link:hover{background:var(--dsw-alias-bg-layer-2)}
+.wb-link i{width:32px;height:32px;border-radius:8px;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);box-sizing:border-box;display:grid;place-items:center;font-style:normal;font-weight:600;color:var(--dsw-alias-label-secondary)}
+.wb-link span{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-.bnt-prog{display:grid;grid-template-columns:max-content minmax(0,1fr) max-content;align-content:center;align-items:center;gap:10px;height:100%;font-size:12px;color:var(--dsw-alias-label-secondary)}
-.bnt-prog[data-size=s]{gap:6px 8px}
-.bnt-prow{display:contents}
-.bnt-prow span:last-child{text-align:right;color:var(--dsw-alias-label-primary)}
-.bnt-pbar{height:6px;border-radius:3px;background:var(--dsw-alias-bg-layer-2);overflow:hidden}
-.bnt-pbar i{display:block;height:100%;background:var(--dsw-alias-label-secondary);opacity:.5}
-.bnt-sys{display:flex;flex-direction:column;gap:10px;height:100%;min-height:0}
-.bnt-sys[data-size=w]{flex-direction:row;align-items:stretch;gap:16px}
-.bnt-sys .bnt-prog{height:auto;flex:1;min-width:0}
-.bnt-sys[data-detail] .bnt-prog{grid-template-columns:max-content minmax(0,1fr) max-content max-content}
-.bnt-prow small{font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap}
-.bnt-prow[data-hot] i{background:var(--dsw-alias-state-warn-primary);opacity:1}
-.bnt-prow[data-hot] span:last-of-type{color:var(--dsw-alias-state-warn-primary)}
-.bnt-photo{flex:1;margin:-16px;min-height:0;position:relative;cursor:pointer;background:var(--dsw-alias-bg-layer-2)}
-.bnt-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.bnt-photo-msg{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;height:100%;color:var(--dsw-alias-label-secondary)}
-.bnt-quotes{display:grid;grid-template-columns:minmax(0,1fr) max-content max-content;align-content:start;gap:8px 12px;min-height:0;overflow:auto}
-.bnt-quotes[data-size=w]{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);align-content:center;height:100%}
-.bnt-quote{display:contents}
-.bnt-quotes[data-size=w] .bnt-quote{display:flex;flex-direction:column;gap:2px;min-width:0}
-.bnt-quote>div{min-width:0;display:flex;flex-direction:column}
-.bnt-quote b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bnt-quote small{font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bnt-quote>span{text-align:right;align-self:center;white-space:nowrap}
-.bnt-quotes[data-size=w] .bnt-quote>span{text-align:left;align-self:auto}
-.bnt-quote>span:first-of-type{font-size:15px;font-weight:600}
-.bnt-quote[data-dir=up]>span:last-of-type{color:var(--bnt-up)}
-.bnt-quote[data-dir=down]>span:last-of-type{color:var(--bnt-down)}
-.bnt-quotes{--bnt-up:var(--dsw-alias-state-success-primary);--bnt-down:var(--dsw-alias-state-error-primary)}
-.bnt-quotes[data-red-up]{--bnt-up:var(--dsw-alias-state-error-primary);--bnt-down:var(--dsw-alias-state-success-primary)}
-.bnt-trend{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0}
-.bnt-trend .bnt-seg{overflow-x:auto;scrollbar-width:none}
-.bnt-trend .bnt-seg button{flex:none;white-space:nowrap}
-.bnt-trend .bnt-row{gap:8px;padding:3px 4px}
-.bnt-trend .bnt-row>span{flex:none;font-size:12px;color:var(--dsw-alias-label-secondary)}
-.bnt-trend .bnt-row>.bnt-rank{width:16px;text-align:right}
-.bnt-trend .bnt-rank[data-top]{color:var(--dsw-alias-brand-primary);font-weight:600}
-.bnt-spark{flex:1;min-height:32px;min-width:0;position:relative}
-.bnt-spark svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
-.bnt-spark polyline{fill:none;stroke:var(--dsw-alias-brand-primary);stroke-width:1.5;vector-effect:non-scaling-stroke;stroke-linejoin:round}
-.bnt-spark polygon{fill:var(--dsw-alias-brand-primary);opacity:.08}
+.wb-prog{display:grid;grid-template-columns:max-content minmax(0,1fr) max-content;align-content:center;align-items:center;gap:10px;height:100%;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.wb-prog[data-size=s]{gap:6px 8px}
+.wb-prow{display:contents}
+.wb-prow span:last-child{text-align:right;color:var(--dsw-alias-label-primary)}
+.wb-pbar{height:6px;border-radius:3px;background:var(--dsw-alias-bg-layer-2);overflow:hidden}
+.wb-pbar i{display:block;height:100%;background:var(--dsw-alias-label-secondary);opacity:.5}
+.wb-sys{display:flex;flex-direction:column;gap:10px;height:100%;min-height:0}
+.wb-sys[data-size=w]{flex-direction:row;align-items:stretch;gap:16px}
+.wb-sys .wb-prog{height:auto;flex:1;min-width:0}
+.wb-sys[data-detail] .wb-prog{grid-template-columns:max-content minmax(0,1fr) max-content max-content}
+.wb-prow small{font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap}
+.wb-prow[data-hot] i{background:var(--dsw-alias-state-warn-primary);opacity:1}
+.wb-prow[data-hot] span:last-of-type{color:var(--dsw-alias-state-warn-primary)}
+.wb-photo{flex:1;margin:-16px;min-height:0;position:relative;cursor:pointer;background:var(--dsw-alias-bg-layer-2)}
+.wb-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.wb-photo-msg{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;height:100%;color:var(--dsw-alias-label-secondary)}
+.wb-quotes{display:grid;grid-template-columns:minmax(0,1fr) max-content max-content;align-content:start;gap:8px 12px;min-height:0;overflow:auto}
+.wb-quotes[data-size=w]{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);align-content:center;height:100%}
+.wb-quote{display:contents}
+.wb-quotes[data-size=w] .wb-quote{display:flex;flex-direction:column;gap:2px;min-width:0}
+.wb-quote>div{min-width:0;display:flex;flex-direction:column}
+.wb-quote b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-quote small{font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-quote>span{text-align:right;align-self:center;white-space:nowrap}
+.wb-quotes[data-size=w] .wb-quote>span{text-align:left;align-self:auto}
+.wb-quote>span:first-of-type{font-size:15px;font-weight:600}
+.wb-quote[data-dir=up]>span:last-of-type{color:var(--wb-up)}
+.wb-quote[data-dir=down]>span:last-of-type{color:var(--wb-down)}
+.wb-quotes{--wb-up:var(--dsw-alias-state-success-primary);--wb-down:var(--dsw-alias-state-error-primary)}
+.wb-quotes[data-red-up]{--wb-up:var(--dsw-alias-state-error-primary);--wb-down:var(--dsw-alias-state-success-primary)}
+.wb-trend{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0}
+.wb-trend .wb-seg{overflow-x:auto;scrollbar-width:none}
+.wb-trend .wb-seg button{flex:none;white-space:nowrap}
+.wb-trend .wb-row{gap:8px;padding:3px 4px}
+.wb-trend .wb-row>span{flex:none;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.wb-trend .wb-row>.wb-rank{width:16px;text-align:right}
+.wb-trend .wb-rank[data-top]{color:var(--dsw-alias-brand-primary);font-weight:600}
+.wb-spark{flex:1;min-height:32px;min-width:0;position:relative}
+.wb-spark svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.wb-spark polyline{fill:none;stroke:var(--dsw-alias-brand-primary);stroke-width:1.5;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.wb-spark polygon{fill:var(--dsw-alias-brand-primary);opacity:.08}
 
-.bnt-rowbtn{width:100%;text-align:left;border-radius:8px;color:inherit;text-decoration:none;box-sizing:border-box}
-.bnt-rowbtn:hover{background:var(--dsw-alias-bg-layer-2)}
-.bnt-dot{width:8px;height:8px;border-radius:4px;flex:none;background:var(--dsw-alias-border-l2)}
-.bnt-dot[data-state=running]{background:var(--dsw-alias-brand-primary)}
-.bnt-dot[data-state=waiting]{background:var(--dsw-alias-state-warn-primary)}
-.bnt-row[data-state=waiting] small{color:var(--dsw-alias-state-warn-primary)}
-.bnt-sect{font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary);padding:8px 2px 2px}
-.bnt-row time{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none}
-.bnt-dot[data-state=blocked]{background:var(--dsw-alias-state-error-primary)}
-.bnt-dot[data-state=done]{background:var(--dsw-alias-state-success-primary)}
-.bnt-row[data-state=blocked] small{color:var(--dsw-alias-state-error-primary)}
-.bnt-row .bnt-del{align-self:center}
-.bnt-row:hover .bnt-del{display:grid}
+.wb-rowbtn{width:100%;text-align:left;border-radius:8px;color:inherit;text-decoration:none;box-sizing:border-box}
+.wb-rowbtn:hover{background:var(--dsw-alias-bg-layer-2)}
+.wb-dot{width:8px;height:8px;border-radius:4px;flex:none;background:var(--dsw-alias-border-l2)}
+.wb-dot[data-state=running]{background:var(--dsw-alias-brand-primary)}
+.wb-dot[data-state=waiting]{background:var(--dsw-alias-state-warn-primary)}
+.wb-row[data-state=waiting] small{color:var(--dsw-alias-state-warn-primary)}
+.wb-sect{font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary);padding:8px 2px 2px}
+.wb-row time{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none}
+.wb-dot[data-state=blocked]{background:var(--dsw-alias-state-error-primary)}
+.wb-dot[data-state=done]{background:var(--dsw-alias-state-success-primary)}
+.wb-row[data-state=blocked] small{color:var(--dsw-alias-state-error-primary)}
+.wb-row .wb-del{align-self:center}
+.wb-row:hover .wb-del{display:grid}
 
-.bnt-hrow{display:flex;align-items:center;gap:10px;padding:5px 2px;border-radius:8px;min-width:0}
-.bnt-hrow:hover{background:var(--dsw-alias-bg-layer-2)}
-.bnt-hrow>b{flex:1;min-width:0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bnt-hrow small{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none;min-width:44px;text-align:right}
-.bnt-hdays{display:flex;gap:4px;flex:none}
-.bnt-hday{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--dsw-alias-border-l2);box-sizing:border-box;display:grid;place-items:center}
-.bnt-hday:hover{border-color:var(--dsw-alias-brand-primary)}
-.bnt-hday[data-today]{border-color:var(--dsw-alias-label-secondary)}
-.bnt-hday[data-done]{background:var(--dsw-alias-brand-primary);border-color:var(--dsw-alias-brand-primary);${onBrand('color')}}
-.bnt-hrow:hover .bnt-del{display:grid}
+.wb-hrow{display:flex;align-items:center;gap:10px;padding:5px 2px;border-radius:8px;min-width:0}
+.wb-hrow:hover{background:var(--dsw-alias-bg-layer-2)}
+.wb-hrow>b{flex:1;min-width:0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-hrow small{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none;min-width:44px;text-align:right}
+.wb-hdays{display:flex;gap:4px;flex:none}
+.wb-hday{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--dsw-alias-border-l2);box-sizing:border-box;display:grid;place-items:center}
+.wb-hday:hover{border-color:var(--dsw-alias-brand-primary)}
+.wb-hday[data-today]{border-color:var(--dsw-alias-label-secondary)}
+.wb-hday[data-done]{background:var(--dsw-alias-brand-primary);border-color:var(--dsw-alias-brand-primary);${onBrand('color')}}
+.wb-hrow:hover .wb-del{display:grid}
 
-.bnt-prompt{display:flex;flex-direction:column;gap:8px;height:100%;min-height:0}
-.bnt-prompt textarea{flex:1;min-height:36px;resize:none;border:1px solid var(--dsw-alias-border-l1);outline:none;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary);border-radius:8px;padding:8px 10px;font:inherit;line-height:1.5}
-.bnt-prompt textarea:focus{border-color:var(--dsw-alias-brand-primary)}
-.bnt-chips{display:flex;flex-wrap:wrap;gap:6px;overflow:auto;min-height:0;flex:none;max-height:100%}
-.bnt-prompt[data-size=s] .bnt-chips,.bnt-prompt[data-size=t] .bnt-chips{flex-direction:column;flex-wrap:nowrap}
-.bnt-chip{height:26px;padding:0 10px;border-radius:13px;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:left;flex:none}
-.bnt-chip:hover{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary)}
-.bnt-chip:disabled{opacity:.5;cursor:default}
-.bnt-inrow{display:flex;align-items:flex-start;gap:8px;padding:6px 4px;border-radius:8px;min-width:0}
-.bnt-inrow:hover{background:var(--dsw-alias-bg-layer-2)}
-.bnt-inrow>span{flex:1;min-width:0;white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.45}
-.bnt-inrow small{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none;line-height:1.45}
-.bnt-inrow:hover .bnt-del{display:grid}
-.bnt-inrow:hover small{display:none}
-.bnt-usage{display:flex;flex-direction:column;gap:10px;height:100%;min-height:0}
-.bnt-usage[data-size=m],.bnt-usage[data-size=w]{flex-direction:row;align-items:stretch;gap:16px}
-.bnt-usage .bnt-hero{flex:none;justify-content:flex-start;height:auto}
-.bnt-usage[data-size=m] .bnt-hero,.bnt-usage[data-size=w] .bnt-hero,.bnt-usage[data-size=s] .bnt-hero{justify-content:center}
-.bnt-bars{flex:1;min-width:0;min-height:48px;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:3px;align-items:end}
-.bnt-bars>span{display:flex;align-items:flex-end;height:100%;min-height:0}
-.bnt-bars i{display:block;width:100%;min-height:2px;border-radius:3px 3px 1px 1px;background:var(--dsw-alias-label-secondary);opacity:.35}
-.bnt-bars>span[data-today] i{background:var(--dsw-alias-brand-primary);opacity:1}
-.bnt-seg{display:flex;gap:2px;flex:none}
-.bnt-seg button{height:24px;padding:0 8px;border-radius:6px;font-size:12px;color:var(--dsw-alias-label-secondary)}
-.bnt-seg button[aria-pressed=true]{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
-.bnt-table{display:grid;grid-template-columns:minmax(0,1fr) max-content max-content;gap:4px 12px;font-size:12px;overflow:auto;min-height:0;align-content:start}
-.bnt-table>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bnt-table>span:not(:nth-child(3n+1)){text-align:right}
-.bnt-table>.bnt-th{color:var(--dsw-alias-label-secondary)}
-.bnt-table small{color:var(--dsw-alias-label-secondary);margin-left:6px}
-.bnt-foot-note{font-size:11px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bnt-rowact{display:none;flex:none;height:24px;padding:0 8px;border-radius:6px;font-size:12px;color:var(--dsw-alias-brand-primary);align-self:center}
-.bnt-rowact:hover{background:var(--dsw-alias-bg-layer-1)}
-.bnt-row:hover .bnt-rowact{display:block}
-.bnt-row:hover .bnt-rowact~time{display:none}
-.bnt-rowact[data-danger]{color:var(--dsw-alias-state-error-primary)}
-.bnt-rowact[data-armed]{display:block}
-.bnt-ext{width:28px;height:28px;border-radius:7px;flex:none;display:grid;place-items:center;box-sizing:border-box;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);font-size:9px;font-weight:600;font-style:normal;letter-spacing:.2px;text-transform:uppercase;color:var(--dsw-alias-label-secondary);overflow:hidden}
-.bnt-inrow[data-sel]{box-shadow:inset 2px 0 0 var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-2)}
-.bnt-inrow .bnt-del[data-plain]:hover{color:var(--dsw-alias-label-primary)}
-.bnt-cliptext{flex:1;min-height:0;overflow:hidden;white-space:pre-wrap;word-break:break-word;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
-.bnt-search{margin-bottom:6px;flex:none}
-.bnt-net{display:flex;flex-direction:column;gap:10px;height:100%;min-height:0}
-.bnt-net[data-size=m],.bnt-net[data-size=w]{flex-direction:row;align-items:center;gap:20px}
-.bnt-net[data-size=w] .bnt-spark{align-self:stretch}
-.bnt-rates{display:flex;gap:16px;flex:none}
-.bnt-net[data-size=s] .bnt-rates,.bnt-net[data-size=m] .bnt-rates,.bnt-net[data-size=w] .bnt-rates{flex-direction:column;gap:6px}
-.bnt-rates>div{display:flex;flex-direction:column;min-width:0}
-.bnt-rates small{font-size:12px;color:var(--dsw-alias-label-secondary)}
-.bnt-rates b{font-size:20px;font-weight:600;letter-spacing:-.5px;line-height:1.2;white-space:nowrap}
-.bnt-kv{display:grid;grid-template-columns:max-content minmax(0,1fr) max-content;gap:5px 10px;font-size:12px;align-content:start;min-width:0;flex:1}
-.bnt-kv>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bnt-kv>span:nth-child(3n+1),.bnt-kv>span:nth-child(3n){color:var(--dsw-alias-label-secondary)}
-.bnt-kv>span:nth-child(3n){text-align:right}
-.bnt-kv [data-level=ok]{color:var(--dsw-alias-state-success-primary)}
-.bnt-kv [data-level=warn]{color:var(--dsw-alias-state-warn-primary)}
-.bnt-kv [data-level=bad]{color:var(--dsw-alias-state-error-primary)}
-.bnt-spark polyline.bnt-up{stroke:var(--dsw-alias-label-secondary);opacity:.7}
+.wb-prompt{display:flex;flex-direction:column;gap:8px;height:100%;min-height:0}
+.wb-prompt textarea{flex:1;min-height:36px;resize:none;border:1px solid var(--dsw-alias-border-l1);outline:none;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary);border-radius:8px;padding:8px 10px;font:inherit;line-height:1.5}
+.wb-prompt textarea:focus{border-color:var(--dsw-alias-brand-primary)}
+.wb-chips{display:flex;flex-wrap:wrap;gap:6px;overflow:auto;min-height:0;flex:none;max-height:100%}
+.wb-prompt[data-size=s] .wb-chips,.wb-prompt[data-size=t] .wb-chips{flex-direction:column;flex-wrap:nowrap}
+.wb-chip{height:26px;padding:0 10px;border-radius:13px;border:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:left;flex:none}
+.wb-chip:hover{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary)}
+.wb-chip:disabled{opacity:.5;cursor:default}
+.wb-inrow{display:flex;align-items:flex-start;gap:8px;padding:6px 4px;border-radius:8px;min-width:0}
+.wb-inrow:hover{background:var(--dsw-alias-bg-layer-2)}
+.wb-inrow>span{flex:1;min-width:0;white-space:pre-wrap;word-break:break-word;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.45}
+.wb-inrow small{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none;line-height:1.45}
+.wb-inrow:hover .wb-del{display:grid}
+.wb-inrow:hover small{display:none}
+.wb-usage{display:flex;flex-direction:column;gap:10px;height:100%;min-height:0}
+.wb-usage[data-size=m],.wb-usage[data-size=w]{flex-direction:row;align-items:stretch;gap:16px}
+.wb-usage .wb-hero{flex:none;justify-content:flex-start;height:auto}
+.wb-usage[data-size=m] .wb-hero,.wb-usage[data-size=w] .wb-hero,.wb-usage[data-size=s] .wb-hero{justify-content:center}
+.wb-bars{flex:1;min-width:0;min-height:48px;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:3px;align-items:end}
+.wb-bars>span{display:flex;align-items:flex-end;height:100%;min-height:0}
+.wb-bars i{display:block;width:100%;min-height:2px;border-radius:3px 3px 1px 1px;background:var(--dsw-alias-label-secondary);opacity:.35}
+.wb-bars>span[data-today] i{background:var(--dsw-alias-brand-primary);opacity:1}
+.wb-seg{display:flex;gap:2px;flex:none}
+.wb-seg button{height:24px;padding:0 8px;border-radius:6px;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.wb-seg button[aria-pressed=true]{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
+.wb-table{display:grid;grid-template-columns:minmax(0,1fr) max-content max-content;gap:4px 12px;font-size:12px;overflow:auto;min-height:0;align-content:start}
+.wb-table>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-table>span:not(:nth-child(3n+1)){text-align:right}
+.wb-table>.wb-th{color:var(--dsw-alias-label-secondary)}
+.wb-table small{color:var(--dsw-alias-label-secondary);margin-left:6px}
+.wb-foot-note{font-size:11px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-rowact{display:none;flex:none;height:24px;padding:0 8px;border-radius:6px;font-size:12px;color:var(--dsw-alias-brand-primary);align-self:center}
+.wb-rowact:hover{background:var(--dsw-alias-bg-layer-1)}
+.wb-row:hover .wb-rowact{display:block}
+.wb-row:hover .wb-rowact~time{display:none}
+.wb-rowact[data-danger]{color:var(--dsw-alias-state-error-primary)}
+.wb-rowact[data-armed]{display:block}
+.wb-ext{width:28px;height:28px;border-radius:7px;flex:none;display:grid;place-items:center;box-sizing:border-box;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);font-size:9px;font-weight:600;font-style:normal;letter-spacing:.2px;text-transform:uppercase;color:var(--dsw-alias-label-secondary);overflow:hidden}
+.wb-inrow[data-sel]{box-shadow:inset 2px 0 0 var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-2)}
+.wb-inrow .wb-del[data-plain]:hover{color:var(--dsw-alias-label-primary)}
+.wb-cliptext{flex:1;min-height:0;overflow:hidden;white-space:pre-wrap;word-break:break-word;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.wb-search{margin-bottom:6px;flex:none}
+.wb-net{display:flex;flex-direction:column;gap:10px;height:100%;min-height:0}
+.wb-net[data-size=m],.wb-net[data-size=w]{flex-direction:row;align-items:center;gap:20px}
+.wb-net[data-size=w] .wb-spark{align-self:stretch}
+.wb-rates{display:flex;gap:16px;flex:none}
+.wb-net[data-size=s] .wb-rates,.wb-net[data-size=m] .wb-rates,.wb-net[data-size=w] .wb-rates{flex-direction:column;gap:6px}
+.wb-rates>div{display:flex;flex-direction:column;min-width:0}
+.wb-rates small{font-size:12px;color:var(--dsw-alias-label-secondary)}
+.wb-rates b{font-size:20px;font-weight:600;letter-spacing:-.5px;line-height:1.2;white-space:nowrap}
+.wb-kv{display:grid;grid-template-columns:max-content minmax(0,1fr) max-content;gap:5px 10px;font-size:12px;align-content:start;min-width:0;flex:1}
+.wb-kv>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-kv>span:nth-child(3n+1),.wb-kv>span:nth-child(3n){color:var(--dsw-alias-label-secondary)}
+.wb-kv>span:nth-child(3n){text-align:right}
+.wb-kv [data-level=ok]{color:var(--dsw-alias-state-success-primary)}
+.wb-kv [data-level=warn]{color:var(--dsw-alias-state-warn-primary)}
+.wb-kv [data-level=bad]{color:var(--dsw-alias-state-error-primary)}
+.wb-spark polyline.wb-up{stroke:var(--dsw-alias-label-secondary);opacity:.7}
 
-@media (max-width:900px){.bnt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.bnt-card[data-c="4"]{grid-column:span 2}.bnt-today .bnt-quote,.bnt-today .bnt-qsep{display:none}}
-@media (max-width:600px){.bnt-grid{grid-template-columns:minmax(0,1fr)}.bnt-card{grid-column:auto!important}}
-.bnt-cw{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;margin:0 -4px -4px}
-.bnt-cwframe{flex:1;width:100%;min-height:0;border:0;display:block;background:transparent}
-.bnt-cwerr{position:absolute;left:4px;right:4px;bottom:4px;display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);font-size:12px;color:var(--dsw-alias-state-error-primary)}
-.bnt-cwerr span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bnt-cwerr button{display:inline-flex;align-items:center;gap:4px;flex:none;color:var(--dsw-alias-brand-primary);font-weight:500}
-.bnt-card>header .bnt-hact{opacity:0;width:24px;height:24px;margin:-4px -6px -4px 0;border-radius:6px;display:grid;place-items:center;color:var(--dsw-alias-label-secondary);flex:none}
-.bnt-card:hover>header .bnt-hact,.bnt-card>header .bnt-hact:focus-visible{opacity:1}
-.bnt-card>header .bnt-hact:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-brand-primary)}
-.bnt-gen{border-style:dashed;flex:none}
-.bnt-emptyacts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.bnt-gen .bnt-gname svg{color:var(--dsw-alias-brand-primary)}
-.bnt-gentext{min-height:96px;resize:vertical;line-height:1.5}
-.bnt-modal .bnt-wsel{margin-right:auto}
-.bnt-codefield{flex:1;min-height:0}
-.bnt-code{flex:1;min-height:240px;resize:none;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.5;white-space:pre;tab-size:2}
-.bnt-cwmeta{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none}
-.bnt-modal[data-wide] .bnt-field{flex:none}
-.bnt-modal[data-wide] .bnt-codefield{flex:1}
+@media (max-width:900px){.wb-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wb-card[data-c="4"]{grid-column:span 2}.wb-today .wb-quote,.wb-today .wb-qsep{display:none}}
+@media (max-width:600px){.wb-grid{grid-template-columns:minmax(0,1fr)}.wb-card{grid-column:auto!important}}
+.wb-cw{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;margin:0 -4px -4px}
+.wb-cwframe{flex:1;width:100%;min-height:0;border:0;display:block;background:transparent}
+.wb-cwerr{position:absolute;left:4px;right:4px;bottom:4px;display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);font-size:12px;color:var(--dsw-alias-state-error-primary)}
+.wb-cwerr span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-cwerr button{display:inline-flex;align-items:center;gap:4px;flex:none;color:var(--dsw-alias-brand-primary);font-weight:500}
+.wb-card>header .wb-hact{opacity:0;width:24px;height:24px;margin:-4px -6px -4px 0;border-radius:6px;display:grid;place-items:center;color:var(--dsw-alias-label-secondary);flex:none}
+.wb-card:hover>header .wb-hact,.wb-card>header .wb-hact:focus-visible{opacity:1}
+.wb-card>header .wb-hact:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-brand-primary)}
+.wb-gen{border-style:dashed;flex:none}
+.wb-emptyacts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.wb-gen .wb-gname svg{color:var(--dsw-alias-brand-primary)}
+.wb-gentext{min-height:96px;resize:vertical;line-height:1.5}
+.wb-modal .wb-wsel{margin-right:auto}
+.wb-codefield{flex:1;min-height:0}
+.wb-code{flex:1;min-height:240px;resize:none;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.5;white-space:pre;tab-size:2}
+.wb-cwmeta{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none}
+.wb-modal[data-wide] .wb-field{flex:none}
+.wb-modal[data-wide] .wb-codefield{flex:1}
 `;
 
     const pad = n => String(n).padStart(2, '0');
@@ -702,16 +702,16 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
 `;
 
     // 在 iframe 里运行（按源码序列化注入），不能引用外层变量。
-    function deskBridge() {
-      const boot = JSON.parse(document.getElementById('desk-boot').textContent);
+    function workboardBridge() {
+      const boot = JSON.parse(document.getElementById('workboard-boot').textContent);
       const NS = 'dsh-workboard-frame';
       const KEYS = ['size', 'config', 'data', 'dataAt', 'theme', 'lang'];
       const post = msg => parent.postMessage({ns: NS, ...msg}, '*');
       const pending = new Map();
       const listeners = new Set();
       let seq = 0;
-      const desk = {};
-      for (const k of KEYS) desk[k] = boot[k];
+      const workboard = {};
+      for (const k of KEYS) workboard[k] = boot[k];
       const request = (type, payload) => new Promise((resolve, reject) => {
         const id = ++seq;
         pending.set(id, {resolve, reject});
@@ -721,16 +721,16 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         const message = error && typeof error === 'object' ? (error.stack || error.message || String(error)) : String(error);
         post({type: 'error', message: message.slice(0, 2000), line: line > boot.offset ? line - boot.offset : 0});
       };
-      desk.on = fn => { listeners.add(fn); return () => { listeners.delete(fn); }; };
-      desk.fetch = (url, options = {}) => request('fetch', {url: String(url), as: options.as, fresh: options.fresh === true});
-      desk.save = data => request('save', {data}).then(r => { desk.data = data ?? null; desk.dataAt = r.dataAt; return true; });
-      desk.open = url => { post({type: 'open', url: String(url)}); };
-      desk.ask = prompt => { post({type: 'ask', prompt: String(prompt)}); };
-      window.desk = desk;
+      workboard.on = fn => { listeners.add(fn); return () => { listeners.delete(fn); }; };
+      workboard.fetch = (url, options = {}) => request('fetch', {url: String(url), as: options.as, fresh: options.fresh === true});
+      workboard.save = data => request('save', {data}).then(r => { workboard.data = data ?? null; workboard.dataAt = r.dataAt; return true; });
+      workboard.open = url => { post({type: 'open', url: String(url)}); };
+      workboard.ask = prompt => { post({type: 'ask', prompt: String(prompt)}); };
+      window.workboard = workboard;
       const root = document.documentElement;
       const paint = vars => {
         for (const k of Object.keys(vars)) root.style.setProperty(k, vars[k]);
-        root.style.colorScheme = desk.theme;
+        root.style.colorScheme = workboard.theme;
       };
       paint(boot.vars);
       addEventListener('message', event => {
@@ -744,10 +744,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           return;
         }
         if (m.type !== 'state') return;
-        const changed = KEYS.filter(k => k in m.state && JSON.stringify(desk[k]) !== JSON.stringify(m.state[k]));
-        for (const k of changed) desk[k] = m.state[k];
+        const changed = KEYS.filter(k => k in m.state && JSON.stringify(workboard[k]) !== JSON.stringify(m.state[k]));
+        for (const k of changed) workboard[k] = m.state[k];
         if (m.state.vars) paint(m.state.vars);
-        if (changed.length) for (const fn of [...listeners]) { try { fn(desk); } catch (error) { report(error); } }
+        if (changed.length) for (const fn of [...listeners]) { try { fn(workboard); } catch (error) { report(error); } }
       });
       addEventListener('error', e => report(e.error || e.message, e.lineno));
       addEventListener('unhandledrejection', e => report(e.reason));
@@ -755,7 +755,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         const a = e.target instanceof Element ? e.target.closest('a[href]') : null;
         if (!a || (a.getAttribute('href') ?? '').startsWith('#')) return;
         e.preventDefault();
-        desk.open(a.href);
+        workboard.open(a.href);
       });
       post({type: 'ready'});
     }
@@ -765,7 +765,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     function frameDoc(html, state) {
       const head = (json => `<!doctype html><html lang="${escAttr(state.lang)}"><head><meta charset="utf-8">`
         + `<meta http-equiv="Content-Security-Policy" content="${FRAME_CSP}"><style>${FRAME_CSS}</style>`
-        + `<script type="application/json" id="desk-boot">${json}</script><script>(${deskBridge})()</script></head><body>`);
+        + `<script type="application/json" id="workboard-boot">${json}</script><script>(${workboardBridge})()</script></head><body>`);
       const offset = head('').split('\n').length;
       const boot = JSON.stringify({...state, offset}).replace(/</g, '\\u003c');
       return `${head(boot)}\n${html}\n</body></html>`;
@@ -1062,29 +1062,29 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const q = useQuote(prefs, now, dayOfYear(now) + offset, offset * 2);
           const w = wx.value;
           let weather = null;
-          if (showWeather && !wx.loc) weather = h('button', {type: 'button', className: 'bnt-btn bnt-cta', onClick: openSettings}, t('setCity'));
+          if (showWeather && !wx.loc) weather = h('button', {type: 'button', className: 'wb-btn wb-cta', onClick: openSettings}, t('setCity'));
           else if (showWeather && w) {
             const aqi = w.aqi != null ? aqiLevel(w.aqi) : null;
-            weather = h('div', {className: 'bnt-wxmini'},
+            weather = h('div', {className: 'wb-wxmini'},
               h(WxIcon, {code: w.current.code, isDay: w.current.isDay, size: 28}),
-              h('span', {className: 'bnt-wxt bnt-num'}, deg(w.current.temp)),
+              h('span', {className: 'wb-wxt wb-num'}, deg(w.current.temp)),
               h('div', null,
                 h('div', null, `${wx.loc.name} · ${t(wxKind(w.current.code, w.current.isDay)[1])}`),
-                h('div', {className: 'bnt-muted bnt-num'}, `${deg(w.today.lo)} / ${deg(w.today.hi)}`, aqi ? ` · AQI ${w.aqi} ${t(aqi.key)}` : '')));
+                h('div', {className: 'wb-muted wb-num'}, `${deg(w.today.lo)} / ${deg(w.today.hi)}`, aqi ? ` · AQI ${w.aqi} ${t(aqi.key)}` : '')));
           }
-          return h('div', {className: 'bnt-today'},
-            h('div', {className: 'bnt-tclock'},
-              h('span', {className: 'bnt-time bnt-num'}, `${pad(now.getHours())}:${pad(now.getMinutes())}`),
-              h('span', {className: 'bnt-greet'}, greet(prefs, now.getHours())),
-              h('span', {className: 'bnt-date'}, `${now.toLocaleDateString(lang, {month: 'long', day: 'numeric', weekday: 'long'})} · ${fill(t('week'), {n: isoWeek(now)})}`)),
-            weather ? h('span', {className: 'bnt-sep'}) : null,
+          return h('div', {className: 'wb-today'},
+            h('div', {className: 'wb-tclock'},
+              h('span', {className: 'wb-time wb-num'}, `${pad(now.getHours())}:${pad(now.getMinutes())}`),
+              h('span', {className: 'wb-greet'}, greet(prefs, now.getHours())),
+              h('span', {className: 'wb-date'}, `${now.toLocaleDateString(lang, {month: 'long', day: 'numeric', weekday: 'long'})} · ${fill(t('week'), {n: isoWeek(now)})}`)),
+            weather ? h('span', {className: 'wb-sep'}) : null,
             weather,
-            showQuote ? h('span', {className: 'bnt-sep bnt-qsep'}) : null,
-            showQuote ? h('button', {type: 'button', className: 'bnt-btn bnt-quote', title: t('nextQuote'), onClick: () => setOffset(o => o + 1)},
-              h('span', {className: 'bnt-qtext'}, q.text),
+            showQuote ? h('span', {className: 'wb-sep wb-qsep'}) : null,
+            showQuote ? h('button', {type: 'button', className: 'wb-btn wb-quote', title: t('nextQuote'), onClick: () => setOffset(o => o + 1)},
+              h('span', {className: 'wb-qtext'}, q.text),
               q.by ? h('cite', null, `— ${q.by}`) : null) : null);
         }
-        Today.desk = {
+        Today.workboard = {
           apiVersion: 1, sizes: ['bar'], banner: true, description: () => t('d_today'),
           settings: [
             NAME_FIELD,
@@ -1102,21 +1102,21 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const lang = t('lang');
           const start = new Date(now.getFullYear(), 0, 1);
           const yearPct = Math.floor((now - start) / (new Date(now.getFullYear() + 1, 0, 1) - start) * 100);
-          return h('div', {className: 'bnt-clock', 'data-size': size},
-            h('span', {className: 'bnt-muted'}, greet(prefs, now.getHours())),
-            h('span', {className: 'bnt-time bnt-num'}, `${pad(now.getHours())}:${pad(now.getMinutes())}`),
-            h('span', {className: 'bnt-muted'}, `${now.toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'})} · ${fill(t('week'), {n: isoWeek(now)})}`),
-            size === 's' ? null : h('div', {className: 'bnt-yearbar', title: fill(t('year'), {n: yearPct})}, h('i', {style: {width: `${yearPct}%`}})));
+          return h('div', {className: 'wb-clock', 'data-size': size},
+            h('span', {className: 'wb-muted'}, greet(prefs, now.getHours())),
+            h('span', {className: 'wb-time wb-num'}, `${pad(now.getHours())}:${pad(now.getMinutes())}`),
+            h('span', {className: 'wb-muted'}, `${now.toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'})} · ${fill(t('week'), {n: isoWeek(now)})}`),
+            size === 's' ? null : h('div', {className: 'wb-yearbar', title: fill(t('year'), {n: yearPct})}, h('i', {style: {width: `${yearPct}%`}})));
         }
-        Clock.desk = {apiVersion: 1, sizes: ['m', 's'], title: false, description: () => t('d_clock'), settings: [NAME_FIELD]};
+        Clock.workboard = {apiVersion: 1, sizes: ['m', 's'], title: false, description: () => t('d_clock'), settings: [NAME_FIELD]};
 
         function TodoRow({todo, today}) {
           return h('li', {'data-done': todo.done ? '' : undefined},
-            h('button', {type: 'button', className: 'bnt-btn bnt-ck', 'aria-label': todo.done ? t('reopen') : t('complete'), onClick: () => { data.setDone(todo.id, !todo.done).catch(() => {}); }},
+            h('button', {type: 'button', className: 'wb-btn wb-ck', 'aria-label': todo.done ? t('reopen') : t('complete'), onClick: () => { data.setDone(todo.id, !todo.done).catch(() => {}); }},
               todo.done ? h(Icon.check) : null),
-            h('span', {className: 'bnt-tx', title: todo.text}, todo.text),
-            !todo.done && todo.createdAt < today ? h('span', {className: 'bnt-tag'}, t('carried')) : null,
-            h('button', {type: 'button', className: 'bnt-btn bnt-del', 'aria-label': t('remove'), title: t('remove'), onClick: () => { data.removeTodo(todo.id).catch(() => {}); }}, h(Icon.x)));
+            h('span', {className: 'wb-tx', title: todo.text}, todo.text),
+            !todo.done && todo.createdAt < today ? h('span', {className: 'wb-tag'}, t('carried')) : null,
+            h('button', {type: 'button', className: 'wb-btn wb-del', 'aria-label': t('remove'), title: t('remove'), onClick: () => { data.removeTodo(todo.id).catch(() => {}); }}, h(Icon.x)));
         }
 
         function Todo() {
@@ -1135,16 +1135,16 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             data.addTodo(value).catch(() => setText(value));
           };
           return h(React.Fragment, null,
-            h('ul', {className: 'bnt-list'},
-              todos && open.length === 0 ? h('li', {className: 'bnt-blank'}, t('noTodos')) : null,
+            h('ul', {className: 'wb-list'},
+              todos && open.length === 0 ? h('li', {className: 'wb-blank'}, t('noTodos')) : null,
               open.map(x => h(TodoRow, {key: x.id, todo: x, today})),
-              done.length ? h('li', {key: '__done'}, h('button', {type: 'button', className: 'bnt-btn bnt-donetoggle', 'aria-expanded': showDone, onClick: () => setShowDone(v => !v)},
+              done.length ? h('li', {key: '__done'}, h('button', {type: 'button', className: 'wb-btn wb-donetoggle', 'aria-expanded': showDone, onClick: () => setShowDone(v => !v)},
                 h(Icon.chev), fill(t('done'), {n: done.length}))) : null,
               showDone ? done.map(x => h(TodoRow, {key: x.id, todo: x, today})) : null),
-            h('label', {className: 'bnt-add'}, h(Icon.plus),
+            h('label', {className: 'wb-add'}, h(Icon.plus),
               h('input', {value: text, placeholder: t('addTodo'), enterKeyHint: 'done', onChange: e => setText(e.target.value), onKeyDown: submit})));
         }
-        Todo.desk = {apiVersion: 1, sizes: ['l', 'm', 't'], description: () => t('d_todo')};
+        Todo.workboard = {apiVersion: 1, sizes: ['l', 'm', 't'], description: () => t('d_todo')};
 
         function Note() {
           useLocale();
@@ -1183,38 +1183,38 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             if (line) data.addTodo(line).catch(() => {});
           };
           return h(React.Fragment, null,
-            h('textarea', {ref: area, className: 'bnt-note', value: text ?? '', placeholder: t('notePlaceholder'), spellCheck: false, onChange,
+            h('textarea', {ref: area, className: 'wb-note', value: text ?? '', placeholder: t('notePlaceholder'), spellCheck: false, onChange,
               onFocus: () => { focused.current = true; }, onBlur: () => { focused.current = false; }}),
-            h('div', {className: 'bnt-notefoot'}, h('span', null, status),
-              h('button', {type: 'button', className: 'bnt-btn', onMouseDown: e => e.preventDefault(), onClick: lineToTodo}, t('lineToTodo'))));
+            h('div', {className: 'wb-notefoot'}, h('span', null, status),
+              h('button', {type: 'button', className: 'wb-btn', onMouseDown: e => e.preventDefault(), onClick: lineToTodo}, t('lineToTodo'))));
         }
-        Note.desk = {apiVersion: 1, sizes: ['l', 't', 'm', 's'], description: () => t('d_note')};
+        Note.workboard = {apiVersion: 1, sizes: ['l', 't', 'm', 's'], description: () => t('d_note')};
 
         function Weather({size, openSettings}) {
           useLocale();
           const prefs = usePrefs();
           const wx = useWeather(prefs);
-          if (!wx.loc) return h('div', {className: 'bnt-wx', style: {justifyContent: 'center', alignItems: 'flex-start'}}, h('button', {type: 'button', className: 'bnt-btn bnt-cta', onClick: openSettings}, t('setCity')));
+          if (!wx.loc) return h('div', {className: 'wb-wx', style: {justifyContent: 'center', alignItems: 'flex-start'}}, h('button', {type: 'button', className: 'wb-btn wb-cta', onClick: openSettings}, t('setCity')));
           const w = wx.value;
-          if (!w) return h('div', {className: 'bnt-wx bnt-muted'}, wx.error || '…');
+          if (!w) return h('div', {className: 'wb-wx wb-muted'}, wx.error || '…');
           const [, textKey] = wxKind(w.current.code, w.current.isDay);
           const aqi = w.aqi != null ? aqiLevel(w.aqi) : null;
-          return h('div', {className: 'bnt-wx', title: wx.loc.region || undefined},
-            h('div', {className: 'bnt-wxnow'},
+          return h('div', {className: 'wb-wx', title: wx.loc.region || undefined},
+            h('div', {className: 'wb-wxnow'},
               h(WxIcon, {code: w.current.code, isDay: w.current.isDay, size: size === 's' ? 30 : 40}),
-              h('span', {className: 'bnt-wxt bnt-num'}, deg(w.current.temp)),
-              size === 's' ? null : h('div', {className: 'bnt-wxmeta'},
+              h('span', {className: 'wb-wxt wb-num'}, deg(w.current.temp)),
+              size === 's' ? null : h('div', {className: 'wb-wxmeta'},
                 h('b', null, `${wx.loc.name} · ${t(textKey)}`),
-                h('span', {className: 'bnt-num'}, `${deg(w.today.lo)} / ${deg(w.today.hi)} · ${fill(t('feels'), {n: Math.round(w.current.feels)})}`))),
-            size === 's' ? h('div', {className: 'bnt-wxmeta'},
+                h('span', {className: 'wb-num'}, `${deg(w.today.lo)} / ${deg(w.today.hi)} · ${fill(t('feels'), {n: Math.round(w.current.feels)})}`))),
+            size === 's' ? h('div', {className: 'wb-wxmeta'},
               h('b', null, wx.loc.name),
               h('span', null, t(textKey)),
-              h('span', {className: 'bnt-num'}, `${deg(w.today.lo)} / ${deg(w.today.hi)}`)) : null,
-            aqi ? h('div', null, h('span', {className: 'bnt-aqi', 'data-level': aqi.level}, `AQI ${w.aqi} · ${t(aqi.key)}`)) : null,
-            size === 's' ? null : h('div', {className: 'bnt-wxhours bnt-num'}, w.hours.slice(0, 6).map(x => h('div', {key: x.time},
+              h('span', {className: 'wb-num'}, `${deg(w.today.lo)} / ${deg(w.today.hi)}`)) : null,
+            aqi ? h('div', null, h('span', {className: 'wb-aqi', 'data-level': aqi.level}, `AQI ${w.aqi} · ${t(aqi.key)}`)) : null,
+            size === 's' ? null : h('div', {className: 'wb-wxhours wb-num'}, w.hours.slice(0, 6).map(x => h('div', {key: x.time},
               h('span', null, x.time), h(WxIcon, {code: x.code, size: 18}), h('b', null, deg(x.temp))))));
         }
-        Weather.desk = {apiVersion: 1, sizes: ['m', 's'], description: () => t('d_weather'), settings: LOCATION_FIELDS};
+        Weather.workboard = {apiVersion: 1, sizes: ['m', 's'], description: () => t('d_weather'), settings: LOCATION_FIELDS};
 
         const dayKey = v => { const d = new Date(v); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
         const keyDate = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
@@ -1238,8 +1238,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         function EventRow({e, now}) {
           const state = e.end <= now ? 'past' : e.start <= now ? 'now' : '';
           const time = e.allDay ? t('allDay') : e.end > e.start ? `${hm(e.start)}–${hm(e.end)}` : hm(e.start);
-          return h('div', {className: 'bnt-ev', 'data-state': state || undefined, title: [e.title, e.location].filter(Boolean).join(' · ')},
-            h('i'), h('span', {className: 'bnt-evtime bnt-num'}, time), h('span', {className: 'bnt-evtitle'}, e.title));
+          return h('div', {className: 'wb-ev', 'data-state': state || undefined, title: [e.title, e.location].filter(Boolean).join(' · ')},
+            h('i'), h('span', {className: 'wb-evtime wb-num'}, time), h('span', {className: 'wb-evtitle'}, e.title));
         }
 
         function Calendar({size, openSettings}) {
@@ -1267,42 +1267,42 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const list = (k, head) => {
             const items = byDay.get(k) ?? [];
             return h(React.Fragment, {key: k},
-              head ? h('div', {className: 'bnt-evhead'}, head) : null,
-              items.length ? items.map((e, i) => h(EventRow, {key: `${e.start}-${i}`, e, now: nowMs})) : h('div', {className: 'bnt-blank'}, t('noEvents')));
+              head ? h('div', {className: 'wb-evhead'}, head) : null,
+              items.length ? items.map((e, i) => h(EventRow, {key: `${e.start}-${i}`, e, now: nowMs})) : h('div', {className: 'wb-blank'}, t('noEvents')));
           };
-          const footer = !urls.length ? h('button', {type: 'button', className: 'bnt-btn bnt-cta', style: {alignSelf: 'flex-start'}, onClick: openSettings}, t('addIcs'))
-            : failed ? h('div', {className: 'bnt-calerr', title: res.value.errors.map(e => `${e.url}: ${e.message}`).join('\n')}, fill(t('calError'), {n: failed})) : res.error ? h('div', {className: 'bnt-calerr'}, res.error) : null;
+          const footer = !urls.length ? h('button', {type: 'button', className: 'wb-btn wb-cta', style: {alignSelf: 'flex-start'}, onClick: openSettings}, t('addIcs'))
+            : failed ? h('div', {className: 'wb-calerr', title: res.value.errors.map(e => `${e.url}: ${e.message}`).join('\n')}, fill(t('calError'), {n: failed})) : res.error ? h('div', {className: 'wb-calerr'}, res.error) : null;
 
           if (!big) {
             const tomorrow = dayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
-            return h('div', {className: 'bnt-cal'},
-              urls.length ? h('div', {className: 'bnt-events'}, list(todayKey, size === 'm' ? t('todayEvents') : null), size === 'm' ? list(tomorrow, t('tomorrowEvents')) : null) : null,
+            return h('div', {className: 'wb-cal'},
+              urls.length ? h('div', {className: 'wb-events'}, list(todayKey, size === 'm' ? t('todayEvents') : null), size === 'm' ? list(tomorrow, t('tomorrowEvents')) : null) : null,
               footer);
           }
           const sel = selected ?? (month === 0 ? todayKey : dayKey(base));
           const names = Array.from({length: 7}, (_, i) => new Date(2026, 10, 1 + ((weekStart + i) % 7)).toLocaleDateString(lang, {weekday: 'narrow'}));
           const days = Array.from({length: rows * 7}, (_, i) => new Date(gridStart.getFullYear(), gridStart.getMonth(), gridStart.getDate() + i));
           const selDate = keyDate(sel);
-          return h('div', {className: 'bnt-cal', 'data-big': ''},
-            h('div', {className: 'bnt-calnav'},
-              h('button', {type: 'button', className: 'bnt-btn', onClick: () => { setMonth(0); setSelected(null); }}, base.toLocaleDateString(lang, {year: 'numeric', month: 'long'})),
-              h('button', {type: 'button', className: 'bnt-btn bnt-iconbtn', 'aria-label': t('prevMonth'), onClick: () => { setMonth(m => m - 1); setSelected(null); }}, h(Icon.left)),
-              h('button', {type: 'button', className: 'bnt-btn bnt-iconbtn', 'aria-label': t('nextMonth'), onClick: () => { setMonth(m => m + 1); setSelected(null); }}, h(Icon.right))),
-            h('div', {className: 'bnt-month bnt-num'},
-              names.map((n, i) => h('span', {key: `w${i}`, className: 'bnt-wd'}, n)),
+          return h('div', {className: 'wb-cal', 'data-big': ''},
+            h('div', {className: 'wb-calnav'},
+              h('button', {type: 'button', className: 'wb-btn', onClick: () => { setMonth(0); setSelected(null); }}, base.toLocaleDateString(lang, {year: 'numeric', month: 'long'})),
+              h('button', {type: 'button', className: 'wb-btn wb-iconbtn', 'aria-label': t('prevMonth'), onClick: () => { setMonth(m => m - 1); setSelected(null); }}, h(Icon.left)),
+              h('button', {type: 'button', className: 'wb-btn wb-iconbtn', 'aria-label': t('nextMonth'), onClick: () => { setMonth(m => m + 1); setSelected(null); }}, h(Icon.right))),
+            h('div', {className: 'wb-month wb-num'},
+              names.map((n, i) => h('span', {key: `w${i}`, className: 'wb-wd'}, n)),
               days.map(d => {
                 const k = dayKey(d);
-                return h('button', {key: k, type: 'button', className: 'bnt-btn bnt-day', onClick: () => setSelected(k),
+                return h('button', {key: k, type: 'button', className: 'wb-btn wb-day', onClick: () => setSelected(k),
                   'data-out': d.getMonth() !== base.getMonth() ? '' : undefined, 'data-today': k === todayKey ? '' : undefined,
                   'data-selected': k === sel ? '' : undefined, 'data-has': byDay.has(k) ? '' : undefined}, d.getDate());
               })),
-            urls.length ? h('div', {className: 'bnt-events'}, list(sel, sel === todayKey ? t('todayEvents') : selDate.toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'}))) : null,
+            urls.length ? h('div', {className: 'wb-events'}, list(sel, sel === todayKey ? t('todayEvents') : selDate.toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'}))) : null,
             footer);
         }
         const CALENDAR_URLS_FIELD = {key: 'calendarUrls', type: 'textarea', scope: 'global', label: () => t('f_urls'), placeholder: 'https://…/calendar.ics'};
         const WEEK_START_FIELD = {key: 'weekStart', type: 'select', scope: 'global', label: () => t('f_weekStart'), default: () => (t('lang').startsWith('zh') ? '1' : '0'),
           options: [{value: '1', label: () => t('monday')}, {value: '0', label: () => t('sunday')}]};
-        Calendar.desk = {
+        Calendar.workboard = {
           apiVersion: 1, sizes: ['t', 'l', 's', 'm'], description: () => t('d_calendar'),
           settings: [CALENDAR_URLS_FIELD, WEEK_START_FIELD],
         };
@@ -1313,11 +1313,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const prefs = usePrefs();
           const [offset, setOffset] = useState(0);
           const q = useQuote(prefs, now, dayOfYear(now) + offset + 1, offset * 2 + 1);
-          return h('button', {type: 'button', className: 'bnt-btn bnt-qcard', 'data-size': size, title: t('nextQuote'), onClick: () => setOffset(o => o + 1)},
-            h('span', {className: 'bnt-qtext'}, q.text),
+          return h('button', {type: 'button', className: 'wb-btn wb-qcard', 'data-size': size, title: t('nextQuote'), onClick: () => setOffset(o => o + 1)},
+            h('span', {className: 'wb-qtext'}, q.text),
             q.by ? h('cite', null, `— ${q.by}`) : null);
         }
-        Quote.desk = {apiVersion: 1, sizes: ['m', 'w', 's'], title: false, description: () => t('d_quote'), settings: QUOTE_FIELDS};
+        Quote.workboard = {apiVersion: 1, sizes: ['m', 'w', 's'], title: false, description: () => t('d_quote'), settings: QUOTE_FIELDS};
 
         const DATE_LINE = /^(?:(\d{4})[-/.])?(\d{1,2})[-/.](\d{1,2})(?:\s+(.*))?$/;
         function countdownItems(config, now) {
@@ -1347,18 +1347,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const now = useNow();
           const lang = t('lang');
           const items = countdownItems(config ?? {}, now);
-          if (!items.length) return h('div', {className: 'bnt-hero'}, h('button', {type: 'button', className: 'bnt-btn bnt-cta', style: {alignSelf: 'flex-start'}, onClick: openSettings}, t('addEvents')));
+          if (!items.length) return h('div', {className: 'wb-hero'}, h('button', {type: 'button', className: 'wb-btn wb-cta', style: {alignSelf: 'flex-start'}, onClick: openSettings}, t('addEvents')));
           const num = x => (x.days === 0 ? [t('isToday')] : [x.days, h('small', {key: 'u'}, x.days === 1 ? t('dayUnit') : t('dayUnits'))]);
           const when = x => x.date.toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'});
           if (size === 's') {
             const x = items[0];
-            return h('div', {className: 'bnt-hero'}, h('small', null, x.name), h('span', {className: 'bnt-big bnt-num'}, ...num(x)), h('small', null, when(x)));
+            return h('div', {className: 'wb-hero'}, h('small', null, x.name), h('span', {className: 'wb-big wb-num'}, ...num(x)), h('small', null, when(x)));
           }
-          return h('div', {className: 'bnt-rows'}, items.map((x, i) => h('div', {key: i, className: 'bnt-row'},
+          return h('div', {className: 'wb-rows'}, items.map((x, i) => h('div', {key: i, className: 'wb-row'},
             h('div', null, h('b', null, x.name), h('small', null, when(x))),
-            h('span', {className: 'bnt-big bnt-num'}, ...num(x)))));
+            h('span', {className: 'wb-big wb-num'}, ...num(x)))));
         }
-        Countdown.desk = {
+        Countdown.workboard = {
           apiVersion: 1, sizes: ['m', 's', 't'], description: () => t('d_countdown'),
           settings: [
             {key: 'events', type: 'textarea', label: () => t('f_events'), placeholder: '2026-12-25 …'},
@@ -1393,13 +1393,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             const diff = diffH === 0 ? t('sameTime') : fill(t('hoursDiff'), {n: `${diffH > 0 ? '+' : '−'}${Math.abs(diffH)}`});
             return {...z, time: `${pad(p.h)}:${pad(p.mi)}`, sub: [day, diff].filter(Boolean).join(' · '), night: p.h < 6 || p.h >= 22};
           });
-          if (size === 'w') return h('div', {className: 'bnt-cols'}, rows.map((r, i) => h('div', {key: i},
-            h('small', null, r.name), h('span', {className: 'bnt-big bnt-num'}, r.time), h('small', null, r.sub))));
-          return h('div', {className: 'bnt-rows'}, rows.map((r, i) => h('div', {key: i, className: 'bnt-row', 'data-dim': r.night ? '' : undefined},
+          if (size === 'w') return h('div', {className: 'wb-cols'}, rows.map((r, i) => h('div', {key: i},
+            h('small', null, r.name), h('span', {className: 'wb-big wb-num'}, r.time), h('small', null, r.sub))));
+          return h('div', {className: 'wb-rows'}, rows.map((r, i) => h('div', {key: i, className: 'wb-row', 'data-dim': r.night ? '' : undefined},
             h('div', null, h('b', null, r.name), size === 's' ? null : h('small', null, r.sub)),
-            h('span', {className: 'bnt-big bnt-num'}, r.time))));
+            h('span', {className: 'wb-big wb-num'}, r.time))));
         }
-        WorldClock.desk = {
+        WorldClock.workboard = {
           apiVersion: 1, sizes: ['m', 's', 'w', 't'], description: () => t('d_worldclock'),
           settings: [{key: 'zones', type: 'textarea', label: () => t('f_zones'), default: () => t('defaultZones')}],
         };
@@ -1450,20 +1450,20 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             if (typeof Notification !== 'undefined' && Notification.permission === 'default') Promise.resolve().then(() => Notification.requestPermission()).catch(() => {});
             put({endsAt: Date.now() + left, left: null, total: paused ? total : length(f.mode)});
           };
-          const btn = (key, text, onClick, primary) => h('button', {key, type: 'button', className: 'bnt-action', 'data-primary': primary ? '' : undefined, onClick}, text);
-          return h('div', {className: 'bnt-focus', 'data-size': size, 'data-running': running ? '' : undefined},
-            h('div', {className: 'bnt-fhead'}, h('b', null, f.mode === 'work' ? t('focusWork') : t('focusBreak')),
-              size === 's' ? null : h('span', {className: 'bnt-num'}, fill(t('pomos'), {n: count}))),
-            h('span', {className: 'bnt-big bnt-num'}, `${pad(Math.floor(secs / 60))}:${pad(secs % 60)}`),
-            size === 's' ? null : h('div', {className: 'bnt-pbar'}, h('i', {style: {width: `${Math.min(100, Math.max(0, (1 - left / total) * 100))}%`}})),
-            h('div', {className: 'bnt-fbtns'},
+          const btn = (key, text, onClick, primary) => h('button', {key, type: 'button', className: 'wb-action', 'data-primary': primary ? '' : undefined, onClick}, text);
+          return h('div', {className: 'wb-focus', 'data-size': size, 'data-running': running ? '' : undefined},
+            h('div', {className: 'wb-fhead'}, h('b', null, f.mode === 'work' ? t('focusWork') : t('focusBreak')),
+              size === 's' ? null : h('span', {className: 'wb-num'}, fill(t('pomos'), {n: count}))),
+            h('span', {className: 'wb-big wb-num'}, `${pad(Math.floor(secs / 60))}:${pad(secs % 60)}`),
+            size === 's' ? null : h('div', {className: 'wb-pbar'}, h('i', {style: {width: `${Math.min(100, Math.max(0, (1 - left / total) * 100))}%`}})),
+            h('div', {className: 'wb-fbtns'},
               running ? btn('p', t('pause'), () => put({endsAt: null, left: Math.max(0, f.endsAt - Date.now())}), true) : btn('s', paused ? t('resume') : t('start'), start, true),
               size === 's' ? null : running || paused
                 ? btn('r', t('reset'), () => put({endsAt: null, left: null, total: null}))
                 : btn('k', t('skip'), () => put({mode: f.mode === 'work' ? 'break' : 'work', endsAt: null, left: null, total: null}))));
         }
         const minuteOptions = list => list.map(n => ({value: String(n), label: () => fill(t('minutes'), {n})}));
-        Focus.desk = {
+        Focus.workboard = {
           apiVersion: 1, sizes: ['m', 's'], title: false, description: () => t('d_focus'),
           settings: [
             {key: 'workMin', type: 'select', default: '25', label: () => t('f_workMin'), options: minuteOptions([15, 20, 25, 30, 45, 50, 60, 90])},
@@ -1491,11 +1491,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         function Links({config, openSettings}) {
           useLocale();
           const links = parseLinks(config?.links);
-          if (!links.length) return h('div', {className: 'bnt-hero'}, h('button', {type: 'button', className: 'bnt-btn bnt-cta', style: {alignSelf: 'flex-start'}, onClick: openSettings}, t('addLinks')));
-          return h('div', {className: 'bnt-links'}, links.map((l, i) => h('a', {key: i, className: 'bnt-link', href: l.href, target: '_blank', rel: 'noopener noreferrer', title: l.href},
+          if (!links.length) return h('div', {className: 'wb-hero'}, h('button', {type: 'button', className: 'wb-btn wb-cta', style: {alignSelf: 'flex-start'}, onClick: openSettings}, t('addLinks')));
+          return h('div', {className: 'wb-links'}, links.map((l, i) => h('a', {key: i, className: 'wb-link', href: l.href, target: '_blank', rel: 'noopener noreferrer', title: l.href},
             h('i', null, ([...l.name][0] ?? '?').toUpperCase()), h('span', null, l.name))));
         }
-        Links.desk = {
+        Links.workboard = {
           apiVersion: 1, sizes: ['m', 's', 'w', 't', 'l'], description: () => t('d_links'),
           settings: [{key: 'links', type: 'textarea', label: () => t('f_links'), placeholder: 'GitHub https://github.com'}],
         };
@@ -1513,18 +1513,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             ['p_month', new Date(y, m, 1), new Date(y, m + 1, 1)],
             ['p_year', new Date(y, 0, 1), new Date(y + 1, 0, 1)],
           ];
-          return h('div', {className: 'bnt-prog', 'data-size': size}, spans.map(([key, a, b]) => {
+          return h('div', {className: 'wb-prog', 'data-size': size}, spans.map(([key, a, b]) => {
             const pct = Math.min(100, Math.max(0, (now - a) / (b - a) * 100));
-            return h('div', {key, className: 'bnt-prow'}, h('span', null, t(key)),
-              h('div', {className: 'bnt-pbar'}, h('i', {style: {width: `${pct}%`}})), h('span', {className: 'bnt-num'}, `${Math.floor(pct)}%`));
+            return h('div', {key, className: 'wb-prow'}, h('span', null, t(key)),
+              h('div', {className: 'wb-pbar'}, h('i', {style: {width: `${pct}%`}})), h('span', {className: 'wb-num'}, `${Math.floor(pct)}%`));
           }));
         }
-        Progress.desk = {apiVersion: 1, sizes: ['m', 's', 'w'], description: () => t('d_progress')};
+        Progress.workboard = {apiVersion: 1, sizes: ['m', 's', 'w'], description: () => t('d_progress')};
 
         function widgetList() {
           return ctx.slots.entries(SLOT).map(entry => {
             const {id, label} = entry.options;
-            const manifest = entry.component?.desk ?? {};
+            const manifest = entry.component?.workboard ?? {};
             const declared = (Array.isArray(manifest.sizes) ? manifest.sizes : []).filter(s => SIZES[s]);
             const sizes = declared.length ? Object.keys(SIZES).filter(s => declared.includes(s)) : ['m'];
             return {
@@ -1560,9 +1560,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             window.addEventListener('keydown', onKey);
             return () => window.removeEventListener('keydown', onKey);
           }, [onClose]);
-          return h('div', {className: 'bnt-overlay', onMouseDown: e => { if (e.target === e.currentTarget) onClose(); }},
-            h('div', {className: 'bnt-modal', 'data-wide': wide ? '' : undefined, role: 'dialog', 'aria-modal': true, 'aria-label': title},
-              h('h2', null, title), children, footer ? h('div', {className: 'bnt-foot'}, footer) : null));
+          return h('div', {className: 'wb-overlay', onMouseDown: e => { if (e.target === e.currentTarget) onClose(); }},
+            h('div', {className: 'wb-modal', 'data-wide': wide ? '' : undefined, role: 'dialog', 'aria-modal': true, 'aria-label': title},
+              h('h2', null, title), children, footer ? h('div', {className: 'wb-foot'}, footer) : null));
         }
 
         function LocationField({value, onChange}) {
@@ -1577,24 +1577,24 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             return () => { alive = false; clearTimeout(id); };
           }, [query]);
           return h(React.Fragment, null,
-            value ? h('div', {className: 'bnt-loc'}, h('b', null, value.name), h('span', {className: 'bnt-muted'}, value.region ?? ''),
-              h('span', {className: 'bnt-spacer'}), h('button', {type: 'button', className: 'bnt-btn bnt-cta', onClick: () => onChange(null)}, t('clear'))) : null,
-            h('input', {className: 'bnt-input', value: query, placeholder: t('searchCity'), onChange: e => setQuery(e.target.value)}),
-            results ? h('div', {className: 'bnt-results'}, results.length ? results.map(r => h('button', {key: `${r.lat},${r.lon}`, type: 'button', className: 'bnt-btn', onClick: () => { onChange(r); setQuery(''); setResults(null); }},
-              h('b', null, r.name), ' ', h('span', {className: 'bnt-muted'}, r.region))) : h('span', {className: 'bnt-muted'}, t('noResults'))) : null);
+            value ? h('div', {className: 'wb-loc'}, h('b', null, value.name), h('span', {className: 'wb-muted'}, value.region ?? ''),
+              h('span', {className: 'wb-spacer'}), h('button', {type: 'button', className: 'wb-btn wb-cta', onClick: () => onChange(null)}, t('clear'))) : null,
+            h('input', {className: 'wb-input', value: query, placeholder: t('searchCity'), onChange: e => setQuery(e.target.value)}),
+            results ? h('div', {className: 'wb-results'}, results.length ? results.map(r => h('button', {key: `${r.lat},${r.lon}`, type: 'button', className: 'wb-btn', onClick: () => { onChange(r); setQuery(''); setResults(null); }},
+              h('b', null, r.name), ' ', h('span', {className: 'wb-muted'}, r.region))) : h('span', {className: 'wb-muted'}, t('noResults'))) : null);
         }
 
         const fieldDefault = f => (typeof f.default === 'function' ? f.default() : f.default);
         const fieldView = (f, v, set) => {
           const label = resolveText(f.label) || f.key;
-          if (f.type === 'toggle') return h('label', {key: f.key, className: 'bnt-check'}, h('input', {type: 'checkbox', checked: v !== false && v != null, onChange: e => set(f.key, e.target.checked)}), label);
+          if (f.type === 'toggle') return h('label', {key: f.key, className: 'wb-check'}, h('input', {type: 'checkbox', checked: v !== false && v != null, onChange: e => set(f.key, e.target.checked)}), label);
           let control;
           if (f.type === 'location') control = h(LocationField, {value: v, onChange: x => set(f.key, x)});
-          else if (f.type === 'select') control = h('select', {className: 'bnt-input', value: v ?? '', onChange: e => set(f.key, e.target.value)},
+          else if (f.type === 'select') control = h('select', {className: 'wb-input', value: v ?? '', onChange: e => set(f.key, e.target.value)},
             (f.options ?? []).map(o => h('option', {key: o.value, value: o.value}, resolveText(o.label) || o.value)));
-          else if (f.type === 'textarea') control = h('textarea', {className: 'bnt-input', value: v ?? '', placeholder: f.placeholder, spellCheck: false, onChange: e => set(f.key, e.target.value)});
-          else control = h('input', {className: 'bnt-input', value: v ?? '', placeholder: f.placeholder, onChange: e => set(f.key, e.target.value)});
-          return h('div', {key: f.key, className: 'bnt-field'}, h('span', null, label), control);
+          else if (f.type === 'textarea') control = h('textarea', {className: 'wb-input', value: v ?? '', placeholder: f.placeholder, spellCheck: false, onChange: e => set(f.key, e.target.value)});
+          else control = h('input', {className: 'wb-input', value: v ?? '', placeholder: f.placeholder, onChange: e => set(f.key, e.target.value)});
+          return h('div', {key: f.key, className: 'wb-field'}, h('span', null, label), control);
         };
 
         function SettingsModal({widget, cell, onSaveConfig, onClose}) {
@@ -1618,9 +1618,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             } catch (e) { setError(String(e?.message || e)); }
           };
           return h(Modal, {title: `${widget.label()} · ${t('settings')}`, onClose,
-            footer: [h('button', {key: 'c', type: 'button', className: 'bnt-action', onClick: onClose}, t('cancel')),
-              h('button', {key: 's', type: 'button', className: 'bnt-action', 'data-primary': '', onClick: save}, t('save'))]},
-          fields.map(f => fieldView(f, values[f.key], set)), error ? h('div', {className: 'bnt-error'}, error) : null);
+            footer: [h('button', {key: 'c', type: 'button', className: 'wb-action', onClick: onClose}, t('cancel')),
+              h('button', {key: 's', type: 'button', className: 'wb-action', 'data-primary': '', onClick: save}, t('save'))]},
+          fields.map(f => fieldView(f, values[f.key], set)), error ? h('div', {className: 'wb-error'}, error) : null);
         }
 
         // 「设置 → 工作台」；与卡片弹窗里 scope: 'global' 的字段读写同一份 prefs。
@@ -1631,7 +1631,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         ];
         const SETTING_FIELDS = SETTING_GROUPS.flatMap(([, fields]) => fields);
 
-        function DeskSettings() {
+        function WorkboardSettings() {
           useLocale();
           const prefsSnap = useSyncExternalStore(prefsStore.subscribe, prefsStore.getSnapshot, prefsStore.getSnapshot);
           useEffect(() => { void prefsStore.load(); }, []);
@@ -1650,13 +1650,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
               setStatus(t('saved'));
             } catch (e) { setStatus(String(e?.message || e)); }
           };
-          return h('div', {className: 'bnt-settings'},
+          return h('div', {className: 'wb-settings'},
             h('h2', null, t('title')),
             SETTING_GROUPS.map(([title, fields]) => h('section', {key: title},
               h('h3', null, t(title)), fields.map(f => fieldView(f, values[f.key], set)))),
-            h('div', {className: 'bnt-foot'},
-              status ? h('span', {className: 'bnt-muted', role: 'status'}, status) : null,
-              h('button', {type: 'button', className: 'bnt-action', 'data-primary': '', disabled: !dirty, onClick: save}, t('save'))));
+            h('div', {className: 'wb-foot'},
+              status ? h('span', {className: 'wb-muted', role: 'status'}, status) : null,
+              h('button', {type: 'button', className: 'wb-action', 'data-primary': '', disabled: !dirty, onClick: save}, t('save'))));
         }
 
         function Gallery({list, board, onAdd, onGenerate, onClose}) {
@@ -1669,24 +1669,24 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             && (!q || `${w.label()} ${resolveText(w.description)} ${w.id}`.toLowerCase().includes(q)));
           const card = w => {
             const done = placed.has(w.id);
-            return h('button', {key: w.id, type: 'button', className: 'bnt-btn bnt-gcard', disabled: done, onClick: () => onAdd(w)},
-              h('span', {className: 'bnt-gname'}, h('b', null, w.label()), done ? h('small', null, t('added')) : h(Icon.plus)),
+            return h('button', {key: w.id, type: 'button', className: 'wb-btn wb-gcard', disabled: done, onClick: () => onAdd(w)},
+              h('span', {className: 'wb-gname'}, h('b', null, w.label()), done ? h('small', null, t('added')) : h(Icon.plus)),
               w.description ? h('small', null, resolveText(w.description)) : null);
           };
-          const grid = items => h('div', {className: 'bnt-ggrid'},
+          const grid = items => h('div', {className: 'wb-ggrid'},
             [...items.filter(w => !placed.has(w.id)), ...items.filter(w => placed.has(w.id))].map(card));
-          const body = !shown.length ? h('div', {className: 'bnt-blank bnt-muted'}, t('noResults'))
-            : cat === 'all' && !q ? present.map(c => h('section', {key: c, className: 'bnt-gsec'}, h('h3', null, t(`cat_${c}`)), grid(shown.filter(w => w.category === c))))
+          const body = !shown.length ? h('div', {className: 'wb-blank wb-muted'}, t('noResults'))
+            : cat === 'all' && !q ? present.map(c => h('section', {key: c, className: 'wb-gsec'}, h('h3', null, t(`cat_${c}`)), grid(shown.filter(w => w.category === c))))
               : grid(shown);
           return h(Modal, {title: t('addWidget'), onClose, wide: true,
-            footer: h('button', {type: 'button', className: 'bnt-action', 'data-primary': '', onClick: onClose}, t('doneEdit'))},
-          h('div', {className: 'bnt-gtop'},
-            h('input', {className: 'bnt-input', autoFocus: true, value: query, placeholder: t('searchWidget'), 'aria-label': t('searchWidget'), onChange: e => setQuery(e.target.value)}),
-            h('div', {className: 'bnt-tabs', role: 'tablist'}, ['all', ...present].map(c => h('button', {key: c, type: 'button', role: 'tab',
-              className: 'bnt-btn bnt-tab', 'aria-selected': c === cat, onClick: () => setCat(c)}, t(`cat_${c}`))))),
-          h('div', {className: 'bnt-gbody'},
-            q ? null : h('button', {type: 'button', className: 'bnt-btn bnt-gcard bnt-gen', onClick: onGenerate},
-              h('span', {className: 'bnt-gname'}, h('b', null, t('gen_card')), h(Icon.sparkle)), h('small', null, t('gen_hint'))),
+            footer: h('button', {type: 'button', className: 'wb-action', 'data-primary': '', onClick: onClose}, t('doneEdit'))},
+          h('div', {className: 'wb-gtop'},
+            h('input', {className: 'wb-input', autoFocus: true, value: query, placeholder: t('searchWidget'), 'aria-label': t('searchWidget'), onChange: e => setQuery(e.target.value)}),
+            h('div', {className: 'wb-tabs', role: 'tablist'}, ['all', ...present].map(c => h('button', {key: c, type: 'button', role: 'tab',
+              className: 'wb-btn wb-tab', 'aria-selected': c === cat, onClick: () => setCat(c)}, t(`cat_${c}`))))),
+          h('div', {className: 'wb-gbody'},
+            q ? null : h('button', {type: 'button', className: 'wb-btn wb-gcard wb-gen', onClick: onGenerate},
+              h('span', {className: 'wb-gname'}, h('b', null, t('gen_card')), h(Icon.sparkle)), h('small', null, t('gen_hint'))),
             body));
         }
 
@@ -1713,7 +1713,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           if (!ws.list.length) return null;
           const extra = ws.path && !ws.list.some(w => w.path === ws.path);
           const name = ws.list.find(w => w.path === ws.path)?.title || baseName(ws.path);
-          return h('span', {className: 'bnt-wsel', 'data-set': ws.path ? '' : undefined, title: `${t('ws_label')}: ${ws.path ? `${name} · ${ws.path}` : t('ws_default')}`},
+          return h('span', {className: 'wb-wsel', 'data-set': ws.path ? '' : undefined, title: `${t('ws_label')}: ${ws.path ? `${name} · ${ws.path}` : t('ws_default')}`},
             h(Icon.folder),
             h('select', {value: ws.path, 'aria-label': t('ws_label'), onChange: e => ws.set(e.target.value)},
               h('option', {value: ''}, t('ws_default')),
@@ -1728,8 +1728,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const ui = ctx.get?.('uiWorkspace');
           const ws = useWorkspace();
           const v = res.value;
-          if (!v) return h('div', {className: 'bnt-blank'}, res.error || '…');
-          if (!v.sessions) return h('div', {className: 'bnt-blank'}, t('agentsUnavailable'));
+          if (!v) return h('div', {className: 'wb-blank'}, res.error || '…');
+          if (!v.sessions) return h('div', {className: 'wb-blank'}, t('agentsUnavailable'));
           const lang = t('lang');
           const nowMs = now.getTime();
           const active = v.sessions.filter(s => s.waiting || s.running);
@@ -1740,25 +1740,25 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const sessionRow = s => {
             const state = s.waiting ? 'waiting' : s.running ? 'running' : undefined;
             const status = s.waiting ? t('waitingYou') : s.running ? t('running') : relTime(s.updatedAt, nowMs);
-            return h('button', {key: s.id, type: 'button', className: 'bnt-btn bnt-row bnt-rowbtn', 'data-state': state, title: s.cwd || undefined, onClick: () => ui?.openSession?.(s.id)},
-              h('span', {className: 'bnt-dot', 'data-state': state}),
+            return h('button', {key: s.id, type: 'button', className: 'wb-btn wb-row wb-rowbtn', 'data-state': state, title: s.cwd || undefined, onClick: () => ui?.openSession?.(s.id)},
+              h('span', {className: 'wb-dot', 'data-state': state}),
               h('div', null, h('b', null, s.title || t('untitledSession')), h('small', null, [status, baseName(s.cwd)].filter(Boolean).join(' · '))));
           };
-          const taskRow = k => h('div', {key: k.id, className: 'bnt-row'},
-            h('span', {className: 'bnt-dot', 'data-state': k.running ? 'running' : undefined}),
+          const taskRow = k => h('div', {key: k.id, className: 'wb-row'},
+            h('span', {className: 'wb-dot', 'data-state': k.running ? 'running' : undefined}),
             h('div', null, h('b', null, k.title),
               h('small', null, k.running ? t('executing') : `${relTime(k.scheduledAt, nowMs)} · ${new Date(k.scheduledAt).toLocaleString(lang, {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'})}`)));
           return h(React.Fragment, null,
-            h('div', {className: 'bnt-rows'},
-              sessions.length ? sessions.map(sessionRow) : h('div', {className: 'bnt-blank'}, v.sessions.length ? t('noActive') : t('noSessions')),
-              schedules.length ? h('div', {className: 'bnt-sect'}, t('schedules')) : null,
+            h('div', {className: 'wb-rows'},
+              sessions.length ? sessions.map(sessionRow) : h('div', {className: 'wb-blank'}, v.sessions.length ? t('noActive') : t('noSessions')),
+              schedules.length ? h('div', {className: 'wb-sect'}, t('schedules')) : null,
               schedules.map(taskRow)),
-            h('div', {className: 'bnt-notefoot'},
+            h('div', {className: 'wb-notefoot'},
               h('span', null, active.length ? fill(t('activeCount'), {n: active.length}) : ''),
-              typeof ui?.startSession === 'function' ? h('div', {className: 'bnt-footact'}, h(WorkspaceSelect, {ws}),
-                h('button', {type: 'button', className: 'bnt-btn', onClick: () => ui.startSession(ws.id)}, t('newSession'))) : null));
+              typeof ui?.startSession === 'function' ? h('div', {className: 'wb-footact'}, h(WorkspaceSelect, {ws}),
+                h('button', {type: 'button', className: 'wb-btn', onClick: () => ui.startSession(ws.id)}, t('newSession'))) : null));
         }
-        Agents.desk = {
+        Agents.workboard = {
           apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_agents'),
           settings: [
             {key: 'showRecent', type: 'toggle', default: true, label: () => t('f_showRecent')},
@@ -1779,18 +1779,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const unread = all.map(keyOf).filter(k => k && !read.has(k));
           const items = config?.hideRead ? all.filter(it => !read.has(keyOf(it))) : all;
           return h(React.Fragment, null,
-            h('div', {className: 'bnt-rows'},
-              items.length ? null : h('div', {className: 'bnt-blank'}, res.pending ? '…' : res.error || t('noItems')),
-              items.map((it, i) => h(it.link ? 'a' : 'div', {key: keyOf(it) || i, className: 'bnt-row bnt-rowbtn', title: it.title, ...(keyOf(it) ? readProps(read, keyOf(it)) : {}), ...(it.link ? {href: it.link, target: '_blank', rel: 'noopener noreferrer'} : {})},
+            h('div', {className: 'wb-rows'},
+              items.length ? null : h('div', {className: 'wb-blank'}, res.pending ? '…' : res.error || t('noItems')),
+              items.map((it, i) => h(it.link ? 'a' : 'div', {key: keyOf(it) || i, className: 'wb-row wb-rowbtn', title: it.title, ...(keyOf(it) ? readProps(read, keyOf(it)) : {}), ...(it.link ? {href: it.link, target: '_blank', rel: 'noopener noreferrer'} : {})},
                 h('div', null, h('b', null, it.title || it.link),
                   size === 'w' && !many ? null : h('small', null, [many ? it.feed : '', it.date ? relTime(it.date, now.getTime()) : ''].filter(Boolean).join(' · '))),
                 size === 'w' && !many && it.date ? h('time', null, relTime(it.date, now.getTime())) : null))),
-            failed ? h('div', {className: 'bnt-calerr', title: res.value.errors.map(e => `${e.url}: ${e.message}`).join('\n')}, fill(t('feedError'), {n: failed})) : null,
-            unread.length ? h('div', {className: 'bnt-notefoot'},
+            failed ? h('div', {className: 'wb-calerr', title: res.value.errors.map(e => `${e.url}: ${e.message}`).join('\n')}, fill(t('feedError'), {n: failed})) : null,
+            unread.length ? h('div', {className: 'wb-notefoot'},
               h('span', null, fill(t('unreadCount'), {n: unread.length})),
-              h('button', {type: 'button', className: 'bnt-btn', onClick: () => markRead(unread)}, t('markAllRead'))) : null);
+              h('button', {type: 'button', className: 'wb-btn', onClick: () => markRead(unread)}, t('markAllRead'))) : null);
         }
-        Feed.desk = {
+        Feed.workboard = {
           apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_feed'),
           settings: [
             {key: 'urls', type: 'textarea', label: () => t('f_feeds'), default: () => t('defaultFeeds')},
@@ -1840,26 +1840,26 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             call('habit.add', {name}).then(habit => setHabits(list => [...(list ?? []), habit]), err => { setText(name); fail(err); });
           };
           return h(React.Fragment, null,
-            h('div', {className: 'bnt-rows'},
-              habits && !habits.length ? h('div', {className: 'bnt-blank'}, t('noHabits')) : null,
+            h('div', {className: 'wb-rows'},
+              habits && !habits.length ? h('div', {className: 'wb-blank'}, t('noHabits')) : null,
               (habits ?? []).map(habit => {
                 const n = streak(habit);
-                return h('div', {key: habit.id, className: 'bnt-hrow'},
+                return h('div', {key: habit.id, className: 'wb-hrow'},
                   h('b', {title: habit.name}, habit.name),
-                  h('div', {className: 'bnt-hdays'}, keys.map(k => {
+                  h('div', {className: 'wb-hdays'}, keys.map(k => {
                     const done = habit.days.includes(k);
                     const label = fill(t('markDay'), {d: keyDate(k).toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'})});
-                    return h('button', {key: k, type: 'button', className: 'bnt-btn bnt-hday', 'data-done': done ? '' : undefined, 'data-today': k === todayKey ? '' : undefined,
+                    return h('button', {key: k, type: 'button', className: 'wb-btn wb-hday', 'data-done': done ? '' : undefined, 'data-today': k === todayKey ? '' : undefined,
                       'aria-label': label, 'aria-pressed': done, title: label, onClick: () => toggle(habit, k)}, done ? h(Icon.check) : null);
                   })),
-                  size === 't' ? null : h('small', {className: 'bnt-num'}, n ? fill(t('streak'), {n}) : ''),
-                  h('button', {type: 'button', className: 'bnt-btn bnt-del', 'aria-label': t('remove'), title: t('remove'), onClick: () => remove(habit)}, h(Icon.x)));
+                  size === 't' ? null : h('small', {className: 'wb-num'}, n ? fill(t('streak'), {n}) : ''),
+                  h('button', {type: 'button', className: 'wb-btn wb-del', 'aria-label': t('remove'), title: t('remove'), onClick: () => remove(habit)}, h(Icon.x)));
               })),
-            error ? h('div', {className: 'bnt-calerr'}, error) : null,
-            h('label', {className: 'bnt-add'}, h(Icon.plus),
+            error ? h('div', {className: 'wb-calerr'}, error) : null,
+            h('label', {className: 'wb-add'}, h(Icon.plus),
               h('input', {value: text, placeholder: t('addHabit'), enterKeyHint: 'done', onChange: e => setText(e.target.value), onKeyDown: submit})));
         }
-        Habits.desk = {apiVersion: 1, sizes: ['m', 'l', 't', 'w'], description: () => t('d_habits')};
+        Habits.workboard = {apiVersion: 1, sizes: ['m', 'l', 't', 'w'], description: () => t('d_habits')};
 
         // 新开会话并直接发送；Host 不支持时退回到把 prompt 预填进新会话草稿。
         const launch = async (prompt, cwd, workspaceId) => {
@@ -1897,14 +1897,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             e.preventDefault();
             send(text);
           };
-          return h('div', {className: 'bnt-prompt', 'data-size': size},
-            size === 's' ? null : h('div', {className: 'bnt-pbox', 'data-ws': ws.list.length ? '' : undefined},
+          return h('div', {className: 'wb-prompt', 'data-size': size},
+            size === 's' ? null : h('div', {className: 'wb-pbox', 'data-ws': ws.list.length ? '' : undefined},
               h('textarea', {value: text, placeholder: t('promptPlaceholder'), disabled: busy, spellCheck: false, onChange: e => setText(e.target.value), onKeyDown}),
               h(WorkspaceSelect, {ws})),
-            presets.length ? h('div', {className: 'bnt-chips'}, presets.map((p, i) => h('button', {key: i, type: 'button', className: 'bnt-btn bnt-chip', title: p.prompt, disabled: busy, onClick: () => send(p.prompt)}, p.name))) : null,
-            busy || error ? h('div', {className: error ? 'bnt-calerr' : 'bnt-muted', style: {fontSize: 12}}, error || t('sending')) : null);
+            presets.length ? h('div', {className: 'wb-chips'}, presets.map((p, i) => h('button', {key: i, type: 'button', className: 'wb-btn wb-chip', title: p.prompt, disabled: busy, onClick: () => send(p.prompt)}, p.name))) : null,
+            busy || error ? h('div', {className: error ? 'wb-calerr' : 'wb-muted', style: {fontSize: 12}}, error || t('sending')) : null);
         }
-        Prompt.desk = {
+        Prompt.workboard = {
           apiVersion: 1, sizes: ['m', 'w', 'l', 't', 's'], description: () => t('d_prompt'),
           settings: [
             {key: 'presets', type: 'textarea', label: () => t('f_presets'), default: () => t('defaultPresets')},
@@ -1944,22 +1944,22 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           };
           const list = items ?? [];
           return h(React.Fragment, null,
-            h('div', {className: 'bnt-rows'},
-              items && !list.length ? h('div', {className: 'bnt-blank'}, t('inboxEmpty')) : null,
-              [...list].reverse().map(item => h('div', {key: item.id, className: 'bnt-inrow', title: item.text},
+            h('div', {className: 'wb-rows'},
+              items && !list.length ? h('div', {className: 'wb-blank'}, t('inboxEmpty')) : null,
+              [...list].reverse().map(item => h('div', {key: item.id, className: 'wb-inrow', title: item.text},
                 h('span', null, item.text),
                 size === 't' ? null : h('small', null, relTime(item.createdAt, now.getTime())),
-                h('button', {type: 'button', className: 'bnt-btn bnt-del', 'aria-label': t('remove'), title: t('remove'), onClick: () => remove(item)}, h(Icon.x))))),
-            error ? h('div', {className: 'bnt-calerr'}, error) : null,
-            h('label', {className: 'bnt-add'}, h(Icon.plus),
+                h('button', {type: 'button', className: 'wb-btn wb-del', 'aria-label': t('remove'), title: t('remove'), onClick: () => remove(item)}, h(Icon.x))))),
+            error ? h('div', {className: 'wb-calerr'}, error) : null,
+            h('label', {className: 'wb-add'}, h(Icon.plus),
               h('input', {value: text, placeholder: t('inboxPlaceholder'), enterKeyHint: 'done', onChange: e => setText(e.target.value), onKeyDown: submit})),
-            list.length ? h('div', {className: 'bnt-notefoot'}, h('span', null, fill(t('inboxCount'), {n: list.length})),
-              h('div', {className: 'bnt-footact'}, h(WorkspaceSelect, {ws}),
-                h('button', {type: 'button', className: 'bnt-btn', disabled: busy, onClick: handOff}, busy ? t('sending') : t('toAgent')))) : null);
+            list.length ? h('div', {className: 'wb-notefoot'}, h('span', null, fill(t('inboxCount'), {n: list.length})),
+              h('div', {className: 'wb-footact'}, h(WorkspaceSelect, {ws}),
+                h('button', {type: 'button', className: 'wb-btn', disabled: busy, onClick: handOff}, busy ? t('sending') : t('toAgent')))) : null);
         }
-        Inbox.desk = {apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_inbox')};
+        Inbox.workboard = {apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_inbox')};
 
-        // 自定义 widget：Agent 用 desk_widget 写入的 HTML，跑在无同源权限的沙箱 iframe 里，只能通过 postMessage 桥接访问 Desk。
+        // 自定义 widget：Agent 用 workboard_widget 写入的 HTML，跑在无同源权限的沙箱 iframe 里，只能通过 postMessage 桥接访问工作台。
         // iframe 拿不到宿主的主题变量：由父页面读出实际值传进去，切换明暗时重发。
         const readTheme = el => {
           const style = getComputedStyle(el);
@@ -2083,18 +2083,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             const title = summary?.title ?? id;
             launch(fill(t('cw_fixPrompt'), {title, id, error}), ws.path, ws.id).catch(e => setLoadError(String(e?.message || e)));
           };
-          return h('div', {ref: wrapRef, className: 'bnt-cw'},
+          return h('div', {ref: wrapRef, className: 'wb-cw'},
             doc ? h('iframe', {
-              ref: frameRef, className: 'bnt-cwframe', title: summary?.title ?? id, sandbox: 'allow-scripts', srcDoc: doc,
+              ref: frameRef, className: 'wb-cwframe', title: summary?.title ?? id, sandbox: 'allow-scripts', srcDoc: doc,
               style: {colorScheme: theme.theme, pointerEvents: editing ? 'none' : undefined},
             }) : null,
-            loadError ? h('div', {className: 'bnt-calerr'}, loadError) : null,
-            error ? h('div', {className: 'bnt-cwerr', role: 'alert'},
+            loadError ? h('div', {className: 'wb-calerr'}, loadError) : null,
+            error ? h('div', {className: 'wb-cwerr', role: 'alert'},
               h('span', {title: error}, error),
-              h('button', {type: 'button', className: 'bnt-btn', onClick: fix}, h(Icon.sparkle), t('cw_fix'))) : null);
+              h('button', {type: 'button', className: 'wb-btn', onClick: fix}, h(Icon.sparkle), t('cw_fix'))) : null);
         }
 
-        // 自定义 widget 的清单：面板可见时轮询，每个 widget 动态注册进 desk.widget，组件库、看板和设置弹窗照常工作。
+        // 自定义 widget 的清单：面板可见时轮询，每个 widget 动态注册进 workboard.widget，组件库、看板和设置弹窗照常工作。
         // 只有标题、尺寸、设置等 manifest 变化才重新注册；HTML 和数据的变化由卡片按 rev 自行拉取。
         const customs = (() => {
           let byId = new Map();
@@ -2103,7 +2103,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const manifestKey = w => JSON.stringify([w.title, w.description, w.sizes, w.defaultSize, w.header, w.settings]);
           const register = w => {
             const Component = props => h(CustomWidget, {...props, id: w.id});
-            Component.desk = {apiVersion: 1, sizes: w.sizes, defaultSize: w.defaultSize, title: w.header !== false, description: w.description, category: 'mine', settings: w.settings, custom: w.id};
+            Component.workboard = {apiVersion: 1, sizes: w.sizes, defaultSize: w.defaultSize, title: w.header !== false, description: w.description, category: 'mine', settings: w.settings, custom: w.id};
             return ctx.slots.inject(SLOT, () => ctx.slots.register({name: SLOT, id: `${CUSTOM_PREFIX}${w.id}`, order: 10_000, label: w.title}, Component));
           };
           const sync = next => {
@@ -2176,14 +2176,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           return h(Modal, {title: widget ? fill(t('cw_editTitle'), {title: widget.label()}) : t('gen_title'), onClose,
             footer: [
               h(WorkspaceSelect, {key: 'ws', ws}),
-              h('span', {key: 'sp', className: 'bnt-spacer'}),
-              h('button', {key: 'c', type: 'button', className: 'bnt-action', onClick: onClose}, t('cancel')),
-              h('button', {key: 'go', type: 'button', className: 'bnt-action', 'data-primary': '', disabled: busy || !text.trim(), onClick: submit}, h(Icon.sparkle), busy ? t('sending') : t('gen_go')),
+              h('span', {key: 'sp', className: 'wb-spacer'}),
+              h('button', {key: 'c', type: 'button', className: 'wb-action', onClick: onClose}, t('cancel')),
+              h('button', {key: 'go', type: 'button', className: 'wb-action', 'data-primary': '', disabled: busy || !text.trim(), onClick: submit}, h(Icon.sparkle), busy ? t('sending') : t('gen_go')),
             ]},
-          h('textarea', {className: 'bnt-input bnt-gentext', autoFocus: true, value: text, disabled: busy, spellCheck: false,
+          h('textarea', {className: 'wb-input wb-gentext', autoFocus: true, value: text, disabled: busy, spellCheck: false,
             placeholder: widget ? t('cw_editPlaceholder') : t('gen_placeholder'), onChange: e => setText(e.target.value), onKeyDown}),
-          examples.length ? h('div', {className: 'bnt-chips'}, examples.map(x => h('button', {key: x, type: 'button', className: 'bnt-btn bnt-chip', disabled: busy, onClick: () => setText(x)}, x))) : null,
-          error ? h('div', {className: 'bnt-error'}, error) : null);
+          examples.length ? h('div', {className: 'wb-chips'}, examples.map(x => h('button', {key: x, type: 'button', className: 'wb-btn wb-chip', disabled: busy, onClick: () => setText(x)}, x))) : null,
+          error ? h('div', {className: 'wb-error'}, error) : null);
         }
 
         function SourceModal({widget, onClose, onRemoved}) {
@@ -2210,18 +2210,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           };
           return h(Modal, {title: `${widget.label()} · ${t('cw_source')}`, onClose, wide: true,
             footer: [
-              h('button', {key: 'del', type: 'button', className: 'bnt-action', 'data-danger': '', disabled: busy || !def, onClick: remove, onBlur: () => setConfirm(false)}, confirm ? t('confirmDelete') : t('cw_delete')),
-              h('span', {key: 'sp', className: 'bnt-spacer'}),
-              h('button', {key: 'c', type: 'button', className: 'bnt-action', onClick: onClose}, t('cancel')),
-              h('button', {key: 's', type: 'button', className: 'bnt-action', 'data-primary': '', disabled: busy || !dirty || !title.trim(), onClick: save}, t('save')),
+              h('button', {key: 'del', type: 'button', className: 'wb-action', 'data-danger': '', disabled: busy || !def, onClick: remove, onBlur: () => setConfirm(false)}, confirm ? t('confirmDelete') : t('cw_delete')),
+              h('span', {key: 'sp', className: 'wb-spacer'}),
+              h('button', {key: 'c', type: 'button', className: 'wb-action', onClick: onClose}, t('cancel')),
+              h('button', {key: 's', type: 'button', className: 'wb-action', 'data-primary': '', disabled: busy || !dirty || !title.trim(), onClick: save}, t('save')),
             ]},
           def ? h(React.Fragment, null,
-            h('div', {className: 'bnt-field'}, h('span', null, t('cw_title')), h('input', {className: 'bnt-input', value: title, maxLength: 40, onChange: e => setTitle(e.target.value)})),
-            h('div', {className: 'bnt-field bnt-codefield'}, h('span', null, 'HTML'),
-              h('textarea', {className: 'bnt-input bnt-code', value: html, spellCheck: false, onChange: e => setHtml(e.target.value)})),
-            h('div', {className: 'bnt-muted bnt-cwmeta'}, `${t('cw_fetch')}: ${def.fetch.length ? def.fetch.join('  ') : t('cw_none')}`),
-            def.lastError ? h('div', {className: 'bnt-calerr'}, def.lastError.message) : null) : null,
-          error ? h('div', {className: 'bnt-error'}, error) : null);
+            h('div', {className: 'wb-field'}, h('span', null, t('cw_title')), h('input', {className: 'wb-input', value: title, maxLength: 40, onChange: e => setTitle(e.target.value)})),
+            h('div', {className: 'wb-field wb-codefield'}, h('span', null, 'HTML'),
+              h('textarea', {className: 'wb-input wb-code', value: html, spellCheck: false, onChange: e => setHtml(e.target.value)})),
+            h('div', {className: 'wb-muted wb-cwmeta'}, `${t('cw_fetch')}: ${def.fetch.length ? def.fetch.join('  ') : t('cw_none')}`),
+            def.lastError ? h('div', {className: 'wb-calerr'}, def.lastError.message) : null) : null,
+          error ? h('div', {className: 'wb-error'}, error) : null);
         }
 
         const compact = v => new Intl.NumberFormat(t('lang'), {notation: 'compact', maximumFractionDigits: 1}).format(v);
@@ -2240,7 +2240,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const [range, setRange] = useState(7);
           const res = useRemote('usage.get', {days: 30}, USAGE_MS);
           const v = res.value;
-          if (!v) return h('div', {className: 'bnt-blank'}, res.error || '…');
+          if (!v) return h('div', {className: 'wb-blank'}, res.error || '…');
           const prices = parsePrices(config?.prices);
           const sum = rows => rows.reduce((a, r) => {
             for (const k of ['requests', 'reported', 'input', 'output', 'cacheRead', 'cacheWrite']) a[k] += r[k];
@@ -2257,18 +2257,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           });
           const peak = Math.max(1, ...series.map(x => x.tokens));
           const lang = t('lang');
-          const bars = h('div', {className: 'bnt-bars'}, series.map(x => h('span', {key: x.day, 'data-today': x.day === v.today ? '' : undefined,
+          const bars = h('div', {className: 'wb-bars'}, series.map(x => h('span', {key: x.day, 'data-today': x.day === v.today ? '' : undefined,
             title: fill(t('u_day'), {d: keyDate(x.day).toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'}), t: compact(x.tokens), r: x.requests})},
           h('i', {style: {height: `${Math.round(x.tokens / peak * 100)}%`}}))));
           const cacheBase = today.input + today.cacheRead + today.cacheWrite;
           const meta = [fill(t('u_requests'), {n: today.requests}), cacheBase ? fill(t('u_cache'), {n: Math.round(today.cacheRead / cacheBase * 100)}) : '', today.cost ? fill(t('u_cost'), {n: today.cost.toFixed(2)}) : ''].filter(Boolean);
-          const hero = h('div', {className: 'bnt-hero'},
+          const hero = h('div', {className: 'wb-hero'},
             h('small', null, t('u_today')),
-            h('span', {className: 'bnt-big bnt-num'}, compact(tokensOf(today))),
-            h('small', {className: 'bnt-num'}, size === 's' ? meta[0] : meta.join(' · ')),
-            size === 's' || size === 'm' ? null : h('small', {className: 'bnt-num'}, fill(t('u_vs'), {n: compact(tokensOf(yesterday))})));
-          if (size === 's') return h('div', {className: 'bnt-usage', 'data-size': size}, hero);
-          if (size === 'm' || size === 'w') return h('div', {className: 'bnt-usage', 'data-size': size}, hero, bars);
+            h('span', {className: 'wb-big wb-num'}, compact(tokensOf(today))),
+            h('small', {className: 'wb-num'}, size === 's' ? meta[0] : meta.join(' · ')),
+            size === 's' || size === 'm' ? null : h('small', {className: 'wb-num'}, fill(t('u_vs'), {n: compact(tokensOf(yesterday))})));
+          if (size === 's') return h('div', {className: 'wb-usage', 'data-size': size}, hero);
+          if (size === 'm' || size === 'w') return h('div', {className: 'wb-usage', 'data-size': size}, hero, bars);
           const from = shiftDay(v.today, 1 - range);
           const models = new Map();
           for (const r of v.rows) {
@@ -2279,11 +2279,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const table = [...models.values()].map(rows => ({...sum(rows), model: rows[0].model, provider: rows[0].provider})).sort((a, b) => b.requests - a.requests);
           const silentReq = table.reduce((a, m) => a + m.requests - m.reported, 0);
           const silentBy = [...new Set(table.filter(m => m.requests > m.reported).map(m => m.provider || m.model))].join(', ');
-          return h('div', {className: 'bnt-usage', 'data-size': size},
+          return h('div', {className: 'wb-usage', 'data-size': size},
             hero, bars,
-            h('div', {className: 'bnt-seg'}, [1, 7, 30].map(n => h('button', {key: n, type: 'button', className: 'bnt-btn', 'aria-pressed': range === n, onClick: () => setRange(n)}, t(`u_range_${n}`)))),
-            table.length ? h('div', {className: 'bnt-table bnt-num'},
-              h('span', {className: 'bnt-th'}, t('u_model')), h('span', {className: 'bnt-th'}, t('u_req')), h('span', {className: 'bnt-th'}, t('u_tok')),
+            h('div', {className: 'wb-seg'}, [1, 7, 30].map(n => h('button', {key: n, type: 'button', className: 'wb-btn', 'aria-pressed': range === n, onClick: () => setRange(n)}, t(`u_range_${n}`)))),
+            table.length ? h('div', {className: 'wb-table wb-num'},
+              h('span', {className: 'wb-th'}, t('u_model')), h('span', {className: 'wb-th'}, t('u_req')), h('span', {className: 'wb-th'}, t('u_tok')),
               table.flatMap(m => {
                 const p = priceOf(prices, m.model);
                 return [
@@ -2291,10 +2291,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
                   h('span', {key: `${m.provider}${m.model}r`}, m.requests),
                   h('span', {key: `${m.provider}${m.model}t`, title: p ? fill(t('u_cost'), {n: m.cost.toFixed(2)}) : undefined}, m.reported ? compact(tokensOf(m)) : '–'),
                 ];
-              })) : h('div', {className: 'bnt-blank'}, t('u_none')),
-            silentReq ? h('div', {className: 'bnt-foot-note', title: silentBy}, fill(t('u_unreported'), {n: silentReq, p: silentBy})) : null);
+              })) : h('div', {className: 'wb-blank'}, t('u_none')),
+            silentReq ? h('div', {className: 'wb-foot-note', title: silentBy}, fill(t('u_unreported'), {n: silentReq, p: silentBy})) : null);
         }
-        Usage.desk = {
+        Usage.workboard = {
           apiVersion: 1, sizes: ['l', 't', 'm', 'w', 's'], defaultSize: 'm', description: () => t('d_usage'),
           settings: [{key: 'prices', type: 'textarea', label: () => t('f_prices'), placeholder: 'claude-opus 15 75 1.5 18.75'}],
         };
@@ -2314,8 +2314,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const [error, setError] = useState('');
           const ui = ctx.get?.('uiWorkspace');
           const v = res.value;
-          if (!v) return h('div', {className: 'bnt-blank'}, res.error || '…');
-          if (!v.goals && !v.jobs) return h('div', {className: 'bnt-blank'}, t('r_unavailable'));
+          if (!v) return h('div', {className: 'wb-blank'}, res.error || '…');
+          if (!v.goals && !v.jobs) return h('div', {className: 'wb-blank'}, t('r_unavailable'));
           const nowMs = now.getTime();
           const goals = v.goals ?? [];
           const jobs = (v.jobs ?? []).map(j => (killed.has(j.id) && j.status === 'running' ? {...j, status: 'stopping'} : j));
@@ -2328,33 +2328,33 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             const state = g.phase === 'active' ? (g.armed ? 'running' : 'waiting') : g.phase === 'blocked' ? 'blocked' : g.phase === 'complete' ? 'done' : undefined;
             const status = g.phase === 'active' && !g.armed ? t('r_disarmed') : t(`r_${g.phase}`);
             const sub = [status, g.maxRounds ? fill(t('r_round'), {n: g.rounds, m: g.maxRounds}) : '', g.phase === 'blocked' ? g.reason : g.title].filter(Boolean).join(' · ');
-            return h('button', {key: `g${g.sessionId}`, type: 'button', className: 'bnt-btn bnt-row bnt-rowbtn', 'data-state': state, title: g.objective, onClick: () => open(g.sessionId)},
-              h('span', {className: 'bnt-dot', 'data-state': state}),
+            return h('button', {key: `g${g.sessionId}`, type: 'button', className: 'wb-btn wb-row wb-rowbtn', 'data-state': state, title: g.objective, onClick: () => open(g.sessionId)},
+              h('span', {className: 'wb-dot', 'data-state': state}),
               h('div', null, h('b', null, g.objective), h('small', null, sub)));
           };
           const jobRow = j => {
             const state = j.status === 'running' ? 'running' : j.status === 'failed' ? 'blocked' : j.status === 'completed' ? 'done' : undefined;
             const status = j.status === 'running' ? fill(t('r_running'), {t: duration(nowMs - j.startedAt)}) : j.finishedAt ? `${t(`r_${j.status}`)} · ${relTime(j.finishedAt, nowMs)}` : t(`r_${j.status}`);
-            return h('div', {key: j.id, className: 'bnt-row', 'data-state': state === 'blocked' ? 'blocked' : undefined, title: [j.label, j.progress, j.detail].filter(Boolean).join('\n')},
-              h('span', {className: 'bnt-dot', 'data-state': state}),
+            return h('div', {key: j.id, className: 'wb-row', 'data-state': state === 'blocked' ? 'blocked' : undefined, title: [j.label, j.progress, j.detail].filter(Boolean).join('\n')},
+              h('span', {className: 'wb-dot', 'data-state': state}),
               h('div', {style: {cursor: j.sessionId ? 'pointer' : undefined}, onClick: () => open(j.sessionId)},
-                h('b', {className: 'bnt-num'}, j.label || j.kind),
+                h('b', {className: 'wb-num'}, j.label || j.kind),
                 h('small', null, [status, size === 'm' ? '' : j.progress || j.title].filter(Boolean).join(' · '))),
-              j.status === 'running' ? h('button', {type: 'button', className: 'bnt-btn bnt-del', 'aria-label': t('r_kill'), title: t('r_kill'), onClick: () => kill(j)}, h(Icon.x)) : null);
+              j.status === 'running' ? h('button', {type: 'button', className: 'wb-btn wb-del', 'aria-label': t('r_kill'), title: t('r_kill'), onClick: () => kill(j)}, h(Icon.x)) : null);
           };
           const liveJobs = jobs.filter(j => j.status === 'running' || j.status === 'stopping');
           const activeGoals = goals.filter(g => g.phase !== 'complete');
-          if (!goals.length && !jobs.length) return h('div', {className: 'bnt-blank'}, t('r_idle'));
+          if (!goals.length && !jobs.length) return h('div', {className: 'wb-blank'}, t('r_idle'));
           return h(React.Fragment, null,
-            h('div', {className: 'bnt-rows'},
-              goals.length && jobs.length ? h('div', {className: 'bnt-sect'}, t('r_goals')) : null,
+            h('div', {className: 'wb-rows'},
+              goals.length && jobs.length ? h('div', {className: 'wb-sect'}, t('r_goals')) : null,
               goals.map(goalRow),
-              goals.length && jobs.length ? h('div', {className: 'bnt-sect'}, t('r_jobs')) : null,
+              goals.length && jobs.length ? h('div', {className: 'wb-sect'}, t('r_jobs')) : null,
               jobs.map(jobRow)),
-            error ? h('div', {className: 'bnt-calerr'}, error) : null,
-            size === 'm' ? null : h('div', {className: 'bnt-notefoot'}, h('span', null, fill(t('r_count'), {g: activeGoals.length, j: liveJobs.length}))));
+            error ? h('div', {className: 'wb-calerr'}, error) : null,
+            size === 'm' ? null : h('div', {className: 'wb-notefoot'}, h('span', null, fill(t('r_count'), {g: activeGoals.length, j: liveJobs.length}))));
         }
-        Running.desk = {apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_running')};
+        Running.workboard = {apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_running')};
 
         function Git({size, config}) {
           useLocale();
@@ -2363,7 +2363,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const [busy, setBusy] = useState(false);
           const [error, setError] = useState('');
           const v = res.value;
-          if (!v) return h('div', {className: 'bnt-blank'}, res.error || '…');
+          if (!v) return h('div', {className: 'wb-blank'}, res.error || '…');
           const weight = r => (r.error ? 5 : r.conflicts ? 4 : r.changed + r.untracked ? 3 : r.ahead || r.behind ? 2 : r.gone?.length ? 1 : 0);
           const repos = [...v.repos].sort((a, b) => weight(b) - weight(a) || (b.lastCommitAt ?? 0) - (a.lastCommitAt ?? 0));
           const attention = repos.filter(r => weight(r) > 0).length;
@@ -2373,7 +2373,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             call('git.fetch', {paths: String(config?.paths ?? '')}).then(r => { if (r.errors?.length) setError(r.errors.map(e => `${e.path.split('/').pop()}: ${e.message}`).join('\n')); res.reload(); }, e => setError(String(e?.message || e))).finally(() => setBusy(false));
           };
           const row = r => {
-            if (r.error) return h('div', {key: r.path, className: 'bnt-row', 'data-state': 'blocked', title: r.path}, h('span', {className: 'bnt-dot', 'data-state': 'blocked'}), h('div', null, h('b', null, r.name), h('small', null, r.error)));
+            if (r.error) return h('div', {key: r.path, className: 'wb-row', 'data-state': 'blocked', title: r.path}, h('span', {className: 'wb-dot', 'data-state': 'blocked'}), h('div', null, h('b', null, r.name), h('small', null, r.error)));
             const dirty = r.changed + r.untracked;
             const state = r.conflicts ? 'blocked' : dirty ? 'waiting' : r.ahead || r.behind ? 'running' : undefined;
             const parts = [r.branch,
@@ -2382,19 +2382,19 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
               r.gone.length ? fill(t('g_gone'), {n: r.gone.length}) : '',
               !r.upstream && size !== 'm' ? t('g_noUpstream') : ''].filter(Boolean);
             if (parts.length === 1) parts.push(t('g_clean'));
-            return h('div', {key: r.path, className: 'bnt-row', 'data-state': state === 'blocked' ? 'blocked' : undefined, title: [r.path, r.lastSubject].filter(Boolean).join('\n')},
-              h('span', {className: 'bnt-dot', 'data-state': state}),
-              h('div', null, h('b', null, r.name), h('small', {className: 'bnt-num'}, parts.join(' · '))),
-              h('button', {type: 'button', className: 'bnt-btn bnt-rowact', onClick: () => { launch(fill(t('gitPrompt'), {name: r.name}), r.path).catch(e => setError(String(e?.message || e))); }}, t('toAgent')),
+            return h('div', {key: r.path, className: 'wb-row', 'data-state': state === 'blocked' ? 'blocked' : undefined, title: [r.path, r.lastSubject].filter(Boolean).join('\n')},
+              h('span', {className: 'wb-dot', 'data-state': state}),
+              h('div', null, h('b', null, r.name), h('small', {className: 'wb-num'}, parts.join(' · '))),
+              h('button', {type: 'button', className: 'wb-btn wb-rowact', onClick: () => { launch(fill(t('gitPrompt'), {name: r.name}), r.path).catch(e => setError(String(e?.message || e))); }}, t('toAgent')),
               r.lastCommitAt && size !== 'm' ? h('time', null, relTime(r.lastCommitAt, now.getTime())) : null);
           };
           return h(React.Fragment, null,
-            h('div', {className: 'bnt-rows'}, repos.length ? repos.map(row) : h('div', {className: 'bnt-blank'}, t('g_none'))),
-            error ? h('div', {className: 'bnt-calerr', title: error}, error.split('\n')[0]) : null,
-            h('div', {className: 'bnt-notefoot'}, h('span', null, repos.length ? (attention ? fill(t('g_attention'), {n: attention}) : t('g_allClean')) : ''),
-              repos.some(r => r.upstream) ? h('button', {type: 'button', className: 'bnt-btn', disabled: busy, onClick: fetchAll}, busy ? t('g_fetching') : t('g_fetch')) : null));
+            h('div', {className: 'wb-rows'}, repos.length ? repos.map(row) : h('div', {className: 'wb-blank'}, t('g_none'))),
+            error ? h('div', {className: 'wb-calerr', title: error}, error.split('\n')[0]) : null,
+            h('div', {className: 'wb-notefoot'}, h('span', null, repos.length ? (attention ? fill(t('g_attention'), {n: attention}) : t('g_allClean')) : ''),
+              repos.some(r => r.upstream) ? h('button', {type: 'button', className: 'wb-btn', disabled: busy, onClick: fetchAll}, busy ? t('g_fetching') : t('g_fetch')) : null));
         }
-        Git.desk = {
+        Git.workboard = {
           apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_git'),
           settings: [{key: 'paths', type: 'textarea', label: () => t('f_repos'), placeholder: '~/Vibe/dsh-bento'}],
         };
@@ -2406,9 +2406,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const [busy, setBusy] = useState(false);
           const v = res.value;
           if (!v) {
-            if (!res.error) return h('div', {className: 'bnt-blank'}, '…');
+            if (!res.error) return h('div', {className: 'wb-blank'}, '…');
             const missing = /not installed/.test(res.error);
-            return h('div', {className: 'bnt-blank'}, missing ? t('gh_missing') : h(React.Fragment, null, h('div', {className: 'bnt-calerr'}, res.error), h('div', null, t('gh_login'))));
+            return h('div', {className: 'wb-blank'}, missing ? t('gh_missing') : h(React.Fragment, null, h('div', {className: 'wb-calerr'}, res.error), h('div', null, t('gh_login'))));
           }
           const nowMs = now.getTime();
           const groups = [
@@ -2420,18 +2420,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             setBusy(true);
             call('github.get', {fresh: true}).then(() => res.reload(), () => res.reload()).finally(() => setBusy(false));
           };
-          const row = (key, x) => h('a', {key: `${key}${x.url}`, className: 'bnt-row bnt-rowbtn', href: x.url || undefined, target: '_blank', rel: 'noopener noreferrer', title: x.title},
+          const row = (key, x) => h('a', {key: `${key}${x.url}`, className: 'wb-row wb-rowbtn', href: x.url || undefined, target: '_blank', rel: 'noopener noreferrer', title: x.title},
             h('div', null, h('b', null, x.title),
-              h('small', {className: 'bnt-num'}, [`${x.repo}#${x.number}`, key === 'mine' ? '' : x.author, x.draft ? t('gh_draft') : '', size === 'm' ? '' : relTime(x.updatedAt, nowMs)].filter(Boolean).join(' · '))));
+              h('small', {className: 'wb-num'}, [`${x.repo}#${x.number}`, key === 'mine' ? '' : x.author, x.draft ? t('gh_draft') : '', size === 'm' ? '' : relTime(x.updatedAt, nowMs)].filter(Boolean).join(' · '))));
           return h(React.Fragment, null,
-            h('div', {className: 'bnt-rows'},
+            h('div', {className: 'wb-rows'},
               groups.length ? groups.map(([key, list]) => h(React.Fragment, {key},
-                h('div', {className: 'bnt-sect'}, `${t(`gh_${key}`)} ${list.length}`),
-                list.map(x => row(key, x)))) : h('div', {className: 'bnt-blank'}, t('gh_none'))),
-            size === 'm' ? null : h('div', {className: 'bnt-notefoot'}, h('span', null, v.fetchedAt ? fill(t('updated'), {t: relTime(v.fetchedAt, nowMs)}) : ''),
-              h('button', {type: 'button', className: 'bnt-btn', disabled: busy, onClick: refresh}, busy ? '…' : t('refresh'))));
+                h('div', {className: 'wb-sect'}, `${t(`gh_${key}`)} ${list.length}`),
+                list.map(x => row(key, x)))) : h('div', {className: 'wb-blank'}, t('gh_none'))),
+            size === 'm' ? null : h('div', {className: 'wb-notefoot'}, h('span', null, v.fetchedAt ? fill(t('updated'), {t: relTime(v.fetchedAt, nowMs)}) : ''),
+              h('button', {type: 'button', className: 'wb-btn', disabled: busy, onClick: refresh}, busy ? '…' : t('refresh'))));
         }
-        GitHub.desk = {
+        GitHub.workboard = {
           apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_github'),
           settings: [
             {key: 'showReview', type: 'toggle', default: true, label: () => t('f_showReview')},
@@ -2449,7 +2449,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           useLocale();
           const res = useRemote('system.get', {}, SYSTEM_MS);
           const v = res.value;
-          if (!v) return h('div', {className: 'bnt-blank'}, res.error || '…');
+          if (!v) return h('div', {className: 'wb-blank'}, res.error || '…');
           const load = v.load?.[0] != null ? v.load[0].toFixed(1) : '';
           const memRatio = v.memory.used / v.memory.total;
           const rows = [
@@ -2463,19 +2463,19 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const detail = size === 'l' || size === 'w';
           const spark = (size === 't' || size === 'l' || size === 'w') && v.history.length > 1;
           const pts = v.history.map(([cpu], i, all) => `${(i / Math.max(1, all.length - 1)) * 100},${(1 - cpu) * 30}`);
-          return h('div', {className: 'bnt-sys', 'data-size': size, 'data-detail': detail ? '' : undefined},
-            h('div', {className: 'bnt-prog', 'data-size': size}, rows.map(([key, ratio, note, hot]) => h('div', {key, className: 'bnt-prow', 'data-hot': hot ? '' : undefined, title: note},
+          return h('div', {className: 'wb-sys', 'data-size': size, 'data-detail': detail ? '' : undefined},
+            h('div', {className: 'wb-prog', 'data-size': size}, rows.map(([key, ratio, note, hot]) => h('div', {key, className: 'wb-prow', 'data-hot': hot ? '' : undefined, title: note},
               h('span', null, t(`s_${key}`)),
-              h('div', {className: 'bnt-pbar'}, h('i', {style: {width: `${Math.round(Math.min(1, Math.max(0, ratio)) * 100)}%`}})),
-              h('span', {className: 'bnt-num'}, `${Math.round(ratio * 100)}%`),
+              h('div', {className: 'wb-pbar'}, h('i', {style: {width: `${Math.round(Math.min(1, Math.max(0, ratio)) * 100)}%`}})),
+              h('span', {className: 'wb-num'}, `${Math.round(ratio * 100)}%`),
               detail ? h('small', null, note) : null))),
-            spark ? h('div', {className: 'bnt-spark', title: `${t('s_cpu')} · ${duration(v.history.length * v.sampleMs)}`},
+            spark ? h('div', {className: 'wb-spark', title: `${t('s_cpu')} · ${duration(v.history.length * v.sampleMs)}`},
               h('svg', {viewBox: '0 0 100 30', preserveAspectRatio: 'none'},
                 h('polygon', {points: `0,30 ${pts.join(' ')} 100,30`}),
                 h('polyline', {points: pts.join(' ')}))) : null,
-            size === 't' || size === 'l' ? h('div', {className: 'bnt-notefoot'}, h('span', null, fill(t('s_uptime'), {t: duration(v.uptime * 1000)})), size === 't' && load ? h('span', null, fill(t('s_load'), {l: load})) : null) : null);
+            size === 't' || size === 'l' ? h('div', {className: 'wb-notefoot'}, h('span', null, fill(t('s_uptime'), {t: duration(v.uptime * 1000)})), size === 't' && load ? h('span', null, fill(t('s_load'), {l: load})) : null) : null);
         }
-        System.desk = {apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], description: () => t('d_system')};
+        System.workboard = {apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], description: () => t('d_system')};
 
         function Photo({config, openSettings}) {
           useLocale();
@@ -2501,11 +2501,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             const id = setInterval(() => { if (!document.hidden) next(); }, minutes * 60_000);
             return () => clearInterval(id);
           }, [next, minutes]);
-          if (error || photo?.count === 0) return h('div', {className: 'bnt-photo-msg'}, h('span', null, error || t('ph_empty')), h('button', {type: 'button', className: 'bnt-btn bnt-cta', onClick: openSettings}, t('ph_pick')));
-          if (!photo) return h('div', {className: 'bnt-photo'});
-          return h('div', {className: 'bnt-photo', title: photo.name, onClick: next}, h('img', {src: photo.src, alt: photo.name, draggable: false}));
+          if (error || photo?.count === 0) return h('div', {className: 'wb-photo-msg'}, h('span', null, error || t('ph_empty')), h('button', {type: 'button', className: 'wb-btn wb-cta', onClick: openSettings}, t('ph_pick')));
+          if (!photo) return h('div', {className: 'wb-photo'});
+          return h('div', {className: 'wb-photo', title: photo.name, onClick: next}, h('img', {src: photo.src, alt: photo.name, draggable: false}));
         }
-        Photo.desk = {
+        Photo.workboard = {
           apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], title: false, description: () => t('d_photo'),
           settings: [
             {key: 'dir', type: 'text', label: () => t('f_photoDir'), placeholder: '~/Pictures'},
@@ -2524,21 +2524,21 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const symbols = String(config?.symbols ?? t('mk_symbols'));
           const redUp = (config?.upColor ?? (t('lang').startsWith('zh') ? 'red' : 'green')) === 'red';
           const res = useRemote('market.quotes', {symbols}, MARKET_MS);
-          if (!symbols.trim()) return h('div', {className: 'bnt-photo-msg'}, h('button', {type: 'button', className: 'bnt-btn bnt-cta', onClick: openSettings}, t('mk_none')));
+          if (!symbols.trim()) return h('div', {className: 'wb-photo-msg'}, h('button', {type: 'button', className: 'wb-btn wb-cta', onClick: openSettings}, t('mk_none')));
           const v = res.value;
-          if (!v) return h('div', {className: 'bnt-blank'}, res.error || '…');
+          if (!v) return h('div', {className: 'wb-blank'}, res.error || '…');
           const items = size === 's' ? v.items.slice(0, 3) : v.items;
-          return h('div', {className: 'bnt-quotes', 'data-size': size, 'data-red-up': redUp ? '' : undefined}, items.map((q, i) => {
+          return h('div', {className: 'wb-quotes', 'data-size': size, 'data-red-up': redUp ? '' : undefined}, items.map((q, i) => {
             const name = q.label || q.name || q.symbol;
             const sub = q.error ? (q.error === 'unknown symbol' ? t('mk_unknown') : q.error === 'not found' ? t('mk_missing') : q.error) : (q.label && q.name && q.name !== q.label ? q.name : q.symbol !== name ? q.symbol : q.currency);
             const dir = q.pct > 0 ? 'up' : q.pct < 0 ? 'down' : undefined;
-            return h('div', {key: `${i}${q.symbol}`, className: 'bnt-quote', 'data-dir': dir, title: [q.symbol, q.currency].filter(Boolean).join(' · ')},
+            return h('div', {key: `${i}${q.symbol}`, className: 'wb-quote', 'data-dir': dir, title: [q.symbol, q.currency].filter(Boolean).join(' · ')},
               h('div', null, h('b', null, name), size === 's' ? null : h('small', null, sub)),
-              h('span', {className: 'bnt-num'}, q.price != null ? priceText(q.price, /\//.test(q.symbol) && !q.symbol.startsWith('cg:') && q.price < 100) : '—'),
-              h('span', {className: 'bnt-num'}, q.pct != null ? `${q.pct > 0 ? '+' : ''}${q.pct.toFixed(2)}%` : ''));
+              h('span', {className: 'wb-num'}, q.price != null ? priceText(q.price, /\//.test(q.symbol) && !q.symbol.startsWith('cg:') && q.price < 100) : '—'),
+              h('span', {className: 'wb-num'}, q.pct != null ? `${q.pct > 0 ? '+' : ''}${q.pct.toFixed(2)}%` : ''));
           }));
         }
-        Market.desk = {
+        Market.workboard = {
           apiVersion: 1, sizes: ['t', 'm', 's', 'l', 'w'], defaultSize: 't', description: () => t('d_market'),
           settings: [
             {key: 'symbols', type: 'textarea', default: () => t('mk_symbols'), label: () => t('f_symbols'), placeholder: 'USD/CNY\nsh600519\nhk00700\nusAAPL\nBTC'},
@@ -2560,30 +2560,30 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const res = useRemote('trending.get', source ? {source} : null, TRENDING_MS);
           const v = source && res.value?.source === source ? res.value : null;
           const read = useRead(v ? v.items.map(it => it.url).filter(Boolean) : []);
-          if (!source) return h('div', {className: 'bnt-photo-msg'}, h('button', {type: 'button', className: 'bnt-btn bnt-cta', onClick: openSettings}, t('tr_none')));
+          if (!source) return h('div', {className: 'wb-photo-msg'}, h('button', {type: 'button', className: 'wb-btn wb-cta', onClick: openSettings}, t('tr_none')));
           const compact = new Intl.NumberFormat(t('lang'), {notation: 'compact', maximumFractionDigits: 1});
           const hot = n => (n == null ? '' : `${v.metric === 'stars' ? '+' : ''}${compact.format(n)}`);
-          return h('div', {className: 'bnt-trend'},
-            enabled.length > 1 ? h('div', {className: 'bnt-seg', role: 'tablist'}, enabled.map(id => h('button', {key: id, type: 'button', role: 'tab', className: 'bnt-btn', 'aria-pressed': id === source, onClick: () => setPicked(id)}, t(`tr_${id}`)))) : null,
-            h('div', {className: 'bnt-rows'},
-              v ? v.items.map((it, i) => h('a', {key: `${i}${it.url}`, className: 'bnt-row bnt-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer', title: [it.title, it.meta].filter(Boolean).join('\n')},
-                h('span', {className: 'bnt-rank bnt-num', 'data-top': i < 3 ? '' : undefined}, i + 1),
+          return h('div', {className: 'wb-trend'},
+            enabled.length > 1 ? h('div', {className: 'wb-seg', role: 'tablist'}, enabled.map(id => h('button', {key: id, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': id === source, onClick: () => setPicked(id)}, t(`tr_${id}`)))) : null,
+            h('div', {className: 'wb-rows'},
+              v ? v.items.map((it, i) => h('a', {key: `${i}${it.url}`, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer', title: [it.title, it.meta].filter(Boolean).join('\n')},
+                h('span', {className: 'wb-rank wb-num', 'data-top': i < 3 ? '' : undefined}, i + 1),
                 h('div', null, h('b', null, it.title), size === 'l' && it.meta ? h('small', null, it.meta) : null),
-                size === 't' ? null : h('span', {className: 'bnt-num'}, hot(it.hot))))
-                : h('div', {className: 'bnt-blank'}, res.error || '…')));
+                size === 't' ? null : h('span', {className: 'wb-num'}, hot(it.hot))))
+                : h('div', {className: 'wb-blank'}, res.error || '…')));
         }
-        Trending.desk = {
+        Trending.workboard = {
           apiVersion: 1, sizes: ['l', 't', 'm', 'w'], defaultSize: 'l', description: () => t('d_trending'),
           settings: [...TR_CN, ...TR_INTL].map(id => ({key: trKey(id), type: 'toggle', default: !TR_OFF.has(id), label: () => t(`tr_${id}`)})),
         };
 
-        const blank = text => h('div', {className: 'bnt-blank'}, text);
-        const rowact = (label, fn, opts = {}) => h('button', {type: 'button', className: 'bnt-btn bnt-rowact', 'data-danger': opts.danger ? '' : undefined, 'data-armed': opts.armed ? '' : undefined, disabled: opts.disabled,
+        const blank = text => h('div', {className: 'wb-blank'}, text);
+        const rowact = (label, fn, opts = {}) => h('button', {type: 'button', className: 'wb-btn wb-rowact', 'data-danger': opts.danger ? '' : undefined, 'data-armed': opts.armed ? '' : undefined, disabled: opts.disabled,
           onClick: e => { e.stopPropagation(); fn(); }}, label);
         const extOf = name => /\.([a-z0-9]{1,5})$/i.exec(name)?.[1].toLowerCase() ?? '';
         const fileSize = n => (n == null ? '' : n < 1024 ? `${n} B` : n < 1024 ** 2 ? `${Math.round(n / 1024)} KB` : n < 1024 ** 3 ? `${(n / 1024 ** 2).toFixed(1)} MB` : `${(n / 1024 ** 3).toFixed(1)} GB`);
         const parentName = path => baseName(String(path).split('/').slice(0, -1).join('/'));
-        const FileBadge = ({name, folder}) => h('i', {className: 'bnt-ext', 'aria-hidden': true}, folder ? h(Icon.folder) : (extOf(name) || '·').slice(0, 4));
+        const FileBadge = ({name, folder}) => h('i', {className: 'wb-ext', 'aria-hidden': true}, folder ? h(Icon.folder) : (extOf(name) || '·').slice(0, 4));
         const openFile = (path, reveal) => call('file.open', {path, reveal: reveal === true});
 
         function Outputs({size, config}) {
@@ -2603,7 +2603,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             setBusy(true);
             call('outputs.list', {created, fresh: true}).then(() => res.reload(), fail).finally(() => setBusy(false));
           };
-          const row = x => h('div', {key: x.path, className: 'bnt-row bnt-rowbtn', 'data-dim': x.exists ? undefined : '', title: [x.path, x.description].filter(Boolean).join('\n'),
+          const row = x => h('div', {key: x.path, className: 'wb-row wb-rowbtn', 'data-dim': x.exists ? undefined : '', title: [x.path, x.description].filter(Boolean).join('\n'),
             style: {cursor: x.exists ? 'pointer' : undefined}, onClick: () => { if (x.exists) openFile(x.path).then(() => setError(''), fail); }},
             h(FileBadge, {name: x.name}),
             h('div', null, h('b', null, x.name),
@@ -2611,12 +2611,12 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             x.exists ? rowact(t('o_reveal'), () => { openFile(x.path, true).catch(fail); }) : null,
             x.sessionId && typeof ui?.openSession === 'function' && size !== 'm' ? rowact(t('o_session'), () => ui.openSession(x.sessionId)) : null);
           return h(React.Fragment, null,
-            h('div', {className: 'bnt-rows'}, items.length ? items.slice(0, 60).map(row) : blank(t('o_none'))),
-            error ? h('div', {className: 'bnt-calerr', title: error}, error) : null,
-            size === 'm' ? null : h('div', {className: 'bnt-notefoot'}, h('span', null, items.length ? fill(t('o_count'), {n: items.length}) : ''),
-              h('button', {type: 'button', className: 'bnt-btn', disabled: busy, onClick: refresh}, busy ? '…' : t('refresh'))));
+            h('div', {className: 'wb-rows'}, items.length ? items.slice(0, 60).map(row) : blank(t('o_none'))),
+            error ? h('div', {className: 'wb-calerr', title: error}, error) : null,
+            size === 'm' ? null : h('div', {className: 'wb-notefoot'}, h('span', null, items.length ? fill(t('o_count'), {n: items.length}) : ''),
+              h('button', {type: 'button', className: 'wb-btn', disabled: busy, onClick: refresh}, busy ? '…' : t('refresh'))));
         }
-        Outputs.desk = {
+        Outputs.workboard = {
           apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_outputs'),
           settings: [
             {key: 'created', type: 'toggle', default: true, label: () => t('f_created')},
@@ -2697,9 +2697,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
               : k.scheduledAt ? `${relTime(k.scheduledAt, nowMs)} · ${new Date(k.scheduledAt).toLocaleString(lang, {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'})}` : '';
             const recur = recurText(k);
             const off = busy === k.id;
-            return h('div', {key: k.id, className: 'bnt-row bnt-rowbtn', 'data-dim': k.status === 'active' ? undefined : '', title: [k.title, recur, k.prompt !== k.title ? k.prompt : ''].filter(Boolean).join('\n'),
+            return h('div', {key: k.id, className: 'wb-row wb-rowbtn', 'data-dim': k.status === 'active' ? undefined : '', title: [k.title, recur, k.prompt !== k.title ? k.prompt : ''].filter(Boolean).join('\n'),
               style: {cursor: target ? 'pointer' : undefined}, onClick: () => { if (target) ui?.openSession?.(target); }},
-              h('span', {className: 'bnt-dot', 'data-state': k.running ? 'running' : k.status === 'active' ? 'done' : undefined}),
+              h('span', {className: 'wb-dot', 'data-state': k.running ? 'running' : k.status === 'active' ? 'done' : undefined}),
               h('div', null, h('b', null, k.title), h('small', null, [when, size === 'm' ? '' : recur].filter(Boolean).join(' · '))),
               k.status !== 'ended' && !k.running ? rowact(t('sc_run'), () => act(k, 'run'), {disabled: off}) : null,
               k.status === 'active' ? rowact(t('pause'), () => act(k, 'pause'), {disabled: off}) : k.status === 'paused' ? rowact(t('resume'), () => act(k, 'resume'), {disabled: off}) : null,
@@ -2710,15 +2710,15 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const clear = () => { call('schedule.clear').then(() => res.reload(), fail); };
           const create = () => ui.startSession(ws.id, {prompt: t('sc_newPrompt'), whenDraftExists: 'replace'});
           return h(React.Fragment, null,
-            h('div', {className: 'bnt-rows', onMouseLeave: () => setConfirm('')}, list.length ? list.map(row) : blank(t('sc_none'))),
-            error ? h('div', {className: 'bnt-calerr', title: error}, error) : null,
-            size === 'm' ? null : h('div', {className: 'bnt-notefoot'},
+            h('div', {className: 'wb-rows', onMouseLeave: () => setConfirm('')}, list.length ? list.map(row) : blank(t('sc_none'))),
+            error ? h('div', {className: 'wb-calerr', title: error}, error) : null,
+            size === 'm' ? null : h('div', {className: 'wb-notefoot'},
               h('span', null, all.length ? fill(t('sc_count'), {a: active, p: paused}) : ''),
-              h('div', {className: 'bnt-footact'},
-                config?.showEnded && ended.length ? h('button', {type: 'button', className: 'bnt-btn', onClick: clear}, fill(t('sc_clear'), {n: ended.length})) : null,
-                typeof ui?.startSession === 'function' ? h('button', {type: 'button', className: 'bnt-btn', onClick: create}, t('sc_new')) : null)));
+              h('div', {className: 'wb-footact'},
+                config?.showEnded && ended.length ? h('button', {type: 'button', className: 'wb-btn', onClick: clear}, fill(t('sc_clear'), {n: ended.length})) : null,
+                typeof ui?.startSession === 'function' ? h('button', {type: 'button', className: 'wb-btn', onClick: create}, t('sc_new')) : null)));
         }
-        Schedules.desk = {
+        Schedules.workboard = {
           apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_tasks'),
           settings: [{key: 'showEnded', type: 'toggle', default: false, label: () => t('f_showEnded')}],
         };
@@ -2742,33 +2742,33 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             const candidates = (all.value ?? []).filter(s => !ids.includes(s.id) && (!q || `${s.title} ${s.cwd}`.toLowerCase().includes(q))).slice(0, 40);
             const full = ids.length >= MAX_PINNED;
             return h(React.Fragment, null,
-              h('input', {className: 'bnt-input bnt-search', autoFocus: true, value: query, placeholder: t('pin_search'), onChange: e => setQuery(e.target.value)}),
-              h('div', {className: 'bnt-rows'},
-                !all.value ? blank(all.error || '…') : candidates.length ? candidates.map(s => h('button', {key: s.id, type: 'button', className: 'bnt-btn bnt-row bnt-rowbtn', disabled: full, title: s.cwd || undefined, onClick: () => save([...ids, s.id])},
+              h('input', {className: 'wb-input wb-search', autoFocus: true, value: query, placeholder: t('pin_search'), onChange: e => setQuery(e.target.value)}),
+              h('div', {className: 'wb-rows'},
+                !all.value ? blank(all.error || '…') : candidates.length ? candidates.map(s => h('button', {key: s.id, type: 'button', className: 'wb-btn wb-row wb-rowbtn', disabled: full, title: s.cwd || undefined, onClick: () => save([...ids, s.id])},
                   h(Icon.plus),
                   h('div', null, h('b', null, s.title || t('untitledSession')), h('small', null, [relTime(s.updatedAt, nowMs), baseName(s.cwd)].filter(Boolean).join(' · '))))) : blank(t('noSessions'))),
-              h('div', {className: 'bnt-notefoot'}, h('span', null, fill(t('pin_count'), {n: ids.length})),
-                h('button', {type: 'button', className: 'bnt-btn', onClick: () => { setPicking(false); setQuery(''); }}, t('doneEdit'))));
+              h('div', {className: 'wb-notefoot'}, h('span', null, fill(t('pin_count'), {n: ids.length})),
+                h('button', {type: 'button', className: 'wb-btn', onClick: () => { setPicking(false); setQuery(''); }}, t('doneEdit'))));
           }
           const rows = ids.length ? res.value : [];
           const unpin = id => save(ids.filter(x => x !== id));
-          const del = id => h('button', {type: 'button', className: 'bnt-btn bnt-del', 'aria-label': t('unpin'), title: t('unpin'), onClick: e => { e.stopPropagation(); unpin(id); }}, h(Icon.x));
+          const del = id => h('button', {type: 'button', className: 'wb-btn wb-del', 'aria-label': t('unpin'), title: t('unpin'), onClick: e => { e.stopPropagation(); unpin(id); }}, h(Icon.x));
           const row = s => {
-            if (s.missing) return h('div', {key: s.id, className: 'bnt-row', 'data-dim': ''}, h('span', {className: 'bnt-dot'}), h('div', null, h('b', null, t('pin_missing'))), del(s.id));
+            if (s.missing) return h('div', {key: s.id, className: 'wb-row', 'data-dim': ''}, h('span', {className: 'wb-dot'}), h('div', null, h('b', null, t('pin_missing'))), del(s.id));
             const state = s.waiting ? 'waiting' : s.running ? 'running' : undefined;
             const preview = size !== 'm' && s.preview;
-            return h('div', {key: s.id, className: 'bnt-row bnt-rowbtn', 'data-state': state, title: [s.title, s.cwd].filter(Boolean).join('\n'), style: {cursor: 'pointer'}, onClick: () => ui?.openSession?.(s.id)},
-              h('span', {className: 'bnt-dot', 'data-state': state}),
+            return h('div', {key: s.id, className: 'wb-row wb-rowbtn', 'data-state': state, title: [s.title, s.cwd].filter(Boolean).join('\n'), style: {cursor: 'pointer'}, onClick: () => ui?.openSession?.(s.id)},
+              h('span', {className: 'wb-dot', 'data-state': state}),
               h('div', null, h('b', null, s.title || t('untitledSession')), h('small', null, preview || [statusOf(s), baseName(s.cwd)].filter(Boolean).join(' · '))),
               preview ? h('time', null, statusOf(s)) : null,
               del(s.id));
           };
           return h(React.Fragment, null,
-            h('div', {className: 'bnt-rows'}, !rows ? blank(res.error || '…') : rows.length ? rows.map(row) : blank(t('pin_none'))),
-            h('div', {className: 'bnt-notefoot'}, h('span', null, ids.length ? fill(t('pin_count'), {n: ids.length}) : ''),
-              h('button', {type: 'button', className: 'bnt-btn', onClick: () => setPicking(true)}, t('pin_add'))));
+            h('div', {className: 'wb-rows'}, !rows ? blank(res.error || '…') : rows.length ? rows.map(row) : blank(t('pin_none'))),
+            h('div', {className: 'wb-notefoot'}, h('span', null, ids.length ? fill(t('pin_count'), {n: ids.length}) : ''),
+              h('button', {type: 'button', className: 'wb-btn', onClick: () => setPicking(true)}, t('pin_add'))));
         }
-        Pinned.desk = {apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_pinned')};
+        Pinned.workboard = {apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_pinned')};
 
         function Files({size, config}) {
           useLocale();
@@ -2780,18 +2780,18 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           if (!v) return blank(res.error || '…');
           const fail = e => setError(String(e?.message || e));
           const nowMs = now.getTime();
-          const row = x => h('div', {key: x.path, className: 'bnt-row bnt-rowbtn', title: x.path, style: {cursor: 'pointer'}, onClick: () => openFile(x.path).then(() => setError(''), fail)},
+          const row = x => h('div', {key: x.path, className: 'wb-row wb-rowbtn', title: x.path, style: {cursor: 'pointer'}, onClick: () => openFile(x.path).then(() => setError(''), fail)},
             h(FileBadge, {name: x.name, folder: x.folder}),
             h('div', null, h('b', null, x.name), h('small', null, [x.folder ? '' : fileSize(x.size), size === 'm' ? '' : baseName(x.dir), relTime(x.time, nowMs)].filter(Boolean).join(' · '))),
             x.folder ? null : rowact(t('o_reveal'), () => { openFile(x.path, true).catch(fail); }),
             size === 'm' ? null : rowact(t('toAgent'), () => { launch(fill(t('filePrompt'), {path: x.path}), x.dir).catch(fail); }));
           const failed = v.errors?.length ?? 0;
           return h(React.Fragment, null,
-            h('div', {className: 'bnt-rows'}, v.items.length ? v.items.map(row) : blank(t('fi_none'))),
-            failed ? h('div', {className: 'bnt-calerr', title: v.errors.map(e => `${e.dir}: ${e.message}`).join('\n')}, fill(t('fi_error'), {n: failed})) : null,
-            error ? h('div', {className: 'bnt-calerr', title: error}, error) : null);
+            h('div', {className: 'wb-rows'}, v.items.length ? v.items.map(row) : blank(t('fi_none'))),
+            failed ? h('div', {className: 'wb-calerr', title: v.errors.map(e => `${e.dir}: ${e.message}`).join('\n')}, fill(t('fi_error'), {n: failed})) : null,
+            error ? h('div', {className: 'wb-calerr', title: error}, error) : null);
         }
-        Files.desk = {
+        Files.workboard = {
           apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_files'),
           settings: [
             {key: 'dirs', type: 'textarea', label: () => t('f_dirs'), placeholder: '~/Downloads\n~/Desktop'},
@@ -2829,27 +2829,27 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           };
           const remove = x => { if (sel === x.id) setSel(''); call('clipboard.remove', {id: x.id}).then(() => res.reload(), fail); };
           const clear = () => { setSel(''); call('clipboard.remove', {}).then(() => res.reload(), fail); };
-          const chips = presets.length ? h('div', {className: 'bnt-chips', style: size === 'm' ? undefined : {marginTop: 8}},
-            presets.map((p, i) => h('button', {key: i, type: 'button', className: 'bnt-btn bnt-chip', title: p.prompt, disabled: busy || !current, onClick: () => send(p)}, p.name))) : null;
-          const status = busy || error ? h('div', {className: error ? 'bnt-calerr' : 'bnt-muted', style: {fontSize: 12}}, error || t('sending')) : null;
+          const chips = presets.length ? h('div', {className: 'wb-chips', style: size === 'm' ? undefined : {marginTop: 8}},
+            presets.map((p, i) => h('button', {key: i, type: 'button', className: 'wb-btn wb-chip', title: p.prompt, disabled: busy || !current, onClick: () => send(p)}, p.name))) : null;
+          const status = busy || error ? h('div', {className: error ? 'wb-calerr' : 'wb-muted', style: {fontSize: 12}}, error || t('sending')) : null;
           if (size === 'm') {
-            return h('div', {className: 'bnt-prompt', 'data-size': size},
-              h('div', {className: 'bnt-cliptext', title: current?.text}, current ? current.text : h('span', {className: 'bnt-muted'}, t('cb_empty'))),
+            return h('div', {className: 'wb-prompt', 'data-size': size},
+              h('div', {className: 'wb-cliptext', title: current?.text}, current ? current.text : h('span', {className: 'wb-muted'}, t('cb_empty'))),
               chips, status);
           }
           return h(React.Fragment, null,
-            h('div', {className: 'bnt-rows'},
-              items.length ? items.map(x => h('div', {key: x.id, className: 'bnt-inrow', 'data-sel': x === current ? '' : undefined, title: x.text, style: {cursor: 'pointer'}, onClick: () => setSel(x.id)},
+            h('div', {className: 'wb-rows'},
+              items.length ? items.map(x => h('div', {key: x.id, className: 'wb-inrow', 'data-sel': x === current ? '' : undefined, title: x.text, style: {cursor: 'pointer'}, onClick: () => setSel(x.id)},
                 h('span', null, x.text),
                 h('small', null, copied === x.id ? t('cb_copied') : relTime(x.at, now.getTime())),
-                h('button', {type: 'button', className: 'bnt-btn bnt-del', 'data-plain': '', 'aria-label': t('cb_copy'), title: t('cb_copy'), onClick: e => { e.stopPropagation(); copy(x); }}, h(CopyIcon)),
-                h('button', {type: 'button', className: 'bnt-btn bnt-del', 'aria-label': t('remove'), title: t('remove'), onClick: e => { e.stopPropagation(); remove(x); }}, h(Icon.x)))) : blank(t('cb_empty'))),
+                h('button', {type: 'button', className: 'wb-btn wb-del', 'data-plain': '', 'aria-label': t('cb_copy'), title: t('cb_copy'), onClick: e => { e.stopPropagation(); copy(x); }}, h(CopyIcon)),
+                h('button', {type: 'button', className: 'wb-btn wb-del', 'aria-label': t('remove'), title: t('remove'), onClick: e => { e.stopPropagation(); remove(x); }}, h(Icon.x)))) : blank(t('cb_empty'))),
             chips, status,
-            h('div', {className: 'bnt-notefoot'}, h('span', null, items.length ? fill(t('inboxCount'), {n: items.length}) : ''),
-              h('div', {className: 'bnt-footact'}, h(WorkspaceSelect, {ws}),
-                items.length ? h('button', {type: 'button', className: 'bnt-btn', onClick: clear}, t('cb_clear')) : null)));
+            h('div', {className: 'wb-notefoot'}, h('span', null, items.length ? fill(t('inboxCount'), {n: items.length}) : ''),
+              h('div', {className: 'wb-footact'}, h(WorkspaceSelect, {ws}),
+                items.length ? h('button', {type: 'button', className: 'wb-btn', onClick: clear}, t('cb_clear')) : null)));
         }
-        Clipboard.desk = {
+        Clipboard.workboard = {
           apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_clipboard'),
           settings: [{key: 'presets', type: 'textarea', label: () => t('f_cbPresets'), default: () => t('defaultClipPresets')}],
         };
@@ -2871,9 +2871,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const ip = v.ip;
           const ipText = ip?.ip ?? (ip?.error === 'curl-missing' ? t('n_curl') : '—');
           const where = ip?.ip ? [ip.city, ip.country].filter(Boolean).join(', ') : '';
-          const kv = rows => h('div', {className: 'bnt-kv'}, rows.flatMap(([k, val, extra, level, title], i) => [
+          const kv = rows => h('div', {className: 'wb-kv'}, rows.flatMap(([k, val, extra, level, title], i) => [
             h('span', {key: `${i}k`}, k),
-            h('span', {key: `${i}v`, className: 'bnt-num', 'data-level': level, title: title || val}, val),
+            h('span', {key: `${i}v`, className: 'wb-num', 'data-level': level, title: title || val}, val),
             h('span', {key: `${i}x`}, extra || ''),
           ]));
           const info = [
@@ -2882,46 +2882,46 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             [t('n_proxy'), proxyText, ''],
           ];
           const pings = v.pings.map(p => [p.name, p.error ? (p.error === 'curl-missing' ? t('n_curl') : t('n_unreachable')) : `${p.ms} ms`, '', latLevel(p), p.url]);
-          const rates = h('div', {className: 'bnt-rates'},
-            h('div', null, h('small', null, `↓ ${t('n_down')}`), h('b', {className: 'bnt-num'}, rateText(last[0]))),
-            h('div', null, h('small', null, `↑ ${t('n_up')}`), h('b', {className: 'bnt-num'}, rateText(last[1]))));
+          const rates = h('div', {className: 'wb-rates'},
+            h('div', null, h('small', null, `↓ ${t('n_down')}`), h('b', {className: 'wb-num'}, rateText(last[0]))),
+            h('div', null, h('small', null, `↑ ${t('n_up')}`), h('b', {className: 'wb-num'}, rateText(last[1]))));
           const max = Math.max(1, ...v.rates.flat());
           const pts = i => v.rates.map((r, j, all) => `${(j / Math.max(1, all.length - 1)) * 100},${(1 - r[i] / max) * 30}`).join(' ');
           const spark = (size === 't' || size === 'l' || size === 'w') && v.rates.length > 1
-            ? h('div', {className: 'bnt-spark', title: `↓ ${rateText(Math.max(...v.rates.map(r => r[0])))} · ↑ ${rateText(Math.max(...v.rates.map(r => r[1])))}`},
+            ? h('div', {className: 'wb-spark', title: `↓ ${rateText(Math.max(...v.rates.map(r => r[0])))} · ↑ ${rateText(Math.max(...v.rates.map(r => r[1])))}`},
               h('svg', {viewBox: '0 0 100 30', preserveAspectRatio: 'none'},
                 h('polygon', {points: `0,30 ${pts(0)} 100,30`}),
                 h('polyline', {points: pts(0)}),
-                h('polyline', {className: 'bnt-up', points: pts(1)}))) : null;
+                h('polyline', {className: 'wb-up', points: pts(1)}))) : null;
           const refresh = () => {
             setBusy(true);
             call('network.get', {targets, fresh: true}).then(() => res.reload(), () => res.reload()).finally(() => setBusy(false));
           };
-          if (size === 's') return h('div', {className: 'bnt-net', 'data-size': size}, rates);
-          if (size === 'm') return h('div', {className: 'bnt-net', 'data-size': size}, rates, kv(info));
-          if (size === 'w') return h('div', {className: 'bnt-net', 'data-size': size}, rates, spark, kv(info), pings.length ? kv(pings) : null);
-          return h('div', {className: 'bnt-net', 'data-size': size},
+          if (size === 's') return h('div', {className: 'wb-net', 'data-size': size}, rates);
+          if (size === 'm') return h('div', {className: 'wb-net', 'data-size': size}, rates, kv(info));
+          if (size === 'w') return h('div', {className: 'wb-net', 'data-size': size}, rates, spark, kv(info), pings.length ? kv(pings) : null);
+          return h('div', {className: 'wb-net', 'data-size': size},
             rates, spark, kv(info),
-            pings.length ? h('div', {className: 'bnt-sect', style: {padding: 0}}, t('n_latency')) : null,
+            pings.length ? h('div', {className: 'wb-sect', style: {padding: 0}}, t('n_latency')) : null,
             pings.length ? kv(pings) : null,
-            h('div', {className: 'bnt-notefoot', style: {marginTop: 'auto'}}, h('span', null, v.gateway ? `${v.iface} · ${v.gateway}` : v.iface),
-              h('button', {type: 'button', className: 'bnt-btn', disabled: busy, onClick: refresh}, busy ? '…' : t('refresh'))));
+            h('div', {className: 'wb-notefoot', style: {marginTop: 'auto'}}, h('span', null, v.gateway ? `${v.iface} · ${v.gateway}` : v.iface),
+              h('button', {type: 'button', className: 'wb-btn', disabled: busy, onClick: refresh}, busy ? '…' : t('refresh'))));
         }
-        Network.desk = {
+        Network.workboard = {
           apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], description: () => t('d_network'),
           settings: [{key: 'targets', type: 'textarea', label: () => t('f_targets'), default: () => t('defaultTargets')}],
         };
 
         const builtins = [
-          ['desk.today', 'today', Today], ['desk.todo', 'todo', Todo], ['desk.note', 'note', Note], ['desk.calendar', 'calendar', Calendar],
-          ['desk.weather', 'weather', Weather], ['desk.clock', 'clock', Clock], ['desk.quote', 'quote', Quote], ['desk.countdown', 'countdown', Countdown],
-          ['desk.worldclock', 'worldclock', WorldClock], ['desk.focus', 'focus', Focus], ['desk.links', 'links', Links], ['desk.progress', 'progress', Progress],
-          ['desk.agents', 'agents', Agents], ['desk.feed', 'feed', Feed], ['desk.habits', 'habits', Habits],
-          ['desk.prompt', 'prompt', Prompt], ['desk.inbox', 'inbox', Inbox], ['desk.usage', 'usage', Usage], ['desk.running', 'running', Running],
-          ['desk.git', 'git', Git], ['desk.github', 'github', GitHub], ['desk.system', 'system', System], ['desk.photo', 'photo', Photo], ['desk.market', 'market', Market],
-          ['desk.trending', 'trending', Trending],
-          ['desk.outputs', 'outputs', Outputs], ['desk.schedules', 'tasks', Schedules], ['desk.pinned', 'pinned', Pinned],
-          ['desk.files', 'files', Files], ['desk.clipboard', 'clipboard', Clipboard], ['desk.network', 'network', Network],
+          ['workboard.today', 'today', Today], ['workboard.todo', 'todo', Todo], ['workboard.note', 'note', Note], ['workboard.calendar', 'calendar', Calendar],
+          ['workboard.weather', 'weather', Weather], ['workboard.clock', 'clock', Clock], ['workboard.quote', 'quote', Quote], ['workboard.countdown', 'countdown', Countdown],
+          ['workboard.worldclock', 'worldclock', WorldClock], ['workboard.focus', 'focus', Focus], ['workboard.links', 'links', Links], ['workboard.progress', 'progress', Progress],
+          ['workboard.agents', 'agents', Agents], ['workboard.feed', 'feed', Feed], ['workboard.habits', 'habits', Habits],
+          ['workboard.prompt', 'prompt', Prompt], ['workboard.inbox', 'inbox', Inbox], ['workboard.usage', 'usage', Usage], ['workboard.running', 'running', Running],
+          ['workboard.git', 'git', Git], ['workboard.github', 'github', GitHub], ['workboard.system', 'system', System], ['workboard.photo', 'photo', Photo], ['workboard.market', 'market', Market],
+          ['workboard.trending', 'trending', Trending],
+          ['workboard.outputs', 'outputs', Outputs], ['workboard.schedules', 'tasks', Schedules], ['workboard.pinned', 'pinned', Pinned],
+          ['workboard.files', 'files', Files], ['workboard.clipboard', 'clipboard', Clipboard], ['workboard.network', 'network', Network],
         ];
         const BUILTIN_CATEGORY = {
           daily: ['today', 'clock', 'worldclock', 'weather', 'countdown', 'progress', 'habits', 'photo'],
@@ -2932,7 +2932,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         for (const [category, keys] of Object.entries(BUILTIN_CATEGORY)) {
           for (const key of keys) {
             const component = builtins.find(b => b[1] === key)[2];
-            component.desk = {...component.desk, category};
+            component.workboard = {...component.workboard, category};
           }
         }
         const BUILTIN_IDS = new Set(builtins.map(([id]) => id));
@@ -3043,23 +3043,23 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const modalCustom = modal?.type === 'agent' || modal?.type === 'source' ? byId.get(modal.id) ?? null : null;
           const forgetCell = id => saveBoard({...board, widgets: board.widgets.filter(c => c.id !== id), known: (board.known ?? []).filter(k => k !== id)});
 
-          const tabs = h('div', {className: 'bnt-tabs', role: 'tablist'},
+          const tabs = h('div', {className: 'wb-tabs', role: 'tablist'},
             (boards ?? []).map(b => (b.id === activeId && renaming
-              ? h('input', {key: b.id, className: 'bnt-tabinput', autoFocus: true, defaultValue: b.title || boardTitle(b), 'aria-label': t('rename'),
+              ? h('input', {key: b.id, className: 'wb-tabinput', autoFocus: true, defaultValue: b.title || boardTitle(b), 'aria-label': t('rename'),
                 onBlur: e => commitRename(e.target.value),
                 onKeyDown: e => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) e.currentTarget.blur(); else if (e.key === 'Escape') setRenaming(false); }})
-              : h('button', {key: b.id, type: 'button', role: 'tab', className: 'bnt-btn bnt-tab', 'aria-selected': b.id === activeId, title: t('rename'),
+              : h('button', {key: b.id, type: 'button', role: 'tab', className: 'wb-btn wb-tab', 'aria-selected': b.id === activeId, title: t('rename'),
                 onClick: () => switchTo(b.id), onDoubleClick: () => { switchTo(b.id); setRenaming(true); }}, boardTitle(b)))),
-            h('button', {type: 'button', className: 'bnt-btn bnt-iconbtn bnt-newboard', 'aria-label': t('newBoardLabel'), title: t('newBoardLabel'), onClick: createBoard}, h(Icon.plus)));
+            h('button', {type: 'button', className: 'wb-btn wb-iconbtn wb-newboard', 'aria-label': t('newBoardLabel'), title: t('newBoardLabel'), onClick: createBoard}, h(Icon.plus)));
           const showTabs = editing || renaming || (boards?.length ?? 0) > 1;
 
           const actions = editing
             ? [
-              (boards?.length ?? 0) > 1 ? h('button', {key: 'del', type: 'button', className: 'bnt-action', 'data-danger': '', onClick: deleteBoard, onBlur: () => setConfirmDelete(false)}, confirmDelete ? t('confirmDelete') : t('deleteBoard')) : null,
-              h('button', {key: 'add', type: 'button', className: 'bnt-action', onClick: () => setModal({type: 'gallery'})}, h(Icon.plus), t('addWidget')),
-              h('button', {key: 'done', type: 'button', className: 'bnt-action', 'data-primary': '', onClick: () => { setEditing(false); setConfirmDelete(false); }}, t('doneEdit')),
+              (boards?.length ?? 0) > 1 ? h('button', {key: 'del', type: 'button', className: 'wb-action', 'data-danger': '', onClick: deleteBoard, onBlur: () => setConfirmDelete(false)}, confirmDelete ? t('confirmDelete') : t('deleteBoard')) : null,
+              h('button', {key: 'add', type: 'button', className: 'wb-action', onClick: () => setModal({type: 'gallery'})}, h(Icon.plus), t('addWidget')),
+              h('button', {key: 'done', type: 'button', className: 'wb-action', 'data-primary': '', onClick: () => { setEditing(false); setConfirmDelete(false); }}, t('doneEdit')),
             ]
-            : [h('button', {key: 'edit', type: 'button', className: 'bnt-btn bnt-iconbtn', 'aria-label': t('edit'), title: t('edit'), onClick: () => setEditing(true)}, h(Icon.pencil))];
+            : [h('button', {key: 'edit', type: 'button', className: 'wb-btn wb-iconbtn', 'aria-label': t('edit'), title: t('edit'), onClick: () => setEditing(true)}, h(Icon.pencil))];
 
           const card = cell => {
             const w = byId.get(cell.id);
@@ -3067,7 +3067,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             const [c, r] = SIZES[size];
             const openSettings = () => setModal({type: 'settings', id: cell.id});
             return h('section', {
-              key: cell.id, className: 'bnt-card', 'aria-label': w.label(), 'data-widget': cell.id, 'data-c': c, style: {'--c': c, '--r': r},
+              key: cell.id, className: 'wb-card', 'aria-label': w.label(), 'data-widget': cell.id, 'data-c': c, style: {'--c': c, '--r': r},
               'data-banner': w.banner ? '' : undefined,
               'data-dragging': drag?.id === cell.id ? '' : undefined,
               'data-drop': drag?.over === cell.id ? (drag.after ? 'after' : 'before') : undefined,
@@ -3083,28 +3083,28 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
               onDrop: editing ? e => { e.preventDefault(); drop(cell.id, drag?.after); } : undefined,
               onDragEnd: editing ? () => setDrag(null) : undefined,
             },
-            editing ? h('div', {className: 'bnt-tools', draggable: false, onMouseDown: e => e.stopPropagation()},
+            editing ? h('div', {className: 'wb-tools', draggable: false, onMouseDown: e => e.stopPropagation()},
               w.sizes.length > 1 ? h('select', {value: size, 'aria-label': t('size'), onChange: e => updateCell(cell.id, {size: e.target.value})}, w.sizes.map(s => h('option', {key: s, value: s}, sizeLabel(s)))) : null,
-              w.custom ? h('button', {type: 'button', className: 'bnt-btn', 'aria-label': t('cw_edit'), title: t('cw_edit'), onClick: () => setModal({type: 'agent', id: cell.id})}, h(Icon.sparkle)) : null,
-              w.custom ? h('button', {type: 'button', className: 'bnt-btn', 'aria-label': t('cw_source'), title: t('cw_source'), onClick: () => setModal({type: 'source', id: cell.id})}, h(Icon.code)) : null,
-              w.settings.length ? h('button', {type: 'button', className: 'bnt-btn', 'aria-label': t('settings'), title: t('settings'), onClick: openSettings}, h(Icon.gear)) : null,
-              h('button', {type: 'button', className: 'bnt-btn', 'aria-label': t('remove'), title: t('remove'), onClick: () => removeCell(cell.id)}, h(Icon.x))) : null,
+              w.custom ? h('button', {type: 'button', className: 'wb-btn', 'aria-label': t('cw_edit'), title: t('cw_edit'), onClick: () => setModal({type: 'agent', id: cell.id})}, h(Icon.sparkle)) : null,
+              w.custom ? h('button', {type: 'button', className: 'wb-btn', 'aria-label': t('cw_source'), title: t('cw_source'), onClick: () => setModal({type: 'source', id: cell.id})}, h(Icon.code)) : null,
+              w.settings.length ? h('button', {type: 'button', className: 'wb-btn', 'aria-label': t('settings'), title: t('settings'), onClick: openSettings}, h(Icon.gear)) : null,
+              h('button', {type: 'button', className: 'wb-btn', 'aria-label': t('remove'), title: t('remove'), onClick: () => removeCell(cell.id)}, h(Icon.x))) : null,
             w.title && !w.banner ? h('header', null, h('h3', null, w.label()),
-              w.custom && !editing ? h('button', {type: 'button', className: 'bnt-btn bnt-hact', 'aria-label': t('cw_edit'), title: t('cw_edit'), onClick: () => setModal({type: 'agent', id: cell.id})}, h(Icon.sparkle)) : null) : null,
-            h('div', {className: 'bnt-body'}, renderSlot(SLOT, {size, config: cell.config ?? {}, editing, openSettings}, {only: cell.id})));
+              w.custom && !editing ? h('button', {type: 'button', className: 'wb-btn wb-hact', 'aria-label': t('cw_edit'), title: t('cw_edit'), onClick: () => setModal({type: 'agent', id: cell.id})}, h(Icon.sparkle)) : null) : null,
+            h('div', {className: 'wb-body'}, renderSlot(SLOT, {size, config: cell.config ?? {}, editing, openSettings}, {only: cell.id})));
           };
 
-          return h('div', {className: 'bnt-page'},
-            h('div', {className: 'bnt-inner'},
-              h('div', {className: 'bnt-head', 'data-editing': editing ? '' : undefined}, showTabs ? tabs : null, h('span', {className: 'bnt-spacer'}), ...actions),
-              shownError ? h('div', {className: 'bnt-error', role: 'alert'}, shownError) : null,
-              board && cells.length === 0 && !editing ? h('div', {className: 'bnt-empty'},
-                h('div', {className: 'bnt-emptyacts'},
-                  h('button', {type: 'button', className: 'bnt-action', onClick: () => { setEditing(true); setModal({type: 'gallery'}); }}, h(Icon.plus), t('addWidget')),
-                  h('button', {type: 'button', className: 'bnt-action', onClick: () => setModal({type: 'agent'})}, h(Icon.sparkle), t('gen_card')))) : null,
-              h('div', {className: 'bnt-grid', 'data-editing': editing ? '' : undefined},
+          return h('div', {className: 'wb-page'},
+            h('div', {className: 'wb-inner'},
+              h('div', {className: 'wb-head', 'data-editing': editing ? '' : undefined}, showTabs ? tabs : null, h('span', {className: 'wb-spacer'}), ...actions),
+              shownError ? h('div', {className: 'wb-error', role: 'alert'}, shownError) : null,
+              board && cells.length === 0 && !editing ? h('div', {className: 'wb-empty'},
+                h('div', {className: 'wb-emptyacts'},
+                  h('button', {type: 'button', className: 'wb-action', onClick: () => { setEditing(true); setModal({type: 'gallery'}); }}, h(Icon.plus), t('addWidget')),
+                  h('button', {type: 'button', className: 'wb-action', onClick: () => setModal({type: 'agent'})}, h(Icon.sparkle), t('gen_card')))) : null,
+              h('div', {className: 'wb-grid', 'data-editing': editing ? '' : undefined},
                 cells.map(card),
-                editing && board ? h('button', {type: 'button', className: 'bnt-btn bnt-addtile', onClick: () => setModal({type: 'gallery'})}, h(Icon.plus), t('addWidget')) : null)),
+                editing && board ? h('button', {type: 'button', className: 'wb-btn wb-addtile', onClick: () => setModal({type: 'gallery'})}, h(Icon.plus), t('addWidget')) : null)),
             modal?.type === 'gallery' && board ? h(Gallery, {list, board, onAdd: addWidget, onGenerate: () => setModal({type: 'agent'}), onClose: () => setModal(null)}) : null,
             modal?.type === 'agent' && (!modal.id || modalCustom) ? h(AgentModal, {widget: modalCustom, onClose: () => setModal(null)}) : null,
             modal?.type === 'source' && modalCustom && board ? h(SourceModal, {widget: modalCustom, onClose: () => setModal(null), onRemoved: () => forgetCell(modal.id)}) : null,
@@ -3121,17 +3121,17 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         }, PanelIcon)), 'dsh-workboard: sidebar entry');
         ctx.effect(() => ctx.slots.inject('settings.section', () => ctx.slots.register({
           name: 'settings.section', id: PANEL, order: 40, label: () => t('title'), locale: NS, inject: () => ({}),
-        }, DeskSettings)), 'dsh-workboard: settings section');
+        }, WorkboardSettings)), 'dsh-workboard: settings section');
 
         // 设置弹窗没有公开「打开指定栏目」的接口：插件详情页的按钮改为在主区域打开同一面板。
         if (typeof ctx.inject === 'function') {
-          const SettingsPanel = () => h('div', {className: 'bnt-page'}, h('div', {className: 'bnt-cfgmain'}, h(DeskSettings)));
+          const SettingsPanel = () => h('div', {className: 'wb-page'}, h('div', {className: 'wb-cfgmain'}, h(WorkboardSettings)));
           function OpenSettings({subject, onOpen}) {
             useLocale();
             if (subject?.kind !== 'bundle' && subject?.kind !== 'row') return null;
             if (subject.pkg?.name !== PACKAGE) return null;
             if (subject.kind === 'row' && subject.row?.moduleName !== PACKAGE) return null;
-            return h('button', {type: 'button', className: 'bnt-action', onClick: onOpen}, t('openSettings'));
+            return h('button', {type: 'button', className: 'wb-action', onClick: onOpen}, t('openSettings'));
           }
           ctx.inject(['layout'], pageCtx => pageCtx.slots.inject('main', () => {
             const stopPanel = pageCtx.slots.register({name: 'main', key: SETTINGS_PANEL, locale: NS, inject: () => ({})}, SettingsPanel);
