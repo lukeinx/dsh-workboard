@@ -97,6 +97,9 @@ window.__ModuleLoader__.load({
       d_running: 'Agent 正在推进的目标和后台任务，可停止任务', r_goals: '目标', r_jobs: '后台任务', r_idle: '没有进行中的目标或后台任务', r_unavailable: '当前 Harness 不支持读取目标和后台任务',
       r_round: '第 {n}/{m} 轮', r_active: '进行中', r_paused: '已暂停', r_blocked: '受阻', r_complete: '已完成', r_disarmed: '等待恢复',
       r_running: '已运行 {t}', r_stopping: '正在停止', r_completed: '已完成', r_killed: '已停止', r_failed: '失败', r_kill: '停止', r_count: '{g} 个目标 · {j} 个任务',
+      attention: '待处理', d_attention: '等你确认的会话、卡住的目标、失败的作业、待 Review 的 PR 和结转待办，按紧急程度排成一列',
+      a_waiting: '等你确认', a_blocked: '目标卡住', a_failed: '作业失败', a_review: '待 Review', a_todo: '结转待办', a_inbox: '收集箱有 {n} 条待整理',
+      a_clear: '没有需要你处理的事', a_count: '{n} 项待处理', f_attnGithub: '包含待 Review 的 PR', f_attnTodos: '包含结转待办', f_attnInbox: '包含收集箱',
       d_usage: '每天的请求数与 token，按模型拆分，可按单价估算费用', u_today: '今日 token', u_requests: '{n} 次请求', u_cache: '缓存命中 {n}%', u_cost: '约 ${n}',
       u_vs: '昨日 {n}', u_range_1: '今天', u_range_7: '7 天', u_range_30: '30 天', u_model: '模型', u_req: '请求', u_tok: 'token',
       u_unreported: '{n} 次请求未上报 token（{p}）', u_none: '这段时间没有请求', u_day: '{d}：{t} token，{r} 次请求',
@@ -207,6 +210,9 @@ window.__ModuleLoader__.load({
       d_running: 'Goals the agent is pursuing and background jobs, which you can stop', r_goals: 'Goals', r_jobs: 'Background jobs', r_idle: 'No active goals or background jobs', r_unavailable: 'This Harness does not expose goals or jobs',
       r_round: 'Round {n}/{m}', r_active: 'Active', r_paused: 'Paused', r_blocked: 'Blocked', r_complete: 'Complete', r_disarmed: 'Waiting to resume',
       r_running: 'Running for {t}', r_stopping: 'Stopping', r_completed: 'Completed', r_killed: 'Stopped', r_failed: 'Failed', r_kill: 'Stop', r_count: '{g} goals · {j} jobs',
+      attention: 'Attention', d_attention: 'Sessions waiting for you, stuck goals, failed jobs, PRs to review and carried-over to-dos, in one queue by urgency',
+      a_waiting: 'Needs you', a_blocked: 'Goal blocked', a_failed: 'Job failed', a_review: 'Review requested', a_todo: 'Carried-over to-do', a_inbox: '{n} inbox items to sort',
+      a_clear: 'Nothing needs you', a_count: '{n} to handle', f_attnGithub: 'Include PRs to review', f_attnTodos: 'Include carried-over to-dos', f_attnInbox: 'Include the inbox',
       d_usage: 'Requests and tokens per day, split by model, with optional cost estimates', u_today: 'Tokens today', u_requests: '{n} requests', u_cache: '{n}% cache hits', u_cost: '≈ ${n}',
       u_vs: 'Yesterday {n}', u_range_1: 'Today', u_range_7: '7 days', u_range_30: '30 days', u_model: 'Model', u_req: 'Requests', u_tok: 'Tokens',
       u_unreported: '{n} requests reported no tokens ({p})', u_none: 'No requests in this period', u_day: '{d}: {t} tokens, {r} requests',
@@ -2755,6 +2761,57 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         }
         Running.workboard = {apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_running')};
 
+        const ATTENTION_STATE = {waiting: 'waiting', blocked: 'blocked', failed: 'blocked', review: 'running'};
+        function Attention({size, config}) {
+          useLocale();
+          const now = useNow();
+          const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+          const res = useRemote('attention.get', {dayStart, github: config?.github !== false, todos: config?.todos !== false, inbox: config?.inbox !== false}, AGENT_MS);
+          const [handled, setHandled] = useState(() => new Set());
+          const [busy, setBusy] = useState(false);
+          const [error, setError] = useState('');
+          const ui = ctx.get?.('uiWorkspace');
+          const ws = useWorkspace();
+          const v = res.value;
+          if (!v) return h('div', {className: 'wb-blank'}, res.error || '…');
+          const nowMs = now.getTime();
+          const fail = e => setError(String(e?.message || e));
+          const items = v.items.filter(x => !handled.has(x.id));
+          const complete = x => {
+            setHandled(set => new Set([...set, x.id]));
+            data.setDone(x.todoId, true).then(res.reload, e => { fail(e); res.reload(); });
+          };
+          const sortInbox = () => {
+            setBusy(true);
+            launch(t('inboxPrompt'), ws.path, ws.id).catch(fail).finally(() => setBusy(false));
+          };
+          const row = x => {
+            const state = ATTENTION_STATE[x.kind];
+            const label = x.kind === 'inbox' ? fill(t('a_inbox'), {n: x.count}) : t(`a_${x.kind}`);
+            const sub = x.kind === 'inbox' ? [] : [label, size === 'm' ? '' : x.kind === 'waiting' ? baseName(x.detail) : x.detail, x.at ? relTime(x.at, nowMs) : ''].filter(Boolean);
+            const body = h('div', null, h('b', null, x.kind === 'inbox' ? label : x.title || t('untitledSession')), sub.length ? h('small', null, sub.join(' · ')) : null);
+            const dot = h('span', {className: 'wb-dot', 'data-state': state});
+            const rowState = state === 'blocked' ? 'blocked' : undefined;
+            if (x.url) return h('a', {key: x.id, className: 'wb-row wb-rowbtn', 'data-state': rowState, href: x.url, target: '_blank', rel: 'noopener noreferrer', title: x.title}, dot, body);
+            if (x.sessionId) return h('button', {key: x.id, type: 'button', className: 'wb-btn wb-row wb-rowbtn', 'data-state': rowState, title: x.title, onClick: () => ui?.openSession?.(x.sessionId)}, dot, body);
+            return h('div', {key: x.id, className: 'wb-row', title: x.title}, dot, body,
+              x.kind === 'todo' ? h('button', {type: 'button', className: 'wb-btn wb-rowact', onClick: () => complete(x)}, t('complete')) : null,
+              x.kind === 'inbox' ? h('button', {type: 'button', className: 'wb-btn wb-rowact', disabled: busy, onClick: sortInbox}, busy ? t('sending') : t('toAgent')) : null);
+          };
+          return h(React.Fragment, null,
+            h('div', {className: 'wb-rows'}, items.length ? items.map(row) : h('div', {className: 'wb-blank'}, t('a_clear'))),
+            error ? h('div', {className: 'wb-calerr'}, error) : null,
+            size === 'm' || !items.length ? null : h('div', {className: 'wb-notefoot'}, h('span', null, fill(t('a_count'), {n: items.length}))));
+        }
+        Attention.workboard = {
+          apiVersion: 1, sizes: ['l', 't', 'm', 'w'], description: () => t('d_attention'),
+          settings: [
+            {key: 'github', type: 'toggle', default: true, label: () => t('f_attnGithub')},
+            {key: 'todos', type: 'toggle', default: true, label: () => t('f_attnTodos')},
+            {key: 'inbox', type: 'toggle', default: true, label: () => t('f_attnInbox')},
+          ],
+        };
+
         function Git({size, config}) {
           useLocale();
           const now = useNow();
@@ -3430,10 +3487,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           ['workboard.outputs', 'outputs', Outputs], ['workboard.schedules', 'tasks', Schedules], ['workboard.pinned', 'pinned', Pinned],
           ['workboard.files', 'files', Files], ['workboard.clipboard', 'clipboard', Clipboard], ['workboard.network', 'network', Network],
           ['workboard.nowplaying', 'nowplaying', NowPlaying], ['workboard.ambient', 'ambient', Ambient], ['workboard.videos', 'videos', Videos],
+          ['workboard.attention', 'attention', Attention],
         ];
         const BUILTIN_CATEGORY = {
           daily: ['today', 'clock', 'worldclock', 'weather', 'countdown', 'progress', 'habits', 'photo', 'nowplaying'],
-          agent: ['agents', 'running', 'prompt', 'inbox', 'usage', 'outputs', 'tasks', 'pinned'],
+          agent: ['attention', 'agents', 'running', 'prompt', 'inbox', 'usage', 'outputs', 'tasks', 'pinned'],
           news: ['trending', 'feed', 'videos', 'market', 'quote'],
           tools: ['todo', 'note', 'calendar', 'focus', 'ambient', 'links', 'git', 'github', 'system', 'files', 'clipboard', 'network'],
         };

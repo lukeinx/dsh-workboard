@@ -24,6 +24,7 @@ import {createOutputs} from './lib/outputs.js';
 import {createRecentFiles, isRisky} from './lib/files.js';
 import {createClipboard} from './lib/clipboard.js';
 import {createNetwork} from './lib/network.js';
+import {createAttention} from './lib/attention.js';
 import {stat} from 'node:fs/promises';
 import {isAbsolute, join} from 'node:path';
 
@@ -69,7 +70,7 @@ export const BUILTIN_WIDGETS = [
   'workboard.agents', 'workboard.feed', 'workboard.habits',
   'workboard.prompt', 'workboard.inbox', 'workboard.usage', 'workboard.running', 'workboard.git', 'workboard.github', 'workboard.system', 'workboard.photo', 'workboard.market', 'workboard.trending',
   'workboard.outputs', 'workboard.schedules', 'workboard.pinned', 'workboard.files', 'workboard.clipboard', 'workboard.network',
-  'workboard.nowplaying', 'workboard.ambient', 'workboard.videos',
+  'workboard.nowplaying', 'workboard.ambient', 'workboard.videos', 'workboard.attention',
 ];
 
 export function defaultBoard(id) {
@@ -780,9 +781,11 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
   const calendar = createCalendar(fetcher, services.systemCalendar);
   const feeds = createFeeds(fetcher);
   const quotes = createQuotes(fetcher);
+  const attention = services.attention ?? createAttention({agents, running: services.running, github: services.github, store});
   return {
     'dsh-workboard/quote.get': p => quotes.get({day: p?.day, n: p?.n}),
     'dsh-workboard/feed.get': p => feeds({urls: p?.urls, limit: p?.limit}),
+    'dsh-workboard/attention.get': p => attention({dayStart: p?.dayStart, github: p?.github !== false, todos: p?.todos !== false, inbox: p?.inbox !== false}),
     'dsh-workboard/agent.overview': () => (agents ? agents.overview() : {sessions: null, schedules: null}),
     'dsh-workboard/agent.start': async p => {
       if (!launch) throw new UserError('unavailable', 'this Harness cannot start sessions');

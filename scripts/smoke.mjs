@@ -25,6 +25,7 @@ import {EventEmitter} from 'node:events';
 import {PassThrough} from 'node:stream';
 import {createVideos, parseSource, parseYoutubeFeed, parseBiliArchives, parseChannelId} from '../lib/videos.js';
 import {parseFeed} from '../lib/feed.js';
+import {createAttention} from '../lib/attention.js';
 
 const routes = new Map();
 const tools = new Map();
@@ -331,6 +332,35 @@ await gh({fresh: true});
 assert.equal(ghCalls.length, 6);
 const missing = createGithub(async () => { const e = new Error('spawn gh ENOENT'); e.code = 'not-found'; throw e; });
 await assert.rejects(missing({}), /not installed/);
+
+// 待处理：等确认 > 卡住的目标 > 失败作业 > 待 Review > 结转待办 > 收集箱；gh 慢或缺失时不拖住其余来源。
+const attnListeners = new Map();
+const attnCtx = {
+  on: (name, fn) => { attnListeners.set(name, fn); return () => {}; },
+  get: key => (key === 'sessionController' ? {list: async () => ({items: summaries})} : runCtx.get(key)),
+};
+const blockedCtx = {get: key => (key === 'goals' ? {get: a => (a.id === 's2' ? {objective: 'Stuck goal', phase: 'blocked', blockedReason: {message: 'needs token'}, updatedAt: nowMs} : undefined)} : runCtx.get(key))};
+const attnStore = createStore({});
+const oldTodo = await attnStore.addTodo('carry me');
+await attnStore.addInbox('later');
+const attnHandlers = createHandlers(attnStore, feedFetcher, createAgentWatch(attnCtx), null, {running: createRunning(blockedCtx, () => nowMs), github: createGithub(fakeGh)});
+let release;
+const waitingReq = attnListeners.get('approval/request')({agent: {id: 's3'}}, () => new Promise(r => { release = r; }));
+const attn = await attnHandlers['dsh-workboard/attention.get']({dayStart: Date.now() + 1000});
+assert.deepEqual(attn.items.map(i => [i.kind, i.title]), [
+  ['waiting', ''], ['blocked', 'Stuck goal'], ['failed', 'free'], ['review', 'Fix'], ['todo', 'carry me'], ['inbox', ''],
+]);
+assert.deepEqual([attn.items[0].sessionId, attn.items[1].detail, attn.items[3].url, attn.items[4].todoId, attn.items[5].count], ['s3', 'needs token', 'https://github.com/o/r/pull/7', oldTodo.id, 1]);
+assert.deepEqual(attn.sources, {sessions: true, running: true, github: 'ok'});
+release('allowed-once');
+await waitingReq;
+const quiet = await attnHandlers['dsh-workboard/attention.get']({github: false, inbox: false});
+assert.deepEqual(quiet.items.map(i => i.kind), ['waiting', 'blocked', 'failed']);
+assert.equal(quiet.sources.github, 'off');
+const slowGh = createAttention({store: createStore({}), github: () => new Promise(() => {}), githubWaitMs: 20});
+assert.deepEqual(await slowGh({}), {items: [], sources: {sessions: false, running: false, github: 'pending'}});
+const noGh = createAttention({store: createStore({}), github: createGithub(async () => { const e = new Error('ENOENT'); e.code = 'not-found'; throw e; })});
+assert.equal((await noGh({})).sources.github, 'missing');
 
 // 系统状态：解析 vm_stat / meminfo / pmset，采样进环形缓冲。
 assert.equal(parseVmStat('Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free: 10.\nPages active: 100.\nPages wired down: 50.\nPages occupied by compressor: 10.\n', 1e12), 160 * 16384);
