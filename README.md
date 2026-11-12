@@ -1,6 +1,6 @@
 # Workboard
 
-**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 34 widgets out of the box — and your agent builds the rest.**
+**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 36 widgets out of the box — and your agent builds the rest.**
 
 [简体中文](README.zh.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
@@ -8,7 +8,7 @@
 
 ## Highlights
 
-### 34 widgets, ready to use
+### 36 widgets, ready to use
 
 Open the widget gallery, search, and drop cards straight onto your board across four categories:
 
@@ -67,6 +67,8 @@ If you are an agent interacting with Workboard:
   - `workboard_note`: `read` · `append` · `replace`
   - `workboard_inbox`: `list` · `add` · `remove` · `clear`
   - `workboard_widget`: `list` · `get` · `create` · `update` · `set_data` · `remove`
+  - `workboard_context`: read-only; one call returns what needs the user, calendar, weather, to-dos, habits, inbox, note, sessions, running work, scheduled tasks, outputs, usage, Git, and GitHub; pass `sections` to read only some
+  - `workboard_brief`: `read` · `write` (the daily brief, in Markdown)
 - **Build a custom widget**: load the `workboard-widget` skill ([`skills/workboard-widget.md`](skills/workboard-widget.md)) before calling `workboard_widget`. It documents card sizes, the `window.workboard` bridge API, sandbox rules, and theme tokens.
 - **Limits & live sync**: up to 50 custom widgets, each with up to 200 KB of HTML and 200 KB of JSON data. The UI polls every 5 seconds, so your changes appear without reloading the page.
 - **Storage**: `~/.dsh/storages/dsh_workboard.json`.
@@ -74,13 +76,15 @@ If you are an agent interacting with Workboard:
 ## Reference
 
 <details>
-<summary><b>All 34 built-in widgets</b></summary>
+<summary><b>All 36 built-in widgets</b></summary>
 
 | Widget | Sizes | What it shows |
 |---|---|---|
 | **DeepSeek (Agent workflows)** | | |
+| Attention | `l` `t` `m` `w` | One queue, by urgency, of sessions waiting for you, blocked goals, failed background jobs, PRs to review, carried-over to-dos, and the inbox; jump to the session, complete the to-do, or hand off to the agent |
 | Agent | `t` `l` `m` `w` | Sessions waiting for your input first, followed by running and recent sessions, upcoming scheduled tasks, and a new-session button |
 | Running | `t` `l` `m` `w` | Active goals and background jobs across sessions; jump to the session or stop a job |
+| Daily brief | `l` `t` `w` `m` | A brief of your day that the agent writes from the dashboard; generate it any time or every day on a schedule |
 | Quick prompt | `m` `w` `l` `t` `s` | Type a prompt or pick a preset to launch a new session right away in the chosen workspace |
 | Inbox | `t` `l` `m` `w` | Quick capture for links and thoughts; hand everything to the agent to triage with one click |
 | Usage | `l` `t` `m` `w` `s` | Token counts, request totals, cache hit rate, and per-model breakdown from local session logs, plus cost estimates when prices are set |
@@ -117,7 +121,7 @@ If you are an agent interacting with Workboard:
 | Markets | `t` `m` `s` `l` `w` | Forex (`USD/CNY`), China / HK / US equities (`sh600519`, `hk00700`, `usAAPL`), and crypto (`BTC`, `cg:<id>`) |
 | Quote | `m` `w` `s` | A daily quote (click for another), sharing its source setting with the Today banner |
 
-Note: Agent, Quick prompt, and Inbox share the same default workspace selection. Shared preferences (your name, week start day, city, temperature unit, and quote source) can also be configured under **Settings → Workboard**. New built-in widgets added in future updates appear in the gallery without altering existing boards.
+Note: Agent, Quick prompt, Inbox, Attention, and Daily brief share the same default workspace selection; PRs in Attention reuse the GitHub widget's query and cache. Shared preferences (your name, week start day, city, temperature unit, and quote source) can also be configured under **Settings → Workboard**. New built-in widgets added in future updates appear in the gallery without altering existing boards.
 
 </details>
 
@@ -139,6 +143,8 @@ All external network requests are made and cached by the Host:
 Widgets that only read local state:
 
 - **Usage & Outputs**: read local session logs under `~/.dsh/sessions`
+- **Attention**: combines Harness session, goal, and background job state with your local to-dos and inbox; with GitHub on, it calls the local `gh` CLI (sharing the GitHub widget's 5-minute cache)
+- **Daily brief**: written by the agent in a new session after it reads the local data above through `workboard_context`; turning on **Every day** creates one daily Harness scheduled task, and turning it off deletes it
 - **Git repos**: runs `git status` locally, and only runs `git fetch` when you click Fetch
 - **System**: uses `vm_stat` and `pmset` on macOS
 - **Photo frame**: uses `sips` on macOS to generate thumbnails cached in the system temp directory
@@ -200,7 +206,7 @@ npm run check   # syntax check, Host smoke test, and ICS parser tests
 ```
 
 - `index.js`: Host routes (`/api/dsh-workboard/*`), storage tables, and agent tools
-- `client.js`: sidebar entry, board container, and the 34 built-in widgets
+- `client.js`: sidebar entry, board container, and the 36 built-in widgets
 - `lib/`: data fetchers, parsers, and system probes
 - `skills/workboard-widget.md`: agent skill for building custom widgets
 
