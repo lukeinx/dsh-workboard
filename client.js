@@ -18,6 +18,7 @@ window.__ModuleLoader__.load({
     const GITHUB_MS = 5 * 60_000;
     const SYSTEM_MS = 5000;
     const MARKET_MS = 60_000;
+    const TRENDING_MS = 10 * 60_000;
     // 尺寸档位：[列, 行]，行单位 80px；「横栏」半高，其余行数成对。
     const SIZES = {bar: [4, 1], s: [1, 2], m: [2, 2], t: [1, 4], l: [2, 4], w: [4, 2]};
 
@@ -62,6 +63,9 @@ window.__ModuleLoader__.load({
       prompt: 'Prompt 快启', inbox: '收集箱', usage: '用量', running: '运行中', git: 'Git 工作区', github: 'GitHub', system: '系统状态', photo: '相框', market: '行情',
       d_market: '汇率、A 股 / 港股 / 美股和加密货币报价', f_symbols: '代码（每行一个，后面可加名称）', f_upColor: '涨跌颜色', up_red: '红涨绿跌', up_green: '绿涨红跌',
       mk_symbols: 'USD/CNY\nHKD/CNY\nhk00700 腾讯\nBTC', mk_none: '在设置里添加代码', mk_unknown: '无法识别', mk_missing: '未找到',
+      trending: '热榜', d_trending: '微博、知乎、36 氪、Hacker News、GitHub 等国内外热榜', tr_none: '在设置里选择信源',
+      tr_weibo: '微博', tr_zhihu: '知乎', tr_36kr: '36 氪', tr_sspai: '少数派', tr_bilibili: 'B 站', tr_v2ex: 'V2EX',
+      tr_hn: 'Hacker News', tr_github: 'GitHub', tr_producthunt: 'Product Hunt', tr_reddit: 'Reddit',
       d_photo: '轮播本机文件夹里的照片，点击换下一张', f_photoDir: '照片文件夹', f_shuffle: '随机顺序', f_every: '切换间隔', every_m: '{n} 分钟', every_h: '1 小时',
       ph_empty: '这个文件夹里没有照片', ph_pick: '选择文件夹',
       d_system: '本机 CPU、内存、磁盘和电池', s_cpu: 'CPU', s_mem: '内存', s_disk: '磁盘', s_battery: '电池', s_cores: '{n} 核 · 负载 {l}', s_free: '剩余 {n}',
@@ -126,6 +130,9 @@ window.__ModuleLoader__.load({
       prompt: 'Quick prompt', inbox: 'Inbox', usage: 'Usage', running: 'Running', git: 'Git repos', github: 'GitHub', system: 'System', photo: 'Photo frame', market: 'Markets',
       d_market: 'Exchange rates, China / Hong Kong / US stocks and crypto prices', f_symbols: 'Symbols, one per line, optionally followed by a name', f_upColor: 'Gain colour', up_red: 'Red for gains', up_green: 'Green for gains',
       mk_symbols: 'EUR/USD\nUSD/JPY\nusAAPL Apple\nBTC', mk_none: 'Add symbols in settings', mk_unknown: 'Unrecognized', mk_missing: 'Not found',
+      trending: 'Trending', d_trending: 'Hot lists from Hacker News, GitHub, Reddit, Weibo, Zhihu and more', tr_none: 'Choose sources in settings',
+      tr_weibo: 'Weibo', tr_zhihu: 'Zhihu', tr_36kr: '36Kr', tr_sspai: 'sspai', tr_bilibili: 'Bilibili', tr_v2ex: 'V2EX',
+      tr_hn: 'Hacker News', tr_github: 'GitHub', tr_producthunt: 'Product Hunt', tr_reddit: 'Reddit',
       d_photo: 'Cycles through photos in a local folder; click for the next one', f_photoDir: 'Photo folder', f_shuffle: 'Shuffle', f_every: 'Change every', every_m: '{n} min', every_h: '1 hour',
       ph_empty: 'No photos in this folder', ph_pick: 'Choose folder',
       d_system: 'CPU, memory, disk and battery of this machine', s_cpu: 'CPU', s_mem: 'Memory', s_disk: 'Disk', s_battery: 'Battery', s_cores: '{n} cores · load {l}', s_free: '{n} free',
@@ -393,6 +400,13 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 .bnt-quote[data-dir=down]>span:last-of-type{color:var(--bnt-down)}
 .bnt-quotes{--bnt-up:var(--dsw-alias-state-success-primary);--bnt-down:var(--dsw-alias-state-error-primary)}
 .bnt-quotes[data-red-up]{--bnt-up:var(--dsw-alias-state-error-primary);--bnt-down:var(--dsw-alias-state-success-primary)}
+.bnt-trend{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0}
+.bnt-trend .bnt-seg{overflow-x:auto;scrollbar-width:none}
+.bnt-trend .bnt-seg button{flex:none;white-space:nowrap}
+.bnt-trend .bnt-row{gap:8px;padding:3px 4px}
+.bnt-trend .bnt-row>span{flex:none;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.bnt-trend .bnt-row>.bnt-rank{width:16px;text-align:right}
+.bnt-trend .bnt-rank[data-top]{color:var(--dsw-alias-brand-primary);font-weight:600}
 .bnt-spark{flex:1;min-height:32px;min-width:0;position:relative}
 .bnt-spark svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .bnt-spark polyline{fill:none;stroke:var(--dsw-alias-brand-primary);stroke-width:1.5;vector-effect:non-scaling-stroke;stroke-linejoin:round}
@@ -1828,6 +1842,36 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           ],
         };
 
+        const TR_CN = ['weibo', 'zhihu', '36kr', 'sspai', 'bilibili', 'v2ex'];
+        const TR_INTL = ['hn', 'github', 'producthunt', 'reddit'];
+        const TR_OFF = new Set(['bilibili', 'v2ex']);
+        const trSources = () => (t('lang').startsWith('zh') ? [...TR_CN, ...TR_INTL] : [...TR_INTL, ...TR_CN]);
+        const trKey = id => `src_${id}`;
+
+        function Trending({size, config, openSettings}) {
+          useLocale();
+          const enabled = trSources().filter(id => config?.[trKey(id)] ?? !TR_OFF.has(id));
+          const [picked, setPicked] = useState(null);
+          const source = enabled.includes(picked) ? picked : enabled[0];
+          const res = useRemote('trending.get', source ? {source} : null, TRENDING_MS);
+          if (!source) return h('div', {className: 'bnt-photo-msg'}, h('button', {type: 'button', className: 'bnt-btn bnt-cta', onClick: openSettings}, t('tr_none')));
+          const v = res.value?.source === source ? res.value : null;
+          const compact = new Intl.NumberFormat(t('lang'), {notation: 'compact', maximumFractionDigits: 1});
+          const hot = n => (n == null ? '' : `${v.metric === 'stars' ? '+' : ''}${compact.format(n)}`);
+          return h('div', {className: 'bnt-trend'},
+            enabled.length > 1 ? h('div', {className: 'bnt-seg', role: 'tablist'}, enabled.map(id => h('button', {key: id, type: 'button', role: 'tab', className: 'bnt-btn', 'aria-pressed': id === source, onClick: () => setPicked(id)}, t(`tr_${id}`)))) : null,
+            h('div', {className: 'bnt-rows'},
+              v ? v.items.map((it, i) => h('a', {key: `${i}${it.url}`, className: 'bnt-row bnt-rowbtn', href: it.url, target: '_blank', rel: 'noopener noreferrer', title: [it.title, it.meta].filter(Boolean).join('\n')},
+                h('span', {className: 'bnt-rank bnt-num', 'data-top': i < 3 ? '' : undefined}, i + 1),
+                h('div', null, h('b', null, it.title), size === 'l' && it.meta ? h('small', null, it.meta) : null),
+                size === 't' ? null : h('span', {className: 'bnt-num'}, hot(it.hot))))
+                : h('div', {className: 'bnt-blank'}, res.error || '…')));
+        }
+        Trending.desk = {
+          apiVersion: 1, sizes: ['l', 't', 'm', 'w'], defaultSize: 'l', description: () => t('d_trending'),
+          settings: [...TR_CN, ...TR_INTL].map(id => ({key: trKey(id), type: 'toggle', default: !TR_OFF.has(id), label: () => t(`tr_${id}`)})),
+        };
+
         const builtins = [
           ['desk.today', 'today', Today], ['desk.todo', 'todo', Todo], ['desk.note', 'note', Note], ['desk.calendar', 'calendar', Calendar],
           ['desk.weather', 'weather', Weather], ['desk.clock', 'clock', Clock], ['desk.quote', 'quote', Quote], ['desk.countdown', 'countdown', Countdown],
@@ -1835,6 +1879,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           ['desk.agents', 'agents', Agents], ['desk.feed', 'feed', Feed], ['desk.habits', 'habits', Habits],
           ['desk.prompt', 'prompt', Prompt], ['desk.inbox', 'inbox', Inbox], ['desk.usage', 'usage', Usage], ['desk.running', 'running', Running],
           ['desk.git', 'git', Git], ['desk.github', 'github', GitHub], ['desk.system', 'system', System], ['desk.photo', 'photo', Photo], ['desk.market', 'market', Market],
+          ['desk.trending', 'trending', Trending],
         ];
         const BUILTIN_IDS = new Set(builtins.map(([id]) => id));
 

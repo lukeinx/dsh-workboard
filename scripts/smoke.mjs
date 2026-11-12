@@ -10,6 +10,7 @@ import {createRunner} from '../lib/exec.js';
 import {createSystem, parsePmset, parseVmStat, parseMeminfo} from '../lib/system.js';
 import {createPhotos, findPhotos} from '../lib/photo.js';
 import {createMarket, parseSymbol} from '../lib/market.js';
+import {createTrending, parseGithubTrending, parseZhihuHeat} from '../lib/trending.js';
 import {createFetcher} from '../lib/http.js';
 import {createUsage, zstdFrames} from '../lib/usage.js';
 
@@ -331,5 +332,23 @@ assert.deepEqual(mq.items.map(i => [i.symbol, i.label, i.name, i.price, i.pct, i
 assert.match(mq.items[2].error, /503/);
 assert.equal(mq.items[3].error, 'unknown symbol');
 assert.equal(marketUrls.filter(u => u.includes('gtimg'))[0], 'https://qt.gtimg.cn/q=hk00700');
+
+assert.equal(parseZhihuHeat('681 万热度'), 6_810_000);
+assert.deepEqual(parseGithubTrending('<article class="Box-row"><h2><a href="/meta/astryx">meta / astryx</a></h2><p class="col-9 x">Design &amp; agents</p> 2,776 stars today</article>'),
+  [{title: 'meta / astryx', url: 'https://github.com/meta/astryx', hot: 2776, meta: 'Design & agents'}]);
+const trendCalls = [];
+const trendFetcher = createFetcher({fetchImpl: async (url, init) => {
+  trendCalls.push([url, init.method, init.headers.referer]);
+  if (url.includes('weibo')) return Response.json({data: {realtime: [{word: '话题', num: 5, label_name: '热'}, {word: '广告', is_ad: 1}]}});
+  if (url.includes('36kr')) return Response.json({data: {hotRankList: [{templateMaterial: {itemId: 9, widgetTitle: 'T', statRead: 3}}]}});
+  return new Response('down', {status: 503});
+}});
+const trendHandle = createHandlers(createStore({}), trendFetcher, null, null, {trending: createTrending(trendFetcher)})['dsh-desk/trending.get'];
+assert.deepEqual((await trendHandle({source: 'weibo'})).items, [{title: '话题', url: 'https://s.weibo.com/weibo?q=%23%E8%AF%9D%E9%A2%98%23', hot: 5, meta: '热'}]);
+assert.equal((await trendHandle({source: '36kr'})).items[0].url, 'https://36kr.com/p/9');
+assert.deepEqual(trendCalls.map(c => c[1]), ['GET', 'POST']);
+assert.equal(trendCalls[0][2], 'https://weibo.com/');
+await assert.rejects(trendHandle({source: 'hn'}), /503/);
+await assert.rejects(trendHandle({source: '__proto__'}), /unknown source/);
 
 console.log('smoke ok');

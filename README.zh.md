@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-工作台（`@lukeinx/dsh-desk`）在 DeepSeek Harness 侧栏增加一个模块化工作台。内置 24 个 widget，包括今日横栏、待办、速记、ICS 日历、天气、Agent 会话、Prompt 快启、用量统计、Git 工作区、系统状态和行情，零配置可用；Agent 可以在任意对话里读写你的待办、速记和收集箱；其他插件可以注册自己的 widget。
+工作台（`@lukeinx/dsh-desk`）在 DeepSeek Harness 侧栏增加一个模块化工作台。内置 25 个 widget，包括今日横栏、待办、速记、ICS 日历、天气、Agent 会话、Prompt 快启、用量统计、Git 工作区、系统状态和行情，零配置可用；Agent 可以在任意对话里读写你的待办、速记和收集箱；其他插件可以注册自己的 widget。
 
 状态：早期（P0b）。MIT 许可。
 
@@ -34,6 +34,7 @@
 | 系统状态 | `m` `s` `t` `l` `w` | CPU、内存、磁盘、电池和最近 5 分钟的 CPU 曲线 |
 | 相框 | `m` `s` `t` `l` `w` | 轮播本机文件夹（默认 `~/Pictures`）里的照片，点击换下一张 |
 | 行情 | `t` `m` `s` `l` `w` | 汇率（`USD/CNY`）、A 股 / 港股 / 美股（`sh600519`、`hk00700`、`usAAPL`）和加密货币（`BTC`、`cg:<id>`）；可选红涨或绿涨 |
+| 热榜 | `l` `t` `m` `w` | 每个信源一个标签：微博、知乎、36 氪、少数派、Hacker News、GitHub Trending、Product Hunt 和 Reddit（国际新闻、科技、科学）；B 站和 V2EX 可在设置里打开 |
 
 默认看板只放今日横栏、待办、日历和速记，其余从组件库添加。升级后新增的内置 widget 只出现在组件库，不会自动加入已有看板。
 
@@ -45,6 +46,7 @@
 - 日历和订阅：你添加的 ICS 与 RSS / Atom 地址
 - 行情：股票走腾讯行情 `qt.gtimg.cn`，汇率走 [open.er-api.com](https://open.er-api.com)（每日更新），加密货币走 [CoinGecko](https://www.coingecko.com)
 - GitHub：通过本机 `gh` CLI，用它已有的登录
+- 热榜：微博、知乎、36 氪、少数派、B 站、V2EX 走各站网页接口（非官方，站点改版可能失效），Hacker News 走 [HN Algolia API](https://hn.algolia.com/api)，GitHub 走 Trending 页，Product Hunt 和 Reddit 走订阅源；缓存 10 分钟
 
 另有几个 widget 只读本机：用量读 `~/.dsh/sessions` 下的会话日志；Git 工作区运行 `git status`，只在你点「获取远端」时执行 `git fetch`；系统状态在 macOS 用 `vm_stat` 和 `pmset`；相框在 macOS 用 `sips` 把照片缩到 1280px，缓存在系统临时目录。
 
@@ -102,4 +104,4 @@ ctx.effect(() => ctx.slots.inject('desk.widget', () => ctx.slots.register({
 npm run check   # 语法检查 + Host 端冒烟 + ICS 测试
 ```
 
-文件：`index.js`（Host 端 `/api/dsh-desk/*` 路由、存储、Agent 工具）、`lib/`（HTTP 缓存、天气、ICS 与订阅解析、会话日志用量、子进程、Git、GitHub、系统状态、相框、行情）、`client.js`（侧栏入口、面板、内置 widget）、`cordis.patch.yml`、`locale/`、`icon.svg`。
+文件：`index.js`（Host 端 `/api/dsh-desk/*` 路由、存储、Agent 工具）、`lib/`（HTTP 缓存、天气、ICS 与订阅解析、会话日志用量、子进程、Git、GitHub、系统状态、相框、行情、热榜）、`client.js`（侧栏入口、面板、内置 widget）、`cordis.patch.yml`、`locale/`、`icon.svg`。

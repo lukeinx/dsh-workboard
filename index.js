@@ -10,6 +10,7 @@ import {githubOverview} from './lib/github.js';
 import {createSystem} from './lib/system.js';
 import {createPhotos} from './lib/photo.js';
 import {createMarket} from './lib/market.js';
+import {createTrending} from './lib/trending.js';
 import {randomUUID} from 'node:crypto';
 import {homedir, tmpdir} from 'node:os';
 import {stat} from 'node:fs/promises';
@@ -47,7 +48,7 @@ export const BUILTIN_WIDGETS = [
   'desk.today', 'desk.todo', 'desk.note', 'desk.calendar', 'desk.weather', 'desk.clock',
   'desk.quote', 'desk.countdown', 'desk.worldclock', 'desk.focus', 'desk.links', 'desk.progress',
   'desk.agents', 'desk.feed', 'desk.habits',
-  'desk.prompt', 'desk.inbox', 'desk.usage', 'desk.running', 'desk.git', 'desk.github', 'desk.system', 'desk.photo', 'desk.market',
+  'desk.prompt', 'desk.inbox', 'desk.usage', 'desk.running', 'desk.git', 'desk.github', 'desk.system', 'desk.photo', 'desk.market', 'desk.trending',
 ];
 
 export function defaultBoard(id) {
@@ -568,6 +569,10 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       if (!services.market) throw new UserError('unavailable', 'market data is not available');
       return services.market.quotes({symbols: String(p?.symbols ?? '')});
     },
+    'dsh-desk/trending.get': async p => {
+      if (!services.trending) throw new UserError('unavailable', 'trending lists are not available');
+      return services.trending.list({source: String(p?.source ?? '')});
+    },
     'dsh-desk/github.get': async p => {
       if (!services.github) throw new UserError('unavailable', 'GitHub is not available');
       return services.github({fresh: p?.fresh === true});
@@ -708,6 +713,7 @@ export function apply(ctx) {
     system: createSystem({run}),
     photos: createPhotos({run, cacheDir: join(tmpdir(), 'dsh-desk-photos')}),
     market: createMarket(fetcher),
+    trending: createTrending(fetcher),
   };
   const handlers = createHandlers(store, fetcher, createAgentWatch(ctx), createLauncher(ctx), services);
   ctx.effect(() => () => { void store.close(); }, 'dsh-desk: storage');

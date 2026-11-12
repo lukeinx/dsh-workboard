@@ -2,7 +2,7 @@
 
 [简体中文](README.zh.md)
 
-Desk (`@lukeinx/dsh-desk`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with 24 widgets, including a today banner, to-dos, notes, an ICS calendar, weather, an agent session monitor, quick prompts, usage stats, Git repositories, system status and markets, works with zero configuration, and lets the agent read and change your to-dos, notes and inbox from any conversation. Other plugins can add their own widgets.
+Desk (`@lukeinx/dsh-desk`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with 25 widgets, including a today banner, to-dos, notes, an ICS calendar, weather, an agent session monitor, quick prompts, usage stats, Git repositories, system status and markets, works with zero configuration, and lets the agent read and change your to-dos, notes and inbox from any conversation. Other plugins can add their own widgets.
 
 Status: early (P0b). MIT licensed.
 
@@ -34,6 +34,7 @@ Status: early (P0b). MIT licensed.
 | System | `m` `s` `t` `l` `w` | CPU, memory, disk, battery and a five-minute CPU sparkline |
 | Photo frame | `m` `s` `t` `l` `w` | Cycles through photos in a local folder (`~/Pictures` by default); click for the next one |
 | Markets | `t` `m` `s` `l` `w` | Exchange rates (`USD/CNY`), China / Hong Kong / US stocks (`sh600519`, `hk00700`, `usAAPL`) and crypto (`BTC`, `cg:<id>`); red or green for gains |
+| Trending | `l` `t` `m` `w` | Hot lists, one tab per source: Weibo, Zhihu, 36Kr, sspai, Hacker News, GitHub Trending, Product Hunt and Reddit (world news, technology, science); Bilibili and V2EX can be turned on in settings |
 
 The default board holds Today, To-do, Calendar and Notes; add the rest from the gallery. Built-in widgets added by an upgrade appear only in the gallery and are not placed on existing boards.
 
@@ -45,6 +46,7 @@ Data stays on your machine, in the Harness profile storage (`~/.dsh/storages/dsh
 - Calendars and feeds: the ICS and RSS / Atom addresses you add
 - Markets: Tencent quotes (`qt.gtimg.cn`) for stocks, [open.er-api.com](https://open.er-api.com) for exchange rates (updated daily), [CoinGecko](https://www.coingecko.com) for crypto
 - GitHub: the local `gh` CLI with its existing sign-in
+- Trending: the sites' own web endpoints for Weibo, Zhihu, 36Kr, sspai, Bilibili and V2EX (unofficial, may break when a site changes), the [HN Algolia API](https://hn.algolia.com/api), the GitHub Trending page, and the Product Hunt and Reddit feeds; cached for 10 minutes
 
 A few widgets only read your machine: Usage reads the session logs under `~/.dsh/sessions`; Git repos runs `git status` and runs `git fetch` only when you choose Fetch; System uses `vm_stat` and `pmset` on macOS; Photo frame uses `sips` on macOS to shrink photos to 1280 px, cached in the system temp directory.
 
@@ -102,4 +104,4 @@ The component receives `size`, `config` (the saved settings for this card), `edi
 npm run check   # syntax check, Host smoke test and ICS tests
 ```
 
-Files: `index.js` (Host routes under `/api/dsh-desk/*`, storage, agent tools), `lib/` (HTTP cache, weather, ICS and feed parsing, session-log usage, subprocesses, Git, GitHub, system status, photos, markets), `client.js` (sidebar entry, panel, built-in widgets), `cordis.patch.yml`, `locale/`, `icon.svg`.
+Files: `index.js` (Host routes under `/api/dsh-desk/*`, storage, agent tools), `lib/` (HTTP cache, weather, ICS and feed parsing, session-log usage, subprocesses, Git, GitHub, system status, photos, markets, trending), `client.js` (sidebar entry, panel, built-in widgets), `cordis.patch.yml`, `locale/`, `icon.svg`.
