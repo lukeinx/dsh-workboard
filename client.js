@@ -332,9 +332,11 @@ window.__ModuleLoader__.load({
 .wb-today .wb-greet{grid-area:greet;align-self:end;font-size:15px;font-weight:600}
 .wb-today .wb-date{grid-area:date;align-self:start;color:var(--dsw-alias-label-secondary)}
 .wb-sep{width:1px;align-self:stretch;margin:14px 0;background:var(--dsw-alias-border-l1)}
-.wb-quote{flex:1!important;min-width:0;text-align:left}
-.wb-quote .wb-qtext{display:block;margin:0;font-size:15px;line-height:1.5;font-family:"New York","Songti SC",Georgia,serif;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.wb-quote cite{display:block;font-style:normal;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.wb-tquote{flex:1!important;min-width:0;text-align:left}
+.wb-tquote .wb-qtext{margin:0;font-size:15px;line-height:1.5;font-family:"New York","Songti SC",Georgia,serif;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wb-tquote[data-len=short] .wb-qtext{font-size:18px;line-height:1.4}
+.wb-tquote[data-len=long] .wb-qtext{font-size:13px;line-height:1.45;-webkit-line-clamp:3}
+.wb-tquote cite{display:block;font-style:normal;font-size:12px;color:var(--dsw-alias-label-secondary)}
 
 .wb-clock{display:flex;flex-direction:column;justify-content:center;height:100%}
 .wb-clock .wb-time{font-size:44px;font-weight:600;letter-spacing:-1px;line-height:1.1;margin:4px 0 6px}
@@ -726,7 +728,7 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-vthumb img,.wb-vtile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .wb-vthumb i{position:absolute;right:4px;bottom:4px;padding:0 4px;border-radius:4px;background:rgba(0,0,0,.72);color:#fff;font-size:10px;line-height:16px;font-style:normal}
 
-@media (max-width:900px){.wb-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wb-card[data-c="4"]{grid-column:span 2}.wb-today .wb-quote,.wb-today .wb-qsep{display:none}}
+@media (max-width:900px){.wb-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wb-card[data-c="4"]{grid-column:span 2}.wb-today .wb-tquote,.wb-today .wb-qsep{display:none}}
 @media (max-width:600px){.wb-grid{grid-template-columns:minmax(0,1fr)}.wb-card{grid-column:auto!important}}
 .wb-cw{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;margin:0 -4px -4px}
 .wb-cwframe{flex:1;width:100%;min-height:0;border:0;display:block;background:transparent}
@@ -1176,6 +1178,12 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           if (res.value || (res.pending && last.current)) return res.value ?? last.current;
           return res.pending ? {text: '', by: ''} : quoteAt(prefs, index);
         }
+        // 按视觉宽度估算长度：CJK 记 1，其余字符约半个字宽。
+        const quoteLen = text => {
+          let n = 0;
+          for (const c of String(text)) n += /[\u2e80-\u9fff\uac00-\ud7af\uff00-\uffef]/.test(c) ? 1 : 0.55;
+          return n <= 18 ? 'short' : n > 40 ? 'long' : undefined;
+        };
         const QUOTE_FIELDS = [
           {key: 'quoteSource', type: 'select', scope: 'global', default: () => quoteSource(prefsStore.getSnapshot().values), label: () => t('f_quoteSource'),
             options: QUOTE_SOURCES.map(v => ({value: v, label: () => t(`qs_${v}`)}))},
@@ -1208,11 +1216,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             h('div', {className: 'wb-tclock'},
               h('span', {className: 'wb-time wb-num'}, `${pad(now.getHours())}:${pad(now.getMinutes())}`),
               h('span', {className: 'wb-greet'}, greet(prefs, now.getHours())),
-              h('span', {className: 'wb-date'}, `${now.toLocaleDateString(lang, {month: 'long', day: 'numeric', weekday: 'long'})} · ${fill(t('week'), {n: isoWeek(now)})}`)),
+              h('span', {className: 'wb-date'}, `${now.toLocaleDateString(lang, {month: 'long', day: 'numeric'})} · ${now.toLocaleDateString(lang, {weekday: 'long'})}`)),
             weather ? h('span', {className: 'wb-sep'}) : null,
             weather,
             showQuote ? h('span', {className: 'wb-sep wb-qsep'}) : null,
-            showQuote ? h('button', {type: 'button', className: 'wb-btn wb-quote', title: t('nextQuote'), onClick: () => setOffset(o => o + 1)},
+            showQuote ? h('button', {type: 'button', className: 'wb-btn wb-tquote', 'data-len': quoteLen(q.text), title: t('nextQuote'), onClick: () => setOffset(o => o + 1)},
               h('span', {className: 'wb-qtext'}, q.text),
               q.by ? h('cite', null, `— ${q.by}`) : null) : null);
         }
