@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {zstdCompressSync} from 'node:zlib';
 import {execFileSync} from 'node:child_process';
-import {apply, createStore, createHandlers, createAgentWatch, createLauncher, createWorkspaces, createRunning, createGit, createGithub, createSchedules, createOpener, lastMessageText, migrateLegacy} from '../index.js';
+import {apply, defaultBoard, createStore, createHandlers, createAgentWatch, createLauncher, createWorkspaces, createRunning, createGit, createGithub, createSchedules, createOpener, lastMessageText, migrateLegacy} from '../index.js';
 import {createOutputs, parseOutputs} from '../lib/outputs.js';
 import {createRecentFiles} from '../lib/files.js';
 import {createClipboard} from '../lib/clipboard.js';
@@ -53,7 +53,8 @@ const value = async (method, payload) => {
 };
 
 const board = await value('board.get', {id: 'work'});
-assert.deepEqual(board.widgets.map(w => w.id), ['workboard.today', 'workboard.todo', 'workboard.calendar', 'workboard.note']);
+assert.deepEqual(board.widgets, defaultBoard('work').widgets);
+assert.equal(board.widgets[0].id, 'workboard.today');
 assert.ok(board.known.includes('workboard.clock'));
 const saved = await value('board.put', {board: {...board, widgets: [...board.widgets, {id: 'hello.widget', size: 's'}], known: [...board.known, 'hello.widget']}});
 assert.deepEqual(await value('board.get', {id: 'work'}), saved);

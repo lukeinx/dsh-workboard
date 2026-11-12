@@ -75,7 +75,14 @@ export const BUILTIN_WIDGETS = [
 export function defaultBoard(id) {
   return {
     apiVersion: 1, id, title: '',
-    widgets: [{id: 'workboard.today', size: 'bar'}, {id: 'workboard.todo', size: 'l'}, {id: 'workboard.calendar', size: 't'}, {id: 'workboard.note', size: 't'}],
+    widgets: [
+      {id: 'workboard.today', size: 'bar'}, {id: 'workboard.todo', size: 'l'}, {id: 'workboard.trending', size: 'l'},
+      {id: 'workboard.usage', size: 's'}, {id: 'workboard.focus', size: 's'}, {id: 'workboard.prompt', size: 'm'},
+      {id: 'workboard.outputs', size: 't'}, {id: 'workboard.photo', size: 'l'}, {id: 'workboard.clipboard', size: 't'},
+      {id: 'workboard.calendar', size: 'm'}, {id: 'workboard.countdown', size: 's'}, {id: 'workboard.habits', size: 'm'},
+      {id: 'workboard.progress', size: 'm'}, {id: 'workboard.videos', size: 'l'}, {id: 'workboard.system', size: 't'},
+      {id: 'workboard.network', size: 't'}, {id: 'workboard.nowplaying', size: 's'},
+    ],
     known: BUILTIN_WIDGETS,
   };
 }

@@ -57,7 +57,7 @@ Then ask your agent in a Harness conversation to install it:
 
 > Install the bundle at `~/dsh-workboard` with plugin_manager.
 
-Open **Workboard** from the sidebar. The default board starts with Today, To-do, Calendar, and Notes. Click **Edit** → **Add widget** to browse the gallery or ask the agent to build a custom card.
+Open **Workboard** from the sidebar. The default board comes preset with common widgets such as Today, To-do, Trending, Outputs, Clipboard, Calendar, and System. Click **Edit** → **Add widget** to browse the gallery or ask the agent to build a custom card.
 
 ## For AI agents
 

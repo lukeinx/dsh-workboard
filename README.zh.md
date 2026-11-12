@@ -57,7 +57,7 @@ git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 
 > 用 plugin_manager 安装 `~/dsh-workboard` 这个 bundle。
 
-安装后在左侧边栏打开 **工作台**。初始看板包含「今日」「待办」「日历」和「速记」；点击右上角 **编辑** → **添加 widget** 即可添加更多组件，或让 Agent 生成新卡片。
+安装后在左侧边栏打开 **工作台**。初始看板预置了今日、待办、热榜、产出物、剪贴板、日历、系统状态等常用组件；点击右上角 **编辑** → **添加 widget** 即可添加更多组件，或让 Agent 生成新卡片。
 
 ## 写给 AI Agent
 
