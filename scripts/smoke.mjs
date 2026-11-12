@@ -4,7 +4,7 @@ import {mkdtempSync, mkdirSync, writeFileSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {zstdCompressSync} from 'node:zlib';
-import {apply, createStore, createHandlers, createAgentWatch, createLauncher, migrateLegacy} from '../index.js';
+import {apply, createStore, createHandlers, createAgentWatch, createLauncher, createRunning, migrateLegacy} from '../index.js';
 import {createUsage, zstdFrames} from '../lib/usage.js';
 
 const routes = new Map();
@@ -210,5 +210,25 @@ assert.deepEqual(sum.rows.map(r => [r.day, r.provider, r.model, r.requests, r.re
 assert.deepEqual((await usageHandlers['dsh-desk/usage.get']({days: 1})).rows.map(r => r.day), ['2026-11-12', '2026-11-12']);
 await assert.rejects(createHandlers(createStore({}))['dsh-desk/usage.get']({}), /not available/);
 rmSync(usageRoot, {recursive: true, force: true});
+
+// 运行中：只列未完成的目标与运行中 / 刚结束的任务，停止时带上属主会话。
+const nowMs = Date.UTC(2026, 10, 12, 3);
+const killedJobs = [];
+const runCtx = {get: key => ({
+  agents: {list: () => [{id: 's1'}, {id: 's2'}, {id: 'gone'}]},
+  goals: {get: a => ({s1: {objective: 'Ship widgets', phase: 'active', roundsStarted: 2, maxGoalRounds: 10, activation: 'armed', updatedAt: nowMs}, s2: {objective: 'Old', phase: 'complete', updatedAt: nowMs - 3600_000}})[a.id] ?? (a.id === 'gone' ? (() => { throw new Error('not live'); })() : undefined)},
+  jobs: {
+    list: owner => { if (owner === 'gone') throw new Error('foreign'); return owner === 's1' ? [{id: 'bash-1', kind: 'bash', label: 'npm test', owner: 's1', status: 'running', startedAt: nowMs - 60_000}, {id: 'bash-0', kind: 'bash', label: 'old', owner: 's1', status: 'completed', startedAt: 0, finishedAt: nowMs - 3600_000}] : owner ? [] : [{id: 'bash-2', kind: 'bash', label: 'free', status: 'failed', startedAt: nowMs - 120_000, finishedAt: nowMs - 60_000}]; },
+    kill: (id, owner, reason) => { killedJobs.push([id, owner, reason]); return 'requested'; },
+  },
+  sessionController: {list: async () => ({items: [{sessionId: 's1', projections: {values: {title: 'Widgets'}}}]})},
+})[key]};
+const runHandlers = createHandlers(createStore({}), feedFetcher, null, null, {running: createRunning(runCtx, () => nowMs)});
+const running = await runHandlers['dsh-desk/running.get']();
+assert.deepEqual(running.goals.map(g => [g.sessionId, g.title, g.objective, g.phase, g.rounds, g.maxRounds, g.armed]), [['s1', 'Widgets', 'Ship widgets', 'active', 2, 10, true]]);
+assert.deepEqual(running.jobs.map(j => [j.id, j.sessionId, j.status]), [['bash-1', 's1', 'running'], ['bash-2', '', 'failed']]);
+assert.deepEqual(await runHandlers['dsh-desk/running.kill']({id: 'bash-1', sessionId: 's1'}), {result: 'requested'});
+assert.deepEqual(killedJobs, [['bash-1', 's1', 'stopped from Desk']]);
+assert.deepEqual(await createHandlers(createStore({}), feedFetcher, null, null, {running: createRunning({get: () => undefined})})['dsh-desk/running.get'](), {goals: null, jobs: null});
 
 console.log('smoke ok');

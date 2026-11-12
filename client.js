@@ -55,7 +55,10 @@ window.__ModuleLoader__.load({
       f_showRecent: '显示最近会话', f_showSchedules: '显示定时任务',
       f_feeds: '订阅地址（每行一个 RSS / Atom）', defaultFeeds: 'https://sspai.com/feed', feedError: '{n} 个订阅加载失败', noItems: '没有内容',
       addHabit: '添加习惯', noHabits: '还没有习惯', streak: '连续 {n} 天', markDay: '{d} 打卡',
-      prompt: 'Prompt 快启', inbox: '收集箱', usage: '用量',
+      prompt: 'Prompt 快启', inbox: '收集箱', usage: '用量', running: '运行中',
+      d_running: 'Agent 正在推进的目标和后台任务，可停止任务', r_goals: '目标', r_jobs: '后台任务', r_idle: '没有进行中的目标或后台任务', r_unavailable: '当前 Harness 不支持读取目标和后台任务',
+      r_round: '第 {n}/{m} 轮', r_active: '进行中', r_paused: '已暂停', r_blocked: '受阻', r_complete: '已完成', r_disarmed: '等待恢复',
+      r_running: '已运行 {t}', r_stopping: '正在停止', r_completed: '已完成', r_killed: '已停止', r_failed: '失败', r_kill: '停止', r_count: '{g} 个目标 · {j} 个任务',
       d_usage: '每天的请求数与 token，按模型拆分，可按单价估算费用', u_today: '今日 token', u_requests: '{n} 次请求', u_cache: '缓存命中 {n}%', u_cost: '约 ${n}',
       u_vs: '昨日 {n}', u_range_1: '今天', u_range_7: '7 天', u_range_30: '30 天', u_model: '模型', u_req: '请求', u_tok: 'token',
       u_unreported: '{n} 次请求未上报 token（{p}）', u_none: '这段时间没有请求', u_day: '{d}：{t} token，{r} 次请求',
@@ -104,7 +107,10 @@ window.__ModuleLoader__.load({
       f_showRecent: 'Show recent sessions', f_showSchedules: 'Show scheduled tasks',
       f_feeds: 'Feed URLs, one RSS or Atom feed per line', defaultFeeds: 'https://hnrss.org/frontpage', feedError: '{n} feed(s) failed to load', noItems: 'Nothing here',
       addHabit: 'Add a habit', noHabits: 'No habits yet', streak: '{n}-day streak', markDay: 'Check in for {d}',
-      prompt: 'Quick prompt', inbox: 'Inbox', usage: 'Usage',
+      prompt: 'Quick prompt', inbox: 'Inbox', usage: 'Usage', running: 'Running',
+      d_running: 'Goals the agent is pursuing and background jobs, which you can stop', r_goals: 'Goals', r_jobs: 'Background jobs', r_idle: 'No active goals or background jobs', r_unavailable: 'This Harness does not expose goals or jobs',
+      r_round: 'Round {n}/{m}', r_active: 'Active', r_paused: 'Paused', r_blocked: 'Blocked', r_complete: 'Complete', r_disarmed: 'Waiting to resume',
+      r_running: 'Running for {t}', r_stopping: 'Stopping', r_completed: 'Completed', r_killed: 'Stopped', r_failed: 'Failed', r_kill: 'Stop', r_count: '{g} goals · {j} jobs',
       d_usage: 'Requests and tokens per day, split by model, with optional cost estimates', u_today: 'Tokens today', u_requests: '{n} requests', u_cache: '{n}% cache hits', u_cost: '≈ ${n}',
       u_vs: 'Yesterday {n}', u_range_1: 'Today', u_range_7: '7 days', u_range_30: '30 days', u_model: 'Model', u_req: 'Requests', u_tok: 'Tokens',
       u_unreported: '{n} requests reported no tokens ({p})', u_none: 'No requests in this period', u_day: '{d}: {t} tokens, {r} requests',
@@ -344,6 +350,11 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 .bnt-row[data-state=waiting] small{color:var(--dsw-alias-state-warn-primary)}
 .bnt-sect{font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary);padding:8px 2px 2px}
 .bnt-row time{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none}
+.bnt-dot[data-state=blocked]{background:var(--dsw-alias-state-error-primary)}
+.bnt-dot[data-state=done]{background:var(--dsw-alias-state-success-primary)}
+.bnt-row[data-state=blocked] small{color:var(--dsw-alias-state-error-primary)}
+.bnt-row .bnt-del{align-self:center}
+.bnt-row:hover .bnt-del{display:grid}
 
 .bnt-hrow{display:flex;align-items:center;gap:10px;padding:5px 2px;border-radius:8px;min-width:0}
 .bnt-hrow:hover{background:var(--dsw-alias-bg-layer-2)}
@@ -1508,12 +1519,68 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           settings: [{key: 'prices', type: 'textarea', label: () => t('f_prices'), placeholder: 'claude-opus 15 75 1.5 18.75'}],
         };
 
+        const duration = ms => {
+          const m = Math.max(0, Math.round(ms / 60_000));
+          if (m < 60) return new Intl.NumberFormat(t('lang'), {style: 'unit', unit: 'minute', unitDisplay: 'short'}).format(Math.max(1, m));
+          return new Intl.NumberFormat(t('lang'), {style: 'unit', unit: 'hour', unitDisplay: 'short', maximumFractionDigits: 1}).format(m / 60);
+        };
+
+        function Running({size}) {
+          useLocale();
+          const now = useNow();
+          const res = useRemote('running.get', {}, AGENT_MS);
+          const [killed, setKilled] = useState(() => new Set());
+          const [error, setError] = useState('');
+          const ui = ctx.get?.('uiWorkspace');
+          const v = res.value;
+          if (!v) return h('div', {className: 'bnt-blank'}, res.error || '…');
+          if (!v.goals && !v.jobs) return h('div', {className: 'bnt-blank'}, t('r_unavailable'));
+          const nowMs = now.getTime();
+          const goals = v.goals ?? [];
+          const jobs = (v.jobs ?? []).map(j => (killed.has(j.id) && j.status === 'running' ? {...j, status: 'stopping'} : j));
+          const kill = j => {
+            setKilled(set => new Set([...set, j.id]));
+            call('running.kill', {id: j.id, sessionId: j.sessionId}).catch(e => setError(String(e?.message || e)));
+          };
+          const open = id => { if (id) ui?.openSession?.(id); };
+          const goalRow = g => {
+            const state = g.phase === 'active' ? (g.armed ? 'running' : 'waiting') : g.phase === 'blocked' ? 'blocked' : g.phase === 'complete' ? 'done' : undefined;
+            const status = g.phase === 'active' && !g.armed ? t('r_disarmed') : t(`r_${g.phase}`);
+            const sub = [status, g.maxRounds ? fill(t('r_round'), {n: g.rounds, m: g.maxRounds}) : '', g.phase === 'blocked' ? g.reason : g.title].filter(Boolean).join(' · ');
+            return h('button', {key: `g${g.sessionId}`, type: 'button', className: 'bnt-btn bnt-row bnt-rowbtn', 'data-state': state, title: g.objective, onClick: () => open(g.sessionId)},
+              h('span', {className: 'bnt-dot', 'data-state': state}),
+              h('div', null, h('b', null, g.objective), h('small', null, sub)));
+          };
+          const jobRow = j => {
+            const state = j.status === 'running' ? 'running' : j.status === 'failed' ? 'blocked' : j.status === 'completed' ? 'done' : undefined;
+            const status = j.status === 'running' ? fill(t('r_running'), {t: duration(nowMs - j.startedAt)}) : j.finishedAt ? `${t(`r_${j.status}`)} · ${relTime(j.finishedAt, nowMs)}` : t(`r_${j.status}`);
+            return h('div', {key: j.id, className: 'bnt-row', 'data-state': state === 'blocked' ? 'blocked' : undefined, title: [j.label, j.progress, j.detail].filter(Boolean).join('\n')},
+              h('span', {className: 'bnt-dot', 'data-state': state}),
+              h('div', {style: {cursor: j.sessionId ? 'pointer' : undefined}, onClick: () => open(j.sessionId)},
+                h('b', {className: 'bnt-num'}, j.label || j.kind),
+                h('small', null, [status, size === 'm' ? '' : j.progress || j.title].filter(Boolean).join(' · '))),
+              j.status === 'running' ? h('button', {type: 'button', className: 'bnt-btn bnt-del', 'aria-label': t('r_kill'), title: t('r_kill'), onClick: () => kill(j)}, h(Icon.x)) : null);
+          };
+          const liveJobs = jobs.filter(j => j.status === 'running' || j.status === 'stopping');
+          const activeGoals = goals.filter(g => g.phase !== 'complete');
+          if (!goals.length && !jobs.length) return h('div', {className: 'bnt-blank'}, t('r_idle'));
+          return h(React.Fragment, null,
+            h('div', {className: 'bnt-rows'},
+              goals.length && jobs.length ? h('div', {className: 'bnt-sect'}, t('r_goals')) : null,
+              goals.map(goalRow),
+              goals.length && jobs.length ? h('div', {className: 'bnt-sect'}, t('r_jobs')) : null,
+              jobs.map(jobRow)),
+            error ? h('div', {className: 'bnt-calerr'}, error) : null,
+            size === 'm' ? null : h('div', {className: 'bnt-notefoot'}, h('span', null, fill(t('r_count'), {g: activeGoals.length, j: liveJobs.length}))));
+        }
+        Running.desk = {apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_running')};
+
         const builtins = [
           ['desk.today', 'today', Today], ['desk.todo', 'todo', Todo], ['desk.note', 'note', Note], ['desk.calendar', 'calendar', Calendar],
           ['desk.weather', 'weather', Weather], ['desk.clock', 'clock', Clock], ['desk.quote', 'quote', Quote], ['desk.countdown', 'countdown', Countdown],
           ['desk.worldclock', 'worldclock', WorldClock], ['desk.focus', 'focus', Focus], ['desk.links', 'links', Links], ['desk.progress', 'progress', Progress],
           ['desk.agents', 'agents', Agents], ['desk.feed', 'feed', Feed], ['desk.habits', 'habits', Habits],
-          ['desk.prompt', 'prompt', Prompt], ['desk.inbox', 'inbox', Inbox], ['desk.usage', 'usage', Usage],
+          ['desk.prompt', 'prompt', Prompt], ['desk.inbox', 'inbox', Inbox], ['desk.usage', 'usage', Usage], ['desk.running', 'running', Running],
         ];
         const BUILTIN_IDS = new Set(builtins.map(([id]) => id));
 

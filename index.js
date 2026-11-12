@@ -41,7 +41,7 @@ export const BUILTIN_WIDGETS = [
   'desk.today', 'desk.todo', 'desk.note', 'desk.calendar', 'desk.weather', 'desk.clock',
   'desk.quote', 'desk.countdown', 'desk.worldclock', 'desk.focus', 'desk.links', 'desk.progress',
   'desk.agents', 'desk.feed', 'desk.habits',
-  'desk.prompt', 'desk.inbox', 'desk.usage',
+  'desk.prompt', 'desk.inbox', 'desk.usage', 'desk.running',
 ];
 
 export function defaultBoard(id) {
@@ -406,6 +406,69 @@ export function createLauncher(ctx) {
   };
 }
 
+// 目标与后台任务只存在于 live Agent：遍历 agents.list()，逐个问 goals / jobs。已卸载的历史会话不在其中。
+const RECENT_MS = 15 * 60_000;
+export function createRunning(ctx, now = Date.now) {
+  let titles = {at: 0, map: new Map()};
+  const titleMap = async () => {
+    if (now() - titles.at < 10_000) return titles.map;
+    const controller = ctx.get?.('sessionController');
+    const map = new Map();
+    if (typeof controller?.list === 'function') {
+      const result = await controller.list({}, AbortSignal.timeout(8000)).catch(() => null);
+      for (const s of result?.items ?? []) map.set(s.sessionId, {title: titleOf(s), cwd: s.cwd ?? '', parent: s.parentSessionId ?? ''});
+    }
+    titles = {at: now(), map};
+    return map;
+  };
+  return {
+    async overview() {
+      const agents = ctx.get?.('agents');
+      if (typeof agents?.list !== 'function') return {goals: null, jobs: null};
+      const goals = ctx.get?.('goals');
+      const jobs = ctx.get?.('jobs');
+      const meta = await titleMap();
+      const info = id => meta.get(id) ?? {title: '', cwd: '', parent: ''};
+      const goalRows = [];
+      const jobRows = [];
+      const seenJobs = new Set();
+      const addJobs = (list, owner) => {
+        for (const j of list ?? []) {
+          if (!j || seenJobs.has(j.id)) continue;
+          const live = j.status === 'running' || j.status === 'stopping';
+          if (!live && !(j.finishedAt && now() - j.finishedAt < RECENT_MS)) continue;
+          seenJobs.add(j.id);
+          const sessionId = j.owner ?? owner ?? '';
+          jobRows.push({id: j.id, sessionId, title: info(sessionId).title, kind: String(j.kind ?? ''), label: String(j.label ?? '').slice(0, 300), status: j.status, progress: String(j.progress ?? '').slice(0, 200), detail: String(j.detail ?? '').slice(0, 200), startedAt: Number(j.startedAt) || 0, finishedAt: Number(j.finishedAt) || 0});
+        }
+      };
+      for (const agent of agents.list()) {
+        const id = agent?.id;
+        if (!id) continue;
+        if (typeof goals?.get === 'function') {
+          let g;
+          try { g = goals.get(agent); } catch { g = undefined; }
+          if (g && (g.phase !== 'complete' || now() - g.updatedAt < RECENT_MS)) {
+            const s = info(id);
+            goalRows.push({sessionId: s.parent || id, title: s.title, objective: String(g.objective ?? '').slice(0, 500), phase: g.phase, rounds: g.roundsStarted ?? 0, maxRounds: g.maxGoalRounds ?? 0, armed: g.activation === 'armed', reason: g.blockedReason?.message ?? '', updatedAt: g.updatedAt ?? 0});
+          }
+        }
+        if (typeof jobs?.list === 'function') { try { addJobs(jobs.list(id), id); } catch { /* 已卸载的 Agent */ } }
+      }
+      if (typeof jobs?.list === 'function') { try { addJobs(jobs.list(), ''); } catch { /* 无未归属任务 */ } }
+      const order = {active: 0, blocked: 1, paused: 2, complete: 3};
+      goalRows.sort((a, b) => (order[a.phase] ?? 9) - (order[b.phase] ?? 9) || b.updatedAt - a.updatedAt);
+      jobRows.sort((a, b) => Number(!!a.finishedAt) - Number(!!b.finishedAt) || b.startedAt - a.startedAt);
+      return {goals: goals ? goalRows : null, jobs: jobs ? jobRows.slice(0, 30) : null};
+    },
+    kill({id, sessionId}) {
+      const jobs = ctx.get?.('jobs');
+      if (typeof jobs?.kill !== 'function') throw new UserError('unavailable', 'background jobs are not available');
+      return {result: jobs.kill(String(id), sessionId ? String(sessionId) : undefined, 'stopped from Desk')};
+    },
+  };
+}
+
 export const dshHome = () => process.env.DSH_HOME || join(homedir(), '.dsh');
 
 export function createHandlers(store, fetcher = createFetcher(), agents = null, launch = null, services = {}) {
@@ -421,6 +484,11 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
     'dsh-desk/usage.get': async p => {
       if (!services.usage) throw new UserError('unavailable', 'usage is not available');
       return services.usage.summary({days: p?.days});
+    },
+    'dsh-desk/running.get': async () => (services.running ? services.running.overview() : {goals: null, jobs: null}),
+    'dsh-desk/running.kill': async p => {
+      if (!services.running) throw new UserError('unavailable', 'background jobs are not available');
+      return services.running.kill({id: p?.id, sessionId: p?.sessionId});
     },
     'dsh-desk/inbox.list': () => store.listInbox(),
     'dsh-desk/inbox.add': p => store.addInbox(p?.text),
@@ -548,7 +616,7 @@ export function createTools(store) {
 
 export function apply(ctx) {
   const store = createStore(ctx);
-  const services = {usage: createUsage({root: join(dshHome(), 'sessions')})};
+  const services = {usage: createUsage({root: join(dshHome(), 'sessions')}), running: createRunning(ctx)};
   const handlers = createHandlers(store, createFetcher(), createAgentWatch(ctx), createLauncher(ctx), services);
   ctx.effect(() => () => { void store.close(); }, 'dsh-desk: storage');
 
