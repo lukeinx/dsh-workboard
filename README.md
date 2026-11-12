@@ -130,12 +130,12 @@ All external network requests are made and cached by the Host:
 
 - **Weather & city search**: [Open-Meteo](https://open-meteo.com), requested only after you set a city
 - **Quotes**: [Hitokoto](https://hitokoto.cn), requested only when selected as the quote source
-- **Calendars & feeds**: the ICS and RSS / Atom URLs you configure
+- **Calendars & feeds**: the ICS and RSS / Atom URLs you configure; the Feeds widget starts with [hnrss.org](https://hnrss.org) front page (ifanr and Ruan Yifeng's blog in Chinese), editable in its settings
 - **Markets**: Tencent Finance (`qt.gtimg.cn`) for equities, [open.er-api.com](https://open.er-api.com) for exchange rates, and [CoinGecko](https://www.coingecko.com) for crypto
 - **GitHub**: uses your local `gh` CLI and its existing sign-in
 - **Trending**: public web endpoints for Weibo, Zhihu, 36Kr, sspai, Bilibili, and V2EX (unofficial and may break if a site changes), the [HN Algolia API](https://hn.algolia.com/api), the GitHub Trending page, and official Product Hunt and Reddit feeds; cached for 10 minutes
 - **Videos**: YouTube channel RSS feeds (channel pages only to resolve an `@handle`), Bilibili's public creator archive endpoint (unofficial, rate-limited at times), and thumbnails proxied as data URLs; cached for 15 minutes
-- **Network**: public IP from [ipinfo.io](https://ipinfo.io) (falling back to [ip.sb](https://ip.sb)) and host latency via `curl`, respecting the system proxy when set
+- **Network**: public IP from [ipinfo.io](https://ipinfo.io) (falling back to [ip.sb](https://ip.sb)) and host latency via `curl`, respecting the system proxy when set; tests Google, GitHub, and Cloudflare by default (Baidu, GitHub, and Google in Chinese)
 - **Custom widgets**: limited to the `http(s)` URL prefixes declared in each widget's `fetch` allowlist; cached for 30 seconds
 
 Widgets that only read local state:

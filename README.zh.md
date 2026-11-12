@@ -130,12 +130,12 @@ git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 
 - **天气与城市搜索**：[Open-Meteo](https://open-meteo.com)，仅在设置城市后请求
 - **格言**：[一言](https://hitokoto.cn)，仅在格言来源设为「一言」时请求
-- **日历与订阅**：仅请求你添加的 ICS 与 RSS / Atom 地址
+- **日历与订阅**：仅请求列表中的 ICS 与 RSS / Atom 地址；订阅 widget 默认预填爱范儿与阮一峰的网络日志（英文界面为 [hnrss.org](https://hnrss.org) 首页），可在设置中修改
 - **行情**：股票走腾讯行情接口（`qt.gtimg.cn`），汇率走 [open.er-api.com](https://open.er-api.com)，加密货币走 [CoinGecko](https://www.coingecko.com)
 - **GitHub**：调用本机 `gh` CLI，复用其已有登录态
 - **热榜**：微博、知乎、36 氪、少数派、B 站、V2EX 使用各站公开网页接口（非官方，站点改版可能失效）；Hacker News 使用 [HN Algolia API](https://hn.algolia.com/api)；GitHub 读取 Trending 页面；Product Hunt 与 Reddit 读取官方订阅源；结果缓存 10 分钟
 - **视频订阅**：YouTube 频道 RSS（仅在解析 `@handle` 时请求频道页）、B 站 UP 主投稿公开接口（非官方，偶尔限频），封面由 Host 代理成 data URL；缓存 15 分钟
-- **网络**：公网 IP 查询使用 [ipinfo.io](https://ipinfo.io)（失败时回退至 [ip.sb](https://ip.sb)），站点延迟通过 `curl` 测算（配置了系统代理时自动走代理）
+- **网络**：公网 IP 查询使用 [ipinfo.io](https://ipinfo.io)（失败时回退至 [ip.sb](https://ip.sb)），站点延迟通过 `curl` 测算（配置了系统代理时自动走代理），默认测百度、GitHub 与 Google（英文界面为 Google、GitHub 与 Cloudflare）
 - **自定义 widget**：仅可请求各自在 `fetch` 字段声明的 `http(s)` 地址前缀，Host 缓存 30 秒
 
 仅读取本机数据的组件：
