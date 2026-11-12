@@ -1,6 +1,6 @@
 # Workboard
 
-**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 31 widgets out of the box — and your agent builds the rest.**
+**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 34 widgets out of the box — and your agent builds the rest.**
 
 [简体中文](README.zh.md) · MIT
 
@@ -8,14 +8,14 @@
 
 ## Highlights
 
-### 31 widgets, ready to use
+### 34 widgets, ready to use
 
 Open the widget gallery, search, and drop cards straight onto your board across four categories:
 
 - **Agent workflows**: active and waiting sessions, running goals and background jobs, quick prompts, inbox, token usage and cost estimates, deliverables, scheduled tasks, and pinned sessions
-- **Productivity & dev tools**: to-dos, scratch notes, ICS calendar, Pomodoro focus timer, quick links, Git repos, GitHub PRs and issues, system monitor, network speed and latency, clipboard history, and recent files
-- **Daily essentials**: Today banner, clock, world clock, weather, countdowns, time progress, habit tracker, and photo frame
-- **News & markets**: multi-source trending lists, RSS / Atom feeds, stocks / forex / crypto markets, and daily quotes
+- **Productivity & dev tools**: to-dos, scratch notes, ICS calendar, Pomodoro focus timer, ambient sound, quick links, Git repos, GitHub PRs and issues, system monitor, network speed and latency, clipboard history, and recent files
+- **Daily essentials**: Today banner, clock, world clock, weather, countdowns, time progress, habit tracker, photo frame, and now playing
+- **News & markets**: multi-source trending lists, RSS / Atom feeds, video subscriptions, stocks / forex / crypto markets, and daily quotes
 
 Most widgets work with zero configuration; a few only ask for essentials like your city, an ICS calendar URL, or ticker symbols.
 
@@ -76,7 +76,7 @@ If you are an agent interacting with Workboard:
 ## Reference
 
 <details>
-<summary><b>All 31 built-in widgets</b></summary>
+<summary><b>All 34 built-in widgets</b></summary>
 
 | Widget | Sizes | What it shows |
 |---|---|---|
@@ -94,6 +94,7 @@ If you are an agent interacting with Workboard:
 | Notes | `l` `t` `m` `s` | Autosaving scratchpad; turn the current line into a to-do with one click |
 | Calendar | `t` `l` `s` `m` | Month grid and selected day's schedule from one or more ICS subscriptions, including recurring events |
 | Focus | `m` `s` | Pomodoro timer that keeps running across boards and panels, sends a system notification when done, and tracks today's completed sessions |
+| Ambient sound | `m` `s` `w` `t` | Rain, waves, wind, fire, and pink / brown noise synthesized in the page; mix several, keeps playing across boards and panels, and can start with Focus |
 | Links | `m` `s` `w` `t` `l` | One `name URL` per line (`http`, `https`, and `mailto` only) |
 | Git repos | `t` `l` `m` `w` | Current branch, uncommitted changes, ahead / behind counts, and branches whose upstream is gone; defaults to your Harness workspaces |
 | GitHub | `t` `l` `m` `w` | PRs awaiting your review, your open PRs, and issues assigned to you via your signed-in `gh` CLI |
@@ -110,9 +111,11 @@ If you are an agent interacting with Workboard:
 | Time progress | `m` `s` `w` | Percentage of today, this week, this month, and this year elapsed |
 | Habits | `m` `l` `t` `w` | Check in for any day of the past week and track your current streak |
 | Photo frame | `m` `s` `t` `l` `w` | Cycles through photos from a local folder (`~/Pictures` by default) |
+| Now playing | `m` `s` `w` `t` | Track, artwork, and progress from Music or Spotify on macOS, with play / pause and skip |
 | **News & markets** | | |
 | Trending | `l` `t` `m` `w` | Tabbed hot lists from Weibo, Zhihu, 36Kr, sspai, Hacker News, GitHub Trending, Product Hunt, and Reddit (Bilibili and V2EX optional) |
 | Feeds | `t` `l` `m` `w` | Multiple RSS / Atom feeds merged chronologically; visited items dim automatically |
+| Videos | `l` `t` `m` `w` | Latest uploads from YouTube channels (link, `UC…` ID, or `@handle`), Bilibili creators (space link or UID), and RSS feeds with images, with thumbnails |
 | Markets | `t` `m` `s` `l` `w` | Forex (`USD/CNY`), China / HK / US equities (`sh600519`, `hk00700`, `usAAPL`), and crypto (`BTC`, `cg:<id>`) |
 | Quote | `m` `w` `s` | A daily quote (click for another), sharing its source setting with the Today banner |
 
@@ -131,6 +134,7 @@ All external network requests are made and cached by the Host:
 - **Markets**: Tencent Finance (`qt.gtimg.cn`) for equities, [open.er-api.com](https://open.er-api.com) for exchange rates, and [CoinGecko](https://www.coingecko.com) for crypto
 - **GitHub**: uses your local `gh` CLI and its existing sign-in
 - **Trending**: public web endpoints for Weibo, Zhihu, 36Kr, sspai, Bilibili, and V2EX (unofficial and may break if a site changes), the [HN Algolia API](https://hn.algolia.com/api), the GitHub Trending page, and official Product Hunt and Reddit feeds; cached for 10 minutes
+- **Videos**: YouTube channel RSS feeds (channel pages only to resolve an `@handle`), Bilibili's public creator archive endpoint (unofficial, rate-limited at times), and thumbnails proxied as data URLs; cached for 15 minutes
 - **Network**: public IP from [ipinfo.io](https://ipinfo.io) (falling back to [ip.sb](https://ip.sb)) and host latency via `curl`, respecting the system proxy when set
 - **Custom widgets**: limited to the `http(s)` URL prefixes declared in each widget's `fetch` allowlist; cached for 30 seconds
 
@@ -140,6 +144,8 @@ Widgets that only read local state:
 - **Git repos**: runs `git status` locally, and only runs `git fetch` when you click Fetch
 - **System**: uses `vm_stat` and `pmset` on macOS
 - **Photo frame**: uses `sips` on macOS to generate thumbnails cached in the system temp directory
+- **Now playing**: asks only Music or Spotify if already running, via `osascript`; macOS asks once for Automation permission
+- **Ambient sound**: synthesized with Web Audio in the page, with no files or network
 - **Recent files**: lists only the top level of each configured folder
 - **Clipboard**: polls `pbpaste` (macOS) or `wl-paste` / `xclip` (Linux) every 2 seconds while the card is visible; history stays in memory only
 
@@ -193,7 +199,7 @@ npm run check   # syntax check, Host smoke test, and ICS parser tests
 ```
 
 - `index.js`: Host routes (`/api/dsh-workboard/*`), storage tables, and agent tools
-- `client.js`: sidebar entry, board container, and the 31 built-in widgets
+- `client.js`: sidebar entry, board container, and the 34 built-in widgets
 - `lib/`: data fetchers, parsers, and system probes
 - `skills/workboard-widget.md`: agent skill for building custom widgets
 
@@ -213,6 +219,7 @@ Workboard builds on the following projects and services. Feed and trending conte
 | Tencent Finance (`qt.gtimg.cn`) | China, Hong Kong, and US stock quotes | Unofficial endpoint |
 | [HN Algolia API](https://hn.algolia.com/api), [hnrss.org](https://hnrss.org) | Hacker News hot list and default English feed | Public API and feeds |
 | Weibo, Zhihu, 36Kr, sspai, Bilibili, V2EX, GitHub Trending, Product Hunt, Reddit | Trending lists | Public pages, feeds, and unofficial endpoints |
+| YouTube, Bilibili | Video subscriptions and thumbnails | Public channel feeds and unofficial endpoints |
 | [ifanr](https://www.ifanr.com), [Ruan Yifeng's blog](https://www.ruanyifeng.com/blog/) | Default Chinese RSS feeds | Publishers' RSS feeds |
 | [GitHub CLI](https://cli.github.com) | GitHub widget data | MIT |
 | [ipinfo.io](https://ipinfo.io), [ip.sb](https://ip.sb) | Public IP lookup in the Network widget | Public API |

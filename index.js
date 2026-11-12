@@ -12,6 +12,8 @@ import {createPhotos} from './lib/photo.js';
 import {createMarket} from './lib/market.js';
 import {createTrending} from './lib/trending.js';
 import {createQuotes} from './lib/quote.js';
+import {createNowPlaying} from './lib/nowplaying.js';
+import {createVideos} from './lib/videos.js';
 import {MAX_WIDGETS, WidgetError, allowedUrl, checkHtml, cleanData, cleanSpec, widgetId} from './lib/widgets.js';
 import {createHash, randomUUID} from 'node:crypto';
 import {homedir, platform, tmpdir} from 'node:os';
@@ -65,6 +67,7 @@ export const BUILTIN_WIDGETS = [
   'workboard.agents', 'workboard.feed', 'workboard.habits',
   'workboard.prompt', 'workboard.inbox', 'workboard.usage', 'workboard.running', 'workboard.git', 'workboard.github', 'workboard.system', 'workboard.photo', 'workboard.market', 'workboard.trending',
   'workboard.outputs', 'workboard.schedules', 'workboard.pinned', 'workboard.files', 'workboard.clipboard', 'workboard.network',
+  'workboard.nowplaying', 'workboard.ambient', 'workboard.videos',
 ];
 
 export function defaultBoard(id) {
@@ -804,6 +807,22 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       if (!services.trending) throw new UserError('unavailable', 'trending lists are not available');
       return services.trending.list({source: String(p?.source ?? '')});
     },
+    'dsh-workboard/nowplaying.get': async p => {
+      if (!services.nowPlaying) throw new UserError('unavailable', 'now playing is not available');
+      return services.nowPlaying.get({app: String(p?.app ?? 'auto')});
+    },
+    'dsh-workboard/nowplaying.control': async p => {
+      if (!services.nowPlaying) throw new UserError('unavailable', 'now playing is not available');
+      return services.nowPlaying.control({app: String(p?.app ?? ''), action: String(p?.action ?? '')});
+    },
+    'dsh-workboard/video.list': async p => {
+      if (!services.videos) throw new UserError('unavailable', 'video subscriptions are not available');
+      return services.videos.list({sources: p?.sources});
+    },
+    'dsh-workboard/video.thumb': async p => {
+      if (!services.videos) throw new UserError('unavailable', 'video subscriptions are not available');
+      return services.videos.thumb({url: p?.url});
+    },
     'dsh-workboard/github.get': async p => {
       if (!services.github) throw new UserError('unavailable', 'GitHub is not available');
       return services.github({fresh: p?.fresh === true});
@@ -1096,6 +1115,8 @@ export function apply(ctx) {
     photos: createPhotos({run, cacheDir: join(tmpdir(), 'dsh-workboard-photos')}),
     market: createMarket(fetcher),
     trending: createTrending(fetcher),
+    nowPlaying: createNowPlaying({run, fetcher, cacheDir: join(tmpdir(), 'dsh-workboard-artwork')}),
+    videos: createVideos(fetcher),
     schedules: createSchedules(ctx),
     outputs: createOutputs({root: join(dshHome(), 'sessions')}),
     files: createRecentFiles(),

@@ -1,6 +1,6 @@
 # 工作台 Workboard
 
-**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 31 个 widget，开箱即用；不够用的，让 Agent 现做。**
+**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 34 个 widget，开箱即用；不够用的，让 Agent 现做。**
 
 [English](README.md) · MIT
 
@@ -8,14 +8,14 @@
 
 ## 亮点
 
-### 内置 31 个 widget，开箱即用
+### 内置 34 个 widget，开箱即用
 
 覆盖四大场景，打开组件库即可搜索、预览并连续添加到看板：
 
 - **Agent 协作**：待确认与运行中会话、长程目标与后台作业、Prompt 快启、收集箱、Token 用量与费用估算、产出物、定时任务、收藏会话
-- **效率与开发**：待办、速记、ICS 日历、专注番茄钟、快捷链接、Git 工作区、GitHub（PR / Issue）、系统状态、网络测速、剪贴板、最近文件
-- **日常桌面**：今日横栏、时钟、世界时钟、天气、倒数日、时间进度、习惯打卡、本机相框
-- **资讯与行情**：多源热榜、RSS / Atom 订阅、A 股 / 港股 / 美股 / 汇率 / 加密货币行情、每日格言
+- **效率与开发**：待办、速记、ICS 日历、专注番茄钟、白噪音、快捷链接、Git 工作区、GitHub（PR / Issue）、系统状态、网络测速、剪贴板、最近文件
+- **日常桌面**：今日横栏、时钟、世界时钟、天气、倒数日、时间进度、习惯打卡、本机相框、正在播放
+- **资讯与行情**：多源热榜、RSS / Atom 订阅、视频订阅、A 股 / 港股 / 美股 / 汇率 / 加密货币行情、每日格言
 
 绝大多数零配置即用；少数仅需填入城市、日历订阅链接或股票代码等个人信息。
 
@@ -76,7 +76,7 @@ git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 ## 参考
 
 <details>
-<summary><b>全部 31 个内置 widget</b></summary>
+<summary><b>全部 34 个内置 widget</b></summary>
 
 | Widget | 档位 | 说明 |
 |---|---|---|
@@ -94,6 +94,7 @@ git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 | 速记 | `l` `t` `m` `s` | 自动保存的随手记，光标所在行可一键转为待办 |
 | 日历 | `t` `l` `s` `m` | 月视图与当日日程列表，支持订阅多个 ICS 地址并展开重复规则 |
 | 专注 | `m` `s` | 番茄钟，切换看板或离开面板不中断，到点发送系统通知并统计今日专注次数 |
+| 白噪音 | `m` `s` `w` `t` | 在页面内合成雨声、海浪、风声、篝火与粉噪 / 棕噪，可叠加；切换看板或离开面板不中断，可在专注时自动播放 |
 | 快捷链接 | `m` `s` `w` `t` `l` | 每行一条「名称 网址」，仅允许 `http`、`https` 与 `mailto` |
 | Git 工作区 | `t` `l` `m` `w` | 展示各仓库当前分支、未提交改动、领先 / 落后提交数及上游已删除分支；默认读取 Harness 工作区 |
 | GitHub | `t` `l` `m` `w` | 复用本机已登录的 `gh` CLI，展示待你 Review 的 PR、你发起的 PR 以及指派给你的 Issue |
@@ -110,9 +111,11 @@ git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 | 时间进度 | `m` `s` `w` | 今日、本周、本月与本年已度过的百分比 |
 | 习惯打卡 | `m` `l` `t` `w` | 支持最近一周打卡与补卡，自动计算当前连续达成天数 |
 | 相框 | `m` `s` `t` `l` `w` | 轮播本机文件夹（默认 `~/Pictures`）中的照片 |
+| 正在播放 | `m` `s` `w` `t` | macOS 「音乐」或 Spotify 正在播放的曲目、封面与进度，可播放 / 暂停和切歌 |
 | **资讯与行情** | | |
 | 热榜 | `l` `t` `m` `w` | 多信源分标签聚合：微博、知乎、36 氪、少数派、Hacker News、GitHub Trending、Product Hunt、Reddit（可选 B 站、V2EX） |
 | 订阅 | `t` `l` `m` `w` | 聚合多个 RSS / Atom 订阅源并按时间混排，已读条目自动变灰 |
+| 视频订阅 | `l` `t` `m` `w` | B 站 UP 主（空间链接或 UID）、YouTube 频道（链接、`UC…` ID 或 `@handle`）与带封面的 RSS 的最新视频，带封面 |
 | 行情 | `t` `m` `s` `l` `w` | 支持汇率（`USD/CNY`）、A 股 / 港股 / 美股（`sh600519`、`hk00700`、`usAAPL`）与加密货币（`BTC`、`cg:<id>`） |
 | 格言 | `m` `w` `s` | 每日一句，点击换一条，信源与今日横栏共享 |
 
@@ -131,6 +134,7 @@ git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 - **行情**：股票走腾讯行情接口（`qt.gtimg.cn`），汇率走 [open.er-api.com](https://open.er-api.com)，加密货币走 [CoinGecko](https://www.coingecko.com)
 - **GitHub**：调用本机 `gh` CLI，复用其已有登录态
 - **热榜**：微博、知乎、36 氪、少数派、B 站、V2EX 使用各站公开网页接口（非官方，站点改版可能失效）；Hacker News 使用 [HN Algolia API](https://hn.algolia.com/api)；GitHub 读取 Trending 页面；Product Hunt 与 Reddit 读取官方订阅源；结果缓存 10 分钟
+- **视频订阅**：YouTube 频道 RSS（仅在解析 `@handle` 时请求频道页）、B 站 UP 主投稿公开接口（非官方，偶尔限频），封面由 Host 代理成 data URL；缓存 15 分钟
 - **网络**：公网 IP 查询使用 [ipinfo.io](https://ipinfo.io)（失败时回退至 [ip.sb](https://ip.sb)），站点延迟通过 `curl` 测算（配置了系统代理时自动走代理）
 - **自定义 widget**：仅可请求各自在 `fetch` 字段声明的 `http(s)` 地址前缀，Host 缓存 30 秒
 
@@ -140,6 +144,8 @@ git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 - **Git 工作区**：默认仅执行 `git status`，点击「获取远端」时才执行 `git fetch`
 - **系统状态**：在 macOS 上调用 `vm_stat` 与 `pmset`
 - **相框**：在 macOS 上用 `sips` 生成缩略图并缓存在系统临时目录
+- **正在播放**：只通过 `osascript` 查询已在运行的「音乐」或 Spotify，首次使用时 macOS 会请求自动化权限
+- **白噪音**：在页面内用 Web Audio 合成，不读文件、不联网
 - **最近文件**：仅列出目标文件夹顶层文件，不递归扫描
 - **剪贴板**：仅在卡片可见期间每 2 秒读取一次 `pbpaste`（macOS）或 `wl-paste` / `xclip`（Linux），历史仅保存在内存中，不落盘
 
@@ -193,7 +199,7 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 ```
 
 - `index.js`：Host 端 `/api/dsh-workboard/*` 路由、数据存储与 Agent 工具注册
-- `client.js`：侧栏入口、看板容器与 31 个内置 widget
+- `client.js`：侧栏入口、看板容器与 34 个内置 widget
 - `lib/`：各数据源请求、解析与系统采样模块
 - `skills/workboard-widget.md`：供 Agent 编写自定义 widget 的规范指南
 
@@ -213,6 +219,7 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 | 腾讯财经行情（`qt.gtimg.cn`） | A 股、港股、美股实时行情 | 非官方接口 |
 | [HN Algolia API](https://hn.algolia.com/api)、[hnrss.org](https://hnrss.org) | Hacker News 热榜与默认英文订阅源 | 公开 API 与订阅源 |
 | 微博、知乎、36 氪、少数派、B 站、V2EX、GitHub Trending、Product Hunt、Reddit | 多源热榜 | 公开页面、订阅源与非官方接口 |
+| YouTube、B 站 | 视频订阅与封面 | 公开频道订阅源与非官方接口 |
 | [爱范儿](https://www.ifanr.com)、[阮一峰的网络日志](https://www.ruanyifeng.com/blog/) | 默认中文 RSS 订阅源 | 发布者 RSS |
 | [GitHub CLI](https://cli.github.com) | GitHub widget 数据源 | MIT |
 | [ipinfo.io](https://ipinfo.io)、[ip.sb](https://ip.sb) | 网络 widget 公网 IP 查询 | 公开 API |

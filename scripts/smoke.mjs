@@ -19,6 +19,9 @@ import {createFetcher} from '../lib/http.js';
 import {createUsage, zstdFrames} from '../lib/usage.js';
 import {createQuotes, parseHitokoto} from '../lib/quote.js';
 import {checkHtml, allowedUrl, cleanSpec} from '../lib/widgets.js';
+import {createNowPlaying, parseState, SCRIPTS} from '../lib/nowplaying.js';
+import {createVideos, parseSource, parseYoutubeFeed, parseBiliArchives, parseChannelId} from '../lib/videos.js';
+import {parseFeed} from '../lib/feed.js';
 
 const routes = new Map();
 const tools = new Map();
@@ -598,6 +601,101 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   assert.deepEqual(nv.pings.map(p => [p.name, p.ms, p.error]), [['Up', 120, undefined], ['Down', undefined, 'failed']]);
   assert.ok(curls.every(a => a.includes('-x') && a.includes('http://127.0.0.1:7897')));
   assert.equal(curls.length, 3);
+}
+
+{
+  const US = '\u001f';
+  assert.equal(parseState('stopped\n', 'music'), null);
+  const st = parseState(['playing', 'Song', 'Artist', 'Album', '215000', '61500', 'ABC', 'https://i.scdn.co/x'].join(US) + '\n', 'spotify');
+  assert.deepEqual(st, {app: 'spotify', state: 'playing', title: 'Song', artist: 'Artist', album: 'Album', duration: 215000, position: 61500, id: 'ABC', artUrl: 'https://i.scdn.co/x'});
+  assert.equal(parseState(['paused', 'S', '', '', 'x', '', '', 'javascript:1'].join(US), 'music').artUrl, '');
+  assert.ok(SCRIPTS.music.includes('tell application "Music"') && SCRIPTS.spotify.includes('artwork url'));
+
+  assert.deepEqual(await createNowPlaying({os: 'linux', run: async () => { throw new Error('no'); }, now: () => 5}).get(), {supported: false, apps: [], at: 5, denied: null, track: null});
+  const calls = [];
+  let procs = 'Finder\nMusic\nSpotify\n';
+  let deny = false;
+  const npRun = async (cmd, args) => {
+    calls.push([cmd, ...args]);
+    if (cmd === 'ps') return Buffer.from(procs);
+    if (cmd === 'osascript' && args[1].startsWith('tell application "Music"\nset npState')) {
+      if (deny) throw new Error('execution error: Not authorized to send Apple events to Music. (-1743)');
+      return Buffer.from(['paused', 'Old', 'A', 'B', '1000', '10', 'M1', ''].join(US));
+    }
+    if (cmd === 'osascript' && args[1].startsWith('tell application "Spotify"\nset npState')) return Buffer.from(['playing', 'Live', 'C', 'D', '2000', '20', 'spotify:track:1', 'https://i.scdn.co/a'].join(US));
+    return Buffer.from('');
+  };
+  const npFetch = {get: async url => { calls.push(['fetch', url]); return {type: 'image/jpeg', base64: 'QUJD'}; }};
+  let npClock = 1000;
+  const np = createNowPlaying({os: 'darwin', run: npRun, fetcher: npFetch, now: () => npClock});
+  const live = await np.get({app: 'auto'});
+  assert.deepEqual([live.apps, live.track.app, live.track.title, live.track.art], [['music', 'spotify'], 'spotify', 'Live', 'data:image/jpeg;base64,QUJD']);
+  assert.equal('artUrl' in live.track, false);
+  assert.equal((await np.get({app: 'music'})).track.title, 'Old');
+  const before = calls.length;
+  await np.get({app: 'music'});
+  assert.equal(calls.length, before, 'cached within TTL');
+  await np.control({app: 'spotify', action: 'next'});
+  assert.deepEqual(calls.at(-1), ['osascript', '-e', 'tell application "Spotify" to next track']);
+  await np.control({app: 'music', action: 'open'});
+  assert.deepEqual(calls.at(-1), ['open', '-a', 'Music']);
+  await assert.rejects(np.control({app: 'music', action: 'rm -rf'}), /unknown action/);
+  await assert.rejects(np.control({app: 'finder', action: 'next'}), /unknown app/);
+  procs = 'Music\n';
+  deny = true;
+  npClock += 5000;
+  const blocked = await np.get({app: 'auto'});
+  assert.deepEqual([blocked.track, blocked.denied], [null, 'music']);
+  procs = '';
+  await assert.rejects(np.control({app: 'music', action: 'toggle'}), /not running/);
+  const npHandlers = createHandlers(createStore({}), undefined, null, null, {nowPlaying: np});
+  assert.equal((await npHandlers['dsh-workboard/nowplaying.get']({app: 'auto'})).supported, true);
+}
+
+{
+  assert.deepEqual(parseSource('https://space.bilibili.com/946974/video 影视飓风'), {kind: 'bilibili', id: '946974', label: '影视飓风'});
+  assert.deepEqual(parseSource('163637592'), {kind: 'bilibili', id: '163637592', label: ''});
+  assert.deepEqual(parseSource('https://www.youtube.com/channel/UCBJycsmduvYEL83R_U4JriQ'), {kind: 'youtube', id: 'UCBJycsmduvYEL83R_U4JriQ', label: ''});
+  assert.deepEqual(parseSource('MKBHD https://www.youtube.com/@mkbhd/videos'), {kind: 'handle', id: '@mkbhd', label: 'MKBHD'});
+  assert.deepEqual(parseSource('https://example.com/feed.xml'), {kind: 'rss', id: 'https://example.com/feed.xml', label: ''});
+  assert.equal(parseSource('just words'), null);
+  assert.equal(parseChannelId('<script>{"externalId":"UCBJycsmduvYEL83R_U4JriQ"}</script>'), 'UCBJycsmduvYEL83R_U4JriQ');
+
+  const ytXml = '<feed xmlns:yt="x"><title>Chan &amp; Co</title><entry><yt:videoId>abcdefghijk</yt:videoId><title>Tom &amp; Jerry</title><author><name>Chan</name></author><published>2026-11-10T00:00:00+00:00</published><media:group><media:community><media:statistics views="1234"/></media:community></media:group></entry><entry><yt:videoId>bad id!</yt:videoId><title>x</title></entry></feed>';
+  const yt = parseYoutubeFeed(ytXml);
+  assert.equal(yt.author, 'Chan & Co');
+  assert.deepEqual(yt.items, [{id: 'yt:abcdefghijk', title: 'Tom & Jerry', url: 'https://www.youtube.com/watch?v=abcdefghijk', thumb: 'https://i.ytimg.com/vi/abcdefghijk/mqdefault.jpg', date: Date.parse('2026-11-10T00:00:00Z'), author: 'Chan', duration: null, views: 1234}]);
+  assert.throws(() => parseBiliArchives({code: -352, message: 'risk'}), /risk/);
+  assert.deepEqual(parseBiliArchives({code: 0, data: {archives: [{bvid: 'BV1', title: 'T', pic: 'http://i1.hdslb.com/a.jpg', pubdate: 100, duration: 61, stat: {view: 9}}]}}).map(x => [x.url, x.thumb, x.date, x.duration, x.views]),
+    [['https://www.bilibili.com/video/BV1', 'https://i1.hdslb.com/a.jpg@320w_180h_1c.jpg', 100000, 61, 9]]);
+  assert.equal(parseFeed('<rss><channel><item><title>A</title><link>https://a.example/1</link><media:thumbnail url="https://img.example/1.jpg"/></item><item><title>B</title><link>https://a.example/2</link><description>&lt;p&gt;&lt;img src="https://img.example/2.png"&gt;&lt;/p&gt;</description></item></channel></rss>').items.map(i => i.image).join(' '),
+    'https://img.example/1.jpg https://img.example/2.png');
+
+  let bili412 = 1;
+  const urls = [];
+  const vf = {get: async (url, opts) => {
+    urls.push(url);
+    if (url.includes('recArchivesByKeywords')) {
+      if (bili412-- > 0) throw new Error('HTTP 412');
+      return {code: 0, data: {archives: [{bvid: 'BV9', title: 'Bili', pic: 'http://i0.hdslb.com/p.jpg', pubdate: 2_000_000_000, duration: 30, stat: {view: 5}}]}};
+    }
+    if (url.includes('web-interface/card')) return {data: {card: {name: 'UP'}}};
+    if (url.startsWith('https://www.youtube.com/@')) return '{"externalId":"UCBJycsmduvYEL83R_U4JriQ"}';
+    if (url.includes('feeds/videos.xml')) return ytXml;
+    if (opts?.type === 'bytes') return {type: url.endsWith('.txt') ? 'text/plain' : 'image/jpeg', base64: 'SU1H'};
+    throw new Error('HTTP 404');
+  }};
+  const vids = createVideos(vf, {pause: async () => {}});
+  const vl = await vids.list({sources: '946974\n@chan\nhttps://broken.example/rss\nnope'});
+  assert.deepEqual(vl.items.map(i => [i.title, i.author, i.source]), [['Bili', 'UP', 0], ['Tom & Jerry', 'Chan', 1]]);
+  assert.deepEqual(vl.errors.map(e => e.message).sort(), ['HTTP 404', 'unrecognized source']);
+  assert.equal(urls.filter(u => u.includes('recArchivesByKeywords')).length, 2, '412 retried');
+  assert.equal(await vids.thumb({url: 'https://i0.hdslb.com/p.jpg@320w_180h_1c.jpg'}), 'data:image/jpeg;base64,SU1H');
+  await assert.rejects(vids.thumb({url: 'https://evil.example/x.jpg'}), /unknown thumbnail/);
+  await vids.list({sources: '@chan'});
+  assert.ok(urls.filter(u => u.startsWith('https://www.youtube.com/@')).length === 1, 'handle resolved once');
+  const vh = createHandlers(createStore({}), vf, null, null, {videos: vids});
+  assert.equal((await vh['dsh-workboard/video.list']({sources: '@chan'})).items.length, 1);
 }
 
 console.log('smoke ok');

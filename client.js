@@ -27,6 +27,8 @@ window.__ModuleLoader__.load({
     const FILES_MS = 15_000;
     const CLIP_MS = 2000;
     const NET_MS = 2000;
+    const NOWPLAYING_MS = 3000;
+    const VIDEO_MS = 15 * 60_000;
     const MAX_PINNED = 20;
     // 尺寸档位：[列, 行]，行单位 80px；「横栏」半高，其余行数成对。
     const SIZES = {bar: [4, 1], s: [1, 2], m: [2, 2], t: [1, 4], l: [2, 4], w: [4, 2]};
@@ -133,6 +135,14 @@ window.__ModuleLoader__.load({
       n_down: '下行', n_up: '上行', n_local: '内网', n_public: '出口', n_proxy: '代理', n_noProxy: '未开启', n_pac: '自动代理（PAC）',
       n_unreachable: '不可达', n_curl: '需要 curl', n_latency: '延迟',
       f_targets: '测速站点（每行一个：名称 https://…）', defaultTargets: '百度 https://www.baidu.com\nGitHub https://github.com\nGoogle https://www.google.com',
+      nowplaying: '正在播放', d_nowplaying: '「音乐」或 Spotify 正在播放的歌曲，可暂停和切歌',
+      np_idle: '没有在播放', np_open: '打开{app}', np_mac: '仅支持 macOS', np_denied: '在「系统设置 → 隐私与安全性 → 自动化」里允许 DeepSeek Harness 控制{app}',
+      np_auto: '自动', np_music: '音乐', np_spotify: 'Spotify', f_npApp: '播放器', np_prev: '上一首', np_next: '下一首', np_play: '播放', np_pause: '暂停',
+      ambient: '白噪音', d_ambient: '雨声、海浪、风声、篝火和粉噪 / 棕噪，可叠加，可在专注时自动播放',
+      am_rain: '雨声', am_waves: '海浪', am_wind: '风声', am_fire: '篝火', am_pink: '粉噪', am_brown: '棕噪', am_volume: '音量', f_ambientFocus: '专注时自动播放',
+      videos: '视频订阅', d_videos: 'B 站 UP 主、YouTube 频道的最新视频，带封面',
+      f_videoSources: '订阅（每行一个：B 站空间链接或 UID、YouTube 频道链接或 @handle、带封面的 RSS；后面可加名称）',
+      defaultVideos: 'https://space.bilibili.com/946974 影视飓风\nhttps://space.bilibili.com/163637592 何同学', vd_error: '{n} 个订阅加载失败', vd_views: '{n} 次播放',
     };
     const en = {
       lang: 'en-US', title: 'Workboard', loadFailed: 'Failed to load', empty: 'No widgets on this board yet',
@@ -234,6 +244,14 @@ window.__ModuleLoader__.load({
       n_down: 'Down', n_up: 'Up', n_local: 'Local', n_public: 'Public', n_proxy: 'Proxy', n_noProxy: 'Off', n_pac: 'Auto (PAC)',
       n_unreachable: 'Unreachable', n_curl: 'Needs curl', n_latency: 'Latency',
       f_targets: 'Sites to test, one per line: name https://…', defaultTargets: 'Google https://www.google.com\nGitHub https://github.com\nCloudflare https://www.cloudflare.com',
+      nowplaying: 'Now playing', d_nowplaying: 'The track playing in Music or Spotify, with play, pause and skip',
+      np_idle: 'Nothing playing', np_open: 'Open {app}', np_mac: 'macOS only', np_denied: 'Allow DeepSeek Harness to control {app} in System Settings → Privacy & Security → Automation',
+      np_auto: 'Automatic', np_music: 'Music', np_spotify: 'Spotify', f_npApp: 'Player', np_prev: 'Previous', np_next: 'Next', np_play: 'Play', np_pause: 'Pause',
+      ambient: 'Ambient sound', d_ambient: 'Rain, waves, wind, fire and pink / brown noise; mix them, or play during Focus',
+      am_rain: 'Rain', am_waves: 'Waves', am_wind: 'Wind', am_fire: 'Fire', am_pink: 'Pink', am_brown: 'Brown', am_volume: 'Volume', f_ambientFocus: 'Play during Focus sessions',
+      videos: 'Videos', d_videos: 'Latest uploads from YouTube channels and Bilibili creators, with thumbnails',
+      f_videoSources: 'Sources, one per line: YouTube channel link or @handle, Bilibili space link or UID, or an RSS feed with images; a name may follow',
+      defaultVideos: '@mkbhd\n@veritasium', vd_error: '{n} source(s) failed to load', vd_views: '{n} views',
     };
 
     // 公共领域的经典短句，按日期轮换。
@@ -602,6 +620,58 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-kv [data-level=warn]{color:var(--dsw-alias-state-warn-primary)}
 .wb-kv [data-level=bad]{color:var(--dsw-alias-state-error-primary)}
 .wb-spark polyline.wb-up{stroke:var(--dsw-alias-label-secondary);opacity:.7}
+.wb-np{display:flex;gap:14px;align-items:center;height:100%;min-width:0}
+.wb-np[data-size=t]{flex-direction:column;align-items:stretch;gap:10px}
+.wb-np[data-size=s]{gap:10px}
+.wb-npart{appearance:none;border:0;padding:0;height:100%;aspect-ratio:1;flex:none;border-radius:8px;background:var(--dsw-alias-bg-layer-2) center/cover no-repeat;display:grid;place-items:center;color:var(--dsw-alias-label-secondary);cursor:pointer}
+.wb-np[data-size=t] .wb-npart{height:auto;width:100%}
+.wb-np[data-size=s] .wb-npart{height:56px;align-self:flex-start}
+.wb-npmain{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:6px}
+.wb-npmain>div:first-child{display:flex;flex-direction:column;min-width:0}
+.wb-npmain b{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-npmain small{font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-nptime{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dsw-alias-label-secondary)}
+.wb-nptime .wb-pbar{flex:1;height:4px}
+.wb-nptime .wb-pbar i{background:var(--dsw-alias-label-primary);opacity:.6}
+.wb-npctl{display:flex;align-items:center;gap:4px}
+.wb-npctl button{width:30px;height:30px;border-radius:15px;display:grid;place-items:center}
+.wb-npctl button:hover{background:var(--dsw-alias-bg-layer-2)}
+.wb-npctl button[data-primary]{background:var(--dsw-alias-brand-primary);${onBrand('color')}}
+.wb-npctl button:disabled{opacity:.4;cursor:default}
+.wb-np[data-size=t] .wb-npctl{justify-content:center}
+.wb-amb{display:flex;flex-direction:column;gap:8px;height:100%;min-height:0}
+.wb-amb[data-size=w]{flex-direction:row;align-items:stretch;gap:16px}
+.wb-amtiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;flex:1;min-height:0}
+.wb-amb[data-size=s] .wb-amtiles{grid-template-columns:repeat(3,minmax(0,1fr))}
+.wb-amb[data-size=t] .wb-amtiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+.wb-amtile{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:0;border-radius:10px;border:1px solid transparent;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-secondary);font-size:12px}
+.wb-amtile:hover{color:var(--dsw-alias-label-primary)}
+.wb-amtile span{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-amb[data-size=s] .wb-amtile span{display:none}
+.wb-amtile[aria-pressed=true]{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary)}
+.wb-amb[data-playing] .wb-amtile[aria-pressed=true]{background:color-mix(in srgb,var(--dsw-alias-brand-primary) 14%,transparent)}
+.wb-amctl{display:flex;align-items:center;gap:10px;flex:none;min-width:0}
+.wb-amb[data-size=w] .wb-amctl{width:200px}
+.wb-amctl input{flex:1;min-width:0;accent-color:var(--dsw-alias-brand-primary)}
+.wb-amplay{width:28px;height:28px;border-radius:14px;flex:none;display:grid;place-items:center;background:var(--dsw-alias-brand-primary);${onBrand('color')}}
+.wb-vstrip{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;flex:1;min-height:0;scrollbar-width:thin}
+.wb-vtile{position:relative;flex:none;height:100%;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:var(--dsw-alias-bg-layer-2);color:#fff;text-decoration:none}
+.wb-vtile>div{position:absolute;left:0;right:0;bottom:0;padding:16px 8px 6px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-size:12px;line-height:1.35}
+.wb-vtile b{font-weight:500;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wb-vtile[data-read]>div{opacity:.6}
+.wb-vgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px 10px;overflow:auto;flex:1;min-height:0;align-content:start}
+.wb-vlist{display:flex;flex-direction:column;gap:10px;overflow:auto;flex:1;min-height:0}
+.wb-vcard{display:flex;flex-direction:column;gap:6px;min-width:0;color:inherit;text-decoration:none}
+.wb-vlist .wb-vcard{flex-direction:row;gap:8px;flex:none}
+.wb-vlist .wb-vthumb{width:96px}
+.wb-vcard>div:last-child{min-width:0;display:flex;flex-direction:column;gap:2px}
+.wb-vcard b{font-weight:500;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wb-vcard small{font-size:11px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-vcard:hover b{color:var(--dsw-alias-brand-primary)}
+.wb-vcard[data-read] b{font-weight:400;color:var(--dsw-alias-label-secondary)}
+.wb-vthumb{position:relative;aspect-ratio:16/9;flex:none;border-radius:8px;overflow:hidden;background:var(--dsw-alias-bg-layer-2)}
+.wb-vthumb img,.wb-vtile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.wb-vthumb i{position:absolute;right:4px;bottom:4px;padding:0 4px;border-radius:4px;background:rgba(0,0,0,.72);color:#fff;font-size:10px;line-height:16px;font-style:normal}
 
 @media (max-width:900px){.wb-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wb-card[data-c="4"]{grid-column:span 2}.wb-today .wb-quote,.wb-today .wb-qsep{display:none}}
 @media (max-width:600px){.wb-grid{grid-template-columns:minmax(0,1fr)}.wb-card{grid-column:auto!important}}
@@ -1469,6 +1539,266 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             {key: 'workMin', type: 'select', default: '25', label: () => t('f_workMin'), options: minuteOptions([15, 20, 25, 30, 45, 50, 60, 90])},
             {key: 'breakMin', type: 'select', default: '5', label: () => t('f_breakMin'), options: minuteOptions([3, 5, 10, 15, 20])},
           ],
+        };
+
+        // 白噪音：Web Audio 现场合成、模块级单例，切换看板或离开面板不中断；所选声音和音量存在全局 prefs。
+        // 浏览器只允许在点击等手势里启动声音，所以刷新后保留选择但不自动续播。
+        const AMBIENT = ['rain', 'waves', 'wind', 'fire', 'pink', 'brown'];
+        const AMBIENT_LOOP = 12;
+        const AMBIENT_GAIN = {rain: 1.3, waves: 1.2, wind: 2.4, fire: 1.2, pink: 0.8, brown: 1};
+        const ambientPrefs = prefs => {
+          const a = prefs.ambient && typeof prefs.ambient === 'object' ? prefs.ambient : {};
+          return {on: Array.isArray(a.on) ? AMBIENT.filter(k => a.on.includes(k)) : [], volume: Number.isFinite(a.volume) ? Math.min(1, Math.max(0, a.volume)) : 0.6};
+        };
+
+        // 周期性的包络都能整除 AMBIENT_LOOP 秒，循环接缝处再做一段等功率交叉淡化。
+        function synthNoise(kind, len, rate) {
+          const out = new Float32Array(len);
+          const white = () => Math.random() * 2 - 1;
+          let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0, last = 0, low = 0;
+          const pink = () => {
+            const w = white();
+            b0 = 0.99886 * b0 + w * 0.0555179; b1 = 0.99332 * b1 + w * 0.0750759; b2 = 0.969 * b2 + w * 0.153852;
+            b3 = 0.8665 * b3 + w * 0.3104856; b4 = 0.55 * b4 + w * 0.5329522; b5 = -0.7616 * b5 - w * 0.016898;
+            const v = b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * 0.5362;
+            b6 = w * 0.115926;
+            return v * 0.11;
+          };
+          const brown = () => { last = (last + 0.02 * white()) / 1.02; return last * 3.5; };
+          const wave = (i, seconds) => Math.sin(2 * Math.PI * i / (rate * seconds));
+          const bursts = (perSecond, amp, decay) => {
+            for (let at = 0; at < len;) {
+              at += Math.max(1, Math.floor(rate * -Math.log(1 - Math.random()) / perSecond));
+              const a = amp();
+              const tau = rate * decay();
+              const end = Math.min(len, at + Math.floor(tau * 6));
+              for (let i = at; i < end; i++) out[i] += white() * a * Math.exp(-(i - at) / tau);
+            }
+          };
+          for (let i = 0; i < len; i++) {
+            if (kind === 'pink') out[i] = pink();
+            else if (kind === 'brown') out[i] = brown();
+            else if (kind === 'rain') out[i] = pink() * 0.5;
+            else if (kind === 'fire') { low += (brown() - low) * 0.08; out[i] = low * 1.4 + pink() * 0.03; }
+            else if (kind === 'waves') {
+              const swell = (1 - Math.cos(2 * Math.PI * i / (rate * 6))) / 2;
+              out[i] = (brown() * 0.8 + pink() * 0.35 * swell) * (0.12 + 0.88 * swell * swell);
+            } else out[i] = (brown() * 0.7 + pink() * 0.3) * (0.55 + 0.25 * wave(i, 12) + 0.15 * wave(i, 4) + 0.05 * wave(i, 3));
+          }
+          if (kind === 'rain') bursts(300, () => Math.random() ** 3 * 1.2, () => 0.0008 + Math.random() * 0.003);
+          if (kind === 'fire') bursts(6, () => 0.2 + Math.random() ** 2 * 0.9, () => 0.0003 + Math.random() * 0.002);
+          return out;
+        }
+
+        function noiseBuffer(ac, kind) {
+          const rate = ac.sampleRate;
+          const n = rate * AMBIENT_LOOP;
+          const fade = Math.floor(rate / 2);
+          const buffer = ac.createBuffer(2, n, rate);
+          for (let ch = 0; ch < 2; ch++) {
+            const raw = synthNoise(kind, n + fade, rate);
+            const out = buffer.getChannelData(ch);
+            out.set(raw.subarray(0, n));
+            for (let i = 0; i < fade; i++) {
+              const x = (i / fade) * Math.PI / 2;
+              out[i] = raw[i] * Math.sin(x) + raw[n + i] * Math.cos(x);
+            }
+            let sum = 0;
+            for (let i = 0; i < n; i++) sum += out[i] * out[i];
+            const scale = 0.14 / (Math.sqrt(sum / n) || 1);
+            for (let i = 0; i < n; i++) out[i] *= scale;
+          }
+          return buffer;
+        }
+
+        const ambient = (() => {
+          let ac = null;
+          let master = null;
+          let playing = false;
+          let volume = null;
+          let suspendTimer = null;
+          const buffers = new Map();
+          const layers = new Map();
+          const listeners = new Set();
+          const emit = () => { for (const l of listeners) l(); };
+          const level = () => (volume ?? ambientPrefs(prefsStore.getSnapshot().values).volume) ** 2 * 0.9;
+          const ready = () => {
+            if (ac) return true;
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return false;
+            ac = new AC();
+            const limiter = ac.createDynamicsCompressor();
+            master = ac.createGain();
+            master.gain.value = 0;
+            master.connect(limiter);
+            limiter.connect(ac.destination);
+            return true;
+          };
+          const filter = (type, frequency, q) => {
+            const f = ac.createBiquadFilter();
+            f.type = type;
+            f.frequency.value = frequency;
+            if (q) f.Q.value = q;
+            return f;
+          };
+          function addLayer(kind) {
+            if (!buffers.has(kind)) buffers.set(kind, noiseBuffer(ac, kind));
+            const src = ac.createBufferSource();
+            src.buffer = buffers.get(kind);
+            src.loop = true;
+            const sources = [src];
+            const chain = kind === 'rain' ? [filter('highpass', 300), filter('lowpass', 7000)]
+              : kind === 'waves' ? [filter('lowpass', 1400)]
+              : kind === 'fire' ? [filter('highpass', 40)]
+              : kind === 'wind' ? [filter('bandpass', 450, 0.7)] : [];
+            if (kind === 'wind') {
+              const lfo = ac.createOscillator();
+              const depth = ac.createGain();
+              lfo.frequency.value = 1 / AMBIENT_LOOP;
+              depth.gain.value = 250;
+              lfo.connect(depth).connect(chain[0].frequency);
+              sources.push(lfo);
+            }
+            const gain = ac.createGain();
+            gain.gain.value = 0;
+            [src, ...chain, gain].reduce((a, b) => a.connect(b));
+            gain.connect(master);
+            src.start(0, Math.random() * AMBIENT_LOOP);
+            for (const s of sources.slice(1)) s.start();
+            gain.gain.setTargetAtTime(AMBIENT_GAIN[kind], ac.currentTime, 0.4);
+            layers.set(kind, {gain, sources});
+          }
+          function dropLayer(kind) {
+            const layer = layers.get(kind);
+            layers.delete(kind);
+            layer.gain.gain.setTargetAtTime(0, ac.currentTime, 0.3);
+            setTimeout(() => { for (const s of layer.sources) { try { s.stop(); } catch { /* 已停止 */ } } layer.gain.disconnect(); }, 2000);
+          }
+          function sync() {
+            if (!ac) return;
+            const {on} = ambientPrefs(prefsStore.getSnapshot().values);
+            if (playing) {
+              for (const k of on) if (!layers.has(k)) addLayer(k);
+              for (const k of [...layers.keys()]) if (!on.includes(k)) dropLayer(k);
+            }
+            master.gain.setTargetAtTime(playing ? level() : 0, ac.currentTime, playing ? 0.5 : 0.25);
+          }
+          return {
+            getSnapshot: () => playing,
+            subscribe: fn => { listeners.add(fn); return () => listeners.delete(fn); },
+            sync,
+            play() {
+              if (!ready()) return;
+              clearTimeout(suspendTimer);
+              if (ac.state !== 'running') ac.resume().catch(() => {});
+              playing = true;
+              sync();
+              emit();
+            },
+            pause() {
+              if (!playing) return;
+              playing = false;
+              sync();
+              emit();
+              clearTimeout(suspendTimer);
+              suspendTimer = setTimeout(() => { if (!playing && ac) ac.suspend().catch(() => {}); }, 1500);
+            },
+            setVolume(v) {
+              volume = v;
+              if (ac && playing) master.gain.setTargetAtTime(level(), ac.currentTime, 0.05);
+            },
+            dispose() {
+              clearTimeout(suspendTimer);
+              if (ac) ac.close().catch(() => {});
+              ac = null;
+              playing = false;
+              layers.clear();
+              buffers.clear();
+            },
+          };
+        })();
+        const saveAmbient = patch => prefsStore.put({ambient: {...ambientPrefs(prefsStore.getSnapshot().values), ...patch}}).catch(() => {});
+        // 开启「专注时自动播放」后，专注开始时跟着播放，结束或暂停时只停掉由专注启动的声音。
+        ctx.effect(() => {
+          let working = null;
+          let byFocus = false;
+          const check = () => {
+            const snap = prefsStore.getSnapshot();
+            if (!snap.loaded) return;
+            const f = focusState(snap.values);
+            const now = f.mode === 'work' && Boolean(f.endsAt);
+            if (working !== null && now !== working && snap.values.ambientFocus === true) {
+              working = now;
+              if (now && !ambient.getSnapshot()) {
+                byFocus = true;
+                if (!ambientPrefs(snap.values).on.length) saveAmbient({on: ['rain']});
+                ambient.play();
+              } else if (!now && byFocus) {
+                byFocus = false;
+                ambient.pause();
+              }
+            }
+            working = now;
+            ambient.sync();
+          };
+          const off = prefsStore.subscribe(check);
+          check();
+          return () => { off(); ambient.dispose(); };
+        }, 'dsh-workboard: ambient');
+
+        const AMBIENT_ICONS = {
+          rain: WX_PATHS.rain,
+          waves: ['M2 9c2 0 3-2 5-2s3 2 5 2 3-2 5-2 3 2 5 2', 'M2 15c2 0 3-2 5-2s3 2 5 2 3-2 5-2 3 2 5 2'],
+          wind: ['M3 8h11a3 3 0 1 0-3-3', 'M3 12h16a3 3 0 1 1-3 3', 'M3 16h7'],
+          fire: ['M12 3c.5 3 4 5.5 4 10a4 4 0 0 1-8 0c0-2 1-3.5 2-4.5 0 1.5.5 2.5 1.5 3 0-3 0-5.5.5-8.5z'],
+          pink: ['M3 12h2l2-6 3 12 3-14 3 16 2-8h3'],
+          brown: ['M3 12c2-5 4-5 6 0s4 5 6 0 4-5 6 0'],
+        };
+        const fillIcon = (size, d) => h('svg', {width: size, height: size, viewBox: '0 0 24 24', fill: 'currentColor', 'aria-hidden': true}, h('path', {d}));
+        const MEDIA = {
+          play: 'M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z',
+          pause: 'M7 5h3.5v14H7zM13.5 5H17v14h-3.5z',
+          next: 'M5 6.5v11a.8.8 0 0 0 1.2.7l8.3-5.5a.8.8 0 0 0 0-1.4L6.2 5.8A.8.8 0 0 0 5 6.5zM16.5 6h2v12h-2z',
+          prev: 'M19 6.5v11a.8.8 0 0 1-1.2.7l-8.3-5.5a.8.8 0 0 1 0-1.4l8.3-5.5a.8.8 0 0 1 1.2.7zM5.5 6h2v12h-2z',
+        };
+
+        function Ambient({size}) {
+          useLocale();
+          const prefs = usePrefs();
+          const playing = useSyncExternalStore(ambient.subscribe, ambient.getSnapshot, ambient.getSnapshot);
+          const a = ambientPrefs(prefs);
+          const [dragging, setDragging] = useState(null);
+          const timer = useRef(null);
+          useEffect(() => () => clearTimeout(timer.current), []);
+          const toggle = kind => {
+            const adding = !a.on.includes(kind);
+            const on = adding ? [...a.on, kind] : a.on.filter(k => k !== kind);
+            saveAmbient({on});
+            if (!on.length) ambient.pause();
+            else if (adding) ambient.play();
+          };
+          const playPause = () => {
+            if (playing) { ambient.pause(); return; }
+            if (!a.on.length) saveAmbient({on: ['rain']});
+            ambient.play();
+          };
+          const setVolume = v => {
+            setDragging(v);
+            ambient.setVolume(v);
+            clearTimeout(timer.current);
+            timer.current = setTimeout(() => { saveAmbient({volume: v}); ambient.setVolume(null); setDragging(null); }, 400);
+          };
+          const volume = dragging ?? a.volume;
+          return h('div', {className: 'wb-amb', 'data-size': size, 'data-playing': playing ? '' : undefined},
+            h('div', {className: 'wb-amtiles'}, AMBIENT.map(kind => h('button', {key: kind, type: 'button', className: 'wb-btn wb-amtile', 'aria-pressed': a.on.includes(kind), title: t(`am_${kind}`), onClick: () => toggle(kind)},
+              svg(size === 's' ? 18 : 20, AMBIENT_ICONS[kind], 1.6), h('span', null, t(`am_${kind}`))))),
+            h('div', {className: 'wb-amctl'},
+              h('button', {type: 'button', className: 'wb-btn wb-amplay', 'aria-label': playing ? t('np_pause') : t('np_play'), title: playing ? t('np_pause') : t('np_play'), onClick: playPause}, fillIcon(14, playing ? MEDIA.pause : MEDIA.play)),
+              h('input', {type: 'range', min: 0, max: 100, value: Math.round(volume * 100), 'aria-label': t('am_volume'), title: `${t('am_volume')} ${Math.round(volume * 100)}%`, onChange: e => setVolume(Number(e.target.value) / 100)})));
+        }
+        Ambient.workboard = {
+          apiVersion: 1, sizes: ['m', 's', 'w', 't'], title: false, description: () => t('d_ambient'),
+          settings: [{key: 'ambientFocus', type: 'toggle', scope: 'global', default: false, label: () => t('f_ambientFocus')}],
         };
 
         function parseLinks(text) {
@@ -2912,6 +3242,112 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           settings: [{key: 'targets', type: 'textarea', label: () => t('f_targets'), default: () => t('defaultTargets')}],
         };
 
+        const NP_APPS = ['music', 'spotify'];
+        const clockText = ms => {
+          const s = Math.max(0, Math.floor(ms / 1000));
+          const hours = Math.floor(s / 3600);
+          return hours ? `${hours}:${pad(Math.floor(s / 60) % 60)}:${pad(s % 60)}` : `${Math.floor(s / 60)}:${pad(s % 60)}`;
+        };
+        const NOTE_ICON = ['M9 18V5l11-2v13', {tag: 'circle', attrs: {cx: 6, cy: 18, r: 3}}, {tag: 'circle', attrs: {cx: 17, cy: 16, r: 3}}];
+
+        function NowPlaying({size, config}) {
+          useLocale();
+          const now = useNow();
+          const prefer = NP_APPS.includes(config?.app) ? config.app : 'auto';
+          const res = useRemote('nowplaying.get', {app: prefer}, NOWPLAYING_MS);
+          const [busy, setBusy] = useState(false);
+          const [error, setError] = useState('');
+          const v = res.value;
+          const track = v?.track;
+          const app = track?.app ?? (prefer !== 'auto' ? prefer : v?.apps?.[0] ?? 'music');
+          const act = action => {
+            setBusy(true);
+            call('nowplaying.control', {app, action}).then(() => setError(''), e => setError(String(e?.message || e))).finally(() => { setBusy(false); res.reload(); });
+          };
+          const msg = (text, button) => h('div', {className: 'wb-photo-msg'}, h('span', null, text), button ?? null);
+          if (!v) return blank(res.error || '…');
+          if (!v.supported) return msg(t('np_mac'));
+          if (v.denied) return msg(fill(t('np_denied'), {app: t(`np_${v.denied}`)}));
+          if (!track) return msg(error || t('np_idle'), h('button', {type: 'button', className: 'wb-btn wb-cta', disabled: busy, onClick: () => act('open')}, fill(t('np_open'), {app: t(`np_${app}`)})));
+          const playing = track.state === 'playing';
+          const position = Math.min(track.duration || Infinity, track.position + (playing ? Math.max(0, now.getTime() - v.at) : 0));
+          const sub = [track.artist, size === 's' ? '' : track.album].filter(Boolean).join(' — ');
+          const ctl = (key, label, icon, primary) => h('button', {key, type: 'button', className: 'wb-btn', 'data-primary': primary ? '' : undefined, disabled: busy, 'aria-label': label, title: label, onClick: () => act(key)}, fillIcon(primary ? 16 : 14, icon));
+          return h('div', {className: 'wb-np', 'data-size': size},
+            h('button', {type: 'button', className: 'wb-npart', title: fill(t('np_open'), {app: t(`np_${track.app}`)}), style: track.art ? {backgroundImage: `url("${track.art}")`} : undefined, onClick: () => act('open')},
+              track.art ? null : svg(size === 's' ? 20 : 28, NOTE_ICON, 1.6)),
+            h('div', {className: 'wb-npmain'},
+              h('div', null, h('b', {title: track.title}, track.title), sub ? h('small', {title: sub}, sub) : null),
+              size === 's' || !track.duration ? null : h('div', {className: 'wb-nptime wb-num'}, h('span', null, clockText(position)),
+                h('div', {className: 'wb-pbar'}, h('i', {style: {width: `${Math.min(100, position / track.duration * 100)}%`}})), h('span', null, clockText(track.duration))),
+              h('div', {className: 'wb-npctl'},
+                size === 's' ? null : ctl('previous', t('np_prev'), MEDIA.prev),
+                ctl('toggle', playing ? t('np_pause') : t('np_play'), playing ? MEDIA.pause : MEDIA.play, true),
+                ctl('next', t('np_next'), MEDIA.next)),
+              error ? h('div', {className: 'wb-calerr', title: error}, error) : null));
+        }
+        NowPlaying.workboard = {
+          apiVersion: 1, sizes: ['m', 's', 'w', 't'], title: false, description: () => t('d_nowplaying'),
+          settings: [{key: 'app', type: 'select', default: 'auto', label: () => t('f_npApp'), options: ['auto', ...NP_APPS].map(v => ({value: v, label: () => t(`np_${v}`)}))}],
+        };
+
+        // 封面按需从 Host 取 data: URL，页面内缓存并限制并发。
+        const thumbCache = new Map();
+        const thumbQueue = [];
+        let thumbActive = 0;
+        const pumpThumbs = () => {
+          while (thumbActive < 4 && thumbQueue.length) {
+            const {url, resolve, reject} = thumbQueue.shift();
+            thumbActive++;
+            call('video.thumb', {url}).then(resolve, reject).finally(() => { thumbActive--; pumpThumbs(); });
+          }
+        };
+        const loadThumb = url => {
+          let entry = thumbCache.get(url);
+          if (!entry) {
+            entry = {src: '', job: new Promise((resolve, reject) => { thumbQueue.push({url, resolve, reject}); pumpThumbs(); })};
+            entry.job.then(src => { entry.src = src; }, () => {});
+            thumbCache.set(url, entry);
+            if (thumbCache.size > 300) thumbCache.delete(thumbCache.keys().next().value);
+          }
+          return entry.job;
+        };
+        function Thumb({url}) {
+          const [src, setSrc] = useState(() => thumbCache.get(url)?.src ?? '');
+          useEffect(() => {
+            if (!url) return undefined;
+            let alive = true;
+            loadThumb(url).then(s => { if (alive) setSrc(s); }, () => {});
+            return () => { alive = false; };
+          }, [url]);
+          return src ? h('img', {src, alt: '', draggable: false}) : null;
+        }
+
+        function Videos({size, config}) {
+          useLocale();
+          const now = useNow();
+          const sources = String(config?.sources || t('defaultVideos'));
+          const res = useRemote('video.list', {sources}, VIDEO_MS);
+          const items = res.value?.items ?? [];
+          const failed = res.value?.errors ?? [];
+          const read = useRead(items.map(it => it.url));
+          const compact = new Intl.NumberFormat(t('lang'), {notation: 'compact', maximumFractionDigits: 1});
+          const meta = it => [it.author, it.date ? relTime(it.date, now.getTime()) : '', size === 'l' && it.views != null ? fill(t('vd_views'), {n: compact.format(it.views)}) : ''].filter(Boolean).join(' · ');
+          const link = it => ({key: it.id || it.url, href: it.url, target: '_blank', rel: 'noopener noreferrer', title: `${it.title}\n${meta(it)}`, ...readProps(read, it.url)});
+          const strip = size === 'm' || size === 'w';
+          const list = !items.length ? blank(res.pending ? '…' : res.error || t('noItems'))
+            : strip ? h('div', {className: 'wb-vstrip'}, items.map(it => h('a', {...link(it), className: 'wb-vtile'}, h(Thumb, {url: it.thumb}), h('div', null, h('b', null, it.title)))))
+            : h('div', {className: size === 't' ? 'wb-vlist' : 'wb-vgrid'}, items.map(it => h('a', {...link(it), className: 'wb-vcard'},
+              h('div', {className: 'wb-vthumb'}, h(Thumb, {url: it.thumb}), it.duration ? h('i', {className: 'wb-num'}, clockText(it.duration * 1000)) : null),
+              h('div', null, h('b', null, it.title), h('small', null, meta(it))))));
+          return h(React.Fragment, null, list,
+            failed.length ? h('div', {className: 'wb-calerr', title: failed.map(e => `${e.source}: ${e.message}`).join('\n')}, fill(t('vd_error'), {n: failed.length})) : null);
+        }
+        Videos.workboard = {
+          apiVersion: 1, sizes: ['l', 't', 'm', 'w'], defaultSize: 'l', description: () => t('d_videos'),
+          settings: [{key: 'sources', type: 'textarea', label: () => t('f_videoSources'), default: () => t('defaultVideos')}],
+        };
+
         const builtins = [
           ['workboard.today', 'today', Today], ['workboard.todo', 'todo', Todo], ['workboard.note', 'note', Note], ['workboard.calendar', 'calendar', Calendar],
           ['workboard.weather', 'weather', Weather], ['workboard.clock', 'clock', Clock], ['workboard.quote', 'quote', Quote], ['workboard.countdown', 'countdown', Countdown],
@@ -2922,12 +3358,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           ['workboard.trending', 'trending', Trending],
           ['workboard.outputs', 'outputs', Outputs], ['workboard.schedules', 'tasks', Schedules], ['workboard.pinned', 'pinned', Pinned],
           ['workboard.files', 'files', Files], ['workboard.clipboard', 'clipboard', Clipboard], ['workboard.network', 'network', Network],
+          ['workboard.nowplaying', 'nowplaying', NowPlaying], ['workboard.ambient', 'ambient', Ambient], ['workboard.videos', 'videos', Videos],
         ];
         const BUILTIN_CATEGORY = {
-          daily: ['today', 'clock', 'worldclock', 'weather', 'countdown', 'progress', 'habits', 'photo'],
+          daily: ['today', 'clock', 'worldclock', 'weather', 'countdown', 'progress', 'habits', 'photo', 'nowplaying'],
           agent: ['agents', 'running', 'prompt', 'inbox', 'usage', 'outputs', 'tasks', 'pinned'],
-          news: ['trending', 'feed', 'market', 'quote'],
-          tools: ['todo', 'note', 'calendar', 'focus', 'links', 'git', 'github', 'system', 'files', 'clipboard', 'network'],
+          news: ['trending', 'feed', 'videos', 'market', 'quote'],
+          tools: ['todo', 'note', 'calendar', 'focus', 'ambient', 'links', 'git', 'github', 'system', 'files', 'clipboard', 'network'],
         };
         for (const [category, keys] of Object.entries(BUILTIN_CATEGORY)) {
           for (const key of keys) {
