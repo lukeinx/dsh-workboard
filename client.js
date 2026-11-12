@@ -249,11 +249,15 @@ window.__ModuleLoader__.load({
 .bnt-notefoot{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--dsw-alias-label-secondary);margin-top:8px;min-height:18px}
 .bnt-notefoot button{color:var(--dsw-alias-brand-primary)}
 
-.bnt-head{display:flex;align-items:center;gap:8px;padding:20px 0 16px;flex-wrap:wrap;position:sticky;top:0;z-index:5;background:var(--dsw-alias-bg-base)}
+.bnt-head{display:flex;align-items:center;gap:8px;padding:20px 0 16px;flex-wrap:wrap}
+.bnt-head[data-editing]{position:sticky;top:0;z-index:5;background:var(--dsw-alias-bg-base)}
+.bnt-head:not([data-editing]) .bnt-newboard{opacity:0;transition:opacity .15s}
+.bnt-head:hover .bnt-newboard,.bnt-head .bnt-newboard:focus-visible{opacity:1}
 .bnt-tabs{display:flex;align-items:center;gap:2px;flex-wrap:wrap;min-width:0}
-.bnt-tab{height:30px;padding:0 12px;border-radius:8px;color:var(--dsw-alias-label-secondary);font-weight:500;white-space:nowrap}
+.bnt-tab{position:relative;height:30px;padding:0 12px;border-radius:8px;color:var(--dsw-alias-label-secondary);font-weight:500;white-space:nowrap}
 .bnt-tab:hover{color:var(--dsw-alias-label-primary)}
-.bnt-tab[aria-selected=true]{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
+.bnt-tab[aria-selected=true]{color:var(--dsw-alias-label-primary)}
+.bnt-tab[aria-selected=true]::after{content:'';position:absolute;left:12px;right:12px;bottom:2px;height:2px;border-radius:1px;background:var(--dsw-alias-brand-primary)}
 .bnt-tabinput{height:30px;width:120px;box-sizing:border-box;padding:0 10px;border-radius:8px;border:1px solid var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);font:inherit;font-weight:500;outline:none}
 .bnt-iconbtn{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;color:var(--dsw-alias-label-secondary)}
 .bnt-iconbtn:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
@@ -533,6 +537,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
       chev: () => svg(12, 'M9 6l6 6-6 6', 2.2),
       left: () => svg(14, 'M15 6l-6 6 6 6'),
       right: () => svg(14, 'M9 6l6 6-6 6'),
+      pencil: () => svg(14, 'M4 20h4L18.5 9.5a2.83 2.83 0 0 0-4-4L4 16v4zM13.5 6.5l4 4'),
       gear: () => svg(14, ['M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z'], 1.6),
     };
 
@@ -2035,7 +2040,8 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
                 onKeyDown: e => { if (e.key === 'Enter' && !e.nativeEvent.isComposing) e.currentTarget.blur(); else if (e.key === 'Escape') setRenaming(false); }})
               : h('button', {key: b.id, type: 'button', role: 'tab', className: 'bnt-btn bnt-tab', 'aria-selected': b.id === activeId, title: t('rename'),
                 onClick: () => switchTo(b.id), onDoubleClick: () => { switchTo(b.id); setRenaming(true); }}, boardTitle(b)))),
-            h('button', {type: 'button', className: 'bnt-btn bnt-iconbtn', 'aria-label': t('newBoardLabel'), title: t('newBoardLabel'), onClick: createBoard}, h(Icon.plus)));
+            h('button', {type: 'button', className: 'bnt-btn bnt-iconbtn bnt-newboard', 'aria-label': t('newBoardLabel'), title: t('newBoardLabel'), onClick: createBoard}, h(Icon.plus)));
+          const showTabs = editing || renaming || (boards?.length ?? 0) > 1;
 
           const actions = editing
             ? [
@@ -2043,7 +2049,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
               h('button', {key: 'add', type: 'button', className: 'bnt-action', onClick: () => setModal({type: 'gallery'})}, h(Icon.plus), t('addWidget')),
               h('button', {key: 'done', type: 'button', className: 'bnt-action', 'data-primary': '', onClick: () => { setEditing(false); setConfirmDelete(false); }}, t('doneEdit')),
             ]
-            : [h('button', {key: 'edit', type: 'button', className: 'bnt-action', onClick: () => setEditing(true)}, t('edit'))];
+            : [h('button', {key: 'edit', type: 'button', className: 'bnt-btn bnt-iconbtn', 'aria-label': t('edit'), title: t('edit'), onClick: () => setEditing(true)}, h(Icon.pencil))];
 
           const card = cell => {
             const w = byId.get(cell.id);
@@ -2078,7 +2084,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           return h('div', {className: 'bnt-page'},
             h('style', null, CSS),
             h('div', {className: 'bnt-inner'},
-              h('div', {className: 'bnt-head'}, tabs, h('span', {className: 'bnt-spacer'}), ...actions),
+              h('div', {className: 'bnt-head', 'data-editing': editing ? '' : undefined}, showTabs ? tabs : null, h('span', {className: 'bnt-spacer'}), ...actions),
               shownError ? h('div', {className: 'bnt-error', role: 'alert'}, shownError) : null,
               board && cells.length === 0 && !editing ? h('div', {className: 'bnt-empty'},
                 h('button', {type: 'button', className: 'bnt-action', onClick: () => { setEditing(true); setModal({type: 'gallery'}); }}, h(Icon.plus), t('addWidget'))) : null,
