@@ -2,7 +2,7 @@
 
 [简体中文](README.zh.md)
 
-Desk (`@lukeinx/dsh-desk`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with 31 widgets, including a today banner, to-dos, notes, an ICS calendar, weather, an agent session monitor, quick prompts, usage stats, Git repositories, system status, markets, outputs, scheduled tasks and network, works with zero configuration, and lets the agent read and change your to-dos, notes and inbox from any conversation. The agent can also build new widgets from a sentence, and other plugins can add their own.
+Desk (`dsh-workboard`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with 31 widgets, including a today banner, to-dos, notes, an ICS calendar, weather, an agent session monitor, quick prompts, usage stats, Git repositories, system status, markets, outputs, scheduled tasks and network, works with zero configuration, and lets the agent read and change your to-dos, notes and inbox from any conversation. The agent can also build new widgets from a sentence, and other plugins can add their own.
 
 Status: early (P0b). MIT licensed.
 
@@ -126,4 +126,4 @@ The component receives `size`, `config` (the saved settings for this card), `edi
 npm run check   # syntax check, Host smoke test and ICS tests
 ```
 
-Files: `index.js` (Host routes under `/api/dsh-desk/*`, storage, agent tools), `skills/desk-widget.md` (the agent's widget-writing guide), `lib/` (HTTP cache, custom widget validation, weather, ICS and feed parsing, session-log usage, subprocesses, Git, GitHub, system status, photos, markets, trending), `client.js` (sidebar entry, panel, built-in widgets), `cordis.patch.yml`, `locale/`, `icon.svg`.
+Files: `index.js` (Host routes under `/api/dsh-workboard/*`, storage, agent tools), `skills/desk-widget.md` (the agent's widget-writing guide), `lib/` (HTTP cache, custom widget validation, weather, ICS and feed parsing, session-log usage, subprocesses, Git, GitHub, system status, photos, markets, trending), `client.js` (sidebar entry, panel, built-in widgets), `cordis.patch.yml`, `locale/`, `icon.svg`.

@@ -1,14 +1,14 @@
 window.__ModuleLoader__.load({
-  id: '@lukeinx/dsh-desk',
+  id: 'dsh-workboard',
   factory(require) {
     const React = require('react');
     const h = React.createElement;
     const {useCallback, useEffect, useRef, useState, useSyncExternalStore} = React;
 
-    const NS = 'dsh-desk';
-    const PANEL = 'dsh-desk';
-    const SETTINGS_PANEL = 'dsh-desk-settings';
-    const PACKAGE = '@lukeinx/dsh-desk';
+    const NS = 'dsh-workboard';
+    const PANEL = 'dsh-workboard';
+    const SETTINGS_PANEL = 'dsh-workboard-settings';
+    const PACKAGE = 'dsh-workboard';
     const SLOT = 'desk.widget';
     const POLL_MS = 5000;
     const WEATHER_MS = 10 * 60_000;
@@ -661,7 +661,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 
     // 自定义 widget 的 iframe 文档：沙箱内的 CSP 禁止一切直接联网，只留内联脚本 / 样式和 data: 资源。
     const CUSTOM_PREFIX = 'custom.';
-    const FRAME_NS = 'dsh-desk-frame';
+    const FRAME_NS = 'dsh-workboard-frame';
     const FRAME_CSP = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; media-src data: blob:";
     const FRAME_TOKENS = {
       '--bg': '--dsw-alias-bg-base', '--card': '--dsw-alias-bg-layer-1', '--layer': '--dsw-alias-bg-layer-2',
@@ -704,7 +704,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     // 在 iframe 里运行（按源码序列化注入），不能引用外层变量。
     function deskBridge() {
       const boot = JSON.parse(document.getElementById('desk-boot').textContent);
-      const NS = 'dsh-desk-frame';
+      const NS = 'dsh-workboard-frame';
       const KEYS = ['size', 'config', 'data', 'dataAt', 'theme', 'lang'];
       const post = msg => parent.postMessage({ns: NS, ...msg}, '*');
       const pending = new Map();
@@ -896,16 +896,16 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
     return {
       inject: ['slots', 'connection', 'locale'],
       apply(ctx) {
-        ctx.effect(() => ctx.locale.register(NS, {zh, en}), 'dsh-desk: dictionaries');
+        ctx.effect(() => ctx.locale.register(NS, {zh, en}), 'dsh-workboard: dictionaries');
         ctx.effect(() => {
           const tag = document.createElement('style');
           tag.textContent = CSS;
           document.head.appendChild(tag);
           return () => tag.remove();
-        }, 'dsh-desk: styles');
+        }, 'dsh-workboard: styles');
         const t = ctx.locale.bind(NS);
         const call = async (method, payload = {}) => {
-          const result = await ctx.connection.rpc.call('/api', `dsh-desk/${method}`, payload);
+          const result = await ctx.connection.rpc.call('/api', `dsh-workboard/${method}`, payload);
           if (result?.ok === true) return result.value;
           throw new Error(result?.error?.message || t('loadFailed'));
         };
@@ -1431,7 +1431,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const off = prefsStore.subscribe(check);
           check();
           return () => { off(); clearTimeout(timer); };
-        }, 'dsh-desk: focus timer');
+        }, 'dsh-workboard: focus timer');
 
         function Focus({size, config}) {
           useLocale();
@@ -2149,7 +2149,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             dispose() { for (const reg of regs.values()) reg.dispose(); regs.clear(); },
           };
         })();
-        ctx.effect(() => () => customs.dispose(), 'dsh-desk: custom widgets');
+        ctx.effect(() => () => customs.dispose(), 'dsh-workboard: custom widgets');
         void customs.refresh();
 
         // 生成（widget 为空）或修改一个自定义 widget：开新会话交给 Agent，用户在会话里继续追问。
@@ -3115,13 +3115,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         ctx.effect(() => ctx.slots.inject('main', () => ctx.slots.register({
           name: 'main', key: PANEL, locale: NS, inject: () => ({}),
           children: {[SLOT]: {kind: 'list', scope: 'root'}},
-        }, Panel)), 'dsh-desk: main panel');
+        }, Panel)), 'dsh-workboard: main panel');
         ctx.effect(() => ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
           name: 'sidebar.panellist', id: PANEL, order: 30, label: () => t('title'),
-        }, PanelIcon)), 'dsh-desk: sidebar entry');
+        }, PanelIcon)), 'dsh-workboard: sidebar entry');
         ctx.effect(() => ctx.slots.inject('settings.section', () => ctx.slots.register({
           name: 'settings.section', id: PANEL, order: 40, label: () => t('title'), locale: NS, inject: () => ({}),
-        }, DeskSettings)), 'dsh-desk: settings section');
+        }, DeskSettings)), 'dsh-workboard: settings section');
 
         // 设置弹窗没有公开「打开指定栏目」的接口：插件详情页的按钮改为在主区域打开同一面板。
         if (typeof ctx.inject === 'function') {
@@ -3146,7 +3146,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         builtins.forEach(([id, key, component], i) => {
           ctx.effect(() => ctx.slots.inject(SLOT, () => ctx.slots.register({
             name: SLOT, id, order: (i + 1) * 10, label: () => t(key),
-          }, component)), `dsh-desk: ${id} widget`);
+          }, component)), `dsh-workboard: ${id} widget`);
         });
       },
     };

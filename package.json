@@ -1,10 +1,10 @@
 {
-  "name": "@lukeinx/dsh-desk",
+  "name": "dsh-workboard",
   "version": "0.0.1",
-  "private": true,
   "description": "DeepSeek Harness plugin: a modular dashboard panel with clock, weather, quotes, todos, notes and calendar widgets.",
   "type": "module",
   "license": "MIT",
+  "keywords": ["dsh-plugin", "deepseek-harness", "deepseek-desktop", "dashboard", "widgets", "todo", "calendar", "deepseek", "dsh", "ai-agent", "工作台"],
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",

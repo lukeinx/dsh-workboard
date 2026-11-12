@@ -32,9 +32,9 @@ const ctx = {
 apply(ctx);
 
 const call = async (method, payload = {}) => {
-  const route = routes.get(`/api/dsh-desk/${method}`);
+  const route = routes.get(`/api/dsh-workboard/${method}`);
   assert.ok(route, `route ${method}`);
-  const body = JSON.stringify({type: 'client-request', rpcId: 'r1', method: `dsh-desk/${method}`, payload});
+  const body = JSON.stringify({type: 'client-request', rpcId: 'r1', method: `dsh-workboard/${method}`, payload});
   const response = await route.fetch(new Request(`http://127.0.0.1${route.path}`, {method: 'POST', headers: {'content-type': 'application/json'}, body}));
   const message = await response.json();
   assert.equal(message.rpcId, 'r1');
@@ -56,12 +56,12 @@ assert.equal((await call('board.put', {board: {id: '../x', widgets: []}})).ok, f
 const a = await value('todo.add', {text: '  write   README  '});
 assert.equal(a.text, 'write README');
 const b = await value('todo.add', {text: 'ship P0a'});
-assert.equal((await call('todo.add', {text: '   '})).error.code, 'dsh-desk/empty-text');
+assert.equal((await call('todo.add', {text: '   '})).error.code, 'dsh-workboard/empty-text');
 await value('todo.update', {id: a.id, done: true});
 let todos = await value('todo.list');
 assert.deepEqual(todos.map(t => [t.id, t.done]), [[b.id, false], [a.id, true]]);
 await value('todo.remove', {id: b.id});
-assert.equal((await call('todo.remove', {id: b.id})).error.code, 'dsh-desk/not-found');
+assert.equal((await call('todo.remove', {id: b.id})).error.code, 'dsh-workboard/not-found');
 
 assert.equal((await value('note.get')).text, '');
 await value('note.put', {text: '- line one'});
@@ -89,7 +89,7 @@ await value('board.order', {order: [life.id, 'work']});
 assert.equal((await value('board.list'))[0].id, life.id);
 await value('board.delete', {id: 'work'});
 assert.deepEqual((await value('board.list')).map(b => b.id), [life.id]);
-assert.equal((await call('board.delete', {id: life.id})).error.code, 'dsh-desk/last-board');
+assert.equal((await call('board.delete', {id: life.id})).error.code, 'dsh-workboard/last-board');
 
 assert.deepEqual((await value('prefs.put', {prefs: {location: {name: 'Shenzhen', lat: 22.5, lon: 114.1}}})).location, {name: 'Shenzhen', lat: 22.5, lon: 114.1});
 assert.equal((await value('prefs.put', {prefs: {location: null}})).location, undefined);
@@ -99,10 +99,10 @@ assert.equal((await call('prefs.put', {prefs: {'../x': 1}})).ok, false);
 const ics = ['BEGIN:VCALENDAR', 'BEGIN:VEVENT', 'UID:1', 'SUMMARY:Sync', 'DTSTART:20261112T020000Z', 'DTEND:20261112T030000Z', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
 const fetcher = {get: async url => { if (url.includes('bad')) throw new Error('HTTP 404'); return ics; }};
 const handlers = createHandlers(createStore({}), fetcher);
-const cal = await handlers['dsh-desk/calendar.events']({urls: ['https://a.example/x.ics', 'https://bad.example/y.ics'], from: Date.UTC(2026, 10, 11), to: Date.UTC(2026, 10, 13)});
+const cal = await handlers['dsh-workboard/calendar.events']({urls: ['https://a.example/x.ics', 'https://bad.example/y.ics'], from: Date.UTC(2026, 10, 11), to: Date.UTC(2026, 10, 13)});
 assert.deepEqual(cal.events.map(e => [e.title, e.source]), [['Sync', 0]]);
 assert.deepEqual(cal.errors.map(e => e.message), ['HTTP 404']);
-await assert.rejects(handlers['dsh-desk/calendar.events']({urls: [], from: 0, to: 365 * 86400_000}));
+await assert.rejects(handlers['dsh-workboard/calendar.events']({urls: [], from: 0, to: 365 * 86400_000}));
 
 // 旧版 dsh_bento 数据：新域为空时复制并改写内置 widget id，已有数据时不动。
 const fakeDomain = (data = {}) => {
@@ -135,7 +135,7 @@ assert.equal(habit.name, 'read 20 pages');
 assert.deepEqual((await value('habit.check', {id: habit.id, day: '2026-11-11'})).days, ['2026-11-11']);
 assert.deepEqual((await value('habit.check', {id: habit.id, day: '2026-11-10', done: true})).days, ['2026-11-10', '2026-11-11']);
 assert.deepEqual((await value('habit.check', {id: habit.id, day: '2026-11-11'})).days, ['2026-11-10']);
-assert.equal((await call('habit.check', {id: habit.id, day: 'yesterday'})).error.code, 'dsh-desk/bad-day');
+assert.equal((await call('habit.check', {id: habit.id, day: 'yesterday'})).error.code, 'dsh-workboard/bad-day');
 assert.deepEqual((await value('habit.list')).map(h => h.id), [habit.id]);
 await value('habit.remove', {id: habit.id});
 assert.deepEqual(await value('habit.list'), []);
@@ -150,7 +150,7 @@ assert.deepEqual(await value('read.check', {urls: ['https://r.example/1']}), [])
 const rss = '<rss version="2.0"><channel><title>R</title><item><title>Old</title><link>https://r.example/1</link><guid>r-1</guid><pubDate>Mon, 09 Nov 2026 10:00:00 GMT</pubDate></item></channel></rss>';
 const atomFeed = '<feed xmlns="http://www.w3.org/2005/Atom"><title>A</title><entry><title>New</title><link href="https://a.example/2"/><updated>2026-11-11T10:00:00Z</updated></entry></feed>';
 const feedFetcher = {get: async url => { if (url.includes('bad')) throw new Error('HTTP 500'); return url.includes('atom') ? atomFeed : rss; }};
-const feed = await createHandlers(createStore({}), feedFetcher)['dsh-desk/feed.get']({urls: ['https://x.example/rss', 'https://x.example/atom', 'https://bad.example/f']});
+const feed = await createHandlers(createStore({}), feedFetcher)['dsh-workboard/feed.get']({urls: ['https://x.example/rss', 'https://x.example/atom', 'https://bad.example/f']});
 assert.deepEqual(feed.items.map(i => [i.title, i.feed, i.link]), [['New', 'A', 'https://a.example/2'], ['Old', 'R', 'https://r.example/1']]);
 assert.deepEqual(feed.errors.map(e => e.message), ['HTTP 500']);
 assert.deepEqual(feed.items.map(i => i.guid), ['', 'r-1']);
@@ -175,18 +175,18 @@ const agentCtx = {
 const agentHandlers = createHandlers(createStore({}), feedFetcher, createAgentWatch(agentCtx));
 let answer;
 const pending = listeners.get('approval/request')({agent: {id: 's3'}, toolName: 'bash'}, () => new Promise(r => { answer = r; }));
-let overview = await agentHandlers['dsh-desk/agent.overview']();
+let overview = await agentHandlers['dsh-workboard/agent.overview']();
 assert.deepEqual(overview.sessions.map(s => [s.id, s.title, s.running, s.waiting]), [['s3', '', false, true], ['s2', 'Busy', true, false], ['s1', 'Idle chat', false, false]]);
 assert.deepEqual(overview.schedules.map(t => [t.id, t.running, t.scheduledAt]), [['k1', true, Date.UTC(2026, 10, 12, 1)]]);
 answer('allowed-once');
 assert.equal(await pending, 'allowed-once');
 assert.equal(createAgentWatch(agentCtx).waiting.size, 0);
-assert.deepEqual(await createHandlers(createStore({}), feedFetcher)['dsh-desk/agent.overview'](), {sessions: null, schedules: null});
+assert.deepEqual(await createHandlers(createStore({}), feedFetcher)['dsh-workboard/agent.overview'](), {sessions: null, schedules: null});
 
 // 收集箱：保留换行、工具增删清空。
 const inboxItem = await value('inbox.add', {text: '  https://example.com\nread later  '});
 assert.equal(inboxItem.text, 'https://example.com\nread later');
-assert.equal((await call('inbox.add', {text: ' '})).error.code, 'dsh-desk/empty-text');
+assert.equal((await call('inbox.add', {text: ' '})).error.code, 'dsh-workboard/empty-text');
 const inboxTool = tools.get('desk_inbox');
 await inboxTool.execute({action: 'add', text: 'idea'});
 assert.deepEqual((await inboxTool.execute({action: 'list'})).items.map(i => i.text), ['https://example.com\nread later', 'idea']);
@@ -200,17 +200,17 @@ const created = [];
 const prompted = [];
 const launchCtx = {get: key => (key === 'sessionController' ? {create: async r => { created.push(r); return {sessionId: 'new1'}; }, prompt: async r => { prompted.push(r); return {accepted: true}; }} : undefined)};
 const launchHandlers = createHandlers(createStore({}), feedFetcher, null, createLauncher(launchCtx));
-assert.deepEqual(await launchHandlers['dsh-desk/agent.start']({prompt: ' hi ', cwd: '/tmp'}), {sessionId: 'new1'});
+assert.deepEqual(await launchHandlers['dsh-workboard/agent.start']({prompt: ' hi ', cwd: '/tmp'}), {sessionId: 'new1'});
 assert.deepEqual(created, [{cwd: '/tmp'}]);
 assert.deepEqual([prompted[0].sessionId, prompted[0].mode, prompted[0].content], ['new1', 'queue', [{type: 'text', text: 'hi'}]]);
-await assert.rejects(launchHandlers['dsh-desk/agent.start']({prompt: 'x', cwd: 'relative/dir'}), /absolute/);
-await assert.rejects(launchHandlers['dsh-desk/agent.start']({prompt: 'x', cwd: '/definitely/missing'}), /not a directory/);
-await assert.rejects(createHandlers(createStore({}))['dsh-desk/agent.start']({prompt: 'x'}), /cannot start/);
+await assert.rejects(launchHandlers['dsh-workboard/agent.start']({prompt: 'x', cwd: 'relative/dir'}), /absolute/);
+await assert.rejects(launchHandlers['dsh-workboard/agent.start']({prompt: 'x', cwd: '/definitely/missing'}), /not a directory/);
+await assert.rejects(createHandlers(createStore({}))['dsh-workboard/agent.start']({prompt: 'x'}), /cannot start/);
 
 // 工作区列表：只返回 id / path / title，没有 registry 时为 null。
 const wsCtx = {get: key => (key === 'workspaceRegistry' ? {list: () => [{id: 'w1', path: '/tmp/a', title: 'A', sessionIds: ['s1']}, {id: 'w2', path: ''}]} : undefined)};
-assert.deepEqual(await createHandlers(createStore({}), feedFetcher, null, null, {workspaces: createWorkspaces(wsCtx)})['dsh-desk/workspace.list'](), [{id: 'w1', path: '/tmp/a', title: 'A'}]);
-assert.equal(await createHandlers(createStore({}), feedFetcher, null, null, {workspaces: createWorkspaces({get: () => undefined})})['dsh-desk/workspace.list'](), null);
+assert.deepEqual(await createHandlers(createStore({}), feedFetcher, null, null, {workspaces: createWorkspaces(wsCtx)})['dsh-workboard/workspace.list'](), [{id: 'w1', path: '/tmp/a', title: 'A'}]);
+assert.equal(await createHandlers(createStore({}), feedFetcher, null, null, {workspaces: createWorkspaces({get: () => undefined})})['dsh-workboard/workspace.list'](), null);
 
 // 用量：多 frame zstd 日志（末尾半个 frame 模拟正在写入）+ 未压缩日志；不报 usage 的请求只计请求数。
 const usageRoot = mkdtempSync(join(tmpdir(), 'desk-usage-'));
@@ -226,7 +226,7 @@ mkdirSync(join(usageRoot, 'ws', 'session-b'), {recursive: true});
 writeFileSync(join(usageRoot, 'ws', 'session-b', 'session.v4.jsonl'), `${msg(t0, 'p1', 'm1', {inputTokens: 2, outputTokens: 3, cacheWriteTokens: 4})}\n`);
 const usage = createUsage({root: usageRoot, now: () => t0});
 const usageHandlers = createHandlers(createStore({}), feedFetcher, null, null, {usage});
-const sum = await usageHandlers['dsh-desk/usage.get']({days: 7});
+const sum = await usageHandlers['dsh-workboard/usage.get']({days: 7});
 assert.equal(sum.today, '2026-11-12');
 assert.equal(sum.files, 2);
 assert.deepEqual(sum.rows.map(r => [r.day, r.provider, r.model, r.requests, r.reported, r.input, r.output, r.cacheRead, r.cacheWrite]), [
@@ -234,8 +234,8 @@ assert.deepEqual(sum.rows.map(r => [r.day, r.provider, r.model, r.requests, r.re
   ['2026-11-12', 'p1', 'm1', 2, 2, 12, 8, 100, 4],
   ['2026-11-12', 'cursor', 'opus', 1, 0, 0, 0, 0, 0],
 ]);
-assert.deepEqual((await usageHandlers['dsh-desk/usage.get']({days: 1})).rows.map(r => r.day), ['2026-11-12', '2026-11-12']);
-await assert.rejects(createHandlers(createStore({}))['dsh-desk/usage.get']({}), /not available/);
+assert.deepEqual((await usageHandlers['dsh-workboard/usage.get']({days: 1})).rows.map(r => r.day), ['2026-11-12', '2026-11-12']);
+await assert.rejects(createHandlers(createStore({}))['dsh-workboard/usage.get']({}), /not available/);
 rmSync(usageRoot, {recursive: true, force: true});
 
 // 运行中：只列未完成的目标与运行中 / 刚结束的任务，停止时带上属主会话。
@@ -251,12 +251,12 @@ const runCtx = {get: key => ({
   sessionController: {list: async () => ({items: [{sessionId: 's1', projections: {values: {title: 'Widgets'}}}]})},
 })[key]};
 const runHandlers = createHandlers(createStore({}), feedFetcher, null, null, {running: createRunning(runCtx, () => nowMs)});
-const running = await runHandlers['dsh-desk/running.get']();
+const running = await runHandlers['dsh-workboard/running.get']();
 assert.deepEqual(running.goals.map(g => [g.sessionId, g.title, g.objective, g.phase, g.rounds, g.maxRounds, g.armed]), [['s1', 'Widgets', 'Ship widgets', 'active', 2, 10, true]]);
 assert.deepEqual(running.jobs.map(j => [j.id, j.sessionId, j.status]), [['bash-1', 's1', 'running'], ['bash-2', '', 'failed']]);
-assert.deepEqual(await runHandlers['dsh-desk/running.kill']({id: 'bash-1', sessionId: 's1'}), {result: 'requested'});
+assert.deepEqual(await runHandlers['dsh-workboard/running.kill']({id: 'bash-1', sessionId: 's1'}), {result: 'requested'});
 assert.deepEqual(killedJobs, [['bash-1', 's1', 'stopped from Desk']]);
-assert.deepEqual(await createHandlers(createStore({}), feedFetcher, null, null, {running: createRunning({get: () => undefined})})['dsh-desk/running.get'](), {goals: null, jobs: null});
+assert.deepEqual(await createHandlers(createStore({}), feedFetcher, null, null, {running: createRunning({get: () => undefined})})['dsh-workboard/running.get'](), {goals: null, jobs: null});
 
 // Git：真实仓库，领先 1 个提交、一处改动、一个未跟踪文件、一个上游已删除的分支；工作区里的非仓库跳过，设置里的非仓库报错。
 const gitRoot = mkdtempSync(join(tmpdir(), 'desk-git-'));
@@ -274,12 +274,12 @@ writeFileSync(join(gitWork, 'a.txt'), '3'); writeFileSync(join(gitWork, 'new.txt
 mkdirSync(join(gitRoot, 'plain'));
 const gitSvc = createGit({get: () => ({list: () => [{path: gitWork}, {path: join(gitRoot, 'plain')}]})}, createRunner());
 const gitHandlers = createHandlers(createStore({}), feedFetcher, null, null, {git: gitSvc});
-const repos = (await gitHandlers['dsh-desk/git.status']({})).repos;
+const repos = (await gitHandlers['dsh-workboard/git.status']({})).repos;
 assert.deepEqual(repos.map(r => [r.name, r.branch, r.upstream, r.ahead, r.behind, r.changed, r.untracked, r.gone, r.lastSubject]), [['work', 'main', 'origin/main', 1, 0, 1, 1, ['feature'], 'two']]);
-const explicitRepos = (await gitHandlers['dsh-desk/git.status']({paths: `${gitWork}\n${join(gitRoot, 'plain')}`})).repos;
+const explicitRepos = (await gitHandlers['dsh-workboard/git.status']({paths: `${gitWork}\n${join(gitRoot, 'plain')}`})).repos;
 assert.equal(explicitRepos.length, 2);
 assert.match(explicitRepos[1].error, /not a git repository/);
-assert.equal((await gitHandlers['dsh-desk/git.fetch']({})).errors.length, 0);
+assert.equal((await gitHandlers['dsh-workboard/git.fetch']({})).errors.length, 0);
 rmSync(gitRoot, {recursive: true, force: true});
 
 // GitHub：假 gh，三类查询各一次，结果缓存；gh 不存在时给出可读错误。
@@ -289,7 +289,7 @@ const fakeGh = async (cmd, args) => {
   return Buffer.from(JSON.stringify(args[2] === '--review-requested=@me' ? [{number: 7, title: 'Fix', url: 'https://github.com/o/r/pull/7', repository: {nameWithOwner: 'o/r'}, author: {login: 'amy'}, isDraft: false, updatedAt: '2026-11-12T01:00:00Z'}] : []));
 };
 const gh = createGithub(fakeGh);
-const ghValue = await createHandlers(createStore({}), feedFetcher, null, null, {github: gh})['dsh-desk/github.get']({});
+const ghValue = await createHandlers(createStore({}), feedFetcher, null, null, {github: gh})['dsh-workboard/github.get']({});
 assert.deepEqual(ghValue.review.map(x => [x.repo, x.number, x.author, x.url]), [['o/r', 7, 'amy', 'https://github.com/o/r/pull/7']]);
 assert.deepEqual([ghValue.mine, ghValue.assigned], [[], []]);
 await gh({});
@@ -306,7 +306,7 @@ assert.deepEqual(parsePmset("Now drawing from 'AC Power'\n -InternalBattery-0 (i
 assert.deepEqual(parsePmset("Now drawing from 'Battery Power'\n -InternalBattery-0 (id=1)\t42%; discharging; 3:05 remaining present: true"), {percent: 42, charging: false, plugged: false, minutes: 185});
 assert.equal(parsePmset('No batteries'), null);
 const sys = createSystem({os: 'darwin', run: async cmd => Buffer.from(cmd === 'vm_stat' ? '(page size of 4096 bytes)\nPages active: 1000.\n' : '-InternalBattery-0\t55%; charging; 0:40 remaining')});
-const sv = await createHandlers(createStore({}), feedFetcher, null, null, {system: sys})['dsh-desk/system.get']();
+const sv = await createHandlers(createStore({}), feedFetcher, null, null, {system: sys})['dsh-workboard/system.get']();
 sys.stop();
 assert.equal(sv.memory.used, 4096 * 1000);
 assert.deepEqual(sv.battery, {percent: 55, charging: true, plugged: true, minutes: 40});
@@ -330,8 +330,8 @@ assert.deepEqual([p2.name, p2.src], ['a/b/3.heic', `data:image/jpeg;base64,${Buf
 await sips.next({dir: picRoot, index: 1, shuffle: false});
 assert.equal(sipsCalls.length, 1);
 const photoHandlers = createHandlers(createStore({}), feedFetcher, null, null, {photos: plain});
-assert.equal((await photoHandlers['dsh-desk/photo.next']({dir: picRoot, shuffle: false})).name, '1.jpg');
-await assert.rejects(photoHandlers['dsh-desk/photo.next']({dir: join(picRoot, 'missing')}), /not a directory/);
+assert.equal((await photoHandlers['dsh-workboard/photo.next']({dir: picRoot, shuffle: false})).name, '1.jpg');
+await assert.rejects(photoHandlers['dsh-workboard/photo.next']({dir: join(picRoot, 'missing')}), /not a directory/);
 rmSync(picRoot, {recursive: true, force: true});
 
 // 行情：代码分流到三个数据源，腾讯响应按 GBK 解码，单个数据源失败只影响对应行。
@@ -346,7 +346,7 @@ const marketFetcher = createFetcher({fetchImpl: async url => {
   if (url.includes('er-api')) return Response.json({result: 'success', rates: {USD: 1, CNY: 7, HKD: 7.8}});
   return new Response('down', {status: 503});
 }});
-const mq = await createHandlers(createStore({}), marketFetcher, null, null, {market: createMarket(marketFetcher)})['dsh-desk/market.quotes']({symbols: 'hk00700 鹅\nHKD/CNY\nBTC\nnope'});
+const mq = await createHandlers(createStore({}), marketFetcher, null, null, {market: createMarket(marketFetcher)})['dsh-workboard/market.quotes']({symbols: 'hk00700 鹅\nHKD/CNY\nBTC\nnope'});
 assert.deepEqual(mq.items.map(i => [i.symbol, i.label, i.name, i.price, i.pct, i.currency]),
   [['hk00700', '鹅', '腾讯控股', 403.6, -1.46, 'HKD'], ['HKD/CNY', '', 'HKD/CNY', 7 / 7.8, null, 'CNY'], ['BTC', '', undefined, undefined, undefined, undefined], ['nope', '', undefined, undefined, undefined, undefined]]);
 assert.match(mq.items[2].error, /503/);
@@ -363,7 +363,7 @@ const trendFetcher = createFetcher({fetchImpl: async (url, init) => {
   if (url.includes('36kr')) return Response.json({data: {hotRankList: [{templateMaterial: {itemId: 9, widgetTitle: 'T', statRead: 3}}]}});
   return new Response('down', {status: 503});
 }});
-const trendHandle = createHandlers(createStore({}), trendFetcher, null, null, {trending: createTrending(trendFetcher)})['dsh-desk/trending.get'];
+const trendHandle = createHandlers(createStore({}), trendFetcher, null, null, {trending: createTrending(trendFetcher)})['dsh-workboard/trending.get'];
 assert.deepEqual((await trendHandle({source: 'weibo'})).items, [{title: '话题', url: 'https://s.weibo.com/weibo?q=%23%E8%AF%9D%E9%A2%98%23', hot: 5, meta: '热'}]);
 assert.equal((await trendHandle({source: '36kr'})).items[0].url, 'https://36kr.com/p/9');
 assert.deepEqual(trendCalls.map(c => c[1]), ['GET', 'POST']);
@@ -416,10 +416,10 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   assert.equal((await tool.execute({action: 'set_data', id: 'stars', data: {n: 3}})).dataRev, 1);
   assert.equal((await value('widget.save', {id: 'stars', data: {n: 4}})).dataRev, 2);
   assert.deepEqual((await tool.execute({action: 'get', id: 'stars'})).data, {n: 4});
-  assert.equal((await call('widget.save', {id: 'stars', data: {big: 'x'.repeat(210_000)}})).error.code, 'dsh-desk/too-large');
+  assert.equal((await call('widget.save', {id: 'stars', data: {big: 'x'.repeat(210_000)}})).error.code, 'dsh-workboard/too-large');
 
-  assert.equal((await call('widget.fetch', {id: 'stars', url: 'https://other.example.com/x'})).error.code, 'dsh-desk/not-allowed');
-  assert.equal((await call('widget.put', {id: 'stars', html: '<script>}</script>'})).error.code, 'dsh-desk/bad-html');
+  assert.equal((await call('widget.fetch', {id: 'stars', url: 'https://other.example.com/x'})).error.code, 'dsh-workboard/not-allowed');
+  assert.equal((await call('widget.put', {id: 'stars', html: '<script>}</script>'})).error.code, 'dsh-workboard/bad-html');
   assert.equal((await value('widget.put', {id: 'stars', title: 'Repo stars', html: '<i></i>'})).title, 'Repo stars');
 
   const work = await value('board.get', {id: 'work'});
@@ -427,16 +427,16 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   assert.equal((await tool.execute({action: 'remove', id: 'stars'})).removed, true);
   const after = await value('board.get', {id: 'work'});
   assert.ok(!after.widgets.some(w => w.id === 'custom.stars') && !after.known.includes('custom.stars'));
-  assert.equal((await call('widget.get', {id: 'stars'})).error.code, 'dsh-desk/not-found');
-  assert.equal((await call('widget.get', {id: '../x'})).error.code, 'dsh-desk/bad-widget');
+  assert.equal((await call('widget.get', {id: 'stars'})).error.code, 'dsh-workboard/not-found');
+  assert.equal((await call('widget.get', {id: '../x'})).error.code, 'dsh-workboard/bad-widget');
 }
 {
   const widgetFetcher = createFetcher({fetchImpl: async url => (url.endsWith('.png') ? new Response(new Uint8Array([1, 2, 3]), {headers: {'content-type': 'image/png'}}) : Response.json({ok: url}))});
   const store = createStore({});
   const handle = createHandlers(store, widgetFetcher);
   await store.createWidget({id: 'img', title: 'I', html: 'x', fetch: ['https://cdn.example.com/']});
-  assert.deepEqual(await handle['dsh-desk/widget.fetch']({id: 'img', url: 'https://cdn.example.com/a.json'}), {ok: 'https://cdn.example.com/a.json'});
-  assert.equal(await handle['dsh-desk/widget.fetch']({id: 'img', url: 'https://cdn.example.com/a.png', as: 'dataUrl'}), 'data:image/png;base64,AQID');
+  assert.deepEqual(await handle['dsh-workboard/widget.fetch']({id: 'img', url: 'https://cdn.example.com/a.json'}), {ok: 'https://cdn.example.com/a.json'});
+  assert.equal(await handle['dsh-workboard/widget.fetch']({id: 'img', url: 'https://cdn.example.com/a.png', as: 'dataUrl'}), 'data:image/png;base64,AQID');
 }
 
 // 定时任务：列表字段、暂停 / 恢复 / 删除映射到 schedule.edit，立即运行与执行中、不存在的结果。
@@ -450,18 +450,18 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
     deleteInactive: async () => ({deleted: 2}),
   };
   const sh = createHandlers(createStore({}), feedFetcher, null, null, {schedules: createSchedules({get: k => (k === 'schedule' ? svc : undefined)})});
-  const rows = await sh['dsh-desk/schedule.list']();
+  const rows = await sh['dsh-workboard/schedule.list']();
   assert.deepEqual(rows.map(r => [r.id, r.title, r.kind, r.status, r.timing.rrule ?? r.timing.everySeconds, r.lastSessionId, r.sessionId, r.cwd]),
     [['k1', 'Daily report', 'rrule', 'active', 'FREQ=DAILY;BYHOUR=9;BYMINUTE=0', 'session-x', '', '/tmp'], ['k2', 'Ping', 'every', 'paused', 3600, '', 'session-y', '']]);
-  assert.equal((await sh['dsh-desk/schedule.edit']({id: 'k1', action: 'pause'})).status, 'paused');
-  await sh['dsh-desk/schedule.edit']({id: 'k1', action: 'delete'});
+  assert.equal((await sh['dsh-workboard/schedule.edit']({id: 'k1', action: 'pause'})).status, 'paused');
+  await sh['dsh-workboard/schedule.edit']({id: 'k1', action: 'delete'});
   assert.deepEqual(edits.map(e => [e.action, e.patch?.active]), [['update', false], ['delete', undefined]]);
-  await assert.rejects(sh['dsh-desk/schedule.edit']({id: 'gone', action: 'resume'}), /no longer exists/);
-  await assert.rejects(sh['dsh-desk/schedule.edit']({id: 'k1', action: 'explode'}), /unknown action/);
-  assert.equal((await sh['dsh-desk/schedule.run']({id: 'k1'})).running, true);
-  assert.deepEqual(await sh['dsh-desk/schedule.run']({id: 'busy'}), {pending: true});
-  assert.deepEqual(await sh['dsh-desk/schedule.clear'](), {deleted: 2});
-  assert.equal(await createHandlers(createStore({}), feedFetcher, null, null, {schedules: createSchedules({get: () => undefined})})['dsh-desk/schedule.list'](), null);
+  await assert.rejects(sh['dsh-workboard/schedule.edit']({id: 'gone', action: 'resume'}), /no longer exists/);
+  await assert.rejects(sh['dsh-workboard/schedule.edit']({id: 'k1', action: 'explode'}), /unknown action/);
+  assert.equal((await sh['dsh-workboard/schedule.run']({id: 'k1'})).running, true);
+  assert.deepEqual(await sh['dsh-workboard/schedule.run']({id: 'busy'}), {pending: true});
+  assert.deepEqual(await sh['dsh-workboard/schedule.clear'](), {deleted: 2});
+  assert.equal(await createHandlers(createStore({}), feedFetcher, null, null, {schedules: createSchedules({get: () => undefined})})['dsh-workboard/schedule.list'](), null);
 }
 
 // 收藏会话：按传入顺序返回，带最后一条消息；已删除的会话标 missing。
@@ -477,13 +477,13 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   } : undefined)};
   const watch = createAgentWatch(pinCtx);
   const ph = createHandlers(createStore({}), feedFetcher, watch);
-  const pins = await ph['dsh-desk/session.pinned']({ids: ['s2', 'nope', 's1']});
+  const pins = await ph['dsh-workboard/session.pinned']({ids: ['s2', 'nope', 's1']});
   assert.deepEqual(pins.map(p => [p.id, p.title ?? '', p.preview ?? '', Boolean(p.missing)]), [['s2', 'Busy', 'Done: all good', false], ['nope', '', '', true], ['s1', 'Idle chat', 'Done: all good', false]]);
-  await ph['dsh-desk/session.pinned']({ids: ['s2']});
+  await ph['dsh-workboard/session.pinned']({ids: ['s2']});
   assert.deepEqual(reads, ['s2', 's1']);
-  assert.deepEqual((await ph['dsh-desk/session.list']()).map(s => s.id), ['s1', 's3', 's2']);
+  assert.deepEqual((await ph['dsh-workboard/session.list']()).map(s => s.id), ['s1', 's3', 's2']);
   assert.equal(lastMessageText([{event: {type: 'user/message', data: {message: {content: 'plain'}}}}]), '> plain');
-  assert.equal(await createHandlers(createStore({}), feedFetcher)['dsh-desk/session.pinned']({ids: ['s1']}), null);
+  assert.equal(await createHandlers(createStore({}), feedFetcher)['dsh-workboard/session.pinned']({ids: ['s1']}), null);
 }
 
 // 产出物：交付与新建文档合并去重，子 Agent 归到父会话，代码文件和失败的写入不算。
@@ -506,13 +506,13 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   mkdirSync(join(root, 'ws', 'session-b'), {recursive: true});
   writeFileSync(join(root, 'ws', 'session-b', 'session.v4.jsonl'), [JSON.stringify({type: 'session', id: 'session-b', parentSession: 'session-a'}), result(3000, join(docs, 'deck.pptx')), result(3100, join(docs, 'gone.md'))].join('\n'));
   const oh = createHandlers(createStore({}), feedFetcher, null, null, {outputs: createOutputs({root})});
-  const out = await oh['dsh-desk/outputs.list']({});
+  const out = await oh['dsh-workboard/outputs.list']({});
   assert.deepEqual(out.items.map(i => [i.name, i.kind, i.sessionId, i.exists, i.description, i.time]), [
     ['gone.md', 'created', 'session-a', false, '', 3100],
     ['deck.pptx', 'created', 'session-a', true, '', 3000],
     ['plan.md', 'presented', 'session-a', true, 'The plan', 2000],
   ]);
-  assert.deepEqual((await oh['dsh-desk/outputs.list']({created: false})).items.map(i => i.name), ['plan.md']);
+  assert.deepEqual((await oh['dsh-workboard/outputs.list']({created: false})).items.map(i => i.name), ['plan.md']);
   assert.equal(parseOutputs('').session, '');
 
   // 最近文件：跳过隐藏项，可排除文件夹，可执行类型标 risky，不存在的文件夹进 errors。
@@ -520,17 +520,17 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   writeFileSync(join(docs, 'setup.dmg'), '');
   mkdirSync(join(docs, 'sub'));
   const fh = createHandlers(createStore({}), feedFetcher, null, null, {files: createRecentFiles()});
-  const recent = await fh['dsh-desk/files.recent']({dirs: `${docs}\n${join(root, 'missing')}`});
+  const recent = await fh['dsh-workboard/files.recent']({dirs: `${docs}\n${join(root, 'missing')}`});
   assert.deepEqual(recent.items.map(i => i.name).sort(), ['deck.pptx', 'plan.md', 'setup.dmg', 'sub']);
   assert.equal(recent.items.find(i => i.name === 'setup.dmg').risky, true);
   assert.equal(recent.items.find(i => i.name === 'sub').folder, true);
   assert.equal(recent.errors.length, 1);
-  assert.ok(!(await fh['dsh-desk/files.recent']({dirs: docs, folders: false})).items.some(i => i.folder));
+  assert.ok(!(await fh['dsh-workboard/files.recent']({dirs: docs, folders: false})).items.some(i => i.folder));
 
   // 打开文件：走 openWorkspacePath，可执行类型只定位，相对路径和不存在的文件拒绝。
   const opened = [];
   const opener = createOpener({get: k => (k === 'sessionController' ? {canOpenWorkspacePath: () => true, openWorkspacePath: async req => { opened.push(req); return {opened: true}; }} : undefined)}, null, 'linux');
-  const openHandle = createHandlers(createStore({}), feedFetcher, null, null, {open: opener})['dsh-desk/file.open'];
+  const openHandle = createHandlers(createStore({}), feedFetcher, null, null, {open: opener})['dsh-workboard/file.open'];
   await openHandle({path: join(docs, 'plan.md')});
   await openHandle({path: join(docs, 'plan.md'), reveal: true});
   await openHandle({path: join(docs, 'setup.dmg')});

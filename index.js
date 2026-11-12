@@ -1,4 +1,4 @@
-// Host 端：/api/dsh-desk/* 路由、看板 / 待办 / 速记存储、天气与日历代理、Agent 工具。
+// Host 端：/api/dsh-workboard/* 路由、看板 / 待办 / 速记存储、天气与日历代理、Agent 工具。
 import {FetchError, createFetcher} from './lib/http.js';
 import {getWeather, searchPlaces} from './lib/weather.js';
 import {parseICS, expandEvents} from './lib/ics.js';
@@ -23,10 +23,10 @@ import {createNetwork} from './lib/network.js';
 import {stat} from 'node:fs/promises';
 import {isAbsolute, join} from 'node:path';
 
-export const name = 'dsh-desk';
+export const name = 'dsh-workboard';
 export const inject = ['connection'];
 
-const NS = 'dsh-desk';
+const NS = 'dsh-workboard';
 // storageDomain 的域名与表名必须匹配 /^[a-z][a-z0-9_]*$/。
 const DOMAIN = 'dsh_desk';
 const LEGACY_DOMAIN = 'dsh_bento';
@@ -752,144 +752,144 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
   const feeds = createFeeds(fetcher);
   const quotes = createQuotes(fetcher);
   return {
-    'dsh-desk/quote.get': p => quotes.get({day: p?.day, n: p?.n}),
-    'dsh-desk/feed.get': p => feeds({urls: p?.urls, limit: p?.limit}),
-    'dsh-desk/agent.overview': () => (agents ? agents.overview() : {sessions: null, schedules: null}),
-    'dsh-desk/agent.start': async p => {
+    'dsh-workboard/quote.get': p => quotes.get({day: p?.day, n: p?.n}),
+    'dsh-workboard/feed.get': p => feeds({urls: p?.urls, limit: p?.limit}),
+    'dsh-workboard/agent.overview': () => (agents ? agents.overview() : {sessions: null, schedules: null}),
+    'dsh-workboard/agent.start': async p => {
       if (!launch) throw new UserError('unavailable', 'this Harness cannot start sessions');
       return launch({prompt: p?.prompt, cwd: p?.cwd, timeZone: p?.timeZone});
     },
-    'dsh-desk/workspace.list': () => (services.workspaces ? services.workspaces() : null),
-    'dsh-desk/usage.get': async p => {
+    'dsh-workboard/workspace.list': () => (services.workspaces ? services.workspaces() : null),
+    'dsh-workboard/usage.get': async p => {
       if (!services.usage) throw new UserError('unavailable', 'usage is not available');
       return services.usage.summary({days: p?.days});
     },
-    'dsh-desk/running.get': async () => (services.running ? services.running.overview() : {goals: null, jobs: null}),
-    'dsh-desk/running.kill': async p => {
+    'dsh-workboard/running.get': async () => (services.running ? services.running.overview() : {goals: null, jobs: null}),
+    'dsh-workboard/running.kill': async p => {
       if (!services.running) throw new UserError('unavailable', 'background jobs are not available');
       return services.running.kill({id: p?.id, sessionId: p?.sessionId});
     },
-    'dsh-desk/git.status': async p => {
+    'dsh-workboard/git.status': async p => {
       if (!services.git) throw new UserError('unavailable', 'git is not available');
       return services.git.status({paths: p?.paths});
     },
-    'dsh-desk/git.fetch': async p => {
+    'dsh-workboard/git.fetch': async p => {
       if (!services.git) throw new UserError('unavailable', 'git is not available');
       return services.git.fetch({paths: p?.paths});
     },
-    'dsh-desk/system.get': async () => {
+    'dsh-workboard/system.get': async () => {
       if (!services.system) throw new UserError('unavailable', 'system status is not available');
       return services.system.get();
     },
-    'dsh-desk/photo.next': async p => {
+    'dsh-workboard/photo.next': async p => {
       if (!services.photos) throw new UserError('unavailable', 'photos are not available');
       const dir = await resolveDir(p?.dir || '~/Pictures');
       return services.photos.next({dir, index: Number.isInteger(p?.index) ? p.index : undefined, shuffle: p?.shuffle !== false});
     },
-    'dsh-desk/market.quotes': async p => {
+    'dsh-workboard/market.quotes': async p => {
       if (!services.market) throw new UserError('unavailable', 'market data is not available');
       return services.market.quotes({symbols: String(p?.symbols ?? '')});
     },
-    'dsh-desk/trending.get': async p => {
+    'dsh-workboard/trending.get': async p => {
       if (!services.trending) throw new UserError('unavailable', 'trending lists are not available');
       return services.trending.list({source: String(p?.source ?? '')});
     },
-    'dsh-desk/github.get': async p => {
+    'dsh-workboard/github.get': async p => {
       if (!services.github) throw new UserError('unavailable', 'GitHub is not available');
       return services.github({fresh: p?.fresh === true});
     },
-    'dsh-desk/widget.list': () => store.listWidgets().map(widgetSummary),
-    'dsh-desk/widget.get': p => store.getWidget(p?.id),
-    'dsh-desk/widget.put': async p => {
+    'dsh-workboard/widget.list': () => store.listWidgets().map(widgetSummary),
+    'dsh-workboard/widget.get': p => store.getWidget(p?.id),
+    'dsh-workboard/widget.put': async p => {
       if (p?.html !== undefined) {
         const {errors} = checkHtml(String(p.html));
         if (errors.length) throw new UserError('bad-html', errors.join('\n'));
       }
       return widgetSummary(await store.updateWidget(p?.id, {title: p?.title, html: p?.html}));
     },
-    'dsh-desk/widget.remove': p => store.removeWidget(p?.id),
-    'dsh-desk/widget.save': async p => {
+    'dsh-workboard/widget.remove': p => store.removeWidget(p?.id),
+    'dsh-workboard/widget.save': async p => {
       const widget = await store.setWidgetData(p?.id, p?.data);
       return {dataRev: widget.dataRev, dataAt: widget.dataAt};
     },
-    'dsh-desk/widget.report': async p => { await store.reportWidget(p?.id, p?.error); return true; },
-    'dsh-desk/widget.fetch': async p => {
+    'dsh-workboard/widget.report': async p => { await store.reportWidget(p?.id, p?.error); return true; },
+    'dsh-workboard/widget.fetch': async p => {
       const widget = store.getWidget(p?.id);
       const url = allowedUrl(p?.url, widget.fetch);
       const as = ['json', 'text', 'dataUrl'].includes(p?.as) ? p.as : 'json';
       const value = await fetcher.get(url, {ttlMs: p?.fresh === true ? 0 : WIDGET_FETCH_TTL, type: as === 'dataUrl' ? 'bytes' : as, maxBytes: as === 'dataUrl' ? 1_500_000 : 2_000_000});
       return as === 'dataUrl' ? `data:${value.type};base64,${value.base64}` : value;
     },
-    'dsh-desk/session.list': async () => (agents ? agents.sessions() : null),
-    'dsh-desk/session.pinned': async p => (agents ? agents.pinned(p?.ids) : null),
-    'dsh-desk/schedule.list': async () => (services.schedules ? services.schedules.list() : null),
-    'dsh-desk/schedule.edit': async p => {
+    'dsh-workboard/session.list': async () => (agents ? agents.sessions() : null),
+    'dsh-workboard/session.pinned': async p => (agents ? agents.pinned(p?.ids) : null),
+    'dsh-workboard/schedule.list': async () => (services.schedules ? services.schedules.list() : null),
+    'dsh-workboard/schedule.edit': async p => {
       if (!services.schedules) throw new UserError('unavailable', 'this Harness does not expose scheduled tasks');
       return services.schedules.edit({id: p?.id, action: p?.action});
     },
-    'dsh-desk/schedule.run': async p => {
+    'dsh-workboard/schedule.run': async p => {
       if (!services.schedules) throw new UserError('unavailable', 'this Harness does not expose scheduled tasks');
       return services.schedules.run({id: p?.id});
     },
-    'dsh-desk/schedule.clear': async () => {
+    'dsh-workboard/schedule.clear': async () => {
       if (!services.schedules) throw new UserError('unavailable', 'this Harness does not expose scheduled tasks');
       return services.schedules.clearEnded();
     },
-    'dsh-desk/outputs.list': async p => {
+    'dsh-workboard/outputs.list': async p => {
       if (!services.outputs) throw new UserError('unavailable', 'outputs are not available');
       return services.outputs.list({created: p?.created !== false, fresh: p?.fresh === true});
     },
-    'dsh-desk/files.recent': async p => {
+    'dsh-workboard/files.recent': async p => {
       if (!services.files) throw new UserError('unavailable', 'recent files are not available');
       const raw = (Array.isArray(p?.dirs) ? p.dirs : String(p?.dirs ?? '').split('\n')).map(x => String(x).trim()).filter(Boolean);
       const resolved = await Promise.all((raw.length ? raw : ['~/Downloads', '~/Desktop']).map(d => resolveDir(d).then(path => ({path}), e => ({error: {dir: d, message: e.message}}))));
       const result = await services.files.list({dirs: resolved.filter(r => r.path).map(r => r.path), limit: p?.limit, folders: p?.folders !== false});
       return {...result, errors: [...resolved.filter(r => r.error).map(r => r.error), ...result.errors]};
     },
-    'dsh-desk/file.open': async p => {
+    'dsh-workboard/file.open': async p => {
       if (!services.open) throw new UserError('unavailable', 'opening files is not available on this Harness');
       return services.open({path: p?.path, reveal: p?.reveal === true});
     },
-    'dsh-desk/clipboard.get': async () => {
+    'dsh-workboard/clipboard.get': async () => {
       if (!services.clipboard) throw new UserError('unavailable', 'clipboard is not available');
       return services.clipboard.get();
     },
-    'dsh-desk/clipboard.remove': async p => {
+    'dsh-workboard/clipboard.remove': async p => {
       if (!services.clipboard) throw new UserError('unavailable', 'clipboard is not available');
       return services.clipboard.remove(p?.id ? String(p.id) : '');
     },
-    'dsh-desk/network.get': async p => {
+    'dsh-workboard/network.get': async p => {
       if (!services.network) throw new UserError('unavailable', 'network status is not available');
       return services.network.get({targets: String(p?.targets ?? ''), fresh: p?.fresh === true});
     },
-    'dsh-desk/inbox.list': () => store.listInbox(),
-    'dsh-desk/inbox.add': p => store.addInbox(p?.text),
-    'dsh-desk/inbox.remove': p => store.removeInbox(p?.id),
-    'dsh-desk/inbox.clear': () => store.clearInbox(),
-    'dsh-desk/read.check': p => store.readOf(p?.urls),
-    'dsh-desk/read.mark': p => store.markRead(p?.urls, p?.read !== false),
-    'dsh-desk/habit.list': () => store.listHabits(),
-    'dsh-desk/habit.add': p => store.addHabit(p?.name),
-    'dsh-desk/habit.check': p => store.checkHabit(p?.id, p?.day, p?.done),
-    'dsh-desk/habit.remove': p => store.removeHabit(p?.id),
-    'dsh-desk/board.list': () => store.listBoards(),
-    'dsh-desk/board.create': p => store.createBoard(p?.title, p?.known),
-    'dsh-desk/board.delete': p => store.deleteBoard(String(p?.id)),
-    'dsh-desk/board.order': p => store.orderBoards(p?.order),
-    'dsh-desk/prefs.get': () => store.getPrefs(),
-    'dsh-desk/prefs.put': p => store.putPrefs(p?.prefs),
-    'dsh-desk/weather.get': p => getWeather(fetcher, {lat: p?.lat, lon: p?.lon, unit: p?.unit}),
-    'dsh-desk/geo.search': p => searchPlaces(fetcher, {query: p?.query, lang: p?.lang}),
-    'dsh-desk/calendar.events': p => calendar({urls: p?.urls, from: p?.from, to: p?.to}),
-    'dsh-desk/board.get': p => store.getBoard(String(p?.id || 'work')),
-    'dsh-desk/board.put': p => store.putBoard(p?.board),
-    'dsh-desk/board.adopt': p => store.adoptWidgets(String(p?.id), p?.known, p?.place),
-    'dsh-desk/todo.list': () => store.listTodos(),
-    'dsh-desk/todo.add': p => store.addTodo(p?.text),
-    'dsh-desk/todo.update': p => store.updateTodo(p?.id, {text: p?.text, done: p?.done}),
-    'dsh-desk/todo.remove': p => store.removeTodo(p?.id),
-    'dsh-desk/note.get': () => store.getNote(),
-    'dsh-desk/note.put': p => store.putNote(p?.text),
+    'dsh-workboard/inbox.list': () => store.listInbox(),
+    'dsh-workboard/inbox.add': p => store.addInbox(p?.text),
+    'dsh-workboard/inbox.remove': p => store.removeInbox(p?.id),
+    'dsh-workboard/inbox.clear': () => store.clearInbox(),
+    'dsh-workboard/read.check': p => store.readOf(p?.urls),
+    'dsh-workboard/read.mark': p => store.markRead(p?.urls, p?.read !== false),
+    'dsh-workboard/habit.list': () => store.listHabits(),
+    'dsh-workboard/habit.add': p => store.addHabit(p?.name),
+    'dsh-workboard/habit.check': p => store.checkHabit(p?.id, p?.day, p?.done),
+    'dsh-workboard/habit.remove': p => store.removeHabit(p?.id),
+    'dsh-workboard/board.list': () => store.listBoards(),
+    'dsh-workboard/board.create': p => store.createBoard(p?.title, p?.known),
+    'dsh-workboard/board.delete': p => store.deleteBoard(String(p?.id)),
+    'dsh-workboard/board.order': p => store.orderBoards(p?.order),
+    'dsh-workboard/prefs.get': () => store.getPrefs(),
+    'dsh-workboard/prefs.put': p => store.putPrefs(p?.prefs),
+    'dsh-workboard/weather.get': p => getWeather(fetcher, {lat: p?.lat, lon: p?.lon, unit: p?.unit}),
+    'dsh-workboard/geo.search': p => searchPlaces(fetcher, {query: p?.query, lang: p?.lang}),
+    'dsh-workboard/calendar.events': p => calendar({urls: p?.urls, from: p?.from, to: p?.to}),
+    'dsh-workboard/board.get': p => store.getBoard(String(p?.id || 'work')),
+    'dsh-workboard/board.put': p => store.putBoard(p?.board),
+    'dsh-workboard/board.adopt': p => store.adoptWidgets(String(p?.id), p?.known, p?.place),
+    'dsh-workboard/todo.list': () => store.listTodos(),
+    'dsh-workboard/todo.add': p => store.addTodo(p?.text),
+    'dsh-workboard/todo.update': p => store.updateTodo(p?.id, {text: p?.text, done: p?.done}),
+    'dsh-workboard/todo.remove': p => store.removeTodo(p?.id),
+    'dsh-workboard/note.get': () => store.getNote(),
+    'dsh-workboard/note.put': p => store.putNote(p?.text),
   };
 }
 
@@ -1083,7 +1083,7 @@ export function apply(ctx) {
     git: createGit(ctx, run),
     github: createGithub(run),
     system: createSystem({run}),
-    photos: createPhotos({run, cacheDir: join(tmpdir(), 'dsh-desk-photos')}),
+    photos: createPhotos({run, cacheDir: join(tmpdir(), 'dsh-workboard-photos')}),
     market: createMarket(fetcher),
     trending: createTrending(fetcher),
     schedules: createSchedules(ctx),
@@ -1094,8 +1094,8 @@ export function apply(ctx) {
     network: createNetwork({run}),
   };
   const handlers = createHandlers(store, fetcher, createAgentWatch(ctx), createLauncher(ctx), services);
-  ctx.effect(() => () => { void store.close(); }, 'dsh-desk: storage');
-  ctx.effect(() => () => { services.system.stop(); services.clipboard.stop(); services.network.stop(); }, 'dsh-desk: samplers');
+  ctx.effect(() => () => { void store.close(); }, 'dsh-workboard: storage');
+  ctx.effect(() => () => { services.system.stop(); services.clipboard.stop(); services.network.stop(); }, 'dsh-workboard: samplers');
 
   // 共享通道 /api 只允许一个 interceptor，每个方法注册独立的 Fetch 路由。
   for (const method of Object.keys(handlers)) {
@@ -1104,15 +1104,15 @@ export function apply(ctx) {
       methods: ['POST'],
       requestBody: 'buffered',
       fetch: request => handleRequest(request, handlers, store),
-    }), `dsh-desk: ${method}`);
+    }), `dsh-workboard: ${method}`);
   }
 
   const tools = ctx.get('tools');
-  if (tools) for (const tool of createTools(store)) ctx.effect(() => tools.register(tool), `dsh-desk: ${tool.name} tool`);
+  if (tools) for (const tool of createTools(store)) ctx.effect(() => tools.register(tool), `dsh-workboard: ${tool.name} tool`);
 
   const skills = ctx.get?.('skills');
   if (typeof skills?.register === 'function') {
     const content = readFileSync(new URL('./skills/desk-widget.md', import.meta.url), 'utf8');
-    ctx.effect(() => skills.register({...SKILL, content}), 'dsh-desk: desk-widget skill');
+    ctx.effect(() => skills.register({...SKILL, content}), 'dsh-workboard: desk-widget skill');
   }
 }

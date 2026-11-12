@@ -1,5 +1,5 @@
 window.__ModuleLoader__.load({
-  id: 'dsh-desk-hello-widget',
+  id: 'dsh-workboard-hello-widget',
   factory(require) {
     const React = require('react');
     const h = React.createElement;
@@ -17,7 +17,7 @@ window.__ModuleLoader__.load({
       apply(ctx) {
         ctx.effect(() => ctx.slots.inject('desk.widget', () => ctx.slots.register({
           name: 'desk.widget', id: 'hello.widget', order: 100, label: 'Hello',
-        }, Hello)), 'dsh-desk-hello-widget: widget');
+        }, Hello)), 'dsh-workboard-hello-widget: widget');
       },
     };
   },

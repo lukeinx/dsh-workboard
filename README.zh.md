@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-工作台（`@lukeinx/dsh-desk`）在 DeepSeek Harness 侧栏增加一个模块化工作台。内置 31 个 widget，包括今日横栏、待办、速记、ICS 日历、天气、Agent 会话、Prompt 快启、用量统计、Git 工作区、系统状态、行情、产出物、定时任务和网络，零配置可用；Agent 可以在任意对话里读写你的待办、速记和收集箱；还可以一句话让 Agent 生成新的 widget，其他插件也可以注册自己的 widget。
+工作台（`dsh-workboard`）在 DeepSeek Harness 侧栏增加一个模块化工作台。内置 31 个 widget，包括今日横栏、待办、速记、ICS 日历、天气、Agent 会话、Prompt 快启、用量统计、Git 工作区、系统状态、行情、产出物、定时任务和网络，零配置可用；Agent 可以在任意对话里读写你的待办、速记和收集箱；还可以一句话让 Agent 生成新的 widget，其他插件也可以注册自己的 widget。
 
 状态：早期（P0b）。MIT 许可。
 
@@ -126,4 +126,4 @@ ctx.effect(() => ctx.slots.inject('desk.widget', () => ctx.slots.register({
 npm run check   # 语法检查 + Host 端冒烟 + ICS 测试
 ```
 
-文件：`index.js`（Host 端 `/api/dsh-desk/*` 路由、存储、Agent 工具）、`skills/desk-widget.md`（Agent 编写 widget 的指南）、`lib/`（HTTP 缓存、自定义 widget 校验、天气、ICS 与订阅解析、会话日志用量、子进程、Git、GitHub、系统状态、相框、行情、热榜）、`client.js`（侧栏入口、面板、内置 widget）、`cordis.patch.yml`、`locale/`、`icon.svg`。
+文件：`index.js`（Host 端 `/api/dsh-workboard/*` 路由、存储、Agent 工具）、`skills/desk-widget.md`（Agent 编写 widget 的指南）、`lib/`（HTTP 缓存、自定义 widget 校验、天气、ICS 与订阅解析、会话日志用量、子进程、Git、GitHub、系统状态、相框、行情、热榜）、`client.js`（侧栏入口、面板、内置 widget）、`cordis.patch.yml`、`locale/`、`icon.svg`。
