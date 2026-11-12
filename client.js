@@ -66,7 +66,7 @@ window.__ModuleLoader__.load({
       waitingYou: '等你确认', running: '运行中', untitledSession: '未命名会话', newSession: '新会话', schedules: '定时任务', executing: '执行中',
       noSessions: '还没有会话', noActive: '没有进行中的会话', agentsUnavailable: '当前 Harness 不支持读取会话', activeCount: '{n} 个进行中',
       f_showRecent: '显示最近会话', f_showSchedules: '显示定时任务',
-      f_feeds: '订阅地址（每行一个 RSS / Atom）', defaultFeeds: 'https://sspai.com/feed', feedError: '{n} 个订阅加载失败', noItems: '没有内容',
+      f_feeds: '订阅地址（每行一个 RSS / Atom）', defaultFeeds: 'https://www.ifanr.com/feed\nhttps://www.ruanyifeng.com/blog/atom.xml', feedError: '{n} 个订阅加载失败', noItems: '没有内容',
       addHabit: '添加习惯', noHabits: '还没有习惯', streak: '连续 {n} 天', markDay: '{d} 打卡',
       prompt: 'Prompt 快启', inbox: '收集箱', usage: '用量', running: '运行中', git: 'Git 工作区', github: 'GitHub', system: '系统状态', photo: '相框', market: '行情',
       d_market: '汇率、A 股 / 港股 / 美股和加密货币报价', f_symbols: '代码（每行一个，后面可加名称）', f_upColor: '涨跌颜色', up_red: '红涨绿跌', up_green: '绿涨红跌',

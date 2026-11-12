@@ -23,7 +23,7 @@ Status: early (P0b). MIT licensed.
 | Links | `m` `s` `w` `t` `l` | One `name URL` per line; only http, https and mailto |
 | Time progress | `m` `s` `w` | How much of today, this week, month and year has passed |
 | Agent | `t` `l` `m` `w` | Sessions waiting for you first, then running and recent ones; click to open. Upcoming scheduled tasks and a new-session button |
-| Feeds | `t` `l` `m` `w` | RSS / Atom, several feeds merged by date; defaults to Hacker News (English) or sspai (Chinese) |
+| Feeds | `t` `l` `m` `w` | RSS / Atom, several feeds merged by date; defaults to Hacker News (English) or ifanr and Ruan Yifeng's blog (Chinese) |
 | Habits | `m` `l` `t` `w` | Check in for any day of the last week, with your current streak |
 | Quick prompt | `m` `w` `l` `t` `s` | Type or pick a preset to start a new session and send it right away, optionally in a chosen directory |
 | Inbox | `t` `l` `m` `w` | Things you jot down, handed to the agent to sort with one click |
