@@ -8,6 +8,7 @@ import {execFileSync} from 'node:child_process';
 import {apply, createStore, createHandlers, createAgentWatch, createLauncher, createRunning, createGit, createGithub, migrateLegacy} from '../index.js';
 import {createRunner} from '../lib/exec.js';
 import {createSystem, parsePmset, parseVmStat, parseMeminfo} from '../lib/system.js';
+import {createPhotos, findPhotos} from '../lib/photo.js';
 import {createUsage, zstdFrames} from '../lib/usage.js';
 
 const routes = new Map();
@@ -288,5 +289,26 @@ assert.equal(sv.memory.used, 4096 * 1000);
 assert.deepEqual(sv.battery, {percent: 55, charging: true, plugged: true, minutes: 40});
 assert.ok(sv.cpu >= 0 && sv.cpu <= 1 && sv.cores > 0 && sv.disk.total > sv.disk.free);
 assert.equal(sv.history.length, 1);
+
+// 相框：跳过隐藏目录和图库包，顺序轮播会回绕；macOS 走 sips 转码并缓存；不存在的文件夹报 bad-dir。
+const picRoot = mkdtempSync(join(tmpdir(), 'desk-photo-'));
+for (const d of ['a', '.hidden', 'Lib.photoslibrary', 'a/b']) mkdirSync(join(picRoot, d), {recursive: true});
+for (const f of ['1.jpg', 'a/2.PNG', 'a/b/3.heic', 'a/notes.txt', '.hidden/4.jpg', 'Lib.photoslibrary/5.jpg', '.6.jpg']) writeFileSync(join(picRoot, f), f);
+assert.deepEqual((await findPhotos(picRoot)).map(p => p.slice(picRoot.length + 1)), ['1.jpg', 'a/2.PNG', 'a/b/3.heic']);
+const plain = createPhotos({os: 'linux'});
+const p0 = await plain.next({dir: picRoot, shuffle: false});
+assert.deepEqual([p0.count, p0.index, p0.name, p0.src], [3, 0, '1.jpg', `data:image/jpeg;base64,${Buffer.from('1.jpg').toString('base64')}`]);
+assert.equal((await plain.next({dir: picRoot, index: 0, shuffle: false})).name, 'a/2.PNG');
+assert.equal((await plain.next({dir: picRoot, index: 1, shuffle: false})).name, '1.jpg');
+const sipsCalls = [];
+const sips = createPhotos({os: 'darwin', cacheDir: join(picRoot, '.cache'), run: async (cmd, args) => { sipsCalls.push(args.at(-3)); writeFileSync(args.at(-1), 'JPEG'); return Buffer.alloc(0); }});
+const p2 = await sips.next({dir: picRoot, index: 1, shuffle: false});
+assert.deepEqual([p2.name, p2.src], ['a/b/3.heic', `data:image/jpeg;base64,${Buffer.from('JPEG').toString('base64')}`]);
+await sips.next({dir: picRoot, index: 1, shuffle: false});
+assert.equal(sipsCalls.length, 1);
+const photoHandlers = createHandlers(createStore({}), feedFetcher, null, null, {photos: plain});
+assert.equal((await photoHandlers['dsh-desk/photo.next']({dir: picRoot, shuffle: false})).name, '1.jpg');
+await assert.rejects(photoHandlers['dsh-desk/photo.next']({dir: join(picRoot, 'missing')}), /not a directory/);
+rmSync(picRoot, {recursive: true, force: true});
 
 console.log('smoke ok');

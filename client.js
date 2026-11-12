@@ -3,7 +3,7 @@ window.__ModuleLoader__.load({
   factory(require) {
     const React = require('react');
     const h = React.createElement;
-    const {useEffect, useRef, useState, useSyncExternalStore} = React;
+    const {useCallback, useEffect, useRef, useState, useSyncExternalStore} = React;
 
     const NS = 'dsh-desk';
     const PANEL = 'dsh-desk';
@@ -58,7 +58,9 @@ window.__ModuleLoader__.load({
       f_showRecent: '显示最近会话', f_showSchedules: '显示定时任务',
       f_feeds: '订阅地址（每行一个 RSS / Atom）', defaultFeeds: 'https://sspai.com/feed', feedError: '{n} 个订阅加载失败', noItems: '没有内容',
       addHabit: '添加习惯', noHabits: '还没有习惯', streak: '连续 {n} 天', markDay: '{d} 打卡',
-      prompt: 'Prompt 快启', inbox: '收集箱', usage: '用量', running: '运行中', git: 'Git 工作区', github: 'GitHub', system: '系统状态',
+      prompt: 'Prompt 快启', inbox: '收集箱', usage: '用量', running: '运行中', git: 'Git 工作区', github: 'GitHub', system: '系统状态', photo: '相框',
+      d_photo: '轮播本机文件夹里的照片，点击换下一张', f_photoDir: '照片文件夹', f_shuffle: '随机顺序', f_every: '切换间隔', every_m: '{n} 分钟', every_h: '1 小时',
+      ph_empty: '这个文件夹里没有照片', ph_pick: '选择文件夹',
       d_system: '本机 CPU、内存、磁盘和电池', s_cpu: 'CPU', s_mem: '内存', s_disk: '磁盘', s_battery: '电池', s_cores: '{n} 核 · 负载 {l}', s_free: '剩余 {n}',
       s_charging: '充电中', s_plugged: '已接电源', s_left: '剩 {t}', s_uptime: '已运行 {t}', s_load: '负载 {l}',
       d_git: '各仓库的分支、未提交改动、未推送 / 落后提交和可清理的分支', d_github: '等我 review 的 PR、我的 PR 和指派给我的 issue，用本机 gh CLI',
@@ -118,7 +120,9 @@ window.__ModuleLoader__.load({
       f_showRecent: 'Show recent sessions', f_showSchedules: 'Show scheduled tasks',
       f_feeds: 'Feed URLs, one RSS or Atom feed per line', defaultFeeds: 'https://hnrss.org/frontpage', feedError: '{n} feed(s) failed to load', noItems: 'Nothing here',
       addHabit: 'Add a habit', noHabits: 'No habits yet', streak: '{n}-day streak', markDay: 'Check in for {d}',
-      prompt: 'Quick prompt', inbox: 'Inbox', usage: 'Usage', running: 'Running', git: 'Git repos', github: 'GitHub', system: 'System',
+      prompt: 'Quick prompt', inbox: 'Inbox', usage: 'Usage', running: 'Running', git: 'Git repos', github: 'GitHub', system: 'System', photo: 'Photo frame',
+      d_photo: 'Cycles through photos in a local folder; click for the next one', f_photoDir: 'Photo folder', f_shuffle: 'Shuffle', f_every: 'Change every', every_m: '{n} min', every_h: '1 hour',
+      ph_empty: 'No photos in this folder', ph_pick: 'Choose folder',
       d_system: 'CPU, memory, disk and battery of this machine', s_cpu: 'CPU', s_mem: 'Memory', s_disk: 'Disk', s_battery: 'Battery', s_cores: '{n} cores · load {l}', s_free: '{n} free',
       s_charging: 'Charging', s_plugged: 'Plugged in', s_left: '{t} left', s_uptime: 'Up {t}', s_load: 'Load {l}',
       d_git: 'Branch, uncommitted changes, unpushed or missing commits and branches to clean up, per repository', d_github: 'PRs awaiting your review, your PRs and issues assigned to you, through the local gh CLI',
@@ -367,6 +371,9 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 .bnt-prow small{font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap}
 .bnt-prow[data-hot] i{background:var(--dsw-alias-state-warn-primary);opacity:1}
 .bnt-prow[data-hot] span:last-of-type{color:var(--dsw-alias-state-warn-primary)}
+.bnt-photo{flex:1;margin:-16px;min-height:0;position:relative;cursor:pointer;background:var(--dsw-alias-bg-layer-2)}
+.bnt-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.bnt-photo-msg{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;height:100%;color:var(--dsw-alias-label-secondary)}
 .bnt-spark{flex:1;min-height:32px;min-width:0;position:relative}
 .bnt-spark svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .bnt-spark polyline{fill:none;stroke:var(--dsw-alias-brand-primary);stroke-width:1.5;vector-effect:non-scaling-stroke;stroke-linejoin:round}
@@ -1733,13 +1740,50 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
         }
         System.desk = {apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], description: () => t('d_system')};
 
+        function Photo({config, openSettings}) {
+          useLocale();
+          const dir = String(config?.dir ?? '');
+          const shuffle = config?.shuffle !== false;
+          const minutes = Math.max(1, Number(config?.every) || 5);
+          const [photo, setPhoto] = useState(null);
+          const [error, setError] = useState('');
+          const index = useRef(undefined);
+          const busy = useRef(false);
+          const next = useCallback(() => {
+            if (busy.current) return;
+            busy.current = true;
+            call('photo.next', {dir, shuffle, index: index.current}).then(v => {
+              index.current = v.index;
+              setPhoto(v);
+              setError('');
+            }, e => setError(String(e?.message || e))).finally(() => { busy.current = false; });
+          }, [dir, shuffle]);
+          useEffect(() => {
+            index.current = undefined;
+            next();
+            const id = setInterval(() => { if (!document.hidden) next(); }, minutes * 60_000);
+            return () => clearInterval(id);
+          }, [next, minutes]);
+          if (error || photo?.count === 0) return h('div', {className: 'bnt-photo-msg'}, h('span', null, error || t('ph_empty')), h('button', {type: 'button', className: 'bnt-btn bnt-cta', onClick: openSettings}, t('ph_pick')));
+          if (!photo) return h('div', {className: 'bnt-photo'});
+          return h('div', {className: 'bnt-photo', title: photo.name, onClick: next}, h('img', {src: photo.src, alt: photo.name, draggable: false}));
+        }
+        Photo.desk = {
+          apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], title: false, description: () => t('d_photo'),
+          settings: [
+            {key: 'dir', type: 'text', label: () => t('f_photoDir'), placeholder: '~/Pictures'},
+            {key: 'shuffle', type: 'toggle', default: true, label: () => t('f_shuffle')},
+            {key: 'every', type: 'select', default: '5', label: () => t('f_every'), options: [1, 5, 15, 30].map(n => ({value: String(n), label: () => fill(t('every_m'), {n})})).concat({value: '60', label: () => t('every_h')})},
+          ],
+        };
+
         const builtins = [
           ['desk.today', 'today', Today], ['desk.todo', 'todo', Todo], ['desk.note', 'note', Note], ['desk.calendar', 'calendar', Calendar],
           ['desk.weather', 'weather', Weather], ['desk.clock', 'clock', Clock], ['desk.quote', 'quote', Quote], ['desk.countdown', 'countdown', Countdown],
           ['desk.worldclock', 'worldclock', WorldClock], ['desk.focus', 'focus', Focus], ['desk.links', 'links', Links], ['desk.progress', 'progress', Progress],
           ['desk.agents', 'agents', Agents], ['desk.feed', 'feed', Feed], ['desk.habits', 'habits', Habits],
           ['desk.prompt', 'prompt', Prompt], ['desk.inbox', 'inbox', Inbox], ['desk.usage', 'usage', Usage], ['desk.running', 'running', Running],
-          ['desk.git', 'git', Git], ['desk.github', 'github', GitHub], ['desk.system', 'system', System],
+          ['desk.git', 'git', Git], ['desk.github', 'github', GitHub], ['desk.system', 'system', System], ['desk.photo', 'photo', Photo],
         ];
         const BUILTIN_IDS = new Set(builtins.map(([id]) => id));
 

@@ -8,8 +8,9 @@ import {createRunner} from './lib/exec.js';
 import {repoStatus, fetchRepo} from './lib/git.js';
 import {githubOverview} from './lib/github.js';
 import {createSystem} from './lib/system.js';
+import {createPhotos} from './lib/photo.js';
 import {randomUUID} from 'node:crypto';
-import {homedir} from 'node:os';
+import {homedir, tmpdir} from 'node:os';
 import {stat} from 'node:fs/promises';
 import {isAbsolute, join} from 'node:path';
 
@@ -45,7 +46,7 @@ export const BUILTIN_WIDGETS = [
   'desk.today', 'desk.todo', 'desk.note', 'desk.calendar', 'desk.weather', 'desk.clock',
   'desk.quote', 'desk.countdown', 'desk.worldclock', 'desk.focus', 'desk.links', 'desk.progress',
   'desk.agents', 'desk.feed', 'desk.habits',
-  'desk.prompt', 'desk.inbox', 'desk.usage', 'desk.running', 'desk.git', 'desk.github', 'desk.system',
+  'desk.prompt', 'desk.inbox', 'desk.usage', 'desk.running', 'desk.git', 'desk.github', 'desk.system', 'desk.photo',
 ];
 
 export function defaultBoard(id) {
@@ -557,6 +558,11 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       if (!services.system) throw new UserError('unavailable', 'system status is not available');
       return services.system.get();
     },
+    'dsh-desk/photo.next': async p => {
+      if (!services.photos) throw new UserError('unavailable', 'photos are not available');
+      const dir = await resolveDir(p?.dir || '~/Pictures');
+      return services.photos.next({dir, index: Number.isInteger(p?.index) ? p.index : undefined, shuffle: p?.shuffle !== false});
+    },
     'dsh-desk/github.get': async p => {
       if (!services.github) throw new UserError('unavailable', 'GitHub is not available');
       return services.github({fresh: p?.fresh === true});
@@ -688,7 +694,7 @@ export function createTools(store) {
 export function apply(ctx) {
   const store = createStore(ctx);
   const run = createRunner();
-  const services = {usage: createUsage({root: join(dshHome(), 'sessions')}), running: createRunning(ctx), git: createGit(ctx, run), github: createGithub(run), system: createSystem({run})};
+  const services = {usage: createUsage({root: join(dshHome(), 'sessions')}), running: createRunning(ctx), git: createGit(ctx, run), github: createGithub(run), system: createSystem({run}), photos: createPhotos({run, cacheDir: join(tmpdir(), 'dsh-desk-photos')})};
   const handlers = createHandlers(store, createFetcher(), createAgentWatch(ctx), createLauncher(ctx), services);
   ctx.effect(() => () => { void store.close(); }, 'dsh-desk: storage');
 
