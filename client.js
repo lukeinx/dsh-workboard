@@ -2396,7 +2396,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         }
         Git.workboard = {
           apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_git'),
-          settings: [{key: 'paths', type: 'textarea', label: () => t('f_repos'), placeholder: '~/Vibe/dsh-bento'}],
+          settings: [{key: 'paths', type: 'textarea', label: () => t('f_repos'), placeholder: '~/Vibe/dsh-workboard'}],
         };
 
         function GitHub({size, config}) {
