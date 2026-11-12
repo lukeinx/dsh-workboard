@@ -222,6 +222,7 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 | YouTube、B 站 | 视频订阅与封面 | 公开频道订阅源与非官方接口 |
 | [爱范儿](https://www.ifanr.com)、[阮一峰的网络日志](https://www.ruanyifeng.com/blog/) | 默认中文 RSS 订阅源 | 发布者 RSS |
 | [GitHub CLI](https://cli.github.com) | GitHub widget 数据源 | MIT |
+| [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter) | 读取系统「正在播放」，内置于 `vendor/` | BSD-3-Clause |
 | [ipinfo.io](https://ipinfo.io)、[ip.sb](https://ip.sb) | 网络 widget 公网 IP 查询 | 公开 API |
 | 经典文献（老子、孔子、荀子等） | 内置格言库 | 公有领域 |
 

@@ -222,6 +222,7 @@ Workboard builds on the following projects and services. Feed and trending conte
 | YouTube, Bilibili | Video subscriptions and thumbnails | Public channel feeds and unofficial endpoints |
 | [ifanr](https://www.ifanr.com), [Ruan Yifeng's blog](https://www.ruanyifeng.com/blog/) | Default Chinese RSS feeds | Publishers' RSS feeds |
 | [GitHub CLI](https://cli.github.com) | GitHub widget data | MIT |
+| [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter) | System now-playing info, bundled in `vendor/` | BSD-3-Clause |
 | [ipinfo.io](https://ipinfo.io), [ip.sb](https://ip.sb) | Public IP lookup in the Network widget | Public API |
 | Classical texts (Laozi, Confucius, Xunzi, and others) | Built-in quotes | Public domain |
 
