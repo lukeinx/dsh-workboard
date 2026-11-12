@@ -332,11 +332,12 @@ window.__ModuleLoader__.load({
 .wb-today .wb-greet{grid-area:greet;align-self:end;font-size:15px;font-weight:600}
 .wb-today .wb-date{grid-area:date;align-self:start;color:var(--dsw-alias-label-secondary)}
 .wb-sep{width:1px;align-self:stretch;margin:14px 0;background:var(--dsw-alias-border-l1)}
-.wb-tquote{flex:1!important;min-width:0;text-align:right}
+.wb-tquote{flex:1!important;min-width:0;text-align:left;display:flex;flex-wrap:wrap;align-items:baseline;align-content:center;column-gap:10px}
+.wb-tquote .wb-qtext{flex:0 1 auto;min-width:0}
 .wb-tquote .wb-qtext{margin:0;font-size:15px;line-height:1.5;font-family:"New York","Songti SC",Georgia,serif;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .wb-tquote[data-len=short] .wb-qtext{font-size:18px;line-height:1.4}
 .wb-tquote[data-len=long] .wb-qtext{font-size:13px;line-height:1.45;-webkit-line-clamp:3}
-.wb-tquote cite{display:block;font-style:normal;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.wb-tquote cite{flex:none;white-space:nowrap;font-style:normal;font-size:12px;color:var(--dsw-alias-label-secondary)}
 
 .wb-clock{display:flex;flex-direction:column;justify-content:center;height:100%}
 .wb-clock .wb-time{font-size:44px;font-weight:600;letter-spacing:-1px;line-height:1.1;margin:4px 0 6px}
