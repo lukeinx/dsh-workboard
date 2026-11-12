@@ -2,7 +2,7 @@
 
 [简体中文](README.zh.md)
 
-Desk (`@lukeinx/dsh-desk`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with fifteen widgets, including a today banner, to-dos, notes, an ICS calendar, weather, an agent session monitor, feeds, habits and a focus timer, works with zero configuration, and lets the agent read and change your to-dos and notes from any conversation. Other plugins can add their own widgets.
+Desk (`@lukeinx/dsh-desk`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with 24 widgets, including a today banner, to-dos, notes, an ICS calendar, weather, an agent session monitor, quick prompts, usage stats, Git repositories, system status and markets, works with zero configuration, and lets the agent read and change your to-dos, notes and inbox from any conversation. Other plugins can add their own widgets.
 
 Status: early (P0b). MIT licensed.
 
@@ -25,17 +25,36 @@ Status: early (P0b). MIT licensed.
 | Agent | `t` `l` `m` `w` | Sessions waiting for you first, then running and recent ones; click to open. Upcoming scheduled tasks and a new-session button |
 | Feeds | `t` `l` `m` `w` | RSS / Atom, several feeds merged by date; defaults to Hacker News (English) or sspai (Chinese) |
 | Habits | `m` `l` `t` `w` | Check in for any day of the last week, with your current streak |
+| Quick prompt | `m` `w` `l` `t` `s` | Type or pick a preset to start a new session and send it right away, optionally in a chosen directory |
+| Inbox | `t` `l` `m` `w` | Things you jot down, handed to the agent to sort with one click |
+| Usage | `l` `t` `m` `w` `s` | Tokens, requests, cache hits and a per-model breakdown for today and recent days, from local session logs; estimated cost once you enter prices |
+| Running | `t` `l` `m` `w` | Goals and background jobs across sessions; click to open the session, or stop a job |
+| Git repos | `t` `l` `m` `w` | Branch, changes, ahead / behind and branches whose upstream is gone, per repository; defaults to the Harness workspaces. Fetch all or hand a repository to the agent |
+| GitHub | `t` `l` `m` `w` | PRs awaiting your review, your PRs and issues assigned to you, through your signed-in `gh` |
+| System | `m` `s` `t` `l` `w` | CPU, memory, disk, battery and a five-minute CPU sparkline |
+| Photo frame | `m` `s` `t` `l` `w` | Cycles through photos in a local folder (`~/Pictures` by default); click for the next one |
+| Markets | `t` `m` `s` `l` `w` | Exchange rates (`USD/CNY`), China / Hong Kong / US stocks (`sh600519`, `hk00700`, `usAAPL`) and crypto (`BTC`, `cg:<id>`); red or green for gains |
 
 The default board holds Today, To-do, Calendar and Notes; add the rest from the gallery. Built-in widgets added by an upgrade appear only in the gallery and are not placed on existing boards.
 
 Choose **Edit** to drag cards, change sizes, remove cards, open a widget's settings or add widgets from the gallery. Boards are tabs: **+** adds one, double-click renames it, and edit mode can delete it.
 
-Data stays on your machine, in the Harness profile storage (`~/.dsh/storages/dsh_desk.json`). Data from the earlier `dsh-bento` version (`dsh_bento.json`) is copied over on first start; the old file is left in place. The Host makes the only network requests: weather and city search go to [Open-Meteo](https://open-meteo.com) (no key, data under CC BY 4.0) once you set a city, and calendars are fetched from the ICS addresses you add. Responses are cached on the Host.
+Data stays on your machine, in the Harness profile storage (`~/.dsh/storages/dsh_desk.json`). Data from the earlier `dsh-bento` version (`dsh_bento.json`) is copied over on first start; the old file is left in place. The Host makes the only network requests and caches the responses:
+
+- Weather and city search: [Open-Meteo](https://open-meteo.com) (no key, data under CC BY 4.0), only once you set a city
+- Calendars and feeds: the ICS and RSS / Atom addresses you add
+- Markets: Tencent quotes (`qt.gtimg.cn`) for stocks, [open.er-api.com](https://open.er-api.com) for exchange rates (updated daily), [CoinGecko](https://www.coingecko.com) for crypto
+- GitHub: the local `gh` CLI with its existing sign-in
+
+A few widgets only read your machine: Usage reads the session logs under `~/.dsh/sessions`; Git repos runs `git status` and runs `git fetch` only when you choose Fetch; System uses `vm_stat` and `pmset` on macOS; Photo frame uses `sips` on macOS to shrink photos to 1280 px, cached in the system temp directory.
+
+Usage counts the usage fields in the logs. Some providers do not report tokens; their requests count toward requests only, and the card says so. Running sees only sessions in the current Harness process.
 
 ## Agent tools
 
 - `desk_todos` — `list`, `add`, `complete`, `reopen`, `remove`
 - `desk_note` — `read`, `append`, `replace`
+- `desk_inbox` — `list`, `add`, `remove`, `clear`
 
 The page refreshes every 5 seconds while it is visible, so changes made by the agent appear without a reload.
 
@@ -83,4 +102,4 @@ The component receives `size`, `config` (the saved settings for this card), `edi
 npm run check   # syntax check, Host smoke test and ICS tests
 ```
 
-Files: `index.js` (Host routes under `/api/dsh-desk/*`, storage, agent tools), `lib/` (HTTP cache, weather, ICS parsing), `client.js` (sidebar entry, panel, built-in widgets), `cordis.patch.yml`, `locale/`, `icon.svg`.
+Files: `index.js` (Host routes under `/api/dsh-desk/*`, storage, agent tools), `lib/` (HTTP cache, weather, ICS and feed parsing, session-log usage, subprocesses, Git, GitHub, system status, photos, markets), `client.js` (sidebar entry, panel, built-in widgets), `cordis.patch.yml`, `locale/`, `icon.svg`.

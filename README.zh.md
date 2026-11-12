@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-工作台（`@lukeinx/dsh-desk`）在 DeepSeek Harness 侧栏增加一个模块化工作台。内置 15 个 widget，包括今日横栏、待办、速记、ICS 日历、天气、Agent 会话、订阅、习惯打卡和专注计时，零配置可用；Agent 可以在任意对话里读写你的待办和速记；其他插件可以注册自己的 widget。
+工作台（`@lukeinx/dsh-desk`）在 DeepSeek Harness 侧栏增加一个模块化工作台。内置 24 个 widget，包括今日横栏、待办、速记、ICS 日历、天气、Agent 会话、Prompt 快启、用量统计、Git 工作区、系统状态和行情，零配置可用；Agent 可以在任意对话里读写你的待办、速记和收集箱；其他插件可以注册自己的 widget。
 
 状态：早期（P0b）。MIT 许可。
 
@@ -25,17 +25,36 @@
 | Agent | `t` `l` `m` `w` | 等你确认的会话排最前，其次运行中和最近会话，点击打开；即将触发的定时任务；一键新会话 |
 | 订阅 | `t` `l` `m` `w` | RSS / Atom，多个源按时间合并；默认中文少数派、英文 Hacker News |
 | 习惯打卡 | `m` `l` `t` `w` | 最近一周可点选补卡，显示连续天数 |
+| Prompt 快启 | `m` `w` `l` `t` `s` | 输入或点预设，直接新开会话并发送；可指定工作目录 |
+| 收集箱 | `t` `l` `m` `w` | 随手丢进来的事情，一键交给 Agent 整理 |
+| 用量 | `l` `t` `m` `w` `s` | 从本机会话日志统计今日和最近几天的 token、请求数、缓存命中和按模型拆分；填单价后估算花费 |
+| 运行中 | `t` `l` `m` `w` | 各会话的长任务目标和后台作业，点击打开会话，可停止作业 |
+| Git 工作区 | `t` `l` `m` `w` | 各仓库的分支、改动、领先 / 落后和上游已删除的分支；默认取 Harness 工作区；可一键获取远端或交给 Agent |
+| GitHub | `t` `l` `m` `w` | 等我 review 的 PR、我的 PR 和指派给我的 issue，用本机已登录的 `gh` |
+| 系统状态 | `m` `s` `t` `l` `w` | CPU、内存、磁盘、电池和最近 5 分钟的 CPU 曲线 |
+| 相框 | `m` `s` `t` `l` `w` | 轮播本机文件夹（默认 `~/Pictures`）里的照片，点击换下一张 |
+| 行情 | `t` `m` `s` `l` `w` | 汇率（`USD/CNY`）、A 股 / 港股 / 美股（`sh600519`、`hk00700`、`usAAPL`）和加密货币（`BTC`、`cg:<id>`）；可选红涨或绿涨 |
 
 默认看板只放今日横栏、待办、日历和速记，其余从组件库添加。升级后新增的内置 widget 只出现在组件库，不会自动加入已有看板。
 
 点「编辑」可以拖动卡片、换尺寸、移除、打开 widget 设置，或从组件库添加。看板是标签页：「+」新建，双击重命名，编辑模式下可删除。
 
-数据留在本机 Harness profile 存储（`~/.dsh/storages/dsh_desk.json`）。旧版 `dsh-bento` 的数据（`dsh_bento.json`）会在首次启动时复制过来，旧文件保留不动。网络请求只由 Host 发出：设置城市后，天气和城市搜索走 [Open-Meteo](https://open-meteo.com)（无需 key，数据 CC BY 4.0）；日历从你添加的 ICS 地址拉取。结果在 Host 缓存。
+数据留在本机 Harness profile 存储（`~/.dsh/storages/dsh_desk.json`）。旧版 `dsh-bento` 的数据（`dsh_bento.json`）会在首次启动时复制过来，旧文件保留不动。网络请求只由 Host 发出，结果在 Host 缓存：
+
+- 天气和城市搜索：[Open-Meteo](https://open-meteo.com)（无需 key，数据 CC BY 4.0），设置城市后才请求
+- 日历和订阅：你添加的 ICS 与 RSS / Atom 地址
+- 行情：股票走腾讯行情 `qt.gtimg.cn`，汇率走 [open.er-api.com](https://open.er-api.com)（每日更新），加密货币走 [CoinGecko](https://www.coingecko.com)
+- GitHub：通过本机 `gh` CLI，用它已有的登录
+
+另有几个 widget 只读本机：用量读 `~/.dsh/sessions` 下的会话日志；Git 工作区运行 `git status`，只在你点「获取远端」时执行 `git fetch`；系统状态在 macOS 用 `vm_stat` 和 `pmset`；相框在 macOS 用 `sips` 把照片缩到 1280px，缓存在系统临时目录。
+
+用量按日志里的 usage 字段统计。部分 provider 不上报 token，这些请求只计入请求数，卡片底部会注明。「运行中」只看得到当前 Harness 进程里的会话。
 
 ## Agent 工具
 
 - `desk_todos`：`list`、`add`、`complete`、`reopen`、`remove`
 - `desk_note`：`read`、`append`、`replace`
+- `desk_inbox`：`list`、`add`、`remove`、`clear`
 
 页面可见时每 5 秒刷新，Agent 的改动不用刷新页面就会出现。
 
@@ -83,4 +102,4 @@ ctx.effect(() => ctx.slots.inject('desk.widget', () => ctx.slots.register({
 npm run check   # 语法检查 + Host 端冒烟 + ICS 测试
 ```
 
-文件：`index.js`（Host 端 `/api/dsh-desk/*` 路由、存储、Agent 工具）、`lib/`（HTTP 缓存、天气、ICS 解析）、`client.js`（侧栏入口、面板、内置 widget）、`cordis.patch.yml`、`locale/`、`icon.svg`。
+文件：`index.js`（Host 端 `/api/dsh-desk/*` 路由、存储、Agent 工具）、`lib/`（HTTP 缓存、天气、ICS 与订阅解析、会话日志用量、子进程、Git、GitHub、系统状态、相框、行情）、`client.js`（侧栏入口、面板、内置 widget）、`cordis.patch.yml`、`locale/`、`icon.svg`。
