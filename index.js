@@ -13,12 +13,13 @@ import {createPhotos} from './lib/photo.js';
 import {createMarket} from './lib/market.js';
 import {createTrending} from './lib/trending.js';
 import {createQuotes} from './lib/quote.js';
-import {createNowPlaying} from './lib/nowplaying.js';
+import {createMediaRemote, createNowPlaying} from './lib/nowplaying.js';
 import {createVideos} from './lib/videos.js';
 import {MAX_WIDGETS, WidgetError, allowedUrl, checkHtml, cleanData, cleanSpec, widgetId} from './lib/widgets.js';
 import {createHash, randomUUID} from 'node:crypto';
 import {homedir, platform, tmpdir} from 'node:os';
 import {readFileSync} from 'node:fs';
+import {spawn} from 'node:child_process';
 import {createOutputs} from './lib/outputs.js';
 import {createRecentFiles, isRisky} from './lib/files.js';
 import {createClipboard} from './lib/clipboard.js';
@@ -821,7 +822,7 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
     },
     'dsh-workboard/nowplaying.control': async p => {
       if (!services.nowPlaying) throw new UserError('unavailable', 'now playing is not available');
-      return services.nowPlaying.control({app: String(p?.app ?? ''), action: String(p?.action ?? '')});
+      return services.nowPlaying.control({app: String(p?.app ?? ''), action: String(p?.action ?? ''), bundle: String(p?.bundle ?? '')});
     },
     'dsh-workboard/video.list': async p => {
       if (!services.videos) throw new UserError('unavailable', 'video subscriptions are not available');
@@ -1125,7 +1126,7 @@ export function apply(ctx) {
     photos: createPhotos({run, cacheDir: join(tmpdir(), 'dsh-workboard-photos')}),
     market: createMarket(fetcher),
     trending: createTrending(fetcher),
-    nowPlaying: createNowPlaying({run, fetcher, cacheDir: join(tmpdir(), 'dsh-workboard-artwork')}),
+    nowPlaying: createNowPlaying({run, fetcher, cacheDir: join(tmpdir(), 'dsh-workboard-artwork'), media: createMediaRemote({spawn})}),
     videos: createVideos(fetcher),
     schedules: createSchedules(ctx),
     outputs: createOutputs({root: join(dshHome(), 'sessions')}),
@@ -1136,7 +1137,7 @@ export function apply(ctx) {
   };
   const handlers = createHandlers(store, fetcher, createAgentWatch(ctx), createLauncher(ctx), services);
   ctx.effect(() => () => { void store.close(); }, 'dsh-workboard: storage');
-  ctx.effect(() => () => { services.system.stop(); services.clipboard.stop(); services.network.stop(); }, 'dsh-workboard: samplers');
+  ctx.effect(() => () => { services.system.stop(); services.clipboard.stop(); services.network.stop(); services.nowPlaying.stop(); }, 'dsh-workboard: samplers');
 
   // 共享通道 /api 只允许一个 interceptor，每个方法注册独立的 Fetch 路由。
   for (const method of Object.keys(handlers)) {

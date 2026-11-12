@@ -111,7 +111,7 @@ If you are an agent interacting with Workboard:
 | Time progress | `m` `s` `w` | Percentage of today, this week, this month, and this year elapsed |
 | Habits | `m` `l` `t` `w` | Check in for any day of the past week and track your current streak |
 | Photo frame | `m` `s` `t` `l` `w` | Cycles through photos from a local folder (`~/Pictures` by default) |
-| Now playing | `m` `s` `w` `t` | Track, artwork, and progress from Music or Spotify on macOS, with play / pause and skip |
+| Now playing | `m` `s` `w` `t` | Track, artwork, and progress of whatever macOS reports as now playing (Music, Spotify, QQ Music, browsers…), with play / pause and skip |
 | **News & markets** | | |
 | Trending | `l` `t` `m` `w` | Tabbed hot lists from Weibo, Zhihu, 36Kr, sspai, Hacker News, GitHub Trending, Product Hunt, and Reddit (Bilibili and V2EX optional) |
 | Feeds | `t` `l` `m` `w` | Multiple RSS / Atom feeds merged chronologically; visited items dim automatically |
@@ -144,7 +144,7 @@ Widgets that only read local state:
 - **Git repos**: runs `git status` locally, and only runs `git fetch` when you click Fetch
 - **System**: uses `vm_stat` and `pmset` on macOS
 - **Photo frame**: uses `sips` on macOS to generate thumbnails cached in the system temp directory
-- **Now playing**: asks only Music or Spotify if already running, via `osascript`; macOS asks once for Automation permission
+- **Now playing**: reads the system now-playing session through the bundled [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter) (`vendor/`, BSD-3-Clause), which runs under `/usr/bin/perl` and needs no permission; if that fails it falls back to asking Music or Spotify via `osascript` when already running, for which macOS asks once for Automation permission
 - **Ambient sound**: synthesized with Web Audio in the page, with no files or network
 - **Recent files**: lists only the top level of each configured folder
 - **Clipboard**: polls `pbpaste` (macOS) or `wl-paste` / `xclip` (Linux) every 2 seconds while the card is visible; history stays in memory only

@@ -111,7 +111,7 @@ git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 | 时间进度 | `m` `s` `w` | 今日、本周、本月与本年已度过的百分比 |
 | 习惯打卡 | `m` `l` `t` `w` | 支持最近一周打卡与补卡，自动计算当前连续达成天数 |
 | 相框 | `m` `s` `t` `l` `w` | 轮播本机文件夹（默认 `~/Pictures`）中的照片 |
-| 正在播放 | `m` `s` `w` `t` | macOS 「音乐」或 Spotify 正在播放的曲目、封面与进度，可播放 / 暂停和切歌 |
+| 正在播放 | `m` `s` `w` `t` | macOS 系统「正在播放」的曲目、封面与进度（「音乐」、Spotify、QQ 音乐、浏览器等），可播放 / 暂停和切歌 |
 | **资讯与行情** | | |
 | 热榜 | `l` `t` `m` `w` | 多信源分标签聚合：微博、知乎、36 氪、少数派、Hacker News、GitHub Trending、Product Hunt、Reddit（可选 B 站、V2EX） |
 | 订阅 | `t` `l` `m` `w` | 聚合多个 RSS / Atom 订阅源并按时间混排，已读条目自动变灰 |
@@ -144,7 +144,7 @@ git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 - **Git 工作区**：默认仅执行 `git status`，点击「获取远端」时才执行 `git fetch`
 - **系统状态**：在 macOS 上调用 `vm_stat` 与 `pmset`
 - **相框**：在 macOS 上用 `sips` 生成缩略图并缓存在系统临时目录
-- **正在播放**：只通过 `osascript` 查询已在运行的「音乐」或 Spotify，首次使用时 macOS 会请求自动化权限
+- **正在播放**：通过内置的 [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter)（`vendor/`，BSD-3-Clause）读取系统「正在播放」，它由 `/usr/bin/perl` 运行，无需授权；此路不通时退回用 `osascript` 查询已在运行的「音乐」或 Spotify，首次使用时 macOS 会请求自动化权限
 - **白噪音**：在页面内用 Web Audio 合成，不读文件、不联网
 - **最近文件**：仅列出目标文件夹顶层文件，不递归扫描
 - **剪贴板**：仅在卡片可见期间每 2 秒读取一次 `pbpaste`（macOS）或 `wl-paste` / `xclip`（Linux），历史仅保存在内存中，不落盘

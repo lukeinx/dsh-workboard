@@ -136,7 +136,7 @@ window.__ModuleLoader__.load({
       n_down: '下行', n_up: '上行', n_local: '内网', n_public: '出口', n_proxy: '代理', n_noProxy: '未开启', n_pac: '自动代理（PAC）',
       n_unreachable: '不可达', n_curl: '需要 curl', n_latency: '延迟',
       f_targets: '测速站点（每行一个：名称 https://…）', defaultTargets: '百度 https://www.baidu.com\nGitHub https://github.com\nGoogle https://www.google.com',
-      nowplaying: '正在播放', d_nowplaying: '「音乐」或 Spotify 正在播放的歌曲，可暂停和切歌',
+      nowplaying: '正在播放', d_nowplaying: '系统正在播放的内容（QQ 音乐、「音乐」、Spotify、浏览器等），可暂停和切歌',
       np_idle: '没有在播放', np_open: '打开{app}', np_mac: '仅支持 macOS', np_denied: '在「系统设置 → 隐私与安全性 → 自动化」里允许 DeepSeek Harness 控制{app}',
       np_auto: '自动', np_music: '音乐', np_spotify: 'Spotify', f_npApp: '播放器', np_prev: '上一首', np_next: '下一首', np_play: '播放', np_pause: '暂停',
       ambient: '白噪音', d_ambient: '雨声、海浪、风声、篝火和粉噪 / 棕噪，可叠加，可在专注时自动播放',
@@ -246,7 +246,7 @@ window.__ModuleLoader__.load({
       n_down: 'Down', n_up: 'Up', n_local: 'Local', n_public: 'Public', n_proxy: 'Proxy', n_noProxy: 'Off', n_pac: 'Auto (PAC)',
       n_unreachable: 'Unreachable', n_curl: 'Needs curl', n_latency: 'Latency',
       f_targets: 'Sites to test, one per line: name https://…', defaultTargets: 'Google https://www.google.com\nGitHub https://github.com\nCloudflare https://www.cloudflare.com',
-      nowplaying: 'Now playing', d_nowplaying: 'The track playing in Music or Spotify, with play, pause and skip',
+      nowplaying: 'Now playing', d_nowplaying: 'Whatever macOS reports as now playing (Music, Spotify, QQ Music, browsers…), with play, pause and skip',
       np_idle: 'Nothing playing', np_open: 'Open {app}', np_mac: 'macOS only', np_denied: 'Allow DeepSeek Harness to control {app} in System Settings → Privacy & Security → Automation',
       np_auto: 'Automatic', np_music: 'Music', np_spotify: 'Spotify', f_npApp: 'Player', np_prev: 'Previous', np_next: 'Next', np_play: 'Play', np_pause: 'Pause',
       ambient: 'Ambient sound', d_ambient: 'Rain, waves, wind, fire and pink / brown noise; mix them, or play during Focus',
@@ -3324,19 +3324,20 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const app = track?.app ?? (prefer !== 'auto' ? prefer : v?.apps?.[0] ?? 'music');
           const act = action => {
             setBusy(true);
-            call('nowplaying.control', {app, action}).then(() => setError(''), e => setError(String(e?.message || e))).finally(() => { setBusy(false); res.reload(); });
+            call('nowplaying.control', {app, action, bundle: track?.bundle}).then(() => setError(''), e => setError(String(e?.message || e))).finally(() => { setBusy(false); res.reload(); });
           };
           const msg = (text, button) => h('div', {className: 'wb-photo-msg'}, h('span', null, text), button ?? null);
           if (!v) return blank(res.error || '…');
           if (!v.supported) return msg(t('np_mac'));
           if (v.denied) return msg(fill(t('np_denied'), {app: t(`np_${v.denied}`)}));
+          const appLabel = tr => (tr.app === 'system' ? tr.name : t(`np_${tr.app}`));
           if (!track) return msg(error || t('np_idle'), h('button', {type: 'button', className: 'wb-btn wb-cta', disabled: busy, onClick: () => act('open')}, fill(t('np_open'), {app: t(`np_${app}`)})));
           const playing = track.state === 'playing';
           const position = Math.min(track.duration || Infinity, track.position + (playing ? Math.max(0, now.getTime() - v.at) : 0));
           const sub = [track.artist, size === 's' ? '' : track.album].filter(Boolean).join(' — ');
           const ctl = (key, label, icon, primary) => h('button', {key, type: 'button', className: 'wb-btn', 'data-primary': primary ? '' : undefined, disabled: busy, 'aria-label': label, title: label, onClick: () => act(key)}, fillIcon(primary ? 16 : 14, icon));
           return h('div', {className: 'wb-np', 'data-size': size},
-            h('button', {type: 'button', className: 'wb-npart', title: fill(t('np_open'), {app: t(`np_${track.app}`)}), style: track.art ? {backgroundImage: `url("${track.art}")`} : undefined, onClick: () => act('open')},
+            h('button', {type: 'button', className: 'wb-npart', title: fill(t('np_open'), {app: appLabel(track)}), style: track.art ? {backgroundImage: `url("${track.art}")`} : undefined, onClick: () => act('open')},
               track.art ? null : svg(size === 's' ? 20 : 28, NOTE_ICON, 1.6)),
             h('div', {className: 'wb-npmain'},
               h('div', null, h('b', {title: track.title}, track.title), sub ? h('small', {title: sub}, sub) : null),
