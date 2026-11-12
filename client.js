@@ -21,6 +21,8 @@ window.__ModuleLoader__.load({
     const TRENDING_MS = 10 * 60_000;
     // 尺寸档位：[列, 行]，行单位 80px；「横栏」半高，其余行数成对。
     const SIZES = {bar: [4, 1], s: [1, 2], m: [2, 2], t: [1, 4], l: [2, 4], w: [4, 2]};
+    // 组件库分类；未声明或不在表内的归入 plugin。
+    const CATEGORIES = ['daily', 'agent', 'news', 'tools', 'plugin'];
 
     const zh = {
       lang: 'zh-CN', title: '工作台', loadFailed: '加载失败', empty: '看板上还没有 widget',
@@ -37,6 +39,7 @@ window.__ModuleLoader__.load({
       allDay: '全天', noEvents: '没有日程', addIcs: '添加 ICS 订阅', todayEvents: '今天', tomorrowEvents: '明天', prevMonth: '上个月', nextMonth: '下个月', calError: '{n} 个订阅加载失败',
       work: '工作', untitled: '未命名', newBoard: '看板 {n}', newBoardLabel: '新建看板', rename: '双击改名',
       edit: '编辑', doneEdit: '完成', addWidget: '添加 widget', added: '已添加', add: '添加', settings: '设置', save: '保存', cancel: '取消',
+      searchWidget: '搜索 widget', cat_all: '全部', cat_daily: '日常', cat_agent: 'Agent', cat_news: '资讯', cat_tools: '效率与工具', cat_plugin: '插件',
       deleteBoard: '删除看板', confirmDelete: '确认删除', size: '尺寸', drag: '拖动排序',
       size_bar: '横栏', size_s: '小 1×1', size_m: '中 2×1', size_t: '竖 1×2', size_l: '大 2×2', size_w: '通栏 4×1',
       f_name: '称呼', f_location: '城市', f_unit: '温度单位', f_showWeather: '显示天气', f_showQuote: '显示格言', f_urls: 'ICS 订阅地址（每行一个）', f_weekStart: '每周开始于',
@@ -104,6 +107,7 @@ window.__ModuleLoader__.load({
       allDay: 'All day', noEvents: 'No events', addIcs: 'Add an ICS subscription', todayEvents: 'Today', tomorrowEvents: 'Tomorrow', prevMonth: 'Previous month', nextMonth: 'Next month', calError: '{n} subscription(s) failed to load',
       work: 'Work', untitled: 'Untitled', newBoard: 'Board {n}', newBoardLabel: 'New board', rename: 'Double-click to rename',
       edit: 'Edit', doneEdit: 'Done', addWidget: 'Add widget', added: 'Added', add: 'Add', settings: 'Settings', save: 'Save', cancel: 'Cancel',
+      searchWidget: 'Search widgets', cat_all: 'All', cat_daily: 'Daily', cat_agent: 'Agent', cat_news: 'News', cat_tools: 'Productivity & tools', cat_plugin: 'Plugins',
       deleteBoard: 'Delete board', confirmDelete: 'Confirm delete', size: 'Size', drag: 'Drag to reorder',
       size_bar: 'Banner', size_s: 'Small 1×1', size_m: 'Medium 2×1', size_t: 'Tall 1×2', size_l: 'Large 2×2', size_w: 'Wide 4×1',
       f_name: 'Your name', f_location: 'City', f_unit: 'Temperature unit', f_showWeather: 'Show weather', f_showQuote: 'Show quote', f_urls: 'ICS subscription URLs, one per line', f_weekStart: 'Week starts on',
@@ -289,10 +293,19 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 .bnt-results button{text-align:left;padding:6px 8px;border-radius:6px}
 .bnt-results button:hover{background:var(--dsw-alias-bg-layer-2)}
 .bnt-foot{display:flex;justify-content:flex-end;gap:8px}
-.bnt-gitem{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--dsw-alias-border-l1)}
-.bnt-gitem:last-child{border-bottom:0}
-.bnt-gitem>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
-.bnt-gitem small{color:var(--dsw-alias-label-secondary);font-size:12px}
+.bnt-modal[data-wide]{width:min(760px,100%);height:min(640px,80vh);overflow:hidden}
+.bnt-gtop{display:flex;flex-direction:column;gap:10px;flex:none}
+.bnt-gbody{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:16px;margin:0 -4px;padding:0 4px}
+.bnt-gsec h3{margin:0 0 8px;font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}
+.bnt-ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.bnt-gcard{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border:1px solid var(--dsw-alias-border-l1);border-radius:10px;text-align:left;min-width:0}
+.bnt-gcard:hover:not(:disabled){border-color:var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-2)}
+.bnt-gcard:disabled{opacity:.5;cursor:default}
+.bnt-gname{display:flex;align-items:center;gap:8px}
+.bnt-gname b{flex:1;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bnt-gname svg{color:var(--dsw-alias-label-secondary);flex:none}
+.bnt-gcard:hover:not(:disabled) .bnt-gname svg{color:var(--dsw-alias-brand-primary)}
+.bnt-gcard small{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
 .bnt-wx{display:flex;flex-direction:column;height:100%;min-height:0;gap:8px;color:var(--dsw-alias-label-primary)}
 .bnt-wxnow{display:flex;align-items:center;gap:12px;min-width:0}
@@ -1187,6 +1200,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
               id: id ?? '',
               label: () => resolveText(label) || id,
               description: manifest.description,
+              category: CATEGORIES.includes(manifest.category) ? manifest.category : 'plugin',
               sizes,
               defaultSize: sizes.includes(manifest.defaultSize) ? manifest.defaultSize : (declared[0] ?? 'm'),
               banner: manifest.banner === true,
@@ -1208,14 +1222,14 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           };
         })();
 
-        function Modal({title, onClose, children, footer}) {
+        function Modal({title, onClose, children, footer, wide}) {
           useEffect(() => {
             const onKey = e => { if (e.key === 'Escape') onClose(); };
             window.addEventListener('keydown', onKey);
             return () => window.removeEventListener('keydown', onKey);
           }, [onClose]);
           return h('div', {className: 'bnt-overlay', onMouseDown: e => { if (e.target === e.currentTarget) onClose(); }},
-            h('div', {className: 'bnt-modal', role: 'dialog', 'aria-modal': true, 'aria-label': title},
+            h('div', {className: 'bnt-modal', 'data-wide': wide ? '' : undefined, role: 'dialog', 'aria-modal': true, 'aria-label': title},
               h('h2', null, title), children, footer ? h('div', {className: 'bnt-foot'}, footer) : null));
         }
 
@@ -1277,15 +1291,31 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
         }
 
         function Gallery({list, board, onAdd, onClose}) {
-          return h(Modal, {title: t('addWidget'), onClose},
-            h('div', null, list.map(w => {
-              const placed = board.widgets.some(c => c.id === w.id);
-              return h('div', {key: w.id, className: 'bnt-gitem'},
-                h('div', null, h('b', null, w.label()),
-                  w.description ? h('small', null, resolveText(w.description)) : null,
-                  h('small', null, w.sizes.map(sizeLabel).join(' · '))),
-                h('button', {type: 'button', className: 'bnt-action', disabled: placed, onClick: () => onAdd(w)}, placed ? t('added') : t('add')));
-            })));
+          const [cat, setCat] = useState('all');
+          const [query, setQuery] = useState('');
+          const q = query.trim().toLowerCase();
+          const placed = new Set(board.widgets.map(c => c.id));
+          const present = CATEGORIES.filter(c => list.some(w => w.category === c));
+          const shown = list.filter(w => (cat === 'all' || w.category === cat)
+            && (!q || `${w.label()} ${resolveText(w.description)} ${w.id}`.toLowerCase().includes(q)));
+          const card = w => {
+            const done = placed.has(w.id);
+            return h('button', {key: w.id, type: 'button', className: 'bnt-btn bnt-gcard', disabled: done, onClick: () => onAdd(w)},
+              h('span', {className: 'bnt-gname'}, h('b', null, w.label()), done ? h('small', null, t('added')) : h(Icon.plus)),
+              w.description ? h('small', null, resolveText(w.description)) : null);
+          };
+          const grid = items => h('div', {className: 'bnt-ggrid'},
+            [...items.filter(w => !placed.has(w.id)), ...items.filter(w => placed.has(w.id))].map(card));
+          const body = !shown.length ? h('div', {className: 'bnt-blank bnt-muted'}, t('noResults'))
+            : cat === 'all' && !q ? present.map(c => h('section', {key: c, className: 'bnt-gsec'}, h('h3', null, t(`cat_${c}`)), grid(shown.filter(w => w.category === c))))
+              : grid(shown);
+          return h(Modal, {title: t('addWidget'), onClose, wide: true,
+            footer: h('button', {type: 'button', className: 'bnt-action', 'data-primary': '', onClick: onClose}, t('doneEdit'))},
+          h('div', {className: 'bnt-gtop'},
+            h('input', {className: 'bnt-input', autoFocus: true, value: query, placeholder: t('searchWidget'), 'aria-label': t('searchWidget'), onChange: e => setQuery(e.target.value)}),
+            h('div', {className: 'bnt-tabs', role: 'tablist'}, ['all', ...present].map(c => h('button', {key: c, type: 'button', role: 'tab',
+              className: 'bnt-btn bnt-tab', 'aria-selected': c === cat, onClick: () => setCat(c)}, t(`cat_${c}`))))),
+          h('div', {className: 'bnt-gbody'}, body));
         }
 
         const relTime = (ms, nowMs) => {
@@ -1881,6 +1911,18 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           ['desk.git', 'git', Git], ['desk.github', 'github', GitHub], ['desk.system', 'system', System], ['desk.photo', 'photo', Photo], ['desk.market', 'market', Market],
           ['desk.trending', 'trending', Trending],
         ];
+        const BUILTIN_CATEGORY = {
+          daily: ['today', 'clock', 'worldclock', 'weather', 'countdown', 'progress', 'habits', 'photo'],
+          agent: ['agents', 'running', 'prompt', 'inbox', 'usage'],
+          news: ['trending', 'feed', 'market', 'quote'],
+          tools: ['todo', 'note', 'calendar', 'focus', 'links', 'git', 'github', 'system'],
+        };
+        for (const [category, keys] of Object.entries(BUILTIN_CATEGORY)) {
+          for (const key of keys) {
+            const component = builtins.find(b => b[1] === key)[2];
+            component.desk = {...component.desk, category};
+          }
+        }
         const BUILTIN_IDS = new Set(builtins.map(([id]) => id));
 
         function Panel({renderSlot}) {
@@ -1964,7 +2006,6 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           const removeCell = id => saveBoard({...board, widgets: board.widgets.filter(c => c.id !== id)});
           const addWidget = w => {
             saveBoard({...board, widgets: [...board.widgets, {id: w.id, size: w.defaultSize}], known: [...new Set([...(board.known ?? []), w.id])]});
-            setModal(null);
           };
           const drop = (targetId, after) => {
             const from = drag?.id;

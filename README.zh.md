@@ -38,7 +38,7 @@
 
 默认看板只放今日横栏、待办、日历和速记，其余从组件库添加。升级后新增的内置 widget 只出现在组件库，不会自动加入已有看板。
 
-点「编辑」可以拖动卡片、换尺寸、移除、打开 widget 设置，或从组件库添加。看板是标签页：「+」新建，双击重命名，编辑模式下可删除。
+点「编辑」可以拖动卡片、换尺寸、移除、打开 widget 设置，或从组件库添加。组件库按日常、Agent、资讯、效率与工具分组，可搜索，添加后不关闭，可以连续添加。看板是标签页：「+」新建，双击重命名，编辑模式下可删除。
 
 数据留在本机 Harness profile 存储（`~/.dsh/storages/dsh_desk.json`）。旧版 `dsh-bento` 的数据（`dsh_bento.json`）会在首次启动时复制过来，旧文件保留不动。网络请求只由 Host 发出，结果在 Host 缓存：
 
@@ -94,6 +94,7 @@ ctx.effect(() => ctx.slots.inject('desk.widget', () => ctx.slots.register({
 
 - `title: false` 隐藏卡片标题，`banner: true` 无框渲染。
 - `description` 显示在组件库里。
+- `category` 决定在组件库里的分组：`daily`（日常）、`agent`（Agent）、`news`（资讯）、`tools`（效率与工具）；未填或其他值归入「插件」。
 - `settings` 是设置弹窗的字段列表：`{key, type, label, default?, options?, placeholder?}`，`type` 可选 `text`、`textarea`、`select`（配 `options: [{value, label}]`）、`toggle`。label 可以是字符串，也可以是返回字符串的函数。
 
 组件收到 `size`、`config`（这张卡保存的设置）、`editing` 和 `openSettings()`。

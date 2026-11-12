@@ -38,7 +38,7 @@ Status: early (P0b). MIT licensed.
 
 The default board holds Today, To-do, Calendar and Notes; add the rest from the gallery. Built-in widgets added by an upgrade appear only in the gallery and are not placed on existing boards.
 
-Choose **Edit** to drag cards, change sizes, remove cards, open a widget's settings or add widgets from the gallery. Boards are tabs: **+** adds one, double-click renames it, and edit mode can delete it.
+Choose **Edit** to drag cards, change sizes, remove cards, open a widget's settings or add widgets from the gallery, which groups them into Daily, Agent, News and Productivity & tools, can be searched and stays open so you can add several. Boards are tabs: **+** adds one, double-click renames it, and edit mode can delete it.
 
 Data stays on your machine, in the Harness profile storage (`~/.dsh/storages/dsh_desk.json`). Data from the earlier `dsh-bento` version (`dsh_bento.json`) is copied over on first start; the old file is left in place. The Host makes the only network requests and caches the responses:
 
@@ -94,6 +94,7 @@ A complete bundle is in [`examples/hello-widget`](examples/hello-widget). A newl
 
 - `title: false` hides the card header; `banner: true` renders without a frame.
 - `description` is shown in the widget gallery.
+- `category` groups the widget in the gallery: `daily`, `agent`, `news` or `tools`. Widgets without one, or with any other value, go under Plugins.
 - `settings` is a list of fields for the settings dialog: `{key, type, label, default?, options?, placeholder?}` with `type` one of `text`, `textarea`, `select` (with `options: [{value, label}]`) or `toggle`. Labels can be strings or functions that return a string.
 
 The component receives `size`, `config` (the saved settings for this card), `editing` and `openSettings()`.
