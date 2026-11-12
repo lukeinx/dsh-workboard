@@ -2,7 +2,7 @@
 
 [简体中文](README.zh.md)
 
-Desk (`@lukeinx/dsh-desk`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with 25 widgets, including a today banner, to-dos, notes, an ICS calendar, weather, an agent session monitor, quick prompts, usage stats, Git repositories, system status and markets, works with zero configuration, and lets the agent read and change your to-dos, notes and inbox from any conversation. The agent can also build new widgets from a sentence, and other plugins can add their own.
+Desk (`@lukeinx/dsh-desk`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with 31 widgets, including a today banner, to-dos, notes, an ICS calendar, weather, an agent session monitor, quick prompts, usage stats, Git repositories, system status, markets, outputs, scheduled tasks and network, works with zero configuration, and lets the agent read and change your to-dos, notes and inbox from any conversation. The agent can also build new widgets from a sentence, and other plugins can add their own.
 
 Status: early (P0b). MIT licensed.
 
@@ -35,6 +35,12 @@ Status: early (P0b). MIT licensed.
 | Photo frame | `m` `s` `t` `l` `w` | Cycles through photos in a local folder (`~/Pictures` by default); click for the next one |
 | Markets | `t` `m` `s` `l` `w` | Exchange rates (`USD/CNY`), China / Hong Kong / US stocks (`sh600519`, `hk00700`, `usAAPL`) and crypto (`BTC`, `cg:<id>`); red or green for gains |
 | Trending | `l` `t` `m` `w` | Hot lists, one tab per source: Weibo, Zhihu, 36Kr, sspai, Hacker News, GitHub Trending, Product Hunt and Reddit (world news, technology, science); Bilibili and V2EX can be turned on in settings; opened items turn grey |
+| Outputs | `t` `l` `m` `w` | Files the agent presented as deliverables, and optionally documents it created, newest first; click to open, or reveal in Finder and jump to the session |
+| Scheduled tasks | `t` `l` `m` `w` | All scheduled tasks with their recurrence and next run; run now, pause, resume or delete, and start a session to create a new one |
+| Pinned sessions | `t` `l` `m` `w` | Sessions you pin, with each one's latest message; click to open |
+| Recent files | `t` `l` `m` `w` | Newest files in `~/Downloads` and `~/Desktop` or your own folders; open, reveal, or hand a file to the agent. Apps, installers and scripts are revealed instead of opened |
+| Clipboard | `t` `l` `m` `w` | Recent text you copied while the panel is open; copy again or send an item with a preset such as Translate or Summarize |
+| Network | `m` `s` `t` `l` `w` | Download and upload speed, local and public IP, system proxy and latency to the sites you list |
 
 Agent, Quick prompt and Inbox share one workspace choice, listing the Harness workspaces; changing it on one card changes it on the others.
 
@@ -52,8 +58,9 @@ Data stays on your machine, in the Harness profile storage (`~/.dsh/storages/dsh
 - Markets: Tencent quotes (`qt.gtimg.cn`) for stocks, [open.er-api.com](https://open.er-api.com) for exchange rates (updated daily), [CoinGecko](https://www.coingecko.com) for crypto
 - GitHub: the local `gh` CLI with its existing sign-in
 - Trending: the sites' own web endpoints for Weibo, Zhihu, 36Kr, sspai, Bilibili and V2EX (unofficial, may break when a site changes), the [HN Algolia API](https://hn.algolia.com/api), the GitHub Trending page, and the Product Hunt and Reddit feeds; cached for 10 minutes
+- Network: your public IP from [ipinfo.io](https://ipinfo.io) (falling back to [ip.sb](https://ip.sb)), and latency to the sites you list, both through `curl` and the system proxy when one is set
 
-A few widgets only read your machine: Usage reads the session logs under `~/.dsh/sessions`; Git repos runs `git status` and runs `git fetch` only when you choose Fetch; System uses `vm_stat` and `pmset` on macOS; Photo frame uses `sips` on macOS to shrink photos to 1280 px, cached in the system temp directory.
+A few widgets only read your machine: Usage reads the session logs under `~/.dsh/sessions`; Git repos runs `git status` and runs `git fetch` only when you choose Fetch; System uses `vm_stat` and `pmset` on macOS; Photo frame uses `sips` on macOS to shrink photos to 1280 px, cached in the system temp directory. Outputs reads the same session logs; Recent files lists only the top level of each folder; Clipboard reads `pbpaste` (macOS) or `wl-paste` / `xclip` (Linux) every 2 seconds while the card is shown and keeps history in memory only, never on disk.
 
 Usage counts the usage fields in the logs. Some providers do not report tokens; their requests count toward requests only, and the card says so. Running sees only sessions in the current Harness process.
 

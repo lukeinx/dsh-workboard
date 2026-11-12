@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-工作台（`@lukeinx/dsh-desk`）在 DeepSeek Harness 侧栏增加一个模块化工作台。内置 25 个 widget，包括今日横栏、待办、速记、ICS 日历、天气、Agent 会话、Prompt 快启、用量统计、Git 工作区、系统状态和行情，零配置可用；Agent 可以在任意对话里读写你的待办、速记和收集箱；还可以一句话让 Agent 生成新的 widget，其他插件也可以注册自己的 widget。
+工作台（`@lukeinx/dsh-desk`）在 DeepSeek Harness 侧栏增加一个模块化工作台。内置 31 个 widget，包括今日横栏、待办、速记、ICS 日历、天气、Agent 会话、Prompt 快启、用量统计、Git 工作区、系统状态、行情、产出物、定时任务和网络，零配置可用；Agent 可以在任意对话里读写你的待办、速记和收集箱；还可以一句话让 Agent 生成新的 widget，其他插件也可以注册自己的 widget。
 
 状态：早期（P0b）。MIT 许可。
 
@@ -35,6 +35,12 @@
 | 相框 | `m` `s` `t` `l` `w` | 轮播本机文件夹（默认 `~/Pictures`）里的照片，点击换下一张 |
 | 行情 | `t` `m` `s` `l` `w` | 汇率（`USD/CNY`）、A 股 / 港股 / 美股（`sh600519`、`hk00700`、`usAAPL`）和加密货币（`BTC`、`cg:<id>`）；可选红涨或绿涨 |
 | 热榜 | `l` `t` `m` `w` | 每个信源一个标签：微博、知乎、36 氪、少数派、Hacker News、GitHub Trending、Product Hunt 和 Reddit（国际新闻、科技、科学）；B 站和 V2EX 可在设置里打开；打开过的条目变灰 |
+| 产出物 | `t` `l` `m` `w` | Agent 交付的文件，可选附带它新建的文档，按时间倒序；点击打开，也可以在 Finder 中定位或跳到对应会话 |
+| 定时任务 | `t` `l` `m` `w` | 全部定时任务的周期和下次运行时间；立即运行、暂停、恢复或删除，新建时开一个会话来创建 |
+| 收藏会话 | `t` `l` `m` `w` | 你收藏的会话和各自最新一条消息；点击打开 |
+| 最近文件 | `t` `l` `m` `w` | `~/Downloads`、`~/Desktop` 或自定文件夹里最新的文件；打开、定位或交给 Agent。应用、安装包和脚本只定位不打开 |
+| 剪贴板 | `t` `l` `m` `w` | 面板打开期间复制过的文本；再次复制，或带上「翻译」「总结」等预设发给 Agent |
+| 网络 | `m` `s` `t` `l` `w` | 上下行速率、本机和公网 IP、系统代理，以及到你所列站点的延迟 |
 
 Agent、Prompt 快启和收集箱共用同一个工作区选择，选项来自 Harness 登记的工作区；在任一卡片切换后其他卡片同步。
 
@@ -52,8 +58,9 @@ Agent、Prompt 快启和收集箱共用同一个工作区选择，选项来自 H
 - 行情：股票走腾讯行情 `qt.gtimg.cn`，汇率走 [open.er-api.com](https://open.er-api.com)（每日更新），加密货币走 [CoinGecko](https://www.coingecko.com)
 - GitHub：通过本机 `gh` CLI，用它已有的登录
 - 热榜：微博、知乎、36 氪、少数派、B 站、V2EX 走各站网页接口（非官方，站点改版可能失效），Hacker News 走 [HN Algolia API](https://hn.algolia.com/api)，GitHub 走 Trending 页，Product Hunt 和 Reddit 走订阅源；缓存 10 分钟
+- 网络：公网 IP 走 [ipinfo.io](https://ipinfo.io)（失败时换 [ip.sb](https://ip.sb)），延迟测你列出的站点，都用 `curl`，设置了系统代理时经过代理
 
-另有几个 widget 只读本机：用量读 `~/.dsh/sessions` 下的会话日志；Git 工作区运行 `git status`，只在你点「获取远端」时执行 `git fetch`；系统状态在 macOS 用 `vm_stat` 和 `pmset`；相框在 macOS 用 `sips` 把照片缩到 1280px，缓存在系统临时目录。
+另有几个 widget 只读本机：用量读 `~/.dsh/sessions` 下的会话日志；Git 工作区运行 `git status`，只在你点「获取远端」时执行 `git fetch`；系统状态在 macOS 用 `vm_stat` 和 `pmset`；相框在 macOS 用 `sips` 把照片缩到 1280px，缓存在系统临时目录。产出物读同一批会话日志；最近文件只列各文件夹第一层；剪贴板在卡片显示期间每 2 秒读一次 `pbpaste`（macOS）或 `wl-paste` / `xclip`（Linux），历史只存在内存，不写盘。
 
 用量按日志里的 usage 字段统计。部分 provider 不上报 token，这些请求只计入请求数，卡片底部会注明。「运行中」只看得到当前 Harness 进程里的会话。
 

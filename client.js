@@ -23,6 +23,11 @@ window.__ModuleLoader__.load({
     const SYSTEM_MS = 5000;
     const MARKET_MS = 60_000;
     const TRENDING_MS = 10 * 60_000;
+    const OUTPUTS_MS = 30_000;
+    const FILES_MS = 15_000;
+    const CLIP_MS = 2000;
+    const NET_MS = 2000;
+    const MAX_PINNED = 20;
     // 尺寸档位：[列, 行]，行单位 80px；「横栏」半高，其余行数成对。
     const SIZES = {bar: [4, 1], s: [1, 2], m: [2, 2], t: [1, 4], l: [2, 4], w: [4, 2]};
     // 组件库分类；未声明或不在表内的归入 plugin。
@@ -106,6 +111,28 @@ window.__ModuleLoader__.load({
       cw_editPrompt: '请修改我 Desk 工作台上的 widget「{title}」（id：{id}）：{desc}\n\n先加载 desk-widget skill，用 desk_widget get 读取当前定义后再改。',
       cw_fix: '让 Agent 修复', cw_fixPrompt: '我 Desk 工作台上的 widget「{title}」（id：{id}）运行出错：\n{error}\n\n请先加载 desk-widget skill，用 desk_widget get 读取当前定义，找到原因后修复。',
       cw_source: '源码', cw_title: '标题', cw_delete: '删除 widget', cw_fetch: '可访问的地址', cw_none: '无',
+      outputs: '产出物', d_outputs: 'Agent 交付和新建的文档，点开即用，可回到来源会话',
+      o_presented: '交付', o_reveal: '定位', o_session: '会话', o_none: '还没有产出物', o_count: '{n} 个文件', o_missing: '已删除',
+      f_created: '包含 Agent 新建的文档', f_showMissing: '显示已删除的文件',
+      tasks: '定时任务', d_tasks: '所有定时任务的下次运行时间与周期，可立即运行、暂停、恢复、删除',
+      sc_none: '没有定时任务', sc_unavailable: '当前 Harness 不支持定时任务', sc_run: '运行', sc_delete: '删除', sc_paused: '已暂停', sc_ended: '已结束',
+      sc_pending: '上一次还在执行', sc_count: '{a} 个启用 · {p} 个暂停', sc_clear: '清除已结束 {n}', sc_new: '新建',
+      sc_newPrompt: '帮我创建一个定时任务：', f_showEnded: '显示已结束的任务',
+      once: '一次性', every_n: '每 {n}', daily_at: '每天 {t}', weekly_at: '每周{d} {t}', monthly_at: '每月 {d} 日 {t}',
+      iv_min: '{n} 分钟', iv_hour: '{n} 小时', iv_day: '{n} 天', iv_week: '{n} 周',
+      pinned: '收藏会话', d_pinned: '常用会话固定在这里，显示最新一条消息，点一下继续',
+      pin_add: '收藏会话', pin_none: '还没有收藏的会话', pin_search: '搜索会话标题或目录', pin_missing: '会话已不存在', unpin: '取消收藏', pin_count: '已收藏 {n}',
+      files: '最近文件', d_files: '下载、桌面等文件夹里最新的文件，可打开、定位或交给 Agent',
+      f_dirs: '文件夹（每行一个）', f_folders: '包含文件夹', fi_none: '没有文件', fi_error: '{n} 个文件夹读取失败',
+      filePrompt: '看一下这个文件：{path}\n先告诉我它是什么、有哪些要点，再问我要怎么处理。',
+      clipboard: '剪贴板', d_clipboard: '最近复制的文字，一键交给 Agent 翻译、总结或改写',
+      cb_unsupported: '当前系统不支持读取剪贴板', cb_empty: '复制一段文字后会出现在这里', cb_copy: '复制', cb_copied: '已复制', cb_clear: '清空',
+      f_cbPresets: '预设（每行一个：名称 | 指令，剪贴板内容附在指令后）',
+      defaultClipPresets: '翻译 | 翻译下面的内容：中文译成英文，其他语言译成中文\n总结 | 用几条要点总结下面的内容\n解释 | 解释下面这段内容，必要时举例\n改写 | 把下面的内容改写得更清晰、简洁',
+      network: '网络', d_network: '网速、内网和出口 IP、系统代理，以及到常用站点的延迟',
+      n_down: '下行', n_up: '上行', n_local: '内网', n_public: '出口', n_proxy: '代理', n_noProxy: '未开启', n_pac: '自动代理（PAC）',
+      n_unreachable: '不可达', n_curl: '需要 curl', n_latency: '延迟',
+      f_targets: '测速站点（每行一个：名称 https://…）', defaultTargets: '百度 https://www.baidu.com\nGitHub https://github.com\nGoogle https://www.google.com',
     };
     const en = {
       lang: 'en-US', title: 'Desk', loadFailed: 'Failed to load', empty: 'No widgets on this board yet',
@@ -185,6 +212,28 @@ window.__ModuleLoader__.load({
       cw_editPrompt: 'Change the widget “{title}” (id: {id}) on my Desk dashboard: {desc}\n\nLoad the desk-widget skill first, read the current definition with desk_widget get, then change it.',
       cw_fix: 'Ask agent to fix', cw_fixPrompt: 'The widget “{title}” (id: {id}) on my Desk dashboard fails:\n{error}\n\nLoad the desk-widget skill, read the current definition with desk_widget get, find the cause and fix it.',
       cw_source: 'Source', cw_title: 'Title', cw_delete: 'Delete widget', cw_fetch: 'Allowed addresses', cw_none: 'none',
+      outputs: 'Outputs', d_outputs: 'Documents the agent presented or created; open them or jump back to the session',
+      o_presented: 'Presented', o_reveal: 'Reveal', o_session: 'Session', o_none: 'No outputs yet', o_count: '{n} files', o_missing: 'Deleted',
+      f_created: 'Include documents the agent created', f_showMissing: 'Show deleted files',
+      tasks: 'Scheduled tasks', d_tasks: 'Next run and recurrence of every scheduled task; run now, pause, resume or delete',
+      sc_none: 'No scheduled tasks', sc_unavailable: 'This Harness does not expose scheduled tasks', sc_run: 'Run', sc_delete: 'Delete', sc_paused: 'Paused', sc_ended: 'Ended',
+      sc_pending: 'The previous run is still going', sc_count: '{a} active · {p} paused', sc_clear: 'Clear {n} ended', sc_new: 'New',
+      sc_newPrompt: 'Create a scheduled task for me: ', f_showEnded: 'Show ended tasks',
+      once: 'Once', every_n: 'Every {n}', daily_at: 'Daily {t}', weekly_at: 'Every {d} {t}', monthly_at: 'Monthly on day {d} {t}',
+      iv_min: '{n} min', iv_hour: '{n} h', iv_day: '{n} d', iv_week: '{n} wk',
+      pinned: 'Pinned sessions', d_pinned: 'Keep the sessions you return to here, with their latest message',
+      pin_add: 'Pin a session', pin_none: 'No pinned sessions', pin_search: 'Search titles or folders', pin_missing: 'Session no longer exists', unpin: 'Unpin', pin_count: '{n} pinned',
+      files: 'Recent files', d_files: 'Newest files in Downloads, Desktop or other folders; open, reveal or hand to the agent',
+      f_dirs: 'Folders, one per line', f_folders: 'Include folders', fi_none: 'No files', fi_error: '{n} folder(s) could not be read',
+      filePrompt: 'Take a look at this file: {path}\nTell me what it is and its key points first, then ask me what to do with it.',
+      clipboard: 'Clipboard', d_clipboard: 'Text you copied recently; hand it to the agent to translate, summarize or rewrite',
+      cb_unsupported: 'Reading the clipboard is not supported on this system', cb_empty: 'Copy some text and it shows up here', cb_copy: 'Copy', cb_copied: 'Copied', cb_clear: 'Clear',
+      f_cbPresets: 'Presets, one per line: name | instruction; the clipboard text is appended',
+      defaultClipPresets: 'Translate | Translate the text below into English, or into Chinese if it is already English\nSummarize | Summarize the text below in a few bullet points\nExplain | Explain the text below, with an example if useful\nRewrite | Rewrite the text below to be clearer and more concise',
+      network: 'Network', d_network: 'Throughput, local and public IP, system proxy and latency to sites you use',
+      n_down: 'Down', n_up: 'Up', n_local: 'Local', n_public: 'Public', n_proxy: 'Proxy', n_noProxy: 'Off', n_pac: 'Auto (PAC)',
+      n_unreachable: 'Unreachable', n_curl: 'Needs curl', n_latency: 'Latency',
+      f_targets: 'Sites to test, one per line: name https://…', defaultTargets: 'Google https://www.google.com\nGitHub https://github.com\nCloudflare https://www.cloudflare.com',
     };
 
     // 公共领域的经典短句，按日期轮换。
@@ -530,6 +579,29 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 .bnt-rowact:hover{background:var(--dsw-alias-bg-layer-1)}
 .bnt-row:hover .bnt-rowact{display:block}
 .bnt-row:hover .bnt-rowact~time{display:none}
+.bnt-rowact[data-danger]{color:var(--dsw-alias-state-error-primary)}
+.bnt-rowact[data-armed]{display:block}
+.bnt-ext{width:28px;height:28px;border-radius:7px;flex:none;display:grid;place-items:center;box-sizing:border-box;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);font-size:9px;font-weight:600;font-style:normal;letter-spacing:.2px;text-transform:uppercase;color:var(--dsw-alias-label-secondary);overflow:hidden}
+.bnt-inrow[data-sel]{box-shadow:inset 2px 0 0 var(--dsw-alias-brand-primary);background:var(--dsw-alias-bg-layer-2)}
+.bnt-inrow .bnt-del[data-plain]:hover{color:var(--dsw-alias-label-primary)}
+.bnt-cliptext{flex:1;min-height:0;overflow:hidden;white-space:pre-wrap;word-break:break-word;line-height:1.5;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+.bnt-search{margin-bottom:6px;flex:none}
+.bnt-net{display:flex;flex-direction:column;gap:10px;height:100%;min-height:0}
+.bnt-net[data-size=m],.bnt-net[data-size=w]{flex-direction:row;align-items:center;gap:20px}
+.bnt-net[data-size=w] .bnt-spark{align-self:stretch}
+.bnt-rates{display:flex;gap:16px;flex:none}
+.bnt-net[data-size=s] .bnt-rates,.bnt-net[data-size=m] .bnt-rates,.bnt-net[data-size=w] .bnt-rates{flex-direction:column;gap:6px}
+.bnt-rates>div{display:flex;flex-direction:column;min-width:0}
+.bnt-rates small{font-size:12px;color:var(--dsw-alias-label-secondary)}
+.bnt-rates b{font-size:20px;font-weight:600;letter-spacing:-.5px;line-height:1.2;white-space:nowrap}
+.bnt-kv{display:grid;grid-template-columns:max-content minmax(0,1fr) max-content;gap:5px 10px;font-size:12px;align-content:start;min-width:0;flex:1}
+.bnt-kv>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bnt-kv>span:nth-child(3n+1),.bnt-kv>span:nth-child(3n){color:var(--dsw-alias-label-secondary)}
+.bnt-kv>span:nth-child(3n){text-align:right}
+.bnt-kv [data-level=ok]{color:var(--dsw-alias-state-success-primary)}
+.bnt-kv [data-level=warn]{color:var(--dsw-alias-state-warn-primary)}
+.bnt-kv [data-level=bad]{color:var(--dsw-alias-state-error-primary)}
+.bnt-spark polyline.bnt-up{stroke:var(--dsw-alias-label-secondary);opacity:.7}
 
 @media (max-width:900px){.bnt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.bnt-card[data-c="4"]{grid-column:span 2}.bnt-today .bnt-quote,.bnt-today .bnt-qsep{display:none}}
 @media (max-width:600px){.bnt-grid{grid-template-columns:minmax(0,1fr)}.bnt-card{grid-column:auto!important}}
@@ -735,6 +807,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
       pencil: () => svg(14, 'M4 20h4L18.5 9.5a2.83 2.83 0 0 0-4-4L4 16v4zM13.5 6.5l4 4'),
       sparkle: () => svg(14, ['M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z', 'M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z'], 1.6),
       code: () => svg(14, 'M8 7l-5 5 5 5M16 7l5 5-5 5'),
+      copy: () => svg(14, ['M9 9h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1z', 'M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1'], 1.8),
       gear: () => svg(14, ['M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z'], 1.6),
     };
 
@@ -2504,6 +2577,341 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           settings: [...TR_CN, ...TR_INTL].map(id => ({key: trKey(id), type: 'toggle', default: !TR_OFF.has(id), label: () => t(`tr_${id}`)})),
         };
 
+        const blank = text => h('div', {className: 'bnt-blank'}, text);
+        const rowact = (label, fn, opts = {}) => h('button', {type: 'button', className: 'bnt-btn bnt-rowact', 'data-danger': opts.danger ? '' : undefined, 'data-armed': opts.armed ? '' : undefined, disabled: opts.disabled,
+          onClick: e => { e.stopPropagation(); fn(); }}, label);
+        const extOf = name => /\.([a-z0-9]{1,5})$/i.exec(name)?.[1].toLowerCase() ?? '';
+        const fileSize = n => (n == null ? '' : n < 1024 ? `${n} B` : n < 1024 ** 2 ? `${Math.round(n / 1024)} KB` : n < 1024 ** 3 ? `${(n / 1024 ** 2).toFixed(1)} MB` : `${(n / 1024 ** 3).toFixed(1)} GB`);
+        const parentName = path => baseName(String(path).split('/').slice(0, -1).join('/'));
+        const FileBadge = ({name, folder}) => h('i', {className: 'bnt-ext', 'aria-hidden': true}, folder ? h(Icon.folder) : (extOf(name) || '·').slice(0, 4));
+        const openFile = (path, reveal) => call('file.open', {path, reveal: reveal === true});
+
+        function Outputs({size, config}) {
+          useLocale();
+          const now = useNow();
+          const ui = ctx.get?.('uiWorkspace');
+          const created = config?.created !== false;
+          const res = useRemote('outputs.list', {created}, OUTPUTS_MS);
+          const [error, setError] = useState('');
+          const [busy, setBusy] = useState(false);
+          const v = res.value;
+          if (!v) return blank(res.error || '…');
+          const fail = e => setError(String(e?.message || e));
+          const nowMs = now.getTime();
+          const items = v.items.filter(x => x.exists || config?.showMissing);
+          const refresh = () => {
+            setBusy(true);
+            call('outputs.list', {created, fresh: true}).then(() => res.reload(), fail).finally(() => setBusy(false));
+          };
+          const row = x => h('div', {key: x.path, className: 'bnt-row bnt-rowbtn', 'data-dim': x.exists ? undefined : '', title: [x.path, x.description].filter(Boolean).join('\n'),
+            style: {cursor: x.exists ? 'pointer' : undefined}, onClick: () => { if (x.exists) openFile(x.path).then(() => setError(''), fail); }},
+            h(FileBadge, {name: x.name}),
+            h('div', null, h('b', null, x.name),
+              h('small', null, [x.exists ? '' : t('o_missing'), x.kind === 'presented' ? t('o_presented') : '', size === 'm' ? '' : x.description || parentName(x.path), relTime(x.time, nowMs)].filter(Boolean).join(' · '))),
+            x.exists ? rowact(t('o_reveal'), () => { openFile(x.path, true).catch(fail); }) : null,
+            x.sessionId && typeof ui?.openSession === 'function' && size !== 'm' ? rowact(t('o_session'), () => ui.openSession(x.sessionId)) : null);
+          return h(React.Fragment, null,
+            h('div', {className: 'bnt-rows'}, items.length ? items.slice(0, 60).map(row) : blank(t('o_none'))),
+            error ? h('div', {className: 'bnt-calerr', title: error}, error) : null,
+            size === 'm' ? null : h('div', {className: 'bnt-notefoot'}, h('span', null, items.length ? fill(t('o_count'), {n: items.length}) : ''),
+              h('button', {type: 'button', className: 'bnt-btn', disabled: busy, onClick: refresh}, busy ? '…' : t('refresh'))));
+        }
+        Outputs.desk = {
+          apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_outputs'),
+          settings: [
+            {key: 'created', type: 'toggle', default: true, label: () => t('f_created')},
+            {key: 'showMissing', type: 'toggle', default: false, label: () => t('f_showMissing')},
+          ],
+        };
+
+        const hhmm = (hh, mm) => `${pad(hh)}:${pad(mm)}`;
+        const weekdayNames = days => {
+          const lang = t('lang');
+          const isZh = lang.startsWith('zh');
+          const fmt = new Intl.DateTimeFormat(lang, {weekday: isZh ? 'narrow' : 'short'});
+          // 2024-01-07 是周日；0 和 7 都按周日。
+          return days.map(n => fmt.format(new Date(2024, 0, 7 + (Number(n) % 7)))).join(isZh ? '、' : ', ');
+        };
+        const intervalText = sec => {
+          if (sec % 604800 === 0) return fill(t('iv_week'), {n: sec / 604800});
+          if (sec % 86400 === 0) return fill(t('iv_day'), {n: sec / 86400});
+          if (sec % 3600 === 0) return fill(t('iv_hour'), {n: sec / 3600});
+          return fill(t('iv_min'), {n: Math.max(1, Math.round(sec / 60))});
+        };
+        const RRULE_DAYS = {SU: 0, MO: 1, TU: 2, WE: 3, TH: 4, FR: 5, SA: 6};
+        const rruleText = raw => {
+          const line = String(raw ?? '').split('\n').find(l => l.includes('FREQ=')) ?? '';
+          const rule = Object.fromEntries(line.replace(/^RRULE:/, '').split(';').map(p => p.split('=')));
+          const n = Number(rule.INTERVAL) || 1;
+          const time = rule.BYHOUR != null && !rule.BYHOUR.includes(',') ? hhmm(Number(rule.BYHOUR), Number(rule.BYMINUTE) || 0) : '';
+          const days = rule.BYDAY ? rule.BYDAY.split(',').map(d => RRULE_DAYS[d.slice(-2)]).filter(d => d != null) : [];
+          const every = sec => `${fill(t('every_n'), {n: intervalText(sec)})} ${time}`.trim();
+          if (rule.FREQ === 'MINUTELY') return every(n * 60);
+          if (rule.FREQ === 'HOURLY') return every(n * 3600);
+          if (rule.FREQ === 'DAILY') return n === 1 ? fill(t('daily_at'), {t: time}).trim() : every(n * 86400);
+          if (rule.FREQ === 'WEEKLY') return days.length && n === 1 ? fill(t('weekly_at'), {d: weekdayNames(days), t: time}).trim() : every(n * 604800);
+          if (rule.FREQ === 'MONTHLY' && rule.BYMONTHDAY && !rule.BYMONTHDAY.includes(',')) return fill(t('monthly_at'), {d: rule.BYMONTHDAY, t: time}).trim();
+          return line || String(raw ?? '');
+        };
+        const recurText = k => {
+          const x = k.timing ?? {};
+          if (k.kind === 'every') return fill(t('every_n'), {n: intervalText(Number(x.everySeconds) || 60)});
+          if (k.kind === 'daily') return fill(t('daily_at'), {t: x.time ?? ''}).trim();
+          if (k.kind === 'weekly') return fill(t('weekly_at'), {d: weekdayNames(x.weekdays ?? []), t: x.time ?? ''}).trim();
+          if (k.kind === 'cron') return `cron ${x.expression ?? ''}`;
+          if (k.kind === 'rrule') return rruleText(x.rrule);
+          return t('once');
+        };
+
+        function Schedules({size, config}) {
+          useLocale();
+          const now = useNow();
+          const ui = ctx.get?.('uiWorkspace');
+          const ws = useWorkspace();
+          const res = useRemote('schedule.list', {}, AGENT_MS);
+          const [confirm, setConfirm] = useState('');
+          const [busy, setBusy] = useState('');
+          const [error, setError] = useState('');
+          const v = res.value;
+          if (v === undefined) return blank(res.error || '…');
+          if (v === null) return blank(t('sc_unavailable'));
+          const nowMs = now.getTime();
+          const lang = t('lang');
+          const fail = e => setError(String(e?.message || e));
+          const rank = k => (k.running ? 0 : k.status === 'active' ? 1 : k.status === 'paused' ? 2 : 3);
+          const all = [...v].sort((a, b) => rank(a) - rank(b) || (a.scheduledAt || 9e15) - (b.scheduledAt || 9e15));
+          const ended = all.filter(k => k.status === 'ended');
+          const list = config?.showEnded ? all : all.filter(k => k.status !== 'ended');
+          const wide = size === 'l' || size === 'w';
+          const act = (k, action) => {
+            setBusy(k.id);
+            setError('');
+            const job = action === 'run'
+              ? call('schedule.run', {id: k.id}).then(r => { if (r?.pending) setError(t('sc_pending')); })
+              : call('schedule.edit', {id: k.id, action});
+            job.then(() => res.reload(), fail).finally(() => { setBusy(''); setConfirm(''); });
+          };
+          const row = k => {
+            const target = k.lastSessionId || k.sessionId;
+            const when = k.running ? t('executing') : k.status === 'paused' ? t('sc_paused') : k.status === 'ended' ? t('sc_ended')
+              : k.scheduledAt ? `${relTime(k.scheduledAt, nowMs)} · ${new Date(k.scheduledAt).toLocaleString(lang, {month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'})}` : '';
+            const recur = recurText(k);
+            const off = busy === k.id;
+            return h('div', {key: k.id, className: 'bnt-row bnt-rowbtn', 'data-dim': k.status === 'active' ? undefined : '', title: [k.title, recur, k.prompt !== k.title ? k.prompt : ''].filter(Boolean).join('\n'),
+              style: {cursor: target ? 'pointer' : undefined}, onClick: () => { if (target) ui?.openSession?.(target); }},
+              h('span', {className: 'bnt-dot', 'data-state': k.running ? 'running' : k.status === 'active' ? 'done' : undefined}),
+              h('div', null, h('b', null, k.title), h('small', null, [when, size === 'm' ? '' : recur].filter(Boolean).join(' · '))),
+              k.status !== 'ended' && !k.running ? rowact(t('sc_run'), () => act(k, 'run'), {disabled: off}) : null,
+              k.status === 'active' ? rowact(t('pause'), () => act(k, 'pause'), {disabled: off}) : k.status === 'paused' ? rowact(t('resume'), () => act(k, 'resume'), {disabled: off}) : null,
+              wide || k.status === 'ended' ? rowact(confirm === k.id ? t('confirmDelete') : t('sc_delete'), () => (confirm === k.id ? act(k, 'delete') : setConfirm(k.id)), {danger: true, armed: confirm === k.id, disabled: off}) : null);
+          };
+          const active = all.filter(k => k.status === 'active').length;
+          const paused = all.filter(k => k.status === 'paused').length;
+          const clear = () => { call('schedule.clear').then(() => res.reload(), fail); };
+          const create = () => ui.startSession(ws.id, {prompt: t('sc_newPrompt'), whenDraftExists: 'replace'});
+          return h(React.Fragment, null,
+            h('div', {className: 'bnt-rows', onMouseLeave: () => setConfirm('')}, list.length ? list.map(row) : blank(t('sc_none'))),
+            error ? h('div', {className: 'bnt-calerr', title: error}, error) : null,
+            size === 'm' ? null : h('div', {className: 'bnt-notefoot'},
+              h('span', null, all.length ? fill(t('sc_count'), {a: active, p: paused}) : ''),
+              h('div', {className: 'bnt-footact'},
+                config?.showEnded && ended.length ? h('button', {type: 'button', className: 'bnt-btn', onClick: clear}, fill(t('sc_clear'), {n: ended.length})) : null,
+                typeof ui?.startSession === 'function' ? h('button', {type: 'button', className: 'bnt-btn', onClick: create}, t('sc_new')) : null)));
+        }
+        Schedules.desk = {
+          apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_tasks'),
+          settings: [{key: 'showEnded', type: 'toggle', default: false, label: () => t('f_showEnded')}],
+        };
+
+        function Pinned({size}) {
+          useLocale();
+          const now = useNow();
+          const prefs = usePrefs();
+          const ui = ctx.get?.('uiWorkspace');
+          const ids = Array.isArray(prefs.pinnedSessions) ? prefs.pinnedSessions.map(String) : [];
+          const [picking, setPicking] = useState(false);
+          const [query, setQuery] = useState('');
+          const res = useRemote('session.pinned', ids.length ? {ids} : null, AGENT_MS);
+          const all = useRemote('session.list', picking ? {} : null, AGENT_MS);
+          if (res.value === null || (picking && all.value === null)) return blank(t('agentsUnavailable'));
+          const nowMs = now.getTime();
+          const save = list => { void prefsStore.put({pinnedSessions: list.slice(0, MAX_PINNED)}); };
+          const statusOf = s => (s.waiting ? t('waitingYou') : s.running ? t('running') : relTime(s.updatedAt, nowMs));
+          if (picking) {
+            const q = query.trim().toLowerCase();
+            const candidates = (all.value ?? []).filter(s => !ids.includes(s.id) && (!q || `${s.title} ${s.cwd}`.toLowerCase().includes(q))).slice(0, 40);
+            const full = ids.length >= MAX_PINNED;
+            return h(React.Fragment, null,
+              h('input', {className: 'bnt-input bnt-search', autoFocus: true, value: query, placeholder: t('pin_search'), onChange: e => setQuery(e.target.value)}),
+              h('div', {className: 'bnt-rows'},
+                !all.value ? blank(all.error || '…') : candidates.length ? candidates.map(s => h('button', {key: s.id, type: 'button', className: 'bnt-btn bnt-row bnt-rowbtn', disabled: full, title: s.cwd || undefined, onClick: () => save([...ids, s.id])},
+                  h(Icon.plus),
+                  h('div', null, h('b', null, s.title || t('untitledSession')), h('small', null, [relTime(s.updatedAt, nowMs), baseName(s.cwd)].filter(Boolean).join(' · '))))) : blank(t('noSessions'))),
+              h('div', {className: 'bnt-notefoot'}, h('span', null, fill(t('pin_count'), {n: ids.length})),
+                h('button', {type: 'button', className: 'bnt-btn', onClick: () => { setPicking(false); setQuery(''); }}, t('doneEdit'))));
+          }
+          const rows = ids.length ? res.value : [];
+          const unpin = id => save(ids.filter(x => x !== id));
+          const del = id => h('button', {type: 'button', className: 'bnt-btn bnt-del', 'aria-label': t('unpin'), title: t('unpin'), onClick: e => { e.stopPropagation(); unpin(id); }}, h(Icon.x));
+          const row = s => {
+            if (s.missing) return h('div', {key: s.id, className: 'bnt-row', 'data-dim': ''}, h('span', {className: 'bnt-dot'}), h('div', null, h('b', null, t('pin_missing'))), del(s.id));
+            const state = s.waiting ? 'waiting' : s.running ? 'running' : undefined;
+            const preview = size !== 'm' && s.preview;
+            return h('div', {key: s.id, className: 'bnt-row bnt-rowbtn', 'data-state': state, title: [s.title, s.cwd].filter(Boolean).join('\n'), style: {cursor: 'pointer'}, onClick: () => ui?.openSession?.(s.id)},
+              h('span', {className: 'bnt-dot', 'data-state': state}),
+              h('div', null, h('b', null, s.title || t('untitledSession')), h('small', null, preview || [statusOf(s), baseName(s.cwd)].filter(Boolean).join(' · '))),
+              preview ? h('time', null, statusOf(s)) : null,
+              del(s.id));
+          };
+          return h(React.Fragment, null,
+            h('div', {className: 'bnt-rows'}, !rows ? blank(res.error || '…') : rows.length ? rows.map(row) : blank(t('pin_none'))),
+            h('div', {className: 'bnt-notefoot'}, h('span', null, ids.length ? fill(t('pin_count'), {n: ids.length}) : ''),
+              h('button', {type: 'button', className: 'bnt-btn', onClick: () => setPicking(true)}, t('pin_add'))));
+        }
+        Pinned.desk = {apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_pinned')};
+
+        function Files({size, config}) {
+          useLocale();
+          const now = useNow();
+          const dirs = String(config?.dirs ?? '').trim() || '~/Downloads\n~/Desktop';
+          const res = useRemote('files.recent', {dirs, limit: 40, folders: config?.folders !== false}, FILES_MS);
+          const [error, setError] = useState('');
+          const v = res.value;
+          if (!v) return blank(res.error || '…');
+          const fail = e => setError(String(e?.message || e));
+          const nowMs = now.getTime();
+          const row = x => h('div', {key: x.path, className: 'bnt-row bnt-rowbtn', title: x.path, style: {cursor: 'pointer'}, onClick: () => openFile(x.path).then(() => setError(''), fail)},
+            h(FileBadge, {name: x.name, folder: x.folder}),
+            h('div', null, h('b', null, x.name), h('small', null, [x.folder ? '' : fileSize(x.size), size === 'm' ? '' : baseName(x.dir), relTime(x.time, nowMs)].filter(Boolean).join(' · '))),
+            x.folder ? null : rowact(t('o_reveal'), () => { openFile(x.path, true).catch(fail); }),
+            size === 'm' ? null : rowact(t('toAgent'), () => { launch(fill(t('filePrompt'), {path: x.path}), x.dir).catch(fail); }));
+          const failed = v.errors?.length ?? 0;
+          return h(React.Fragment, null,
+            h('div', {className: 'bnt-rows'}, v.items.length ? v.items.map(row) : blank(t('fi_none'))),
+            failed ? h('div', {className: 'bnt-calerr', title: v.errors.map(e => `${e.dir}: ${e.message}`).join('\n')}, fill(t('fi_error'), {n: failed})) : null,
+            error ? h('div', {className: 'bnt-calerr', title: error}, error) : null);
+        }
+        Files.desk = {
+          apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_files'),
+          settings: [
+            {key: 'dirs', type: 'textarea', label: () => t('f_dirs'), placeholder: '~/Downloads\n~/Desktop'},
+            {key: 'folders', type: 'toggle', default: true, label: () => t('f_folders')},
+          ],
+        };
+
+        const CopyIcon = () => svg(14, ['M9 9h11v11H9z', 'M5 15H4V4h11v1']);
+
+        function Clipboard({size, config}) {
+          useLocale();
+          const now = useNow();
+          const res = useRemote('clipboard.get', {}, CLIP_MS);
+          const ws = useWorkspace();
+          const [sel, setSel] = useState('');
+          const [busy, setBusy] = useState(false);
+          const [error, setError] = useState('');
+          const [copied, setCopied] = useState('');
+          const v = res.value;
+          if (!v) return blank(res.error || '…');
+          if (!v.supported) return blank(t('cb_unsupported'));
+          const fail = e => setError(String(e?.message || e));
+          const presets = parsePresets(config?.presets ?? t('defaultClipPresets'));
+          const items = v.items;
+          const current = items.find(x => x.id === sel) ?? items[0];
+          const send = p => {
+            if (!current || busy) return;
+            setBusy(true);
+            setError('');
+            launch(`${p.prompt}\n\n${current.text}`, ws.path, ws.id).catch(fail).finally(() => setBusy(false));
+          };
+          const copy = x => {
+            if (!navigator.clipboard?.writeText) return;
+            navigator.clipboard.writeText(x.text).then(() => { setCopied(x.id); setTimeout(() => setCopied(''), 1200); }, fail);
+          };
+          const remove = x => { if (sel === x.id) setSel(''); call('clipboard.remove', {id: x.id}).then(() => res.reload(), fail); };
+          const clear = () => { setSel(''); call('clipboard.remove', {}).then(() => res.reload(), fail); };
+          const chips = presets.length ? h('div', {className: 'bnt-chips', style: size === 'm' ? undefined : {marginTop: 8}},
+            presets.map((p, i) => h('button', {key: i, type: 'button', className: 'bnt-btn bnt-chip', title: p.prompt, disabled: busy || !current, onClick: () => send(p)}, p.name))) : null;
+          const status = busy || error ? h('div', {className: error ? 'bnt-calerr' : 'bnt-muted', style: {fontSize: 12}}, error || t('sending')) : null;
+          if (size === 'm') {
+            return h('div', {className: 'bnt-prompt', 'data-size': size},
+              h('div', {className: 'bnt-cliptext', title: current?.text}, current ? current.text : h('span', {className: 'bnt-muted'}, t('cb_empty'))),
+              chips, status);
+          }
+          return h(React.Fragment, null,
+            h('div', {className: 'bnt-rows'},
+              items.length ? items.map(x => h('div', {key: x.id, className: 'bnt-inrow', 'data-sel': x === current ? '' : undefined, title: x.text, style: {cursor: 'pointer'}, onClick: () => setSel(x.id)},
+                h('span', null, x.text),
+                h('small', null, copied === x.id ? t('cb_copied') : relTime(x.at, now.getTime())),
+                h('button', {type: 'button', className: 'bnt-btn bnt-del', 'data-plain': '', 'aria-label': t('cb_copy'), title: t('cb_copy'), onClick: e => { e.stopPropagation(); copy(x); }}, h(CopyIcon)),
+                h('button', {type: 'button', className: 'bnt-btn bnt-del', 'aria-label': t('remove'), title: t('remove'), onClick: e => { e.stopPropagation(); remove(x); }}, h(Icon.x)))) : blank(t('cb_empty'))),
+            chips, status,
+            h('div', {className: 'bnt-notefoot'}, h('span', null, items.length ? fill(t('inboxCount'), {n: items.length}) : ''),
+              h('div', {className: 'bnt-footact'}, h(WorkspaceSelect, {ws}),
+                items.length ? h('button', {type: 'button', className: 'bnt-btn', onClick: clear}, t('cb_clear')) : null)));
+        }
+        Clipboard.desk = {
+          apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_clipboard'),
+          settings: [{key: 'presets', type: 'textarea', label: () => t('f_cbPresets'), default: () => t('defaultClipPresets')}],
+        };
+
+        const rateText = n => (n >= 1024 ** 2 ? `${(n / 1024 ** 2).toFixed(1)} MB/s` : n >= 1024 ? `${Math.round(n / 1024)} KB/s` : `${Math.round(n)} B/s`);
+        const latLevel = p => (p.error ? 'bad' : p.ms < 300 ? 'ok' : p.ms < 1000 ? 'warn' : 'bad');
+
+        function Network({size, config}) {
+          useLocale();
+          const targets = String(config?.targets ?? t('defaultTargets'));
+          const res = useRemote('network.get', {targets}, NET_MS);
+          const [busy, setBusy] = useState(false);
+          const v = res.value;
+          if (!v) return blank(res.error || '…');
+          const last = v.rates.at(-1) ?? [0, 0];
+          const local = v.addresses.find(a => a.family === 'IPv4')?.address ?? v.addresses[0]?.address ?? '—';
+          const px = v.proxy;
+          const proxyText = v.via || (px?.pac ? t('n_pac') : px?.env || t('n_noProxy'));
+          const ip = v.ip;
+          const ipText = ip?.ip ?? (ip?.error === 'curl-missing' ? t('n_curl') : '—');
+          const where = ip?.ip ? [ip.city, ip.country].filter(Boolean).join(', ') : '';
+          const kv = rows => h('div', {className: 'bnt-kv'}, rows.flatMap(([k, val, extra, level, title], i) => [
+            h('span', {key: `${i}k`}, k),
+            h('span', {key: `${i}v`, className: 'bnt-num', 'data-level': level, title: title || val}, val),
+            h('span', {key: `${i}x`}, extra || ''),
+          ]));
+          const info = [
+            [t('n_local'), local, v.iface],
+            [t('n_public'), ipText, size === 'm' ? '' : where, undefined, [ip?.ip, where, ip?.org].filter(Boolean).join('\n')],
+            [t('n_proxy'), proxyText, ''],
+          ];
+          const pings = v.pings.map(p => [p.name, p.error ? (p.error === 'curl-missing' ? t('n_curl') : t('n_unreachable')) : `${p.ms} ms`, '', latLevel(p), p.url]);
+          const rates = h('div', {className: 'bnt-rates'},
+            h('div', null, h('small', null, `↓ ${t('n_down')}`), h('b', {className: 'bnt-num'}, rateText(last[0]))),
+            h('div', null, h('small', null, `↑ ${t('n_up')}`), h('b', {className: 'bnt-num'}, rateText(last[1]))));
+          const max = Math.max(1, ...v.rates.flat());
+          const pts = i => v.rates.map((r, j, all) => `${(j / Math.max(1, all.length - 1)) * 100},${(1 - r[i] / max) * 30}`).join(' ');
+          const spark = (size === 't' || size === 'l' || size === 'w') && v.rates.length > 1
+            ? h('div', {className: 'bnt-spark', title: `↓ ${rateText(Math.max(...v.rates.map(r => r[0])))} · ↑ ${rateText(Math.max(...v.rates.map(r => r[1])))}`},
+              h('svg', {viewBox: '0 0 100 30', preserveAspectRatio: 'none'},
+                h('polygon', {points: `0,30 ${pts(0)} 100,30`}),
+                h('polyline', {points: pts(0)}),
+                h('polyline', {className: 'bnt-up', points: pts(1)}))) : null;
+          const refresh = () => {
+            setBusy(true);
+            call('network.get', {targets, fresh: true}).then(() => res.reload(), () => res.reload()).finally(() => setBusy(false));
+          };
+          if (size === 's') return h('div', {className: 'bnt-net', 'data-size': size}, rates);
+          if (size === 'm') return h('div', {className: 'bnt-net', 'data-size': size}, rates, kv(info));
+          if (size === 'w') return h('div', {className: 'bnt-net', 'data-size': size}, rates, spark, kv(info), pings.length ? kv(pings) : null);
+          return h('div', {className: 'bnt-net', 'data-size': size},
+            rates, spark, kv(info),
+            pings.length ? h('div', {className: 'bnt-sect', style: {padding: 0}}, t('n_latency')) : null,
+            pings.length ? kv(pings) : null,
+            h('div', {className: 'bnt-notefoot', style: {marginTop: 'auto'}}, h('span', null, v.gateway ? `${v.iface} · ${v.gateway}` : v.iface),
+              h('button', {type: 'button', className: 'bnt-btn', disabled: busy, onClick: refresh}, busy ? '…' : t('refresh'))));
+        }
+        Network.desk = {
+          apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], description: () => t('d_network'),
+          settings: [{key: 'targets', type: 'textarea', label: () => t('f_targets'), default: () => t('defaultTargets')}],
+        };
+
         const builtins = [
           ['desk.today', 'today', Today], ['desk.todo', 'todo', Todo], ['desk.note', 'note', Note], ['desk.calendar', 'calendar', Calendar],
           ['desk.weather', 'weather', Weather], ['desk.clock', 'clock', Clock], ['desk.quote', 'quote', Quote], ['desk.countdown', 'countdown', Countdown],
@@ -2512,12 +2920,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           ['desk.prompt', 'prompt', Prompt], ['desk.inbox', 'inbox', Inbox], ['desk.usage', 'usage', Usage], ['desk.running', 'running', Running],
           ['desk.git', 'git', Git], ['desk.github', 'github', GitHub], ['desk.system', 'system', System], ['desk.photo', 'photo', Photo], ['desk.market', 'market', Market],
           ['desk.trending', 'trending', Trending],
+          ['desk.outputs', 'outputs', Outputs], ['desk.schedules', 'tasks', Schedules], ['desk.pinned', 'pinned', Pinned],
+          ['desk.files', 'files', Files], ['desk.clipboard', 'clipboard', Clipboard], ['desk.network', 'network', Network],
         ];
         const BUILTIN_CATEGORY = {
           daily: ['today', 'clock', 'worldclock', 'weather', 'countdown', 'progress', 'habits', 'photo'],
-          agent: ['agents', 'running', 'prompt', 'inbox', 'usage'],
+          agent: ['agents', 'running', 'prompt', 'inbox', 'usage', 'outputs', 'tasks', 'pinned'],
           news: ['trending', 'feed', 'market', 'quote'],
-          tools: ['todo', 'note', 'calendar', 'focus', 'links', 'git', 'github', 'system'],
+          tools: ['todo', 'note', 'calendar', 'focus', 'links', 'git', 'github', 'system', 'files', 'clipboard', 'network'],
         };
         for (const [category, keys] of Object.entries(BUILTIN_CATEGORY)) {
           for (const key of keys) {

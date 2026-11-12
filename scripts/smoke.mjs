@@ -5,7 +5,11 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {zstdCompressSync} from 'node:zlib';
 import {execFileSync} from 'node:child_process';
-import {apply, createStore, createHandlers, createAgentWatch, createLauncher, createWorkspaces, createRunning, createGit, createGithub, migrateLegacy} from '../index.js';
+import {apply, createStore, createHandlers, createAgentWatch, createLauncher, createWorkspaces, createRunning, createGit, createGithub, createSchedules, createOpener, lastMessageText, migrateLegacy} from '../index.js';
+import {createOutputs, parseOutputs} from '../lib/outputs.js';
+import {createRecentFiles} from '../lib/files.js';
+import {createClipboard} from '../lib/clipboard.js';
+import {createNetwork, parseRoute, parseIpRoute, parseNetstat, parseProcNetDev, parseScutilProxy, parseTargets} from '../lib/network.js';
 import {createRunner} from '../lib/exec.js';
 import {createSystem, parsePmset, parseVmStat, parseMeminfo} from '../lib/system.js';
 import {createPhotos, findPhotos} from '../lib/photo.js';
@@ -433,6 +437,159 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   await store.createWidget({id: 'img', title: 'I', html: 'x', fetch: ['https://cdn.example.com/']});
   assert.deepEqual(await handle['dsh-desk/widget.fetch']({id: 'img', url: 'https://cdn.example.com/a.json'}), {ok: 'https://cdn.example.com/a.json'});
   assert.equal(await handle['dsh-desk/widget.fetch']({id: 'img', url: 'https://cdn.example.com/a.png', as: 'dataUrl'}), 'data:image/png;base64,AQID');
+}
+
+// 定时任务：列表字段、暂停 / 恢复 / 删除映射到 schedule.edit，立即运行与执行中、不存在的结果。
+{
+  const edits = [];
+  const entry = {id: 'k1', kind: 'rrule', title: '', prompt: 'Daily report', rrule: 'FREQ=DAILY;BYHOUR=9;BYMINUTE=0', scheduledAt: '2026-11-13T01:00:00.000Z', status: 'active', target: {kind: 'new', create: {cwd: '/tmp'}}, lastDelivery: {deliveredAt: '2026-11-12T01:00:00.000Z', targetSessionId: 'session-x'}};
+  const svc = {
+    catalog: async () => [entry, {id: 'k2', kind: 'every', title: 'Ping', prompt: 'p', everySeconds: 3600, scheduledAt: '', status: 'paused', target: {kind: 'session', sessionId: 'session-y'}}],
+    edit: async req => { edits.push(req); return req.id === 'gone' ? {id: req.id, code: 'schedule_not_found'} : req.action === 'delete' ? {id: req.id, deleted: true} : {...entry, status: req.patch.active ? 'active' : 'paused'}; },
+    run: async req => (req.id === 'busy' ? {id: req.id, code: 'schedule_execution_pending'} : {...entry, executionActive: true}),
+    deleteInactive: async () => ({deleted: 2}),
+  };
+  const sh = createHandlers(createStore({}), feedFetcher, null, null, {schedules: createSchedules({get: k => (k === 'schedule' ? svc : undefined)})});
+  const rows = await sh['dsh-desk/schedule.list']();
+  assert.deepEqual(rows.map(r => [r.id, r.title, r.kind, r.status, r.timing.rrule ?? r.timing.everySeconds, r.lastSessionId, r.sessionId, r.cwd]),
+    [['k1', 'Daily report', 'rrule', 'active', 'FREQ=DAILY;BYHOUR=9;BYMINUTE=0', 'session-x', '', '/tmp'], ['k2', 'Ping', 'every', 'paused', 3600, '', 'session-y', '']]);
+  assert.equal((await sh['dsh-desk/schedule.edit']({id: 'k1', action: 'pause'})).status, 'paused');
+  await sh['dsh-desk/schedule.edit']({id: 'k1', action: 'delete'});
+  assert.deepEqual(edits.map(e => [e.action, e.patch?.active]), [['update', false], ['delete', undefined]]);
+  await assert.rejects(sh['dsh-desk/schedule.edit']({id: 'gone', action: 'resume'}), /no longer exists/);
+  await assert.rejects(sh['dsh-desk/schedule.edit']({id: 'k1', action: 'explode'}), /unknown action/);
+  assert.equal((await sh['dsh-desk/schedule.run']({id: 'k1'})).running, true);
+  assert.deepEqual(await sh['dsh-desk/schedule.run']({id: 'busy'}), {pending: true});
+  assert.deepEqual(await sh['dsh-desk/schedule.clear'](), {deleted: 2});
+  assert.equal(await createHandlers(createStore({}), feedFetcher, null, null, {schedules: createSchedules({get: () => undefined})})['dsh-desk/schedule.list'](), null);
+}
+
+// 收藏会话：按传入顺序返回，带最后一条消息；已删除的会话标 missing。
+{
+  const reads = [];
+  const pinCtx = {get: key => (key === 'sessionController' ? {
+    list: async () => ({items: summaries}),
+    events: async req => { reads.push(req.address.sessionId); return {records: [
+      {type: 'event', event: {type: 'user/message', data: {message: {content: [{type: 'text', text: 'hello'}]}}}},
+      {type: 'event', event: {type: 'assistant/message', data: {message: {content: [{type: 'text', text: ' Done:\n all   good '}]}}}},
+      {type: 'event', event: {type: 'tool/call', data: {}}},
+    ]}; },
+  } : undefined)};
+  const watch = createAgentWatch(pinCtx);
+  const ph = createHandlers(createStore({}), feedFetcher, watch);
+  const pins = await ph['dsh-desk/session.pinned']({ids: ['s2', 'nope', 's1']});
+  assert.deepEqual(pins.map(p => [p.id, p.title ?? '', p.preview ?? '', Boolean(p.missing)]), [['s2', 'Busy', 'Done: all good', false], ['nope', '', '', true], ['s1', 'Idle chat', 'Done: all good', false]]);
+  await ph['dsh-desk/session.pinned']({ids: ['s2']});
+  assert.deepEqual(reads, ['s2', 's1']);
+  assert.deepEqual((await ph['dsh-desk/session.list']()).map(s => s.id), ['s1', 's3', 's2']);
+  assert.equal(lastMessageText([{event: {type: 'user/message', data: {message: {content: 'plain'}}}}]), '> plain');
+  assert.equal(await createHandlers(createStore({}), feedFetcher)['dsh-desk/session.pinned']({ids: ['s1']}), null);
+}
+
+// 产出物：交付与新建文档合并去重，子 Agent 归到父会话，代码文件和失败的写入不算。
+{
+  const root = mkdtempSync(join(tmpdir(), 'desk-out-'));
+  const docs = join(root, 'docs');
+  mkdirSync(docs);
+  writeFileSync(join(docs, 'plan.md'), '# plan');
+  writeFileSync(join(docs, 'deck.pptx'), 'x');
+  const ev = (type, time, data) => JSON.stringify({type, seq: 1, time, data});
+  const result = (time, path, isError = false) => ev('tool/result', time, {message: {isError}, meta: {operation: 'create', path}});
+  mkdirSync(join(root, 'ws', 'session-a'), {recursive: true});
+  writeFileSync(join(root, 'ws', 'session-a', 'session.v4.jsonl.zstd'), zstdCompressSync(Buffer.from([
+    JSON.stringify({type: 'session', id: 'session-a'}),
+    result(1000, join(docs, 'plan.md')),
+    result(1100, join(docs, 'index.js')),
+    result(1200, join(docs, 'bad.md'), true),
+    ev('deliverables/presented', 2000, {files: [{path: join(docs, 'plan.md'), description: 'The plan'}, {path: 'relative.md'}]}),
+  ].join('\n'))));
+  mkdirSync(join(root, 'ws', 'session-b'), {recursive: true});
+  writeFileSync(join(root, 'ws', 'session-b', 'session.v4.jsonl'), [JSON.stringify({type: 'session', id: 'session-b', parentSession: 'session-a'}), result(3000, join(docs, 'deck.pptx')), result(3100, join(docs, 'gone.md'))].join('\n'));
+  const oh = createHandlers(createStore({}), feedFetcher, null, null, {outputs: createOutputs({root})});
+  const out = await oh['dsh-desk/outputs.list']({});
+  assert.deepEqual(out.items.map(i => [i.name, i.kind, i.sessionId, i.exists, i.description, i.time]), [
+    ['gone.md', 'created', 'session-a', false, '', 3100],
+    ['deck.pptx', 'created', 'session-a', true, '', 3000],
+    ['plan.md', 'presented', 'session-a', true, 'The plan', 2000],
+  ]);
+  assert.deepEqual((await oh['dsh-desk/outputs.list']({created: false})).items.map(i => i.name), ['plan.md']);
+  assert.equal(parseOutputs('').session, '');
+
+  // 最近文件：跳过隐藏项，可排除文件夹，可执行类型标 risky，不存在的文件夹进 errors。
+  writeFileSync(join(docs, '.DS_Store'), '');
+  writeFileSync(join(docs, 'setup.dmg'), '');
+  mkdirSync(join(docs, 'sub'));
+  const fh = createHandlers(createStore({}), feedFetcher, null, null, {files: createRecentFiles()});
+  const recent = await fh['dsh-desk/files.recent']({dirs: `${docs}\n${join(root, 'missing')}`});
+  assert.deepEqual(recent.items.map(i => i.name).sort(), ['deck.pptx', 'plan.md', 'setup.dmg', 'sub']);
+  assert.equal(recent.items.find(i => i.name === 'setup.dmg').risky, true);
+  assert.equal(recent.items.find(i => i.name === 'sub').folder, true);
+  assert.equal(recent.errors.length, 1);
+  assert.ok(!(await fh['dsh-desk/files.recent']({dirs: docs, folders: false})).items.some(i => i.folder));
+
+  // 打开文件：走 openWorkspacePath，可执行类型只定位，相对路径和不存在的文件拒绝。
+  const opened = [];
+  const opener = createOpener({get: k => (k === 'sessionController' ? {canOpenWorkspacePath: () => true, openWorkspacePath: async req => { opened.push(req); return {opened: true}; }} : undefined)}, null, 'linux');
+  const openHandle = createHandlers(createStore({}), feedFetcher, null, null, {open: opener})['dsh-desk/file.open'];
+  await openHandle({path: join(docs, 'plan.md')});
+  await openHandle({path: join(docs, 'plan.md'), reveal: true});
+  await openHandle({path: join(docs, 'setup.dmg')});
+  assert.deepEqual(opened.map(r => r.action ?? 'open'), ['open', 'reveal', 'reveal']);
+  await assert.rejects(openHandle({path: 'plan.md'}), /absolute/);
+  await assert.rejects(openHandle({path: join(docs, 'nope.md')}), /no such file/);
+  rmSync(root, {recursive: true, force: true});
+}
+
+// 剪贴板：只在内容变化时入列，重复内容上移；清空后当前内容不会被重新加入。
+{
+  let clip = 'first';
+  let clock = 0;
+  const cb = createClipboard({os: 'darwin', now: () => clock, run: async () => Buffer.from(clip)});
+  assert.deepEqual((await cb.get()).items.map(i => i.text), ['first']);
+  clip = 'second'; clock = 1;
+  assert.deepEqual((await cb.get()).items.map(i => i.text), ['second', 'first']);
+  clip = 'first'; clock = 2;
+  assert.deepEqual((await cb.get()).items.map(i => i.text), ['first', 'second']);
+  const id = (await cb.get()).items[1].id;
+  assert.equal(cb.remove(id), 1);
+  cb.remove('');
+  assert.deepEqual((await cb.get()).items, []);
+  cb.stop();
+  assert.deepEqual(await createClipboard({os: 'win32', run: async () => Buffer.alloc(0)}).get(), {supported: false, items: []});
+}
+
+// 网络：解析 route / netstat / scutil 和测速站点；系统代理开启时 curl 经代理。
+{
+  assert.deepEqual(parseRoute('   route to: default\n    gateway: 10.0.0.1\n  interface: en0\n'), {iface: 'en0', gateway: '10.0.0.1'});
+  assert.deepEqual(parseIpRoute('default via 192.168.1.1 dev wlan0 proto dhcp'), {iface: 'wlan0', gateway: '192.168.1.1'});
+  const ns = 'Name  Mtu   Network       Address            Ipkts Ierrs     Ibytes    Opkts Oerrs     Obytes  Coll\nen0   1500  <Link#15>   c0:c7:db:0a:32:73 145 0 1000 95 0 500 0\nen0   1500  10.64.84/24   10.64.84.70     145 - 1000 95 - 500 -\n';
+  assert.deepEqual(parseNetstat(ns, 'en0'), {rx: 1000, tx: 500});
+  assert.deepEqual(parseNetstat('en0 1500 <Link#4> 145 0 2000 95 0 900 0', 'en0'), {rx: 2000, tx: 900});
+  assert.deepEqual(parseProcNetDev('  eth0: 1234 5 0 0 0 0 0 0 4321 6 0 0 0 0 0 0', 'eth0'), {rx: 1234, tx: 4321});
+  const scutil = '<dictionary> {\n  HTTPEnable : 1\n  HTTPPort : 7897\n  HTTPProxy : 127.0.0.1\n  HTTPSEnable : 0\n  ProxyAutoConfigEnable : 0\n  SOCKSEnable : 0\n}';
+  assert.deepEqual(parseScutilProxy(scutil), {http: {host: '127.0.0.1', port: 7897}, https: null, socks: null, pac: ''});
+  assert.deepEqual(parseTargets('Baidu https://www.baidu.com\nhttps://github.com\nnot a url'), [{name: 'Baidu', url: 'https://www.baidu.com'}, {name: 'github.com', url: 'https://github.com'}]);
+  const curls = [];
+  let clock = 0;
+  const net = createNetwork({os: 'darwin', now: () => clock, interfaces: () => ({en0: [{address: 'fe80::1', family: 'IPv6', internal: false}, {address: '10.0.0.5', family: 'IPv4', internal: false}]}), run: async (cmd, args) => {
+    if (cmd === 'route') return Buffer.from('gateway: 10.0.0.1\ninterface: en0\n');
+    if (cmd === 'netstat') return Buffer.from(`en0 1500 <Link#4> 1 0 ${1000 + clock * 10} 1 0 ${500 + clock} 0`);
+    if (cmd === 'scutil') return Buffer.from(scutil);
+    curls.push(args);
+    if (args.includes('https://ipinfo.io/json')) return Buffer.from(JSON.stringify({ip: '1.2.3.4', city: 'LA', country: 'US', org: 'AS1 Test'}));
+    if (args.includes('https://down.example')) throw Object.assign(new Error('timeout'), {code: 'failed'});
+    return Buffer.from('200 0.120');
+  }});
+  await net.get({targets: 'Up https://up.example\nDown https://down.example'});
+  clock = 2000;
+  const nv = await net.get({targets: 'Up https://up.example\nDown https://down.example'});
+  net.stop();
+  assert.deepEqual([nv.iface, nv.gateway, nv.addresses[0].address, nv.via], ['en0', '10.0.0.1', '10.0.0.5', '127.0.0.1:7897']);
+  assert.deepEqual(nv.rates, [[10000, 1000]]);
+  assert.deepEqual(nv.ip, {ip: '1.2.3.4', city: 'LA', region: '', country: 'US', org: 'Test'});
+  assert.deepEqual(nv.pings.map(p => [p.name, p.ms, p.error]), [['Up', 120, undefined], ['Down', undefined, 'failed']]);
+  assert.ok(curls.every(a => a.includes('-x') && a.includes('http://127.0.0.1:7897')));
+  assert.equal(curls.length, 3);
 }
 
 console.log('smoke ok');

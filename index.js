@@ -14,8 +14,12 @@ import {createTrending} from './lib/trending.js';
 import {createQuotes} from './lib/quote.js';
 import {MAX_WIDGETS, WidgetError, allowedUrl, checkHtml, cleanData, cleanSpec, widgetId} from './lib/widgets.js';
 import {createHash, randomUUID} from 'node:crypto';
-import {homedir, tmpdir} from 'node:os';
+import {homedir, platform, tmpdir} from 'node:os';
 import {readFileSync} from 'node:fs';
+import {createOutputs} from './lib/outputs.js';
+import {createRecentFiles, isRisky} from './lib/files.js';
+import {createClipboard} from './lib/clipboard.js';
+import {createNetwork} from './lib/network.js';
 import {stat} from 'node:fs/promises';
 import {isAbsolute, join} from 'node:path';
 
@@ -59,6 +63,7 @@ export const BUILTIN_WIDGETS = [
   'desk.quote', 'desk.countdown', 'desk.worldclock', 'desk.focus', 'desk.links', 'desk.progress',
   'desk.agents', 'desk.feed', 'desk.habits',
   'desk.prompt', 'desk.inbox', 'desk.usage', 'desk.running', 'desk.git', 'desk.github', 'desk.system', 'desk.photo', 'desk.market', 'desk.trending',
+  'desk.outputs', 'desk.schedules', 'desk.pinned', 'desk.files', 'desk.clipboard', 'desk.network',
 ];
 
 export function defaultBoard(id) {
@@ -419,6 +424,97 @@ const titleOf = summary => {
   return String(typeof value === 'string' ? value : value?.title ?? value?.value ?? '').slice(0, 200);
 };
 const toMs = iso => { const ms = Date.parse(iso ?? ''); return Number.isFinite(ms) ? ms : 0; };
+const MAX_PINNED = 20;
+
+export function lastMessageText(records) {
+  for (let i = records.length - 1; i >= 0; i--) {
+    const event = records[i]?.event;
+    if (event?.type !== 'assistant/message' && event?.type !== 'user/message') continue;
+    const content = event.data?.message?.content;
+    const parts = typeof content === 'string' ? [content] : (Array.isArray(content) ? content : []).filter(p => p?.type === 'text').map(p => p.text);
+    const value = parts.join(' ').replace(/\s+/g, ' ').trim();
+    if (value) return `${event.type === 'user/message' ? '> ' : ''}${value.slice(0, 240)}`;
+  }
+  return '';
+}
+
+// 定时任务管理：列表、暂停 / 恢复 / 删除、立即运行、清除已结束，都走 Harness 的 schedule 服务。
+const scheduleRow = t => ({
+  id: t.id,
+  title: String(t.title || t.prompt || '').slice(0, 200),
+  prompt: String(t.prompt ?? '').slice(0, 2000),
+  kind: t.kind,
+  timing: {
+    everySeconds: t.everySeconds, afterSeconds: t.afterSeconds, time: t.time, weekdays: t.weekdays,
+    expression: t.expression, rrule: t.rrule, timeZone: t.timeZone,
+  },
+  status: t.status,
+  scheduledAt: toMs(t.scheduledAt),
+  running: t.executionActive === true,
+  lastAt: toMs(t.lastDelivery?.deliveredAt),
+  lastSessionId: t.lastDelivery?.targetSessionId ?? '',
+  sessionId: t.target?.sessionId ?? '',
+  cwd: t.target?.create?.cwd ?? '',
+});
+
+export function createSchedules(ctx) {
+  const service = () => {
+    const s = ctx.get?.('schedule');
+    if (typeof s?.catalog !== 'function') throw new UserError('unavailable', 'this Harness does not expose scheduled tasks');
+    return s;
+  };
+  const check = result => {
+    if (result?.code === 'schedule_not_found') throw new UserError('not-found', 'the scheduled task no longer exists');
+    if (result?.code === 'schedule_conflict') throw new UserError('conflict', 'the scheduled task changed, try again');
+    return result;
+  };
+  return {
+    async list() {
+      const s = ctx.get?.('schedule');
+      if (typeof s?.catalog !== 'function') return null;
+      return (await s.catalog()).filter(Boolean).map(scheduleRow);
+    },
+    async edit({id, action}) {
+      const s = service();
+      if (!id) throw new UserError('bad-request', 'id is required');
+      if (action === 'delete') return check(await s.edit({id: String(id), action: 'delete'}, undefined, AbortSignal.timeout(15_000)));
+      if (action !== 'pause' && action !== 'resume') throw new UserError('bad-request', `unknown action ${action}`);
+      return scheduleRow(check(await s.edit({id: String(id), action: 'update', patch: {active: action === 'resume'}}, undefined, AbortSignal.timeout(15_000))));
+    },
+    async run({id}) {
+      const s = service();
+      const result = check(await s.run({id: String(id ?? '')}, AbortSignal.timeout(30_000)));
+      if (result?.code === 'schedule_execution_pending') return {pending: true};
+      return scheduleRow(result);
+    },
+    async clearEnded() {
+      return service().deleteInactive();
+    },
+  };
+}
+
+// 用桌面打开或在文件管理器里定位本机文件；会直接运行或安装的类型只定位。
+// 优先走 Harness 的 openWorkspacePath，不可用时在 macOS 上退回 open 命令。
+export function createOpener(ctx, run, os = platform()) {
+  return async ({path, reveal}) => {
+    const target = String(path ?? '');
+    if (!isAbsolute(target)) throw new UserError('bad-path', 'path must be absolute');
+    if (!(await stat(target).catch(() => null))) throw new UserError('not-found', `no such file: ${target}`);
+    const action = reveal || isRisky(target) ? 'reveal' : undefined;
+    const controller = ctx.get?.('sessionController');
+    if (typeof controller?.openWorkspacePath === 'function' && controller.canOpenWorkspacePath?.() !== false) {
+      try {
+        await controller.openWorkspacePath({path: target, ...(action ? {action} : {})}, AbortSignal.timeout(10_000));
+        return {opened: true, action: action ?? 'open'};
+      } catch (error) {
+        if (os !== 'darwin' || !run) throw new UserError('open-failed', String(error?.message || error));
+      }
+    }
+    if (os !== 'darwin' || !run) throw new UserError('unavailable', 'opening files is not available on this Harness');
+    await run('open', action ? ['-R', target] : [target], {timeoutMs: 10_000});
+    return {opened: true, action: action ?? 'open'};
+  };
+}
 
 // 会话与定时任务来自 Harness 内置服务（sessionController / schedule），缺失时对应字段为 null。
 // 「等待确认」通过旁听 approval / user-questions 两个 waterfall 得到，只计数不作答。
@@ -440,21 +536,56 @@ export function createAgentWatch(ctx) {
     ctx.on('user-questions/request', (req, next) => passThrough(req?.agent?.id, next));
   }
   let cached = null;
+  let listed = null;
+  const previews = new Map();
+  // 所有顶层会话（不含子 Agent 和空白会话），按活动时间倒序；不支持时为 null。
+  const allSessions = async () => {
+    if (listed && Date.now() - listed.at < 2000) return listed.value;
+    const controller = ctx.get?.('sessionController');
+    let value = null;
+    if (typeof controller?.list === 'function') {
+      const result = await controller.list({}, AbortSignal.timeout(8000));
+      value = (result?.items ?? [])
+        .filter(s => s && !s.blank && s.origin !== 'subagent' && !s.parentSessionId)
+        .map(s => ({id: s.sessionId, title: titleOf(s), running: Boolean(s.running), waiting: waiting.has(s.sessionId), updatedAt: Number(s.updatedAt) || 0, cwd: s.cwd ?? ''}))
+        .sort((a, b) => b.updatedAt - a.updatedAt);
+    }
+    listed = {at: Date.now(), value};
+    return value;
+  };
+  // 最后一条用户或助手消息的文字，按会话更新时间缓存；读不到时为空串。
+  const preview = async s => {
+    const hit = previews.get(s.id);
+    if (hit && hit.updatedAt === s.updatedAt) return hit.value;
+    const controller = ctx.get?.('sessionController');
+    let value = '';
+    if (typeof controller?.events === 'function') {
+      try {
+        const page = await controller.events({address: {kind: 'session', sessionId: s.id}, maxMessages: 2}, AbortSignal.timeout(5000));
+        value = lastMessageText(page?.records ?? []);
+      } catch {}
+    }
+    previews.set(s.id, {updatedAt: s.updatedAt, value});
+    return value;
+  };
   return {
     waiting,
+    sessions: allSessions,
+    async pinned(ids) {
+      const list = (Array.isArray(ids) ? ids : []).map(String).filter(Boolean).slice(0, MAX_PINNED);
+      const all = await allSessions();
+      if (!all) return null;
+      const byId = new Map(all.map(s => [s.id, s]));
+      return Promise.all(list.map(async id => {
+        const s = byId.get(id);
+        return s ? {...s, preview: await preview(s)} : {id, missing: true};
+      }));
+    },
     async overview() {
       if (cached && Date.now() - cached.at < 2000) return cached.value;
-      const controller = ctx.get?.('sessionController');
       const schedule = ctx.get?.('schedule');
-      let sessions = null;
-      if (typeof controller?.list === 'function') {
-        const result = await controller.list({}, AbortSignal.timeout(8000));
-        sessions = (result?.items ?? [])
-          .filter(s => s && !s.blank && s.origin !== 'subagent' && !s.parentSessionId)
-          .map(s => ({id: s.sessionId, title: titleOf(s), running: Boolean(s.running), waiting: waiting.has(s.sessionId), updatedAt: Number(s.updatedAt) || 0, cwd: s.cwd ?? ''}))
-          .sort((a, b) => Number(b.waiting) - Number(a.waiting) || Number(b.running) - Number(a.running) || b.updatedAt - a.updatedAt)
-          .slice(0, 30);
-      }
+      const all = await allSessions();
+      const sessions = all ? [...all].sort((a, b) => Number(b.waiting) - Number(a.waiting) || Number(b.running) - Number(a.running) || b.updatedAt - a.updatedAt).slice(0, 30) : null;
       let schedules = null;
       if (typeof schedule?.catalog === 'function') {
         schedules = (await schedule.catalog())
@@ -689,6 +820,48 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       const value = await fetcher.get(url, {ttlMs: p?.fresh === true ? 0 : WIDGET_FETCH_TTL, type: as === 'dataUrl' ? 'bytes' : as, maxBytes: as === 'dataUrl' ? 1_500_000 : 2_000_000});
       return as === 'dataUrl' ? `data:${value.type};base64,${value.base64}` : value;
     },
+    'dsh-desk/session.list': async () => (agents ? agents.sessions() : null),
+    'dsh-desk/session.pinned': async p => (agents ? agents.pinned(p?.ids) : null),
+    'dsh-desk/schedule.list': async () => (services.schedules ? services.schedules.list() : null),
+    'dsh-desk/schedule.edit': async p => {
+      if (!services.schedules) throw new UserError('unavailable', 'this Harness does not expose scheduled tasks');
+      return services.schedules.edit({id: p?.id, action: p?.action});
+    },
+    'dsh-desk/schedule.run': async p => {
+      if (!services.schedules) throw new UserError('unavailable', 'this Harness does not expose scheduled tasks');
+      return services.schedules.run({id: p?.id});
+    },
+    'dsh-desk/schedule.clear': async () => {
+      if (!services.schedules) throw new UserError('unavailable', 'this Harness does not expose scheduled tasks');
+      return services.schedules.clearEnded();
+    },
+    'dsh-desk/outputs.list': async p => {
+      if (!services.outputs) throw new UserError('unavailable', 'outputs are not available');
+      return services.outputs.list({created: p?.created !== false, fresh: p?.fresh === true});
+    },
+    'dsh-desk/files.recent': async p => {
+      if (!services.files) throw new UserError('unavailable', 'recent files are not available');
+      const raw = (Array.isArray(p?.dirs) ? p.dirs : String(p?.dirs ?? '').split('\n')).map(x => String(x).trim()).filter(Boolean);
+      const resolved = await Promise.all((raw.length ? raw : ['~/Downloads', '~/Desktop']).map(d => resolveDir(d).then(path => ({path}), e => ({error: {dir: d, message: e.message}}))));
+      const result = await services.files.list({dirs: resolved.filter(r => r.path).map(r => r.path), limit: p?.limit, folders: p?.folders !== false});
+      return {...result, errors: [...resolved.filter(r => r.error).map(r => r.error), ...result.errors]};
+    },
+    'dsh-desk/file.open': async p => {
+      if (!services.open) throw new UserError('unavailable', 'opening files is not available on this Harness');
+      return services.open({path: p?.path, reveal: p?.reveal === true});
+    },
+    'dsh-desk/clipboard.get': async () => {
+      if (!services.clipboard) throw new UserError('unavailable', 'clipboard is not available');
+      return services.clipboard.get();
+    },
+    'dsh-desk/clipboard.remove': async p => {
+      if (!services.clipboard) throw new UserError('unavailable', 'clipboard is not available');
+      return services.clipboard.remove(p?.id ? String(p.id) : '');
+    },
+    'dsh-desk/network.get': async p => {
+      if (!services.network) throw new UserError('unavailable', 'network status is not available');
+      return services.network.get({targets: String(p?.targets ?? ''), fresh: p?.fresh === true});
+    },
     'dsh-desk/inbox.list': () => store.listInbox(),
     'dsh-desk/inbox.add': p => store.addInbox(p?.text),
     'dsh-desk/inbox.remove': p => store.removeInbox(p?.id),
@@ -913,9 +1086,16 @@ export function apply(ctx) {
     photos: createPhotos({run, cacheDir: join(tmpdir(), 'dsh-desk-photos')}),
     market: createMarket(fetcher),
     trending: createTrending(fetcher),
+    schedules: createSchedules(ctx),
+    outputs: createOutputs({root: join(dshHome(), 'sessions')}),
+    files: createRecentFiles(),
+    open: createOpener(ctx, run),
+    clipboard: createClipboard({run}),
+    network: createNetwork({run}),
   };
   const handlers = createHandlers(store, fetcher, createAgentWatch(ctx), createLauncher(ctx), services);
   ctx.effect(() => () => { void store.close(); }, 'dsh-desk: storage');
+  ctx.effect(() => () => { services.system.stop(); services.clipboard.stop(); services.network.stop(); }, 'dsh-desk: samplers');
 
   // 共享通道 /api 只允许一个 interceptor，每个方法注册独立的 Fetch 路由。
   for (const method of Object.keys(handlers)) {
