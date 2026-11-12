@@ -1136,7 +1136,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           const length = mode => (Number(mode === 'work' ? config?.workMin : config?.breakMin) || (mode === 'work' ? 25 : 5)) * 60_000;
           const running = Boolean(f.endsAt);
           const paused = !running && f.left != null;
-          const left = running ? Math.max(0, f.endsAt - now.getTime()) : (f.left ?? length(f.mode));
+          const left = running ? Math.max(0, f.endsAt - Math.max(now.getTime(), Date.now())) : (f.left ?? length(f.mode));
           const total = f.total || length(f.mode);
           const secs = Math.ceil(left / 1000);
           const count = f.day === dayKey(now) ? f.count : 0;
