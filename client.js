@@ -39,7 +39,7 @@ window.__ModuleLoader__.load({
       lang: 'zh-CN', title: '工作台', loadFailed: '加载失败', empty: '看板上还没有 widget',
       today: '今日', clock: '时钟', todo: '待办', note: '速记', calendar: '日历', weather: '天气',
       d_today: '问候、时间、天气、格言合成一条横栏', d_todo: '未完成自动结转，Agent 可读写', d_note: '自动保存，当前行可转待办',
-      d_calendar: 'ICS 订阅的日程与月历', d_weather: 'Open-Meteo 天气与空气质量', d_clock: '时间、问候与年度进度',
+      d_calendar: '系统日历和 ICS 订阅的日程与月历，中文界面显示农历', d_weather: 'Open-Meteo 天气与空气质量', d_clock: '时间、问候与年度进度',
       night: '夜深了', morning: '早上好', noon: '中午好', afternoon: '下午好', evening: '晚上好', greetName: '{g}，{name}',
       week: '第 {n} 周', year: '今年已过 {n}%', nextQuote: '换一条',
       addTodo: '添加待办', carried: '结转', done: '已完成 {n}', remove: '移除', complete: '完成', reopen: '恢复', noTodos: '没有待办',
@@ -48,6 +48,7 @@ window.__ModuleLoader__.load({
       wx_clear: '晴', wx_partly: '多云', wx_cloud: '阴', wx_fog: '雾', wx_drizzle: '毛毛雨', wx_rain: '雨', wx_snow: '雪', wx_showers: '阵雨', wx_thunder: '雷雨',
       aqi0: '优', aqi1: '良', aqi2: '轻度污染', aqi3: '中度污染', aqi4: '重度污染', aqi5: '严重污染',
       allDay: '全天', noEvents: '没有日程', addIcs: '添加 ICS 订阅', todayEvents: '今天', tomorrowEvents: '明天', prevMonth: '上个月', nextMonth: '下个月', calError: '{n} 个订阅加载失败',
+      calConnect: '连接系统日历', calAsking: '等待授权…', calDenied: '在「系统设置 → 隐私与安全性 → 日历」里允许 DeepSeek Harness', f_systemCalendar: '显示 macOS 系统日历',
       work: '工作', untitled: '未命名', newBoard: '看板 {n}', newBoardLabel: '新建看板', rename: '双击改名',
       edit: '编辑', doneEdit: '完成', addWidget: '添加 widget', added: '已添加', add: '添加', settings: '设置', save: '保存', cancel: '取消',
       saved: '已保存', cfg_personal: '个人', openSettings: '打开设置',
@@ -148,7 +149,7 @@ window.__ModuleLoader__.load({
       lang: 'en-US', title: 'Workboard', loadFailed: 'Failed to load', empty: 'No widgets on this board yet',
       today: 'Today', clock: 'Clock', todo: 'To-do', note: 'Notes', calendar: 'Calendar', weather: 'Weather',
       d_today: 'Greeting, time, weather and a quote in one banner', d_todo: 'Unfinished items carry over; the agent can read and edit', d_note: 'Autosaves; turn the current line into a to-do',
-      d_calendar: 'Events from ICS subscriptions and a month view', d_weather: 'Weather and air quality from Open-Meteo', d_clock: 'Time, greeting and year progress',
+      d_calendar: 'Events from your macOS calendars and ICS subscriptions, with a month view', d_weather: 'Weather and air quality from Open-Meteo', d_clock: 'Time, greeting and year progress',
       night: 'Good night', morning: 'Good morning', noon: 'Good afternoon', afternoon: 'Good afternoon', evening: 'Good evening', greetName: '{g}, {name}',
       week: 'Week {n}', year: '{n}% of the year', nextQuote: 'Next quote',
       addTodo: 'Add a to-do', carried: 'Carried over', done: 'Completed {n}', remove: 'Remove', complete: 'Complete', reopen: 'Reopen', noTodos: 'Nothing to do',
@@ -157,6 +158,7 @@ window.__ModuleLoader__.load({
       wx_clear: 'Clear', wx_partly: 'Partly cloudy', wx_cloud: 'Overcast', wx_fog: 'Fog', wx_drizzle: 'Drizzle', wx_rain: 'Rain', wx_snow: 'Snow', wx_showers: 'Showers', wx_thunder: 'Thunderstorm',
       aqi0: 'Good', aqi1: 'Moderate', aqi2: 'Sensitive', aqi3: 'Unhealthy', aqi4: 'Very unhealthy', aqi5: 'Hazardous',
       allDay: 'All day', noEvents: 'No events', addIcs: 'Add an ICS subscription', todayEvents: 'Today', tomorrowEvents: 'Tomorrow', prevMonth: 'Previous month', nextMonth: 'Next month', calError: '{n} subscription(s) failed to load',
+      calConnect: 'Connect system calendar', calAsking: 'Waiting for permission…', calDenied: 'Allow DeepSeek Harness in System Settings → Privacy & Security → Calendars', f_systemCalendar: 'Show macOS system calendar',
       work: 'Work', untitled: 'Untitled', newBoard: 'Board {n}', newBoardLabel: 'New board', rename: 'Double-click to rename',
       edit: 'Edit', doneEdit: 'Done', addWidget: 'Add widget', added: 'Added', add: 'Add', settings: 'Settings', save: 'Save', cancel: 'Cancel',
       saved: 'Saved', cfg_personal: 'Personal', openSettings: 'Open settings',
@@ -459,6 +461,11 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-evtime{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none;min-width:80px}
 .wb-evtitle{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .wb-calerr{font-size:12px;color:var(--dsw-alias-state-warn-primary)}
+.wb-calfoot{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-top:auto;min-width:0}
+.wb-calfoot .wb-btn[data-quiet]{color:var(--dsw-alias-label-secondary)}
+.wb-caltoday{display:flex;flex-direction:column;gap:2px;min-width:0}
+.wb-caltoday b{font-size:20px;font-weight:600;line-height:1.2}
+.wb-caltoday span{font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 .wb-rows{display:flex;flex-direction:column;gap:2px;overflow:auto;flex:1;min-height:0}
 .wb-row{display:flex;align-items:center;gap:10px;padding:4px 2px;min-width:0}
@@ -1339,23 +1346,45 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const gridEnd = new Date(base.getFullYear(), base.getMonth(), 1 - lead + rows * 7);
           const today0 = keyDate(todayKey);
           const range = big ? [gridStart.getTime(), gridEnd.getTime()] : [today0.getTime(), new Date(today0.getFullYear(), today0.getMonth(), today0.getDate() + 2).getTime()];
-          const res = useRemote('calendar.events', urls.length ? {urls, from: range[0], to: range[1]} : null, CAL_MS);
+          const useSystem = prefs.systemCalendar !== false;
+          const res = useRemote('calendar.events', urls.length || useSystem ? {urls, from: range[0], to: range[1], system: useSystem} : null, CAL_MS);
+          const [asking, setAsking] = useState(false);
+          const sys = res.value?.system;
+          const hasSource = urls.length > 0 || sys === 'ok';
           const byDay = bucket(res.value?.events ?? []);
           const failed = res.value?.errors?.length ?? 0;
           const nowMs = now.getTime();
+          const zh = lang.startsWith('zh');
           const list = (k, head) => {
             const items = byDay.get(k) ?? [];
             return h(React.Fragment, {key: k},
               head ? h('div', {className: 'wb-evhead'}, head) : null,
               items.length ? items.map((e, i) => h(EventRow, {key: `${e.start}-${i}`, e, now: nowMs})) : h('div', {className: 'wb-blank'}, t('noEvents')));
           };
-          const footer = !urls.length ? h('button', {type: 'button', className: 'wb-btn wb-cta', style: {alignSelf: 'flex-start'}, onClick: openSettings}, t('addIcs'))
+          const connect = () => {
+            setAsking(true);
+            call('calendar.connect').catch(() => {}).finally(() => { setAsking(false); res.reload(); });
+          };
+          const actions = res.pending ? null : [
+            sys === 'ask' ? h('button', {key: 'sys', type: 'button', className: 'wb-btn wb-cta', disabled: asking, onClick: connect}, t(asking ? 'calAsking' : 'calConnect')) : null,
+            !hasSource ? h('button', {key: 'ics', type: 'button', className: 'wb-btn', 'data-quiet': sys === 'ask' ? '' : undefined, onClick: openSettings}, t('addIcs')) : null,
+          ].filter(Boolean);
+          const problem = sys === 'denied' && !urls.length ? h('div', {className: 'wb-calerr'}, t('calDenied'))
             : failed ? h('div', {className: 'wb-calerr', title: res.value.errors.map(e => `${e.url}: ${e.message}`).join('\n')}, fill(t('calError'), {n: failed})) : res.error ? h('div', {className: 'wb-calerr'}, res.error) : null;
+          const footer = actions?.length || problem ? h('div', {className: 'wb-calfoot'}, actions, problem) : null;
 
           if (!big) {
+            if (!hasSource) {
+              const moon = zh ? lunar(now) : '';
+              return h('div', {className: 'wb-cal'},
+                h('div', {className: 'wb-caltoday'},
+                  h('b', null, now.toLocaleDateString(lang, {month: 'long', day: 'numeric'})),
+                  h('span', null, [now.toLocaleDateString(lang, {weekday: 'long'}), moon].filter(Boolean).join(' · '))),
+                footer);
+            }
             const tomorrow = dayKey(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
             return h('div', {className: 'wb-cal'},
-              urls.length ? h('div', {className: 'wb-events'}, list(todayKey, size === 'm' ? t('todayEvents') : null), size === 'm' ? list(tomorrow, t('tomorrowEvents')) : null) : null,
+              h('div', {className: 'wb-events'}, list(todayKey, size === 'm' ? t('todayEvents') : null), size === 'm' ? list(tomorrow, t('tomorrowEvents')) : null),
               footer);
           }
           const sel = selected ?? (month === 0 ? todayKey : dayKey(base));
@@ -1375,15 +1404,30 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
                   'data-out': d.getMonth() !== base.getMonth() ? '' : undefined, 'data-today': k === todayKey ? '' : undefined,
                   'data-selected': k === sel ? '' : undefined, 'data-has': byDay.has(k) ? '' : undefined}, d.getDate());
               })),
-            urls.length ? h('div', {className: 'wb-events'}, list(sel, sel === todayKey ? t('todayEvents') : selDate.toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'}))) : null,
+            hasSource ? h('div', {className: 'wb-events'}, list(sel, [sel === todayKey ? t('todayEvents') : selDate.toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'}), zh ? lunar(selDate) : ''].filter(Boolean).join(' · '))) : null,
             footer);
         }
+        const LUNAR_DIGITS = '一二三四五六七八九十';
+        const lunarDay = n => (n <= 10 ? `初${LUNAR_DIGITS[n - 1]}` : n < 20 ? `十${LUNAR_DIGITS[n - 11]}` : n === 20 ? '二十' : n < 30 ? `廿${LUNAR_DIGITS[n - 21]}` : '三十');
+        let lunarFormat = null;
+        function lunar(d) {
+          try {
+            lunarFormat ??= new Intl.DateTimeFormat('zh-CN-u-ca-chinese', {month: 'long', day: 'numeric'});
+            const parts = lunarFormat.formatToParts(d);
+            const m = parts.find(p => p.type === 'month')?.value;
+            const n = Number(parts.find(p => p.type === 'day')?.value);
+            return m && n >= 1 && n <= 30 ? `${m}${lunarDay(n)}` : '';
+          } catch {
+            return '';
+          }
+        }
         const CALENDAR_URLS_FIELD = {key: 'calendarUrls', type: 'textarea', scope: 'global', label: () => t('f_urls'), placeholder: 'https://…/calendar.ics'};
+        const SYSTEM_CALENDAR_FIELD = {key: 'systemCalendar', type: 'toggle', scope: 'global', default: true, label: () => t('f_systemCalendar')};
         const WEEK_START_FIELD = {key: 'weekStart', type: 'select', scope: 'global', label: () => t('f_weekStart'), default: () => (t('lang').startsWith('zh') ? '1' : '0'),
           options: [{value: '1', label: () => t('monday')}, {value: '0', label: () => t('sunday')}]};
         Calendar.workboard = {
           apiVersion: 1, sizes: ['t', 'l', 's', 'm'], description: () => t('d_calendar'),
-          settings: [CALENDAR_URLS_FIELD, WEEK_START_FIELD],
+          settings: [SYSTEM_CALENDAR_FIELD, CALENDAR_URLS_FIELD, WEEK_START_FIELD],
         };
 
         function Quote({size}) {

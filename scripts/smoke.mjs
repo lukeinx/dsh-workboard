@@ -11,6 +11,7 @@ import {createRecentFiles} from '../lib/files.js';
 import {createClipboard} from '../lib/clipboard.js';
 import {createNetwork, parseRoute, parseIpRoute, parseNetstat, parseProcNetDev, parseScutilProxy, parseTargets} from '../lib/network.js';
 import {createRunner} from '../lib/exec.js';
+import {createSystemCalendar, parseOutput as parseSysCal} from '../lib/syscal.js';
 import {createSystem, parsePmset, parseVmStat, parseMeminfo} from '../lib/system.js';
 import {createPhotos, findPhotos} from '../lib/photo.js';
 import {createMarket, parseSymbol} from '../lib/market.js';
@@ -106,6 +107,24 @@ const cal = await handlers['dsh-workboard/calendar.events']({urls: ['https://a.e
 assert.deepEqual(cal.events.map(e => [e.title, e.source]), [['Sync', 0]]);
 assert.deepEqual(cal.errors.map(e => e.message), ['HTTP 404']);
 await assert.rejects(handlers['dsh-workboard/calendar.events']({urls: [], from: 0, to: 365 * 86400_000}));
+
+// 系统日历：假 osascript，合并进事件；非 macOS 不调用命令。
+assert.deepEqual(parseSysCal('{"status":0}'), {status: 'ask', events: []});
+assert.equal(parseSysCal('{"status":2}').status, 'denied');
+let sysAsked = 0;
+const sysCal = createSystemCalendar({os: 'darwin', run: async (cmd, args) => {
+  assert.equal(cmd, 'osascript');
+  if (args.includes('request')) { sysAsked++; return '{"status":3}'; }
+  return JSON.stringify({status: 3, events: [{title: 'Standup', location: '', allDay: false, start: Date.UTC(2026, 10, 12, 1), end: Date.UTC(2026, 10, 12, 2), calendar: 'Work'}]});
+}});
+const sysHandlers = createHandlers(createStore({}), fetcher, null, null, {systemCalendar: sysCal});
+const merged = await sysHandlers['dsh-workboard/calendar.events']({urls: ['https://a.example/x.ics'], from: Date.UTC(2026, 10, 11), to: Date.UTC(2026, 10, 13), system: true});
+assert.deepEqual(merged.events.map(e => [e.title, e.source]), [['Standup', 'system'], ['Sync', 0]]);
+assert.equal(merged.system, 'ok');
+assert.equal((await sysHandlers['dsh-workboard/calendar.events']({urls: [], from: Date.UTC(2026, 10, 11), to: Date.UTC(2026, 10, 13)})).system, null);
+assert.deepEqual(await sysHandlers['dsh-workboard/calendar.connect'](), {status: 'ok'});
+assert.equal(sysAsked, 1);
+assert.deepEqual(await createSystemCalendar({os: 'linux', run: async () => { throw new Error('no'); }}).events({from: 0, to: 1}), {status: 'unsupported', events: []});
 
 // 更早的 dsh_bento 数据：新域为空时复制并改写内置 widget id，已有数据时不动。
 const fakeDomain = (data = {}) => {

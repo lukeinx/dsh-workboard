@@ -5,6 +5,7 @@ import {parseICS, expandEvents} from './lib/ics.js';
 import {parseFeed} from './lib/feed.js';
 import {createUsage} from './lib/usage.js';
 import {createRunner} from './lib/exec.js';
+import {createSystemCalendar} from './lib/syscal.js';
 import {repoStatus, fetchRepo} from './lib/git.js';
 import {githubOverview} from './lib/github.js';
 import {createSystem} from './lib/system.js';
@@ -386,16 +387,17 @@ const reply = (rpcId, result) => Response.json({type: 'server-response', rpcId, 
 const ok = value => ({ok: true, value});
 const fail = (code, message) => ({ok: false, error: {code: `${NS}/${code}`, message, details: {}}});
 
-function createCalendar(fetcher) {
+function createCalendar(fetcher, systemCalendar = null) {
   const parsed = new Map();
-  return async ({urls, from, to}) => {
+  return async ({urls, from, to, system}) => {
     const start = Number(from);
     const end = Number(to);
     if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start || end - start > MAX_RANGE) throw new UserError('bad-range', 'invalid time range');
     const list = (Array.isArray(urls) ? urls : String(urls ?? '').split(/\s+/)).map(u => String(u).trim()).filter(Boolean).slice(0, 10);
     const errors = [];
     const events = [];
-    await Promise.all(list.map(async (url, source) => {
+    let sys = null;
+    await Promise.all([...list.map(async (url, source) => {
       try {
         const text = await fetcher.get(url, {ttlMs: ICS_TTL, type: 'text', maxBytes: ICS_MAX_BYTES, timeoutMs: 15_000});
         let hit = parsed.get(url);
@@ -404,9 +406,15 @@ function createCalendar(fetcher) {
       } catch (error) {
         errors.push({url, message: String(error?.message || error)});
       }
-    }));
+    }), (async () => {
+      if (!system || !systemCalendar) return;
+      const res = await systemCalendar.events({from: start, to: end});
+      sys = res.status;
+      if (res.message) errors.push({url: 'system', message: res.message});
+      for (const e of res.events) events.push({...e, source: 'system'});
+    })()]);
     events.sort((a, b) => a.start - b.start || Number(b.allDay) - Number(a.allDay));
-    return {events: events.slice(0, 500), errors};
+    return {events: events.slice(0, 500), errors, system: sys};
   };
 }
 
@@ -761,7 +769,7 @@ export function createGithub(run, now = Date.now) {
 export const dshHome = () => process.env.DSH_HOME || join(homedir(), '.dsh');
 
 export function createHandlers(store, fetcher = createFetcher(), agents = null, launch = null, services = {}) {
-  const calendar = createCalendar(fetcher);
+  const calendar = createCalendar(fetcher, services.systemCalendar);
   const feeds = createFeeds(fetcher);
   const quotes = createQuotes(fetcher);
   return {
@@ -909,7 +917,8 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
     'dsh-workboard/prefs.put': p => store.putPrefs(p?.prefs),
     'dsh-workboard/weather.get': p => getWeather(fetcher, {lat: p?.lat, lon: p?.lon, unit: p?.unit}),
     'dsh-workboard/geo.search': p => searchPlaces(fetcher, {query: p?.query, lang: p?.lang}),
-    'dsh-workboard/calendar.events': p => calendar({urls: p?.urls, from: p?.from, to: p?.to}),
+    'dsh-workboard/calendar.events': p => calendar({urls: p?.urls, from: p?.from, to: p?.to, system: p?.system === true}),
+    'dsh-workboard/calendar.connect': async () => (services.systemCalendar ? services.systemCalendar.connect() : {status: 'unsupported'}),
     'dsh-workboard/board.get': p => store.getBoard(String(p?.id || 'work')),
     'dsh-workboard/board.put': p => store.putBoard(p?.board),
     'dsh-workboard/board.adopt': p => store.adoptWidgets(String(p?.id), p?.known, p?.place),
@@ -1112,6 +1121,7 @@ export function apply(ctx) {
     git: createGit(ctx, run),
     github: createGithub(run),
     system: createSystem({run}),
+    systemCalendar: createSystemCalendar({run}),
     photos: createPhotos({run, cacheDir: join(tmpdir(), 'dsh-workboard-photos')}),
     market: createMarket(fetcher),
     trending: createTrending(fetcher),
