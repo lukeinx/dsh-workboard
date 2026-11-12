@@ -2,7 +2,7 @@
 
 **[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 34 个 widget，开箱即用；不够用的，让 Agent 现做。**
 
-[English](README.md) · MIT
+[English](README.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
 ![工作台浅色与深色主题](docs/images/hero-zh.png)
 
@@ -47,15 +47,15 @@
 
 ## 快速开始
 
-克隆仓库到本机：
+在 Harness 对话中让 Agent 安装：
+
+> 用 plugin_manager 安装 npm 包 `dsh-workboard`。
+
+想从源码运行，可以克隆仓库，再让 Agent 安装该路径下的 bundle：
 
 ```sh
 git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 ```
-
-在 Harness 对话中让 Agent 安装：
-
-> 用 plugin_manager 安装 `~/dsh-workboard` 这个 bundle。
 
 安装后在左侧边栏打开 **工作台**。初始看板预置了今日、待办、热榜、产出物、剪贴板、日历、系统状态等常用组件；点击右上角 **编辑** → **添加 widget** 即可添加更多组件，或让 Agent 生成新卡片。
 

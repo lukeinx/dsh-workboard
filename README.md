@@ -2,7 +2,7 @@
 
 **A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 34 widgets out of the box — and your agent builds the rest.**
 
-[简体中文](README.zh.md) · MIT
+[简体中文](README.zh.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
 ![Workboard in light and dark themes](docs/images/hero-en.png)
 
@@ -47,15 +47,15 @@ All boards and personal data stay in your local Harness profile. Every external 
 
 ## Quick start
 
-Clone the repository:
+Ask your agent in a Harness conversation:
+
+> Install the npm package `dsh-workboard` with plugin_manager.
+
+To run from source instead, clone the repository and ask the agent to install the bundle at that path:
 
 ```sh
 git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 ```
-
-Then ask your agent in a Harness conversation to install it:
-
-> Install the bundle at `~/dsh-workboard` with plugin_manager.
 
 Open **Workboard** from the sidebar. The default board comes preset with common widgets such as Today, To-do, Trending, Outputs, Clipboard, Calendar, and System. Click **Edit** → **Add widget** to browse the gallery or ask the agent to build a custom card.
 
