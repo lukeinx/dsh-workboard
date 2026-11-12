@@ -258,10 +258,14 @@ window.__ModuleLoader__.load({
 .bnt-note{flex:1;resize:none;border:0;outline:none;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary);border-radius:8px;padding:10px 12px;line-height:1.65;font:inherit;font-size:13px;min-height:0}
 .bnt-notefoot{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--dsw-alias-label-secondary);margin-top:8px;min-height:18px}
 .bnt-notefoot button{color:var(--dsw-alias-brand-primary)}
-.bnt-wsel{min-width:0;max-width:60%;flex:0 1 auto;appearance:none;border:0;background:none;color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;padding:0 12px 0 0;cursor:pointer;text-overflow:ellipsis;outline:none;background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);background-position:calc(100% - 6px) 55%,calc(100% - 3px) 55%;background-size:3px 3px;background-repeat:no-repeat}
-.bnt-wsel:hover,.bnt-wsel:focus-visible{color:var(--dsw-alias-label-primary)}
-.bnt-footact{display:flex;align-items:center;gap:10px;min-width:0;justify-content:flex-end}
-.bnt-prompt .bnt-notefoot{margin-top:0}
+.bnt-wsel{position:relative;display:inline-flex;align-items:center;justify-content:center;flex:none;width:20px;height:20px;border-radius:6px;color:var(--dsw-alias-label-secondary);opacity:.55}
+.bnt-wsel:hover,.bnt-wsel:focus-within{opacity:1;background:var(--dsw-alias-bg-layer-2)}
+.bnt-wsel[data-set]{color:var(--dsw-alias-brand-primary);opacity:.9}
+.bnt-wsel select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:12px}
+.bnt-footact{display:flex;align-items:center;gap:6px;flex:none}
+.bnt-pbox{position:relative;flex:1;min-height:0;display:flex}
+.bnt-pbox .bnt-wsel{position:absolute;right:6px;bottom:6px}
+.bnt-pbox[data-ws] textarea{padding-right:30px}
 
 .bnt-head{display:flex;align-items:center;gap:8px;padding:20px 0 16px;flex-wrap:wrap}
 .bnt-head[data-editing]{position:sticky;top:0;z-index:5;background:var(--dsw-alias-bg-base)}
@@ -558,6 +562,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
       chev: () => svg(12, 'M9 6l6 6-6 6', 2.2),
       left: () => svg(14, 'M15 6l-6 6 6 6'),
       right: () => svg(14, 'M9 6l6 6-6 6'),
+      folder: () => svg(13, 'M3.5 7.5A2 2 0 0 1 5.5 5.5h3.6l2 2h7.4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z', 1.8),
       pencil: () => svg(14, 'M4 20h4L18.5 9.5a2.83 2.83 0 0 0-4-4L4 16v4zM13.5 6.5l4 4'),
       gear: () => svg(14, ['M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z'], 1.6),
     };
@@ -1459,10 +1464,13 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
         function WorkspaceSelect({ws}) {
           if (!ws.list.length) return null;
           const extra = ws.path && !ws.list.some(w => w.path === ws.path);
-          return h('select', {className: 'bnt-wsel', value: ws.path, 'aria-label': t('ws_label'), title: ws.path || t('ws_default'), onChange: e => ws.set(e.target.value)},
-            h('option', {value: ''}, t('ws_default')),
-            extra ? h('option', {value: ws.path}, baseName(ws.path) || ws.path) : null,
-            ws.list.map(w => h('option', {key: w.id, value: w.path}, w.title || baseName(w.path))));
+          const name = ws.list.find(w => w.path === ws.path)?.title || baseName(ws.path);
+          return h('span', {className: 'bnt-wsel', 'data-set': ws.path ? '' : undefined, title: `${t('ws_label')}: ${ws.path ? `${name} · ${ws.path}` : t('ws_default')}`},
+            h(Icon.folder),
+            h('select', {value: ws.path, 'aria-label': t('ws_label'), onChange: e => ws.set(e.target.value)},
+              h('option', {value: ''}, t('ws_default')),
+              extra ? h('option', {value: ws.path}, baseName(ws.path) || ws.path) : null,
+              ws.list.map(w => h('option', {key: w.id, value: w.path}, w.title || baseName(w.path)))));
         }
 
         function Agents({size, config}) {
@@ -1642,10 +1650,11 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             send(text);
           };
           return h('div', {className: 'bnt-prompt', 'data-size': size},
-            size === 's' ? null : h('textarea', {value: text, placeholder: t('promptPlaceholder'), disabled: busy, spellCheck: false, onChange: e => setText(e.target.value), onKeyDown}),
+            size === 's' ? null : h('div', {className: 'bnt-pbox', 'data-ws': ws.list.length ? '' : undefined},
+              h('textarea', {value: text, placeholder: t('promptPlaceholder'), disabled: busy, spellCheck: false, onChange: e => setText(e.target.value), onKeyDown}),
+              h(WorkspaceSelect, {ws})),
             presets.length ? h('div', {className: 'bnt-chips'}, presets.map((p, i) => h('button', {key: i, type: 'button', className: 'bnt-btn bnt-chip', title: p.prompt, disabled: busy, onClick: () => send(p.prompt)}, p.name))) : null,
-            busy || error ? h('div', {className: error ? 'bnt-calerr' : 'bnt-muted', style: {fontSize: 12}}, error || t('sending')) : null,
-            size === 's' || !ws.list.length ? null : h('div', {className: 'bnt-notefoot'}, h(WorkspaceSelect, {ws})));
+            busy || error ? h('div', {className: error ? 'bnt-calerr' : 'bnt-muted', style: {fontSize: 12}}, error || t('sending')) : null);
         }
         Prompt.desk = {
           apiVersion: 1, sizes: ['m', 'w', 'l', 't', 's'], description: () => t('d_prompt'),
