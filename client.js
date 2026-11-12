@@ -26,7 +26,7 @@ window.__ModuleLoader__.load({
     // 尺寸档位：[列, 行]，行单位 80px；「横栏」半高，其余行数成对。
     const SIZES = {bar: [4, 1], s: [1, 2], m: [2, 2], t: [1, 4], l: [2, 4], w: [4, 2]};
     // 组件库分类；未声明或不在表内的归入 plugin。
-    const CATEGORIES = ['daily', 'agent', 'news', 'tools', 'plugin'];
+    const CATEGORIES = ['daily', 'agent', 'news', 'tools', 'mine', 'plugin'];
 
     const zh = {
       lang: 'zh-CN', title: '工作台', loadFailed: '加载失败', empty: '看板上还没有 widget',
@@ -98,6 +98,14 @@ window.__ModuleLoader__.load({
       defaultPresets: '今日计划 | 读取我 Desk 上的待办和收集箱，帮我排出今天最该做的三件事\n整理收集箱 | 用 desk_inbox 读取我的收集箱，逐条整理成待办或给出处理建议，处理完的条目移除\n周报草稿 | 读取我 Desk 上本周完成的待办，写一份简短的周报草稿',
       inboxPlaceholder: '收集一条，回车保存', inboxEmpty: '收集箱是空的', toAgent: '交给 Agent', inboxCount: '{n} 条',
       inboxPrompt: '用 desk_inbox 工具读取我的收集箱，逐条处理：能直接回答或完成的就完成；需要我跟进的用 desk_todos 转成待办；链接先读一下再给一句话摘要。处理完的条目用 desk_inbox remove 移除，最后汇总你做了什么。',
+      cat_mine: '我的', gen_card: '用 Agent 生成', gen_hint: '说一句想要什么，Agent 做好后放到当前看板',
+      gen_title: '用 Agent 生成 widget', gen_go: '交给 Agent', gen_placeholder: '想在工作台上看到什么？写清楚数据和样子，回车发送',
+      gen_examples: '离下班还有多久，下班时间可以设置\n比特币和以太坊的价格与 24 小时涨跌\n我关注的 GitHub 仓库的 Star 数\n喝水记录：点一下记一杯，显示今天喝了几杯\n人民币与常用外币的换算器',
+      gen_prompt: '请为我的 Desk 工作台做一个 widget：{desc}\n\n先加载 desk-widget skill，按其中的流程用 desk_widget 工具创建。',
+      cw_edit: '让 Agent 修改', cw_editTitle: '让 Agent 修改「{title}」', cw_editPlaceholder: '想怎么改？比如换成竖版布局、加一个刷新按钮',
+      cw_editPrompt: '请修改我 Desk 工作台上的 widget「{title}」（id：{id}）：{desc}\n\n先加载 desk-widget skill，用 desk_widget get 读取当前定义后再改。',
+      cw_fix: '让 Agent 修复', cw_fixPrompt: '我 Desk 工作台上的 widget「{title}」（id：{id}）运行出错：\n{error}\n\n请先加载 desk-widget skill，用 desk_widget get 读取当前定义，找到原因后修复。',
+      cw_source: '源码', cw_title: '标题', cw_delete: '删除 widget', cw_fetch: '可访问的地址', cw_none: '无',
     };
     const en = {
       lang: 'en-US', title: 'Desk', loadFailed: 'Failed to load', empty: 'No widgets on this board yet',
@@ -169,6 +177,14 @@ window.__ModuleLoader__.load({
       defaultPresets: 'Plan today | Read my Desk to-dos and inbox and pick the three things I should do today\nSort inbox | Use desk_inbox to read my inbox, turn each item into a to-do or a suggestion, and remove the items you handled\nWeekly note | Read the to-dos I completed on Desk this week and draft a short weekly update',
       inboxPlaceholder: 'Capture something, Enter to save', inboxEmpty: 'Inbox is empty', toAgent: 'Hand to agent', inboxCount: '{n} items',
       inboxPrompt: 'Use the desk_inbox tool to read my inbox and work through it: finish what you can answer or do directly; turn anything I need to follow up into a to-do with desk_todos; read links and give a one-line summary. Remove handled items with desk_inbox remove, then summarize what you did.',
+      cat_mine: 'Mine', gen_card: 'Generate with agent', gen_hint: 'Describe what you want; the agent builds it and puts it on this board',
+      gen_title: 'Generate a widget with the agent', gen_go: 'Hand to agent', gen_placeholder: 'What should this card show? Describe the data and the look, Enter to send',
+      gen_examples: 'Time left until I finish work, with the end time as a setting\nBitcoin and Ether prices with 24-hour change\nStar count of the GitHub repositories I follow\nWater log: tap to add a glass, show today\'s count\nCurrency converter for the currencies I use',
+      gen_prompt: 'Make a widget for my Desk dashboard: {desc}\n\nLoad the desk-widget skill first and create it with the desk_widget tool following that skill.',
+      cw_edit: 'Ask agent to change', cw_editTitle: 'Ask the agent to change “{title}”', cw_editPlaceholder: 'What should change? For example a taller layout or a refresh button',
+      cw_editPrompt: 'Change the widget “{title}” (id: {id}) on my Desk dashboard: {desc}\n\nLoad the desk-widget skill first, read the current definition with desk_widget get, then change it.',
+      cw_fix: 'Ask agent to fix', cw_fixPrompt: 'The widget “{title}” (id: {id}) on my Desk dashboard fails:\n{error}\n\nLoad the desk-widget skill, read the current definition with desk_widget get, find the cause and fix it.',
+      cw_source: 'Source', cw_title: 'Title', cw_delete: 'Delete widget', cw_fetch: 'Allowed addresses', cw_none: 'none',
     };
 
     // 公共领域的经典短句，按日期轮换。
@@ -517,6 +533,24 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 
 @media (max-width:900px){.bnt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.bnt-card[data-c="4"]{grid-column:span 2}.bnt-today .bnt-quote,.bnt-today .bnt-qsep{display:none}}
 @media (max-width:600px){.bnt-grid{grid-template-columns:minmax(0,1fr)}.bnt-card{grid-column:auto!important}}
+.bnt-cw{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;margin:0 -4px -4px}
+.bnt-cwframe{flex:1;width:100%;min-height:0;border:0;display:block;background:transparent}
+.bnt-cwerr{position:absolute;left:4px;right:4px;bottom:4px;display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:8px;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);font-size:12px;color:var(--dsw-alias-state-error-primary)}
+.bnt-cwerr span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bnt-cwerr button{display:inline-flex;align-items:center;gap:4px;flex:none;color:var(--dsw-alias-brand-primary);font-weight:500}
+.bnt-card>header .bnt-hact{opacity:0;width:24px;height:24px;margin:-4px -6px -4px 0;border-radius:6px;display:grid;place-items:center;color:var(--dsw-alias-label-secondary);flex:none}
+.bnt-card:hover>header .bnt-hact,.bnt-card>header .bnt-hact:focus-visible{opacity:1}
+.bnt-card>header .bnt-hact:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-brand-primary)}
+.bnt-gen{border-style:dashed;flex:none}
+.bnt-emptyacts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.bnt-gen .bnt-gname svg{color:var(--dsw-alias-brand-primary)}
+.bnt-gentext{min-height:96px;resize:vertical;line-height:1.5}
+.bnt-modal .bnt-wsel{margin-right:auto}
+.bnt-codefield{flex:1;min-height:0}
+.bnt-code{flex:1;min-height:240px;resize:none;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;line-height:1.5;white-space:pre;tab-size:2}
+.bnt-cwmeta{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none}
+.bnt-modal[data-wide] .bnt-field{flex:none}
+.bnt-modal[data-wide] .bnt-codefield{flex:1}
 `;
 
     const pad = n => String(n).padStart(2, '0');
@@ -553,6 +587,141 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
     })();
     const useNow = () => useSyncExternalStore(clockStore.subscribe, clockStore.getSnapshot, clockStore.getSnapshot);
 
+    // 自定义 widget 的 iframe 文档：沙箱内的 CSP 禁止一切直接联网，只留内联脚本 / 样式和 data: 资源。
+    const CUSTOM_PREFIX = 'custom.';
+    const FRAME_NS = 'dsh-desk-frame';
+    const FRAME_CSP = "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; media-src data: blob:";
+    const FRAME_TOKENS = {
+      '--bg': '--dsw-alias-bg-base', '--card': '--dsw-alias-bg-layer-1', '--layer': '--dsw-alias-bg-layer-2',
+      '--text': '--dsw-alias-label-primary', '--muted': '--dsw-alias-label-secondary', '--accent': '--dsw-alias-brand-primary',
+      '--border': '--dsw-alias-border-l1', '--border-strong': '--dsw-alias-border-l2',
+      '--success': '--dsw-alias-state-success-primary', '--warn': '--dsw-alias-state-warn-primary', '--error': '--dsw-alias-state-error-primary',
+    };
+    const FRAME_CSS = `
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;height:100%;background:transparent}
+body{color:var(--text);font:13px/1.45 var(--font);overflow:auto;overflow-wrap:anywhere;-webkit-font-smoothing:antialiased}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+h1,h2,h3,h4,p{margin:0}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+.num{font-variant-numeric:tabular-nums}
+.big{font-size:28px;font-weight:600;line-height:1.15;font-variant-numeric:tabular-nums}
+.stack{display:flex;flex-direction:column;gap:8px;min-width:0}
+.hstack{display:flex;align-items:center;gap:8px;min-width:0}
+.grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row{display:flex;align-items:center;gap:8px;min-height:30px;padding:4px 0;border-bottom:1px solid var(--border)}
+.row:last-child{border-bottom:0}
+.center{display:grid;place-items:center;height:100%;text-align:center}
+.chip{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:11px;background:var(--layer);font-size:12px;white-space:nowrap}
+.bar{height:6px;border-radius:3px;background:var(--layer);overflow:hidden}
+.bar>i{display:block;height:100%;border-radius:3px;background:var(--accent)}
+.up{color:var(--success)}.down,.error{color:var(--error)}.warn{color:var(--warn)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{height:28px;padding:0 12px;border-radius:8px;border:1px solid var(--border);background:var(--card);cursor:pointer;white-space:nowrap}
+button:hover{border-color:var(--border-strong)}
+button:disabled{opacity:.5;cursor:default}
+button.primary{background:var(--accent);border-color:transparent;color:var(--on-accent)}
+input,select,textarea{min-width:0;background:var(--layer);border:1px solid var(--border);border-radius:8px;padding:5px 8px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
+`;
+
+    // 在 iframe 里运行（按源码序列化注入），不能引用外层变量。
+    function deskBridge() {
+      const boot = JSON.parse(document.getElementById('desk-boot').textContent);
+      const NS = 'dsh-desk-frame';
+      const KEYS = ['size', 'config', 'data', 'dataAt', 'theme', 'lang'];
+      const post = msg => parent.postMessage({ns: NS, ...msg}, '*');
+      const pending = new Map();
+      const listeners = new Set();
+      let seq = 0;
+      const desk = {};
+      for (const k of KEYS) desk[k] = boot[k];
+      const request = (type, payload) => new Promise((resolve, reject) => {
+        const id = ++seq;
+        pending.set(id, {resolve, reject});
+        post({type, id, ...payload});
+      });
+      const report = (error, line) => {
+        const message = error && typeof error === 'object' ? (error.stack || error.message || String(error)) : String(error);
+        post({type: 'error', message: message.slice(0, 2000), line: line > boot.offset ? line - boot.offset : 0});
+      };
+      desk.on = fn => { listeners.add(fn); return () => { listeners.delete(fn); }; };
+      desk.fetch = (url, options = {}) => request('fetch', {url: String(url), as: options.as, fresh: options.fresh === true});
+      desk.save = data => request('save', {data}).then(r => { desk.data = data ?? null; desk.dataAt = r.dataAt; return true; });
+      desk.open = url => { post({type: 'open', url: String(url)}); };
+      desk.ask = prompt => { post({type: 'ask', prompt: String(prompt)}); };
+      window.desk = desk;
+      const root = document.documentElement;
+      const paint = vars => {
+        for (const k of Object.keys(vars)) root.style.setProperty(k, vars[k]);
+        root.style.colorScheme = desk.theme;
+      };
+      paint(boot.vars);
+      addEventListener('message', event => {
+        const m = event.data;
+        if (event.source !== parent || !m || m.ns !== NS) return;
+        if (m.type === 'reply') {
+          const p = pending.get(m.id);
+          if (!p) return;
+          pending.delete(m.id);
+          if (m.ok) p.resolve(m.value); else p.reject(new Error(m.error));
+          return;
+        }
+        if (m.type !== 'state') return;
+        const changed = KEYS.filter(k => k in m.state && JSON.stringify(desk[k]) !== JSON.stringify(m.state[k]));
+        for (const k of changed) desk[k] = m.state[k];
+        if (m.state.vars) paint(m.state.vars);
+        if (changed.length) for (const fn of [...listeners]) { try { fn(desk); } catch (error) { report(error); } }
+      });
+      addEventListener('error', e => report(e.error || e.message, e.lineno));
+      addEventListener('unhandledrejection', e => report(e.reason));
+      document.addEventListener('click', e => {
+        const a = e.target instanceof Element ? e.target.closest('a[href]') : null;
+        if (!a || (a.getAttribute('href') ?? '').startsWith('#')) return;
+        e.preventDefault();
+        desk.open(a.href);
+      });
+      post({type: 'ready'});
+    }
+
+    const escAttr = s => String(s).replace(/[&"<>]/g, c => ({'&': '&amp;', '"': '&quot;', '<': '&lt;', '>': '&gt;'})[c]);
+    // 用户 HTML 从新的一行开始，offset 把报错行号换算成 HTML 内的行号。
+    function frameDoc(html, state) {
+      const head = (json => `<!doctype html><html lang="${escAttr(state.lang)}"><head><meta charset="utf-8">`
+        + `<meta http-equiv="Content-Security-Policy" content="${FRAME_CSP}"><style>${FRAME_CSS}</style>`
+        + `<script type="application/json" id="desk-boot">${json}</script><script>(${deskBridge})()</script></head><body>`);
+      const offset = head('').split('\n').length;
+      const boot = JSON.stringify({...state, offset}).replace(/</g, '\\u003c');
+      return `${head(boot)}\n${html}\n</body></html>`;
+    }
+
+    const rgbOf = (() => {
+      let paint = null;
+      return value => {
+        paint ??= document.createElement('canvas').getContext('2d', {willReadFrequently: true});
+        if (!paint) return null;
+        paint.clearRect(0, 0, 1, 1);
+        paint.fillStyle = '#000';
+        paint.fillStyle = value;
+        paint.fillRect(0, 0, 1, 1);
+        return [...paint.getImageData(0, 0, 1, 1).data.slice(0, 3)];
+      };
+    })();
+    const luminance = rgb => {
+      const [r, g, b] = rgb.map(v => { const c = v / 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4; });
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    };
+    const safeLink = raw => {
+      try {
+        const url = new URL(String(raw));
+        return ['http:', 'https:', 'mailto:'].includes(url.protocol) ? url.href : '';
+      } catch { return ''; }
+    };
+
     const svg = (size, d, width = 2) => h('svg', {width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: width, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true},
       ...(Array.isArray(d) ? d : [d]).map((p, i) => (typeof p === 'string' ? h('path', {key: i, d: p}) : h(p.tag, {key: i, ...p.attrs}))));
     const Icon = {
@@ -564,6 +733,8 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
       right: () => svg(14, 'M9 6l6 6-6 6'),
       folder: () => svg(13, 'M3.5 7.5A2 2 0 0 1 5.5 5.5h3.6l2 2h7.4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z', 1.8),
       pencil: () => svg(14, 'M4 20h4L18.5 9.5a2.83 2.83 0 0 0-4-4L4 16v4zM13.5 6.5l4 4'),
+      sparkle: () => svg(14, ['M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z', 'M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z'], 1.6),
+      code: () => svg(14, 'M8 7l-5 5 5 5M16 7l5 5-5 5'),
       gear: () => svg(14, ['M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z'], 1.6),
     };
 
@@ -1293,6 +1464,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
               banner: manifest.banner === true,
               title: manifest.title !== false,
               settings: Array.isArray(manifest.settings) ? manifest.settings.filter(f => f && typeof f.key === 'string') : [],
+              custom: typeof manifest.custom === 'string' ? manifest.custom : '',
             };
           });
         }
@@ -1414,7 +1586,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
               h('button', {type: 'button', className: 'bnt-action', 'data-primary': '', disabled: !dirty, onClick: save}, t('save'))));
         }
 
-        function Gallery({list, board, onAdd, onClose}) {
+        function Gallery({list, board, onAdd, onGenerate, onClose}) {
           const [cat, setCat] = useState('all');
           const [query, setQuery] = useState('');
           const q = query.trim().toLowerCase();
@@ -1439,7 +1611,10 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             h('input', {className: 'bnt-input', autoFocus: true, value: query, placeholder: t('searchWidget'), 'aria-label': t('searchWidget'), onChange: e => setQuery(e.target.value)}),
             h('div', {className: 'bnt-tabs', role: 'tablist'}, ['all', ...present].map(c => h('button', {key: c, type: 'button', role: 'tab',
               className: 'bnt-btn bnt-tab', 'aria-selected': c === cat, onClick: () => setCat(c)}, t(`cat_${c}`))))),
-          h('div', {className: 'bnt-gbody'}, body));
+          h('div', {className: 'bnt-gbody'},
+            q ? null : h('button', {type: 'button', className: 'bnt-btn bnt-gcard bnt-gen', onClick: onGenerate},
+              h('span', {className: 'bnt-gname'}, h('b', null, t('gen_card')), h(Icon.sparkle)), h('small', null, t('gen_hint'))),
+            body));
         }
 
         const relTime = (ms, nowMs) => {
@@ -1710,6 +1885,271 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
                 h('button', {type: 'button', className: 'bnt-btn', disabled: busy, onClick: handOff}, busy ? t('sending') : t('toAgent')))) : null);
         }
         Inbox.desk = {apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_inbox')};
+
+        // 自定义 widget：Agent 用 desk_widget 写入的 HTML，跑在无同源权限的沙箱 iframe 里，只能通过 postMessage 桥接访问 Desk。
+        // iframe 拿不到宿主的主题变量：由父页面读出实际值传进去，切换明暗时重发。
+        const readTheme = el => {
+          const style = getComputedStyle(el);
+          const vars = {};
+          for (const [name, token] of Object.entries(FRAME_TOKENS)) {
+            const v = style.getPropertyValue(token).trim();
+            if (v) vars[name] = v;
+          }
+          vars['--font'] = style.fontFamily || 'system-ui, sans-serif';
+          const bg = vars['--bg'] ? rgbOf(vars['--bg']) : null;
+          const accent = vars['--accent'] ? rgbOf(vars['--accent']) : null;
+          vars['--on-accent'] = accent && luminance(accent) > 0.45 ? '#000' : '#fff';
+          return {theme: bg && luminance(bg) < 0.4 ? 'dark' : 'light', vars};
+        };
+        function useFrameTheme(ref) {
+          const [theme, setTheme] = useState(null);
+          useEffect(() => {
+            const el = ref.current;
+            if (!el) return undefined;
+            let last = '';
+            const update = () => {
+              const next = readTheme(el);
+              const key = JSON.stringify(next);
+              if (key !== last) { last = key; setTheme(next); }
+            };
+            update();
+            const observer = new MutationObserver(update);
+            observer.observe(document.documentElement, {attributes: true});
+            if (document.body) observer.observe(document.body, {attributes: true});
+            const media = window.matchMedia?.('(prefers-color-scheme: dark)');
+            media?.addEventListener?.('change', update);
+            const id = setInterval(() => { if (!document.hidden) update(); }, 3000);
+            return () => { observer.disconnect(); media?.removeEventListener?.('change', update); clearInterval(id); };
+          }, []);
+          return theme;
+        }
+
+        const customDefaults = (settings, config) => Object.fromEntries((settings ?? []).map(f => [f.key, config?.[f.key] ?? fieldDefault(f) ?? (f.type === 'toggle' ? false : '')]));
+
+        function CustomWidget({id, size, config, editing}) {
+          useLocale();
+          const summary = useSyncExternalStore(customs.subscribe, () => customs.get(id), () => customs.get(id));
+          const wrapRef = useRef(null);
+          const frameRef = useRef(null);
+          const theme = useFrameTheme(wrapRef);
+          const ws = useWorkspace();
+          const [def, setDef] = useState(null);
+          const [error, setError] = useState('');
+          const [loadError, setLoadError] = useState('');
+          const rev = summary?.rev ?? 0;
+          const dataRev = summary?.dataRev ?? 0;
+
+          useEffect(() => {
+            if (!rev || (def && def.rev === rev && def.dataRev >= dataRev)) return undefined;
+            let alive = true;
+            call('widget.get', {id}).then(w => { if (alive) { setDef(w); setLoadError(''); } }, e => { if (alive) setLoadError(String(e?.message || e)); });
+            return () => { alive = false; };
+          }, [id, rev, dataRev]);
+
+          const lang = t('lang');
+          const state = {
+            size, config: customDefaults(summary?.settings, config), data: def?.data ?? null, dataAt: def?.dataAt ?? 0,
+            theme: theme?.theme ?? 'light', lang, vars: theme?.vars ?? {},
+          };
+          const stateRef = useRef(state);
+          stateRef.current = state;
+          const live = useRef({});
+          live.current = {ws, summary, error};
+          const doc = React.useMemo(() => (def && theme ? frameDoc(def.html, stateRef.current) : ''), [def?.rev, def?.html, lang, Boolean(theme)]);
+          const post = msg => frameRef.current?.contentWindow?.postMessage({ns: FRAME_NS, ...msg}, '*');
+          const stateKey = JSON.stringify(state);
+          useEffect(() => { post({type: 'state', state}); }, [stateKey]);
+
+          // 新版本跑起来 5 秒内没报错，就清掉 Host 上记着的旧错误。
+          useEffect(() => {
+            setError('');
+            if (!doc) return undefined;
+            const timer = setTimeout(() => {
+              if (!live.current.error && live.current.summary?.lastError) call('widget.report', {id, error: ''}).catch(() => {});
+            }, 5000);
+            return () => clearTimeout(timer);
+          }, [doc]);
+
+          useEffect(() => {
+            let askedAt = 0;
+            let reported = '';
+            const onMessage = event => {
+              const frame = frameRef.current;
+              const m = event.data;
+              if (!frame || event.source !== frame.contentWindow || !m || m.ns !== FRAME_NS) return;
+              const reply = (ok, value) => post(ok ? {type: 'reply', id: m.id, ok, value} : {type: 'reply', id: m.id, ok, error: value});
+              const fail = e => reply(false, String(e?.message || e));
+              if (m.type === 'ready') post({type: 'state', state: stateRef.current});
+              else if (m.type === 'fetch') call('widget.fetch', {id, url: m.url, as: m.as, fresh: m.fresh === true}).then(v => reply(true, v), fail);
+              else if (m.type === 'save') {
+                call('widget.save', {id, data: m.data}).then(r => {
+                  setDef(d => (d ? {...d, data: m.data ?? null, dataRev: r.dataRev, dataAt: r.dataAt} : d));
+                  reply(true, r);
+                }, fail);
+              } else if (m.type === 'open') {
+                const url = safeLink(m.url);
+                if (url) window.open(url, '_blank', 'noopener,noreferrer');
+              } else if (m.type === 'ask') {
+                const ui = ctx.get?.('uiWorkspace');
+                const prompt = String(m.prompt ?? '').trim().slice(0, 20_000);
+                if (!prompt || typeof ui?.startSession !== 'function' || Date.now() - askedAt < 3000) return;
+                askedAt = Date.now();
+                ui.startSession(live.current.ws.id, {prompt, whenDraftExists: 'replace'});
+              } else if (m.type === 'error') {
+                const message = String(m.message ?? '').slice(0, 2000);
+                const text = m.line > 0 ? `line ${m.line}: ${message}` : message;
+                setError(text);
+                if (text !== reported) { reported = text; call('widget.report', {id, error: text}).catch(() => {}); }
+              }
+            };
+            window.addEventListener('message', onMessage);
+            return () => window.removeEventListener('message', onMessage);
+          }, [id]);
+
+          const fix = () => {
+            const title = summary?.title ?? id;
+            launch(fill(t('cw_fixPrompt'), {title, id, error}), ws.path, ws.id).catch(e => setLoadError(String(e?.message || e)));
+          };
+          return h('div', {ref: wrapRef, className: 'bnt-cw'},
+            doc ? h('iframe', {
+              ref: frameRef, className: 'bnt-cwframe', title: summary?.title ?? id, sandbox: 'allow-scripts', srcDoc: doc,
+              style: {colorScheme: theme.theme, pointerEvents: editing ? 'none' : undefined},
+            }) : null,
+            loadError ? h('div', {className: 'bnt-calerr'}, loadError) : null,
+            error ? h('div', {className: 'bnt-cwerr', role: 'alert'},
+              h('span', {title: error}, error),
+              h('button', {type: 'button', className: 'bnt-btn', onClick: fix}, h(Icon.sparkle), t('cw_fix'))) : null);
+        }
+
+        // 自定义 widget 的清单：面板可见时轮询，每个 widget 动态注册进 desk.widget，组件库、看板和设置弹窗照常工作。
+        // 只有标题、尺寸、设置等 manifest 变化才重新注册；HTML 和数据的变化由卡片按 rev 自行拉取。
+        const customs = (() => {
+          let byId = new Map();
+          const regs = new Map();
+          const listeners = new Set();
+          const manifestKey = w => JSON.stringify([w.title, w.description, w.sizes, w.defaultSize, w.header, w.settings]);
+          const register = w => {
+            const Component = props => h(CustomWidget, {...props, id: w.id});
+            Component.desk = {apiVersion: 1, sizes: w.sizes, defaultSize: w.defaultSize, title: w.header !== false, description: w.description, category: 'mine', settings: w.settings, custom: w.id};
+            return ctx.slots.inject(SLOT, () => ctx.slots.register({name: SLOT, id: `${CUSTOM_PREFIX}${w.id}`, order: 10_000, label: w.title}, Component));
+          };
+          const sync = next => {
+            const ids = new Set(next.map(w => w.id));
+            for (const [id, reg] of regs) if (!ids.has(id)) { reg.dispose(); regs.delete(id); }
+            for (const w of next) {
+              const key = manifestKey(w);
+              const reg = regs.get(w.id);
+              if (reg?.key === key) continue;
+              reg?.dispose();
+              regs.set(w.id, {key, dispose: register(w)});
+            }
+            byId = new Map(next.map(w => [w.id, w]));
+            for (const l of listeners) l();
+          };
+          let job = null;
+          let users = 0;
+          let timer = null;
+          const refresh = () => {
+            job ??= call('widget.list').then(sync, () => {}).finally(() => { job = null; });
+            return job;
+          };
+          const tick = () => { if (!document.hidden) void refresh(); };
+          return {
+            get: id => byId.get(id),
+            subscribe: fn => { listeners.add(fn); return () => listeners.delete(fn); },
+            refresh,
+            start() {
+              if (users++ === 0) {
+                tick();
+                timer = setInterval(tick, POLL_MS);
+                window.addEventListener('focus', tick);
+                document.addEventListener('visibilitychange', tick);
+              }
+              return () => {
+                if (--users === 0) {
+                  clearInterval(timer);
+                  window.removeEventListener('focus', tick);
+                  document.removeEventListener('visibilitychange', tick);
+                }
+              };
+            },
+            dispose() { for (const reg of regs.values()) reg.dispose(); regs.clear(); },
+          };
+        })();
+        ctx.effect(() => () => customs.dispose(), 'dsh-desk: custom widgets');
+        void customs.refresh();
+
+        // 生成（widget 为空）或修改一个自定义 widget：开新会话交给 Agent，用户在会话里继续追问。
+        function AgentModal({widget, onClose}) {
+          useLocale();
+          const ws = useWorkspace();
+          const [text, setText] = useState('');
+          const [busy, setBusy] = useState(false);
+          const [error, setError] = useState('');
+          const examples = widget ? [] : t('gen_examples').split('\n').filter(Boolean);
+          const submit = () => {
+            const desc = text.trim();
+            if (!desc || busy) return;
+            setBusy(true);
+            setError('');
+            const prompt = widget ? fill(t('cw_editPrompt'), {title: widget.label(), id: widget.custom, desc}) : fill(t('gen_prompt'), {desc});
+            launch(prompt, ws.path, ws.id).then(onClose, e => { setError(String(e?.message || e)); setBusy(false); });
+          };
+          const onKeyDown = e => {
+            if (e.key !== 'Enter' || e.shiftKey || e.nativeEvent.isComposing) return;
+            e.preventDefault();
+            submit();
+          };
+          return h(Modal, {title: widget ? fill(t('cw_editTitle'), {title: widget.label()}) : t('gen_title'), onClose,
+            footer: [
+              h(WorkspaceSelect, {key: 'ws', ws}),
+              h('span', {key: 'sp', className: 'bnt-spacer'}),
+              h('button', {key: 'c', type: 'button', className: 'bnt-action', onClick: onClose}, t('cancel')),
+              h('button', {key: 'go', type: 'button', className: 'bnt-action', 'data-primary': '', disabled: busy || !text.trim(), onClick: submit}, h(Icon.sparkle), busy ? t('sending') : t('gen_go')),
+            ]},
+          h('textarea', {className: 'bnt-input bnt-gentext', autoFocus: true, value: text, disabled: busy, spellCheck: false,
+            placeholder: widget ? t('cw_editPlaceholder') : t('gen_placeholder'), onChange: e => setText(e.target.value), onKeyDown}),
+          examples.length ? h('div', {className: 'bnt-chips'}, examples.map(x => h('button', {key: x, type: 'button', className: 'bnt-btn bnt-chip', disabled: busy, onClick: () => setText(x)}, x))) : null,
+          error ? h('div', {className: 'bnt-error'}, error) : null);
+        }
+
+        function SourceModal({widget, onClose, onRemoved}) {
+          useLocale();
+          const id = widget.custom;
+          const [def, setDef] = useState(null);
+          const [title, setTitle] = useState('');
+          const [html, setHtml] = useState('');
+          const [error, setError] = useState('');
+          const [busy, setBusy] = useState(false);
+          const [confirm, setConfirm] = useState(false);
+          const fail = e => { setError(String(e?.message || e)); setBusy(false); };
+          useEffect(() => { call('widget.get', {id}).then(w => { setDef(w); setTitle(w.title); setHtml(w.html); }, fail); }, [id]);
+          const dirty = def && (title.trim() !== def.title || html !== def.html);
+          const save = () => {
+            setBusy(true);
+            setError('');
+            call('widget.put', {id, title: title.trim(), html}).then(() => customs.refresh()).then(onClose, fail);
+          };
+          const remove = () => {
+            if (!confirm) { setConfirm(true); return; }
+            setBusy(true);
+            call('widget.remove', {id}).then(() => { onRemoved(); return customs.refresh(); }).then(onClose, fail);
+          };
+          return h(Modal, {title: `${widget.label()} · ${t('cw_source')}`, onClose, wide: true,
+            footer: [
+              h('button', {key: 'del', type: 'button', className: 'bnt-action', 'data-danger': '', disabled: busy || !def, onClick: remove, onBlur: () => setConfirm(false)}, confirm ? t('confirmDelete') : t('cw_delete')),
+              h('span', {key: 'sp', className: 'bnt-spacer'}),
+              h('button', {key: 'c', type: 'button', className: 'bnt-action', onClick: onClose}, t('cancel')),
+              h('button', {key: 's', type: 'button', className: 'bnt-action', 'data-primary': '', disabled: busy || !dirty || !title.trim(), onClick: save}, t('save')),
+            ]},
+          def ? h(React.Fragment, null,
+            h('div', {className: 'bnt-field'}, h('span', null, t('cw_title')), h('input', {className: 'bnt-input', value: title, maxLength: 40, onChange: e => setTitle(e.target.value)})),
+            h('div', {className: 'bnt-field bnt-codefield'}, h('span', null, 'HTML'),
+              h('textarea', {className: 'bnt-input bnt-code', value: html, spellCheck: false, onChange: e => setHtml(e.target.value)})),
+            h('div', {className: 'bnt-muted bnt-cwmeta'}, `${t('cw_fetch')}: ${def.fetch.length ? def.fetch.join('  ') : t('cw_none')}`),
+            def.lastError ? h('div', {className: 'bnt-calerr'}, def.lastError.message) : null) : null,
+          error ? h('div', {className: 'bnt-error'}, error) : null);
+        }
 
         const compact = v => new Intl.NumberFormat(t('lang'), {notation: 'compact', maximumFractionDigits: 1}).format(v);
         const parsePrices = text => String(text ?? '').split('\n').map(line => {
@@ -2104,6 +2544,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           const fail = e => setError(String(e?.message || e));
 
           useEffect(() => { void prefsStore.load(); }, []);
+          useEffect(() => customs.start(), []);
           useEffect(() => { call('board.list').then(setBoards, fail); }, []);
           useEffect(() => {
             if (!boards?.length || !prefsSnap.loaded || (activeId && boards.some(b => b.id === activeId))) return;
@@ -2189,6 +2630,8 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           const cells = (board?.widgets ?? []).filter(c => byId.has(c.id));
           const shownError = error || dataError;
           const modalWidget = modal?.type === 'settings' ? byId.get(modal.id) : null;
+          const modalCustom = modal?.type === 'agent' || modal?.type === 'source' ? byId.get(modal.id) ?? null : null;
+          const forgetCell = id => saveBoard({...board, widgets: board.widgets.filter(c => c.id !== id), known: (board.known ?? []).filter(k => k !== id)});
 
           const tabs = h('div', {className: 'bnt-tabs', role: 'tablist'},
             (boards ?? []).map(b => (b.id === activeId && renaming
@@ -2232,9 +2675,12 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             },
             editing ? h('div', {className: 'bnt-tools', draggable: false, onMouseDown: e => e.stopPropagation()},
               w.sizes.length > 1 ? h('select', {value: size, 'aria-label': t('size'), onChange: e => updateCell(cell.id, {size: e.target.value})}, w.sizes.map(s => h('option', {key: s, value: s}, sizeLabel(s)))) : null,
+              w.custom ? h('button', {type: 'button', className: 'bnt-btn', 'aria-label': t('cw_edit'), title: t('cw_edit'), onClick: () => setModal({type: 'agent', id: cell.id})}, h(Icon.sparkle)) : null,
+              w.custom ? h('button', {type: 'button', className: 'bnt-btn', 'aria-label': t('cw_source'), title: t('cw_source'), onClick: () => setModal({type: 'source', id: cell.id})}, h(Icon.code)) : null,
               w.settings.length ? h('button', {type: 'button', className: 'bnt-btn', 'aria-label': t('settings'), title: t('settings'), onClick: openSettings}, h(Icon.gear)) : null,
               h('button', {type: 'button', className: 'bnt-btn', 'aria-label': t('remove'), title: t('remove'), onClick: () => removeCell(cell.id)}, h(Icon.x))) : null,
-            w.title && !w.banner ? h('header', null, h('h3', null, w.label())) : null,
+            w.title && !w.banner ? h('header', null, h('h3', null, w.label()),
+              w.custom && !editing ? h('button', {type: 'button', className: 'bnt-btn bnt-hact', 'aria-label': t('cw_edit'), title: t('cw_edit'), onClick: () => setModal({type: 'agent', id: cell.id})}, h(Icon.sparkle)) : null) : null,
             h('div', {className: 'bnt-body'}, renderSlot(SLOT, {size, config: cell.config ?? {}, editing, openSettings}, {only: cell.id})));
           };
 
@@ -2243,11 +2689,15 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
               h('div', {className: 'bnt-head', 'data-editing': editing ? '' : undefined}, showTabs ? tabs : null, h('span', {className: 'bnt-spacer'}), ...actions),
               shownError ? h('div', {className: 'bnt-error', role: 'alert'}, shownError) : null,
               board && cells.length === 0 && !editing ? h('div', {className: 'bnt-empty'},
-                h('button', {type: 'button', className: 'bnt-action', onClick: () => { setEditing(true); setModal({type: 'gallery'}); }}, h(Icon.plus), t('addWidget'))) : null,
+                h('div', {className: 'bnt-emptyacts'},
+                  h('button', {type: 'button', className: 'bnt-action', onClick: () => { setEditing(true); setModal({type: 'gallery'}); }}, h(Icon.plus), t('addWidget')),
+                  h('button', {type: 'button', className: 'bnt-action', onClick: () => setModal({type: 'agent'})}, h(Icon.sparkle), t('gen_card')))) : null,
               h('div', {className: 'bnt-grid', 'data-editing': editing ? '' : undefined},
                 cells.map(card),
                 editing && board ? h('button', {type: 'button', className: 'bnt-btn bnt-addtile', onClick: () => setModal({type: 'gallery'})}, h(Icon.plus), t('addWidget')) : null)),
-            modal?.type === 'gallery' && board ? h(Gallery, {list, board, onAdd: addWidget, onClose: () => setModal(null)}) : null,
+            modal?.type === 'gallery' && board ? h(Gallery, {list, board, onAdd: addWidget, onGenerate: () => setModal({type: 'agent'}), onClose: () => setModal(null)}) : null,
+            modal?.type === 'agent' && (!modal.id || modalCustom) ? h(AgentModal, {widget: modalCustom, onClose: () => setModal(null)}) : null,
+            modal?.type === 'source' && modalCustom && board ? h(SourceModal, {widget: modalCustom, onClose: () => setModal(null), onRemoved: () => forgetCell(modal.id)}) : null,
             modalWidget ? h(SettingsModal, {widget: modalWidget, cell: board?.widgets.find(c => c.id === modal.id), onClose: () => setModal(null),
               onSaveConfig: config => updateCell(modal.id, {config})}) : null);
         }
