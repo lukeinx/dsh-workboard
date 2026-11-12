@@ -47,23 +47,21 @@ All boards and personal data stay in your local Harness profile. Every external 
 
 ## Quick start
 
-Ask your agent in a Harness conversation:
+In Harness, open **Plugins** → **Add plugin**, enter the package name, and install:
 
-> Install the npm package `dsh-workboard` with plugin_manager.
-
-To run from source instead, clone the repository and ask the agent to install the bundle at that path:
-
-```sh
-git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
+```
+dsh-workboard
 ```
 
-Open **Workboard** from the sidebar. The default board comes preset with common widgets such as Today, To-do, Trending, Outputs, Clipboard, Calendar, and System. Click **Edit** → **Add widget** to browse the gallery or ask the agent to build a custom card.
+Or just tell your agent "install the plugin dsh-workboard". From the command line: `dsh plugin --profile web add dsh-workboard`.
+
+Then open **Workboard** from the sidebar. The default board comes preset with common widgets such as Today, To-do, Trending, Outputs, Clipboard, Calendar, and System. Click **Edit** → **Add widget** to browse the gallery or ask the agent to build a custom card.
 
 ## For AI agents
 
 If you are an agent interacting with Workboard:
 
-- **Install**: call `plugin_manager install_bundle` with this repository path (local directories are linked rather than copied).
+- **Install**: call `plugin_manager install_bundle` with `target` set to `dsh-workboard`, or to this repository's absolute path when installing from source (local directories are linked rather than copied).
 - **Built-in tools**:
   - `workboard_todos`: `list` · `add` · `complete` · `reopen` · `remove`
   - `workboard_note`: `read` · `append` · `replace`
@@ -194,7 +192,10 @@ The component receives `{size, config, editing, openSettings}` as props.
 
 ## Development
 
+To run from source, clone the repository and enter its absolute path in **Add plugin** (local directories are linked rather than copied).
+
 ```sh
+git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 npm run check   # syntax check, Host smoke test, and ICS parser tests
 ```
 

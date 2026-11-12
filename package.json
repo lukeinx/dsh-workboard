@@ -8,6 +8,7 @@
   "repository": {"type": "git", "url": "git+https://github.com/lukeinx/dsh-workboard.git"},
   "homepage": "https://github.com/lukeinx/dsh-workboard#readme",
   "bugs": "https://github.com/lukeinx/dsh-workboard/issues",
+  "engines": {"dsh": ">=0.2.0 <0.3.0"},
   "keywords": ["dsh-plugin", "deepseek-harness", "deepseek-desktop", "dashboard", "widgets", "todo", "calendar", "deepseek", "dsh", "ai-agent", "工作台"],
   "exports": {
     ".": "./index.js",

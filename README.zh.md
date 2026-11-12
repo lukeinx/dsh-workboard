@@ -47,15 +47,13 @@
 
 ## 快速开始
 
-在 Harness 对话中让 Agent 安装：
+在 Harness 打开 **插件** → **添加插件**，输入包名并安装：
 
-> 用 plugin_manager 安装 npm 包 `dsh-workboard`。
-
-想从源码运行，可以克隆仓库，再让 Agent 安装该路径下的 bundle：
-
-```sh
-git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 ```
+dsh-workboard
+```
+
+也可以直接对 Agent 说「安装插件 dsh-workboard」。命令行用户：`dsh plugin --profile web add dsh-workboard`。
 
 安装后在左侧边栏打开 **工作台**。初始看板预置了今日、待办、热榜、产出物、剪贴板、日历、系统状态等常用组件；点击右上角 **编辑** → **添加 widget** 即可添加更多组件，或让 Agent 生成新卡片。
 
@@ -63,7 +61,7 @@ git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 
 如果你是在操作工作台的 Agent：
 
-- **安装**：调用 `plugin_manager install_bundle` 指向本仓库目录（本地目录以软链接挂载，不复制文件）。
+- **安装**：调用 `plugin_manager install_bundle`，`target` 填 `dsh-workboard`；从源码安装时填本仓库绝对路径（以软链接挂载，不复制文件）。
 - **内置工具**：
   - `workboard_todos`：`list` · `add` · `complete` · `reopen` · `remove`
   - `workboard_note`：`read` · `append` · `replace`
@@ -194,7 +192,10 @@ Manifest 字段说明：
 
 ## 开发
 
+从源码运行：克隆仓库后，在 **添加插件** 中填入本地目录的绝对路径（以软链接挂载，不复制文件）。
+
 ```sh
+git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
 npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 ```
 
