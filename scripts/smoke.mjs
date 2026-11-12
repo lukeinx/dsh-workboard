@@ -9,6 +9,8 @@ import {apply, createStore, createHandlers, createAgentWatch, createLauncher, cr
 import {createRunner} from '../lib/exec.js';
 import {createSystem, parsePmset, parseVmStat, parseMeminfo} from '../lib/system.js';
 import {createPhotos, findPhotos} from '../lib/photo.js';
+import {createMarket, parseSymbol} from '../lib/market.js';
+import {createFetcher} from '../lib/http.js';
 import {createUsage, zstdFrames} from '../lib/usage.js';
 
 const routes = new Map();
@@ -310,5 +312,24 @@ const photoHandlers = createHandlers(createStore({}), feedFetcher, null, null, {
 assert.equal((await photoHandlers['dsh-desk/photo.next']({dir: picRoot, shuffle: false})).name, '1.jpg');
 await assert.rejects(photoHandlers['dsh-desk/photo.next']({dir: join(picRoot, 'missing')}), /not a directory/);
 rmSync(picRoot, {recursive: true, force: true});
+
+// 行情：代码分流到三个数据源，腾讯响应按 GBK 解码，单个数据源失败只影响对应行。
+assert.deepEqual(['sh600519 茅台', 'hk00700', 'usbrk.b', 'usd/cny', 'BTC', 'eth/cny', 'cg:pepe', 'xyz'].map(l => { const x = parseSymbol(l); return [x.kind, x.symbol]; }),
+  [['stock', 'sh600519'], ['stock', 'hk00700'], ['stock', 'usBRK.B'], ['fx', 'USD/CNY'], ['crypto', 'BTC'], ['crypto', 'ETH/CNY'], ['crypto', 'cg:pepe'], ['unknown', 'xyz']]);
+const gbk = Buffer.from('MX7M2tG2v9i5yX4wMDcwMH40MDMuNjAwfjQwOS42MDB+', 'base64');
+const tencentBody = Buffer.concat([Buffer.from('v_hk00700="'), gbk, Buffer.from(`${'~'.repeat(26)}-6.000~-1.46~x";\n`)]);
+const marketUrls = [];
+const marketFetcher = createFetcher({fetchImpl: async url => {
+  marketUrls.push(url);
+  if (url.includes('gtimg')) return new Response(tencentBody);
+  if (url.includes('er-api')) return Response.json({result: 'success', rates: {USD: 1, CNY: 7, HKD: 7.8}});
+  return new Response('down', {status: 503});
+}});
+const mq = await createHandlers(createStore({}), marketFetcher, null, null, {market: createMarket(marketFetcher)})['dsh-desk/market.quotes']({symbols: 'hk00700 鹅\nHKD/CNY\nBTC\nnope'});
+assert.deepEqual(mq.items.map(i => [i.symbol, i.label, i.name, i.price, i.pct, i.currency]),
+  [['hk00700', '鹅', '腾讯控股', 403.6, -1.46, 'HKD'], ['HKD/CNY', '', 'HKD/CNY', 7 / 7.8, null, 'CNY'], ['BTC', '', undefined, undefined, undefined, undefined], ['nope', '', undefined, undefined, undefined, undefined]]);
+assert.match(mq.items[2].error, /503/);
+assert.equal(mq.items[3].error, 'unknown symbol');
+assert.equal(marketUrls.filter(u => u.includes('gtimg'))[0], 'https://qt.gtimg.cn/q=hk00700');
 
 console.log('smoke ok');

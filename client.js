@@ -17,6 +17,7 @@ window.__ModuleLoader__.load({
     const GIT_MS = 30_000;
     const GITHUB_MS = 5 * 60_000;
     const SYSTEM_MS = 5000;
+    const MARKET_MS = 60_000;
     // 尺寸档位：[列, 行]，行单位 80px；「横栏」半高，其余行数成对。
     const SIZES = {bar: [4, 1], s: [1, 2], m: [2, 2], t: [1, 4], l: [2, 4], w: [4, 2]};
 
@@ -58,7 +59,9 @@ window.__ModuleLoader__.load({
       f_showRecent: '显示最近会话', f_showSchedules: '显示定时任务',
       f_feeds: '订阅地址（每行一个 RSS / Atom）', defaultFeeds: 'https://sspai.com/feed', feedError: '{n} 个订阅加载失败', noItems: '没有内容',
       addHabit: '添加习惯', noHabits: '还没有习惯', streak: '连续 {n} 天', markDay: '{d} 打卡',
-      prompt: 'Prompt 快启', inbox: '收集箱', usage: '用量', running: '运行中', git: 'Git 工作区', github: 'GitHub', system: '系统状态', photo: '相框',
+      prompt: 'Prompt 快启', inbox: '收集箱', usage: '用量', running: '运行中', git: 'Git 工作区', github: 'GitHub', system: '系统状态', photo: '相框', market: '行情',
+      d_market: '汇率、A 股 / 港股 / 美股和加密货币报价', f_symbols: '代码（每行一个，后面可加名称）', f_upColor: '涨跌颜色', up_red: '红涨绿跌', up_green: '绿涨红跌',
+      mk_symbols: 'USD/CNY\nHKD/CNY\nhk00700 腾讯\nBTC', mk_none: '在设置里添加代码', mk_unknown: '无法识别', mk_missing: '未找到',
       d_photo: '轮播本机文件夹里的照片，点击换下一张', f_photoDir: '照片文件夹', f_shuffle: '随机顺序', f_every: '切换间隔', every_m: '{n} 分钟', every_h: '1 小时',
       ph_empty: '这个文件夹里没有照片', ph_pick: '选择文件夹',
       d_system: '本机 CPU、内存、磁盘和电池', s_cpu: 'CPU', s_mem: '内存', s_disk: '磁盘', s_battery: '电池', s_cores: '{n} 核 · 负载 {l}', s_free: '剩余 {n}',
@@ -120,7 +123,9 @@ window.__ModuleLoader__.load({
       f_showRecent: 'Show recent sessions', f_showSchedules: 'Show scheduled tasks',
       f_feeds: 'Feed URLs, one RSS or Atom feed per line', defaultFeeds: 'https://hnrss.org/frontpage', feedError: '{n} feed(s) failed to load', noItems: 'Nothing here',
       addHabit: 'Add a habit', noHabits: 'No habits yet', streak: '{n}-day streak', markDay: 'Check in for {d}',
-      prompt: 'Quick prompt', inbox: 'Inbox', usage: 'Usage', running: 'Running', git: 'Git repos', github: 'GitHub', system: 'System', photo: 'Photo frame',
+      prompt: 'Quick prompt', inbox: 'Inbox', usage: 'Usage', running: 'Running', git: 'Git repos', github: 'GitHub', system: 'System', photo: 'Photo frame', market: 'Markets',
+      d_market: 'Exchange rates, China / Hong Kong / US stocks and crypto prices', f_symbols: 'Symbols, one per line, optionally followed by a name', f_upColor: 'Gain colour', up_red: 'Red for gains', up_green: 'Green for gains',
+      mk_symbols: 'EUR/USD\nUSD/JPY\nusAAPL Apple\nBTC', mk_none: 'Add symbols in settings', mk_unknown: 'Unrecognized', mk_missing: 'Not found',
       d_photo: 'Cycles through photos in a local folder; click for the next one', f_photoDir: 'Photo folder', f_shuffle: 'Shuffle', f_every: 'Change every', every_m: '{n} min', every_h: '1 hour',
       ph_empty: 'No photos in this folder', ph_pick: 'Choose folder',
       d_system: 'CPU, memory, disk and battery of this machine', s_cpu: 'CPU', s_mem: 'Memory', s_disk: 'Disk', s_battery: 'Battery', s_cores: '{n} cores · load {l}', s_free: '{n} free',
@@ -374,6 +379,20 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 .bnt-photo{flex:1;margin:-16px;min-height:0;position:relative;cursor:pointer;background:var(--dsw-alias-bg-layer-2)}
 .bnt-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .bnt-photo-msg{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;height:100%;color:var(--dsw-alias-label-secondary)}
+.bnt-quotes{display:grid;grid-template-columns:minmax(0,1fr) max-content max-content;align-content:start;gap:8px 12px;min-height:0;overflow:auto}
+.bnt-quotes[data-size=w]{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);align-content:center;height:100%}
+.bnt-quote{display:contents}
+.bnt-quotes[data-size=w] .bnt-quote{display:flex;flex-direction:column;gap:2px;min-width:0}
+.bnt-quote>div{min-width:0;display:flex;flex-direction:column}
+.bnt-quote b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bnt-quote small{font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bnt-quote>span{text-align:right;align-self:center;white-space:nowrap}
+.bnt-quotes[data-size=w] .bnt-quote>span{text-align:left;align-self:auto}
+.bnt-quote>span:first-of-type{font-size:15px;font-weight:600}
+.bnt-quote[data-dir=up]>span:last-of-type{color:var(--bnt-up)}
+.bnt-quote[data-dir=down]>span:last-of-type{color:var(--bnt-down)}
+.bnt-quotes{--bnt-up:var(--dsw-alias-state-success-primary);--bnt-down:var(--dsw-alias-state-error-primary)}
+.bnt-quotes[data-red-up]{--bnt-up:var(--dsw-alias-state-error-primary);--bnt-down:var(--dsw-alias-state-success-primary)}
 .bnt-spark{flex:1;min-height:32px;min-width:0;position:relative}
 .bnt-spark svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
 .bnt-spark polyline{fill:none;stroke:var(--dsw-alias-brand-primary);stroke-width:1.5;vector-effect:non-scaling-stroke;stroke-linejoin:round}
@@ -1777,13 +1796,45 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           ],
         };
 
+        const priceText = (v, fx) => new Intl.NumberFormat(t('lang'), {
+          minimumFractionDigits: fx ? 4 : v >= 1000 ? 0 : 2,
+          maximumFractionDigits: fx ? 4 : v >= 1000 ? 2 : v >= 1 ? 2 : 4,
+        }).format(v);
+
+        function Market({size, config, openSettings}) {
+          useLocale();
+          const symbols = String(config?.symbols ?? t('mk_symbols'));
+          const redUp = (config?.upColor ?? (t('lang').startsWith('zh') ? 'red' : 'green')) === 'red';
+          const res = useRemote('market.quotes', {symbols}, MARKET_MS);
+          if (!symbols.trim()) return h('div', {className: 'bnt-photo-msg'}, h('button', {type: 'button', className: 'bnt-btn bnt-cta', onClick: openSettings}, t('mk_none')));
+          const v = res.value;
+          if (!v) return h('div', {className: 'bnt-blank'}, res.error || '…');
+          const items = size === 's' ? v.items.slice(0, 3) : v.items;
+          return h('div', {className: 'bnt-quotes', 'data-size': size, 'data-red-up': redUp ? '' : undefined}, items.map((q, i) => {
+            const name = q.label || q.name || q.symbol;
+            const sub = q.error ? (q.error === 'unknown symbol' ? t('mk_unknown') : q.error === 'not found' ? t('mk_missing') : q.error) : (q.label && q.name && q.name !== q.label ? q.name : q.symbol !== name ? q.symbol : q.currency);
+            const dir = q.pct > 0 ? 'up' : q.pct < 0 ? 'down' : undefined;
+            return h('div', {key: `${i}${q.symbol}`, className: 'bnt-quote', 'data-dir': dir, title: [q.symbol, q.currency].filter(Boolean).join(' · ')},
+              h('div', null, h('b', null, name), size === 's' ? null : h('small', null, sub)),
+              h('span', {className: 'bnt-num'}, q.price != null ? priceText(q.price, /\//.test(q.symbol) && !q.symbol.startsWith('cg:') && q.price < 100) : '—'),
+              h('span', {className: 'bnt-num'}, q.pct != null ? `${q.pct > 0 ? '+' : ''}${q.pct.toFixed(2)}%` : ''));
+          }));
+        }
+        Market.desk = {
+          apiVersion: 1, sizes: ['t', 'm', 's', 'l', 'w'], defaultSize: 't', description: () => t('d_market'),
+          settings: [
+            {key: 'symbols', type: 'textarea', default: () => t('mk_symbols'), label: () => t('f_symbols'), placeholder: 'USD/CNY\nsh600519\nhk00700\nusAAPL\nBTC'},
+            {key: 'upColor', type: 'select', default: () => (t('lang').startsWith('zh') ? 'red' : 'green'), label: () => t('f_upColor'), options: [{value: 'red', label: () => t('up_red')}, {value: 'green', label: () => t('up_green')}]},
+          ],
+        };
+
         const builtins = [
           ['desk.today', 'today', Today], ['desk.todo', 'todo', Todo], ['desk.note', 'note', Note], ['desk.calendar', 'calendar', Calendar],
           ['desk.weather', 'weather', Weather], ['desk.clock', 'clock', Clock], ['desk.quote', 'quote', Quote], ['desk.countdown', 'countdown', Countdown],
           ['desk.worldclock', 'worldclock', WorldClock], ['desk.focus', 'focus', Focus], ['desk.links', 'links', Links], ['desk.progress', 'progress', Progress],
           ['desk.agents', 'agents', Agents], ['desk.feed', 'feed', Feed], ['desk.habits', 'habits', Habits],
           ['desk.prompt', 'prompt', Prompt], ['desk.inbox', 'inbox', Inbox], ['desk.usage', 'usage', Usage], ['desk.running', 'running', Running],
-          ['desk.git', 'git', Git], ['desk.github', 'github', GitHub], ['desk.system', 'system', System], ['desk.photo', 'photo', Photo],
+          ['desk.git', 'git', Git], ['desk.github', 'github', GitHub], ['desk.system', 'system', System], ['desk.photo', 'photo', Photo], ['desk.market', 'market', Market],
         ];
         const BUILTIN_IDS = new Set(builtins.map(([id]) => id));
 

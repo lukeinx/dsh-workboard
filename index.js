@@ -9,6 +9,7 @@ import {repoStatus, fetchRepo} from './lib/git.js';
 import {githubOverview} from './lib/github.js';
 import {createSystem} from './lib/system.js';
 import {createPhotos} from './lib/photo.js';
+import {createMarket} from './lib/market.js';
 import {randomUUID} from 'node:crypto';
 import {homedir, tmpdir} from 'node:os';
 import {stat} from 'node:fs/promises';
@@ -46,7 +47,7 @@ export const BUILTIN_WIDGETS = [
   'desk.today', 'desk.todo', 'desk.note', 'desk.calendar', 'desk.weather', 'desk.clock',
   'desk.quote', 'desk.countdown', 'desk.worldclock', 'desk.focus', 'desk.links', 'desk.progress',
   'desk.agents', 'desk.feed', 'desk.habits',
-  'desk.prompt', 'desk.inbox', 'desk.usage', 'desk.running', 'desk.git', 'desk.github', 'desk.system', 'desk.photo',
+  'desk.prompt', 'desk.inbox', 'desk.usage', 'desk.running', 'desk.git', 'desk.github', 'desk.system', 'desk.photo', 'desk.market',
 ];
 
 export function defaultBoard(id) {
@@ -563,6 +564,10 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       const dir = await resolveDir(p?.dir || '~/Pictures');
       return services.photos.next({dir, index: Number.isInteger(p?.index) ? p.index : undefined, shuffle: p?.shuffle !== false});
     },
+    'dsh-desk/market.quotes': async p => {
+      if (!services.market) throw new UserError('unavailable', 'market data is not available');
+      return services.market.quotes({symbols: String(p?.symbols ?? '')});
+    },
     'dsh-desk/github.get': async p => {
       if (!services.github) throw new UserError('unavailable', 'GitHub is not available');
       return services.github({fresh: p?.fresh === true});
@@ -694,8 +699,17 @@ export function createTools(store) {
 export function apply(ctx) {
   const store = createStore(ctx);
   const run = createRunner();
-  const services = {usage: createUsage({root: join(dshHome(), 'sessions')}), running: createRunning(ctx), git: createGit(ctx, run), github: createGithub(run), system: createSystem({run}), photos: createPhotos({run, cacheDir: join(tmpdir(), 'dsh-desk-photos')})};
-  const handlers = createHandlers(store, createFetcher(), createAgentWatch(ctx), createLauncher(ctx), services);
+  const fetcher = createFetcher();
+  const services = {
+    usage: createUsage({root: join(dshHome(), 'sessions')}),
+    running: createRunning(ctx),
+    git: createGit(ctx, run),
+    github: createGithub(run),
+    system: createSystem({run}),
+    photos: createPhotos({run, cacheDir: join(tmpdir(), 'dsh-desk-photos')}),
+    market: createMarket(fetcher),
+  };
+  const handlers = createHandlers(store, fetcher, createAgentWatch(ctx), createLauncher(ctx), services);
   ctx.effect(() => () => { void store.close(); }, 'dsh-desk: storage');
 
   // 共享通道 /api 只允许一个 interceptor，每个方法注册独立的 Fetch 路由。
