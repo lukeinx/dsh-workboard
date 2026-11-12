@@ -418,14 +418,16 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-gcard:hover:not(:disabled) .wb-gname svg{color:var(--dsw-alias-brand-primary)}
 .wb-gcard small{color:var(--dsw-alias-label-secondary);font-size:12px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
-.wb-wx{display:flex;flex-direction:column;height:100%;min-height:0;gap:8px;color:var(--dsw-alias-label-primary)}
+.wb-wx{display:flex;flex-direction:column;height:100%;min-height:0;gap:8px;overflow:hidden;color:var(--dsw-alias-label-primary)}
+.wb-wx[data-size=s]{gap:6px}
 .wb-wxnow{display:flex;align-items:center;gap:12px;min-width:0}
+.wb-wxnow .wb-aqi{margin-left:auto;align-self:flex-start;flex:none}
 .wb-wxnow svg{color:var(--dsw-alias-label-secondary);flex:none}
 .wb-wxt{font-size:36px;font-weight:600;letter-spacing:-1px;line-height:1}
 .wb-wxmeta{display:flex;flex-direction:column;gap:2px;min-width:0;font-size:12px;color:var(--dsw-alias-label-secondary)}
 .wb-wxmeta b{font-size:13px;font-weight:600;color:var(--dsw-alias-label-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wb-wxhours{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin-top:auto;text-align:center;font-size:12px;color:var(--dsw-alias-label-secondary)}
-.wb-wxhours>div{display:flex;flex-direction:column;align-items:center;gap:4px}
+.wb-wxhours>div{display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.25}
 .wb-wxhours b{font-weight:500;color:var(--dsw-alias-label-primary)}
 .wb-wxmini{display:flex;align-items:center;gap:10px;line-height:1.5}
 .wb-wxmini svg{color:var(--dsw-alias-label-secondary)}
@@ -1270,20 +1272,20 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           if (!w) return h('div', {className: 'wb-wx wb-muted'}, wx.error || '…');
           const [, textKey] = wxKind(w.current.code, w.current.isDay);
           const aqi = w.aqi != null ? aqiLevel(w.aqi) : null;
-          return h('div', {className: 'wb-wx', title: wx.loc.region || undefined},
+          const small = size === 's';
+          return h('div', {className: 'wb-wx', 'data-size': size, title: wx.loc.region || undefined},
             h('div', {className: 'wb-wxnow'},
-              h(WxIcon, {code: w.current.code, isDay: w.current.isDay, size: size === 's' ? 30 : 40}),
+              h(WxIcon, {code: w.current.code, isDay: w.current.isDay, size: small ? 30 : 40}),
               h('span', {className: 'wb-wxt wb-num'}, deg(w.current.temp)),
-              size === 's' ? null : h('div', {className: 'wb-wxmeta'},
+              small ? null : h('div', {className: 'wb-wxmeta'},
                 h('b', null, `${wx.loc.name} · ${t(textKey)}`),
-                h('span', {className: 'wb-num'}, `${deg(w.today.lo)} / ${deg(w.today.hi)} · ${fill(t('feels'), {n: Math.round(w.current.feels)})}`))),
-            size === 's' ? h('div', {className: 'wb-wxmeta'},
-              h('b', null, wx.loc.name),
-              h('span', null, t(textKey)),
+                h('span', {className: 'wb-num'}, `${deg(w.today.lo)} / ${deg(w.today.hi)} · ${fill(t('feels'), {n: Math.round(w.current.feels)})}`)),
+              aqi ? h('span', {className: 'wb-aqi', 'data-level': aqi.level}, small ? `AQI ${w.aqi}` : `AQI ${w.aqi} · ${t(aqi.key)}`) : null),
+            small ? h('div', {className: 'wb-wxmeta'},
+              h('b', null, `${wx.loc.name} · ${t(textKey)}`),
               h('span', {className: 'wb-num'}, `${deg(w.today.lo)} / ${deg(w.today.hi)}`)) : null,
-            aqi ? h('div', null, h('span', {className: 'wb-aqi', 'data-level': aqi.level}, `AQI ${w.aqi} · ${t(aqi.key)}`)) : null,
-            size === 's' ? null : h('div', {className: 'wb-wxhours wb-num'}, w.hours.slice(0, 6).map(x => h('div', {key: x.time},
-              h('span', null, x.time), h(WxIcon, {code: x.code, size: 18}), h('b', null, deg(x.temp))))));
+            small ? null : h('div', {className: 'wb-wxhours wb-num'}, w.hours.slice(0, 6).map(x => h('div', {key: x.time},
+              h('span', null, x.time), h(WxIcon, {code: x.code, size: 16}), h('b', null, deg(x.temp))))));
         }
         Weather.workboard = {apiVersion: 1, sizes: ['m', 's'], description: () => t('d_weather'), settings: LOCATION_FIELDS};
 
