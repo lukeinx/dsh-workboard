@@ -1373,7 +1373,6 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           ['cfg_personal', [NAME_FIELD, WEEK_START_FIELD]],
           ['weather', LOCATION_FIELDS],
           ['quote', QUOTE_FIELDS],
-          ['calendar', [CALENDAR_URLS_FIELD]],
         ];
         const SETTING_FIELDS = SETTING_GROUPS.flatMap(([, fields]) => fields);
 
