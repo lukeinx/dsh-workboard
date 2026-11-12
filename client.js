@@ -76,7 +76,7 @@ window.__ModuleLoader__.load({
       f_showRecent: '显示最近会话', f_showSchedules: '显示定时任务',
       f_feeds: '订阅地址（每行一个 RSS / Atom）', defaultFeeds: 'https://www.ifanr.com/feed\nhttps://www.ruanyifeng.com/blog/atom.xml', feedError: '{n} 个订阅加载失败', noItems: '没有内容',
       markAllRead: '全部已读', unreadCount: '{n} 条未读', f_hideRead: '隐藏已读',
-      addHabit: '添加习惯', noHabits: '还没有习惯', streak: '连续 {n} 天', markDay: '{d} 打卡',
+      addHabit: '添加习惯，回车保存', noHabits: '在下方添加一个习惯，每天点对应日期的格子打卡', streak: '连续 {n} 天', markDay: '{d} 打卡', todayShort: '今',
       prompt: 'Prompt 快启', inbox: '收集箱', usage: '用量', running: '运行中', git: 'Git 工作区', github: 'GitHub', system: '系统状态', photo: '相框', market: '行情',
       d_market: '汇率、A 股 / 港股 / 美股和加密货币报价', f_symbols: '代码（每行一个，后面可加名称）', f_upColor: '涨跌颜色', up_red: '红涨绿跌', up_green: '绿涨红跌',
       mk_symbols: 'USD/CNY\nHKD/CNY\nhk00700 腾讯\nBTC', mk_none: '在设置里添加代码', mk_unknown: '无法识别', mk_missing: '未找到',
@@ -185,7 +185,7 @@ window.__ModuleLoader__.load({
       f_showRecent: 'Show recent sessions', f_showSchedules: 'Show scheduled tasks',
       f_feeds: 'Feed URLs, one RSS or Atom feed per line', defaultFeeds: 'https://hnrss.org/frontpage', feedError: '{n} feed(s) failed to load', noItems: 'Nothing here',
       markAllRead: 'Mark all read', unreadCount: '{n} unread', f_hideRead: 'Hide read items',
-      addHabit: 'Add a habit', noHabits: 'No habits yet', streak: '{n}-day streak', markDay: 'Check in for {d}',
+      addHabit: 'Add a habit, press Enter', noHabits: 'Add a habit below, then tick the box for each day you do it', streak: '{n}-day streak', markDay: 'Check in for {d}', todayShort: 'Today',
       prompt: 'Quick prompt', inbox: 'Inbox', usage: 'Usage', running: 'Running', git: 'Git repos', github: 'GitHub', system: 'System', photo: 'Photo frame', market: 'Markets',
       d_market: 'Exchange rates, China / Hong Kong / US stocks and crypto prices', f_symbols: 'Symbols, one per line, optionally followed by a name', f_upColor: 'Gain colour', up_red: 'Red for gains', up_green: 'Green for gains',
       mk_symbols: 'EUR/USD\nUSD/JPY\nusAAPL Apple\nBTC', mk_none: 'Add symbols in settings', mk_unknown: 'Unrecognized', mk_missing: 'Not found',
@@ -559,11 +559,17 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-hrow>b{flex:1;min-width:0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wb-hrow small{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none;min-width:44px;text-align:right}
 .wb-hdays{display:flex;gap:4px;flex:none}
-.wb-hday{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--dsw-alias-border-l2);box-sizing:border-box;display:grid;place-items:center}
+.wb-hday{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--dsw-alias-border-l2);box-sizing:border-box;display:grid;place-items:center}
 .wb-hday:hover{border-color:var(--dsw-alias-brand-primary)}
-.wb-hday[data-today]{border-color:var(--dsw-alias-label-secondary)}
+.wb-hday[data-today]{border-color:var(--dsw-alias-brand-primary)}
 .wb-hday[data-done]{background:var(--dsw-alias-brand-primary);border-color:var(--dsw-alias-brand-primary);${onBrand('color')}}
-.wb-hrow:hover .wb-del{display:grid}
+.wb-hrow[data-head]{padding-top:0;padding-bottom:0}
+.wb-hrow[data-head]:hover{background:none}
+.wb-hrow[data-head] .wb-hdays span{width:20px;text-align:center;font-size:11px;line-height:14px;color:var(--dsw-alias-label-secondary)}
+.wb-hrow[data-head] .wb-hdays span[data-today]{color:var(--dsw-alias-brand-primary);font-weight:600}
+.wb-hsp{width:24px;flex:none}
+.wb-hrow .wb-del{display:grid;visibility:hidden}
+.wb-hrow:hover .wb-del{visibility:visible}
 
 .wb-prompt{display:flex;flex-direction:column;gap:8px;height:100%;min-height:0}
 .wb-prompt textarea{flex:1;min-height:36px;resize:none;border:1px solid var(--dsw-alias-border-l1);outline:none;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary);border-radius:8px;padding:8px 10px;font:inherit;line-height:1.5}
@@ -2172,9 +2178,17 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             setText('');
             call('habit.add', {name}).then(habit => setHabits(list => [...(list ?? []), habit]), err => { setText(name); fail(err); });
           };
+          const head = habits?.length ? h('div', {className: 'wb-hrow', 'data-head': ''},
+            h('b'),
+            h('div', {className: 'wb-hdays'}, keys.map(k => h('span', {key: k, 'data-today': k === todayKey ? '' : undefined,
+              title: keyDate(k).toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'})},
+              k === todayKey && lang.startsWith('zh') ? t('todayShort') : keyDate(k).toLocaleDateString(lang, {weekday: 'narrow'})))),
+            size === 't' ? null : h('small'),
+            h('i', {className: 'wb-hsp'})) : null;
           return h(React.Fragment, null,
             h('div', {className: 'wb-rows'},
               habits && !habits.length ? h('div', {className: 'wb-blank'}, t('noHabits')) : null,
+              head,
               (habits ?? []).map(habit => {
                 const n = streak(habit);
                 return h('div', {key: habit.id, className: 'wb-hrow'},
