@@ -1,31 +1,64 @@
 {
   "name": "dsh-workboard",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "DeepSeek Harness plugin: a modular dashboard with 36 built-in widgets, plus widgets your agent builds for you.",
   "type": "module",
   "license": "MIT",
   "author": "lukeinx",
-  "repository": {"type": "git", "url": "git+https://github.com/lukeinx/dsh-workboard.git"},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lukeinx/dsh-workboard.git"
+  },
   "homepage": "https://github.com/lukeinx/dsh-workboard#readme",
   "bugs": "https://github.com/lukeinx/dsh-workboard/issues",
-  "engines": {"dsh": ">=0.2.0"},
-  "keywords": ["dsh-plugin", "deepseek-harness", "deepseek-desktop", "dashboard", "widgets", "todo", "calendar", "deepseek", "dsh", "ai-agent", "工作台"],
+  "engines": {
+    "dsh": ">=0.2.0"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek-harness",
+    "deepseek-desktop",
+    "dashboard",
+    "widgets",
+    "todo",
+    "calendar",
+    "deepseek",
+    "dsh",
+    "ai-agent",
+    "工作台"
+  ],
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",
     "./locale/*.json": "./locale/*.json",
     "./icon": "./icon.svg"
   },
-  "files": ["index.js", "client.js", "lib/*.js", "vendor/mediaremote-adapter/**", "skills/*.md", "cordis.patch.yml", "locale/*.json", "icon.svg", "README.md", "README.zh.md"],
+  "files": [
+    "index.js",
+    "client.js",
+    "lib/*.js",
+    "vendor/mediaremote-adapter/**",
+    "skills/*.md",
+    "cordis.patch.yml",
+    "locale/*.json",
+    "icon.svg",
+    "README.md",
+    "README.zh.md"
+  ],
   "scripts": {
     "check": "for f in index.js client.js lib/*.js examples/hello-widget/client.js; do node --check $f || exit 1; done && node scripts/smoke.mjs && TZ=Asia/Shanghai node scripts/smoke-ics.mjs"
   },
   "dsh": {
-    "bundle": { "patch": "./cordis.patch.yml" },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
     "client": {
       "platform": "web",
       "immediately": true,
-      "inject": ["@deepseek-ai/dsh-client-connection", "@deepseek-ai/dsh-client-locale"]
+      "inject": [
+        "@deepseek-ai/dsh-client-connection",
+        "@deepseek-ai/dsh-client-locale"
+      ]
     }
   }
 }
