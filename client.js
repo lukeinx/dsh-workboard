@@ -531,6 +531,7 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-trend .wb-row{gap:8px;padding:3px 4px}
 .wb-trend .wb-row>span{flex:none;font-size:12px;color:var(--dsw-alias-label-secondary)}
 .wb-trend .wb-row>.wb-rank{width:16px;text-align:right}
+.wb-trend .wb-row>.wb-tag{font-size:11px;line-height:16px;padding:0 4px;border-radius:4px;background:var(--dsw-alias-bg-layer-2)}
 .wb-trend .wb-rank[data-top]{color:var(--dsw-alias-brand-primary);font-weight:600}
 .wb-spark{flex:1;min-height:32px;min-width:0;position:relative}
 .wb-spark svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
@@ -2899,6 +2900,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
               v ? v.items.map((it, i) => h('a', {key: `${i}${it.url}`, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer', title: [it.title, it.meta].filter(Boolean).join('\n')},
                 h('span', {className: 'wb-rank wb-num', 'data-top': i < 3 ? '' : undefined}, i + 1),
                 h('div', null, h('b', null, it.title), size === 'l' && it.meta ? h('small', null, it.meta) : null),
+                it.tag ? h('span', {className: 'wb-tag'}, it.tag) : null,
                 size === 't' ? null : h('span', {className: 'wb-num'}, hot(it.hot))))
                 : h('div', {className: 'wb-blank'}, res.error || '…')));
         }

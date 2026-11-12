@@ -375,7 +375,7 @@ const trendFetcher = createFetcher({fetchImpl: async (url, init) => {
   return new Response('down', {status: 503});
 }});
 const trendHandle = createHandlers(createStore({}), trendFetcher, null, null, {trending: createTrending(trendFetcher)})['dsh-workboard/trending.get'];
-assert.deepEqual((await trendHandle({source: 'weibo'})).items, [{title: '话题', url: 'https://s.weibo.com/weibo?q=%23%E8%AF%9D%E9%A2%98%23', hot: 5, meta: '热'}]);
+assert.deepEqual((await trendHandle({source: 'weibo'})).items, [{title: '话题', url: 'https://s.weibo.com/weibo?q=%23%E8%AF%9D%E9%A2%98%23', hot: 5, meta: '', tag: '热'}]);
 assert.equal((await trendHandle({source: '36kr'})).items[0].url, 'https://36kr.com/p/9');
 assert.deepEqual(trendCalls.map(c => c[1]), ['GET', 'POST']);
 assert.equal(trendCalls[0][2], 'https://weibo.com/');
