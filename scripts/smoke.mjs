@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {zstdCompressSync} from 'node:zlib';
 import {execFileSync} from 'node:child_process';
-import {apply, defaultBoard, createStore, createHandlers, createAgentWatch, createLauncher, createWorkspaces, createRunning, createGit, createGithub, createSchedules, createOpener, lastMessageText, migrateLegacy} from '../index.js';
+import {apply, defaultBoard, createStore, createHandlers, createAgentWatch, createLauncher, createWorkspaces, createRunning, createGit, createGithub, createSchedules, createBriefSchedule, createOpener, lastMessageText, migrateLegacy} from '../index.js';
 import {createOutputs, parseOutputs} from '../lib/outputs.js';
 import {createRecentFiles} from '../lib/files.js';
 import {createClipboard} from '../lib/clipboard.js';
@@ -395,6 +395,48 @@ assert.ok(ctxTool.parameters.properties.sections.items.enum.includes('attention'
 const toolSnap = await ctxTool.execute({sections: ['todos', 'note', 'usage']});
 assert.ok(Array.isArray(toolSnap.todos.open));
 assert.ok(toolSnap.usage.error || toolSnap.usage.today);
+
+// 每日简报：工具读写；定时任务开启即创建、再开启即更新、被外部删除后重建、关闭即删除。
+const briefTool = tools.get('workboard_brief');
+assert.deepEqual(await briefTool.execute({action: 'read'}), {text: '', writtenAt: null});
+assert.equal((await briefTool.execute({action: 'write', text: '  ## Today\n- ship  '})).chars, 15);
+assert.equal((await briefTool.execute({action: 'read'})).text, '## Today\n- ship');
+await assert.rejects(briefTool.execute({action: 'write', text: ' '}), /text is required/);
+const briefView = await value('brief.get');
+assert.equal(briefView.brief.text, '## Today\n- ship');
+assert.deepEqual([briefView.schedule, briefView.canSchedule], [null, false]);
+assert.equal((await call('brief.schedule', {enabled: true, time: '08:30', prompt: 'x'})).error.code, 'dsh-workboard/unavailable');
+let briefTasks = [];
+const briefCalls = [];
+const briefSvc = {
+  catalog: async () => briefTasks,
+  create: async req => { briefCalls.push(['create', req]); const t = {id: `b${briefCalls.length}`, kind: 'daily', title: req.title, prompt: req.prompt, time: req.timing.daily.time, timeZone: req.timing.daily.time_zone, scheduledAt: '2026-11-13T00:30:00.000Z', status: 'active', target: {kind: 'new', create: req.target.create}}; briefTasks.push(t); return t; },
+  edit: async req => {
+    briefCalls.push([req.action, req.id]);
+    const t = briefTasks.find(x => x.id === req.id);
+    if (!t) return {id: req.id, code: 'schedule_not_found'};
+    if (req.action === 'delete') { briefTasks = briefTasks.filter(x => x !== t); return {id: req.id, deleted: true}; }
+    Object.assign(t, {time: req.patch.timing.daily.time, prompt: req.patch.prompt});
+    return t;
+  },
+};
+const briefStore = createStore({});
+const briefSched = createBriefSchedule({get: k => (k === 'schedule' ? briefSvc : undefined)}, briefStore);
+const briefHandlers = createHandlers(briefStore, feedFetcher, null, null, {briefSchedule: briefSched});
+const on = await briefHandlers['dsh-workboard/brief.schedule']({enabled: true, time: '08:30', timeZone: 'Asia/Shanghai', title: 'Daily brief', prompt: 'make brief', cwd: '/tmp'});
+assert.deepEqual([on.id, on.timing.time, on.timing.timeZone, on.cwd], ['b1', '08:30', 'Asia/Shanghai', '/tmp']);
+assert.deepEqual(briefCalls[0][1].target, {kind: 'new', create: {cwd: '/tmp'}});
+assert.equal((await briefHandlers['dsh-workboard/brief.get']()).schedule.id, 'b1');
+assert.equal((await briefHandlers['dsh-workboard/brief.schedule']({enabled: true, time: '09:00', prompt: 'make brief'})).timing.time, '09:00');
+assert.deepEqual(briefCalls.map(c => c[0]), ['create', 'update']);
+briefTasks = [];
+assert.equal((await briefHandlers['dsh-workboard/brief.get']()).schedule, null);
+assert.equal((await briefHandlers['dsh-workboard/brief.schedule']({enabled: true, time: '07:00', prompt: 'make brief'})).id, 'b3');
+assert.equal(await briefHandlers['dsh-workboard/brief.schedule']({enabled: false}), null);
+assert.deepEqual(briefTasks, []);
+assert.equal(briefStore.getBriefScheduleId(), '');
+await assert.rejects(briefHandlers['dsh-workboard/brief.schedule']({enabled: true, time: '25:00', prompt: 'x'}), /HH:MM/);
+await assert.rejects(briefHandlers['dsh-workboard/brief.schedule']({enabled: true, time: '08:00', prompt: ' '}), /prompt is required/);
 
 // 系统状态：解析 vm_stat / meminfo / pmset，采样进环形缓冲。
 assert.equal(parseVmStat('Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free: 10.\nPages active: 100.\nPages wired down: 50.\nPages occupied by compressor: 10.\n', 1e12), 160 * 16384);

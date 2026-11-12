@@ -16,6 +16,9 @@ window.__ModuleLoader__.load({
     const CAL_MS = 15 * 60_000;
     const FEED_MS = 15 * 60_000;
     const AGENT_MS = 5000;
+    const BRIEF_TIME = '08:30';
+    const BRIEF_WAIT_MS = 10 * 60_000;
+    const DAILY_TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
     const WORKSPACE_MS = 60_000;
     const USAGE_MS = 60_000;
     const GIT_MS = 30_000;
@@ -100,6 +103,9 @@ window.__ModuleLoader__.load({
       attention: '待处理', d_attention: '等你确认的会话、卡住的目标、失败的作业、待 Review 的 PR 和结转待办，按紧急程度排成一列',
       a_waiting: '等你确认', a_blocked: '目标卡住', a_failed: '作业失败', a_review: '待 Review', a_todo: '结转待办', a_inbox: '收集箱有 {n} 条待整理',
       a_clear: '没有需要你处理的事', a_count: '{n} 项待处理', f_attnGithub: '包含待 Review 的 PR', f_attnTodos: '包含结转待办', f_attnInbox: '包含收集箱',
+      brief: '每日简报', d_brief: 'Agent 汇总工作台数据写成的今日简报，可每天定时生成', b_empty: '还没有简报', b_generate: '生成', b_regenerate: '重新生成', b_generating: '生成中…',
+      b_session: '查看会话', b_auto: '每天 {t}', b_autoOff: '每天自动生成', f_briefTime: '每天自动生成的时间（HH:MM）', briefTaskTitle: '工作台每日简报',
+      briefPrompt: '生成今天的工作简报：先调用 workboard_context 读取工作台数据，再用 workboard_brief 的 write 写入一份 Markdown 简报，最后只回复一句已完成。简报用中文，300 字以内，依次是：需要我先处理的事（按紧急程度）、今天的日程、最近 24 小时的产出与用量、值得留意的 Git / GitHub 状态。没有内容的部分直接省略；不寒暄，不复述数据来源。',
       d_usage: '每天的请求数与 token，按模型拆分，可按单价估算费用', u_today: '今日 token', u_requests: '{n} 次请求', u_cache: '缓存命中 {n}%', u_cost: '约 ${n}',
       u_vs: '昨日 {n}', u_range_1: '今天', u_range_7: '7 天', u_range_30: '30 天', u_model: '模型', u_req: '请求', u_tok: 'token',
       u_unreported: '{n} 次请求未上报 token（{p}）', u_none: '这段时间没有请求', u_day: '{d}：{t} token，{r} 次请求',
@@ -216,6 +222,9 @@ window.__ModuleLoader__.load({
       attention: 'Attention', d_attention: 'Sessions waiting for you, stuck goals, failed jobs, PRs to review and carried-over to-dos, in one queue by urgency',
       a_waiting: 'Needs you', a_blocked: 'Goal blocked', a_failed: 'Job failed', a_review: 'Review requested', a_todo: 'Carried-over to-do', a_inbox: '{n} inbox items to sort',
       a_clear: 'Nothing needs you', a_count: '{n} to handle', f_attnGithub: 'Include PRs to review', f_attnTodos: 'Include carried-over to-dos', f_attnInbox: 'Include the inbox',
+      brief: 'Daily brief', d_brief: 'A brief of your day that the agent writes from the dashboard, optionally every morning', b_empty: 'No brief yet', b_generate: 'Generate', b_regenerate: 'Regenerate', b_generating: 'Writing…',
+      b_session: 'Open session', b_auto: 'Daily at {t}', b_autoOff: 'Every day', f_briefTime: 'Daily time (HH:MM)', briefTaskTitle: 'Workboard daily brief',
+      briefPrompt: 'Write today\'s work brief: call workboard_context to read the dashboard, save a Markdown brief with workboard_brief (action write), then reply with one line once done. Keep it under 150 words, in English, in this order: what needs me first (by urgency), today\'s calendar, output and usage over the last 24 hours, Git / GitHub worth noticing. Skip empty parts; no greetings, no restating where the data came from.',
       d_usage: 'Requests and tokens per day, split by model, with optional cost estimates', u_today: 'Tokens today', u_requests: '{n} requests', u_cache: '{n}% cache hits', u_cost: '≈ ${n}',
       u_vs: 'Yesterday {n}', u_range_1: 'Today', u_range_7: '7 days', u_range_30: '30 days', u_model: 'Model', u_req: 'Requests', u_tok: 'Tokens',
       u_unreported: '{n} requests reported no tokens ({p})', u_none: 'No requests in this period', u_day: '{d}: {t} tokens, {r} requests',
@@ -360,6 +369,19 @@ window.__ModuleLoader__.load({
 .wb-wsel[data-set]{color:var(--dsw-alias-brand-primary);opacity:.9}
 .wb-wsel select{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:12px}
 .wb-footact{display:flex;align-items:center;gap:6px;flex:none}
+.wb-md{font-size:13px;line-height:1.6;color:var(--dsw-alias-label-primary);padding:0 2px}
+.wb-md>:first-child{margin-top:0}
+.wb-md h4{margin:10px 0 2px;font-size:13px;font-weight:600}
+.wb-md h5{margin:8px 0 2px;font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}
+.wb-md p{margin:2px 0}
+.wb-md ul,.wb-md ol{margin:2px 0;padding-left:18px}
+.wb-md li{margin:1px 0}
+.wb-md code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:var(--dsw-alias-bg-layer-2);border-radius:4px;padding:0 4px}
+.wb-md a{color:var(--dsw-alias-brand-primary);text-decoration:none}
+.wb-md a:hover{text-decoration:underline}
+.wb-notefoot .wb-auto{display:inline-flex;align-items:center;gap:4px;color:var(--dsw-alias-label-secondary)}
+.wb-notefoot .wb-auto[aria-pressed=true]{color:var(--dsw-alias-brand-primary)}
+.wb-auto svg{width:12px;height:12px}
 .wb-pbox{position:relative;flex:1;min-height:0;display:flex}
 .wb-pbox .wb-wsel{position:absolute;right:6px;bottom:6px}
 .wb-pbox[data-ws] textarea{padding-right:30px}
@@ -2875,6 +2897,115 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           ],
         };
 
+        // 简报由 Agent 写入，只渲染标题、列表、粗体、行内代码和 http(s) 链接，全部生成 React 元素，不走 innerHTML。
+        const MD_INLINE = /\*\*([^*]+)\*\*|`([^`]+)`|\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g;
+        const mdInline = text => {
+          const out = [];
+          let last = 0;
+          for (const m of text.matchAll(MD_INLINE)) {
+            if (m.index > last) out.push(text.slice(last, m.index));
+            const key = out.length;
+            if (m[1]) out.push(h('b', {key}, m[1]));
+            else if (m[2]) out.push(h('code', {key}, m[2]));
+            else out.push(h('a', {key, href: m[4], target: '_blank', rel: 'noopener noreferrer'}, m[3]));
+            last = m.index + m[0].length;
+          }
+          if (last < text.length) out.push(text.slice(last));
+          return out;
+        };
+        function Markdown({text}) {
+          const blocks = [];
+          let list = null;
+          const close = () => { if (list) { blocks.push(h(list.tag, {key: blocks.length}, list.items)); list = null; } };
+          for (const raw of String(text ?? '').split('\n')) {
+            const line = raw.trimEnd();
+            const item = line.match(/^\s*(?:([-*+])|\d+[.)])\s+(.*)$/);
+            if (item) {
+              const tag = item[1] ? 'ul' : 'ol';
+              if (list && list.tag !== tag) close();
+              list ??= {tag, items: []};
+              list.items.push(h('li', {key: list.items.length}, mdInline(item[2])));
+              continue;
+            }
+            close();
+            if (!line.trim()) continue;
+            const head = line.match(/^(#{1,6})\s+(.*)$/);
+            blocks.push(head ? h(head[1].length <= 2 ? 'h4' : 'h5', {key: blocks.length}, mdInline(head[2])) : h('p', {key: blocks.length}, mdInline(line)));
+          }
+          close();
+          return h('div', {className: 'wb-md'}, blocks);
+        }
+
+        function Brief({size, config}) {
+          useLocale();
+          const now = useNow();
+          const res = useRemote('brief.get', {}, POLL_MS);
+          const ws = useWorkspace();
+          const ui = ctx.get?.('uiWorkspace');
+          const [pending, setPending] = useState(null);
+          const [busy, setBusy] = useState(false);
+          const [error, setError] = useState('');
+          const lastTime = useRef(config?.time);
+          const v = res.value;
+          const brief = v?.brief ?? null;
+          const schedule = v?.schedule ?? null;
+          const time = DAILY_TIME.test(String(config?.time ?? '').trim()) ? String(config.time).trim() : BRIEF_TIME;
+          const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+          const fail = e => setError(String(e?.message || e));
+          const scheduleWith = enabled => call('brief.schedule', {enabled, time, timeZone, title: t('briefTaskTitle'), prompt: t('briefPrompt'), cwd: ws.path || undefined});
+          // 定时任务的时间以任务本身为准；只有用户在设置里改了时间才同步过去。
+          useEffect(() => {
+            if (lastTime.current === config?.time) return;
+            lastTime.current = config?.time;
+            if (schedule && schedule.timing?.time !== time) scheduleWith(true).then(res.reload, fail);
+          }, [config?.time]);
+          useEffect(() => {
+            if (pending && brief && brief.at >= pending.since) setPending(null);
+          }, [brief?.at, pending]);
+          useEffect(() => {
+            if (!pending) return undefined;
+            const id = setTimeout(() => setPending(null), BRIEF_WAIT_MS);
+            return () => clearTimeout(id);
+          }, [pending]);
+          if (!v) return h('div', {className: 'wb-blank'}, res.error || '…');
+          const generate = async () => {
+            setBusy(true);
+            setError('');
+            try {
+              const since = Date.now();
+              const {sessionId} = await call('agent.start', {prompt: t('briefPrompt'), cwd: ws.path || undefined, timeZone});
+              setPending({since, sessionId});
+            } catch (e) {
+              if (/cannot start sessions/.test(String(e?.message)) && typeof ui?.startSession === 'function') ui.startSession(ws.id, {prompt: t('briefPrompt'), whenDraftExists: 'replace'});
+              else fail(e);
+            } finally {
+              setBusy(false);
+            }
+          };
+          const toggleAuto = () => {
+            setBusy(true);
+            setError('');
+            scheduleWith(!schedule).then(res.reload, fail).finally(() => setBusy(false));
+          };
+          const autoLabel = fill(t('b_auto'), {t: schedule?.timing?.time || time});
+          return h(React.Fragment, null,
+            h('div', {className: 'wb-rows'}, brief ? h(Markdown, {text: brief.text}) : h('div', {className: 'wb-blank'}, pending ? t('b_generating') : t('b_empty'))),
+            error ? h('div', {className: 'wb-calerr'}, error) : null,
+            h('div', {className: 'wb-notefoot'},
+              h('span', null, pending && typeof ui?.openSession === 'function'
+                ? h('button', {type: 'button', className: 'wb-btn', onClick: () => ui.openSession(pending.sessionId)}, t('b_session'))
+                : brief ? fill(t('updated'), {t: relTime(brief.at, now.getTime())}) : ''),
+              h('div', {className: 'wb-footact'},
+                v.canSchedule && size !== 'm' ? h('button', {type: 'button', className: 'wb-btn wb-auto', 'aria-pressed': Boolean(schedule), disabled: busy, onClick: toggleAuto},
+                  schedule ? h(Icon.check) : null, schedule ? autoLabel : t('b_autoOff')) : null,
+                h('button', {type: 'button', className: 'wb-btn', disabled: busy || Boolean(pending), onClick: generate},
+                  pending ? t('b_generating') : brief ? t('b_regenerate') : t('b_generate')))));
+        }
+        Brief.workboard = {
+          apiVersion: 1, sizes: ['l', 't', 'w', 'm'], description: () => t('d_brief'),
+          settings: [{key: 'time', type: 'text', default: BRIEF_TIME, label: () => t('f_briefTime'), placeholder: BRIEF_TIME}],
+        };
+
         function Git({size, config}) {
           useLocale();
           const now = useNow();
@@ -3550,11 +3681,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           ['workboard.outputs', 'outputs', Outputs], ['workboard.schedules', 'tasks', Schedules], ['workboard.pinned', 'pinned', Pinned],
           ['workboard.files', 'files', Files], ['workboard.clipboard', 'clipboard', Clipboard], ['workboard.network', 'network', Network],
           ['workboard.nowplaying', 'nowplaying', NowPlaying], ['workboard.ambient', 'ambient', Ambient], ['workboard.videos', 'videos', Videos],
-          ['workboard.attention', 'attention', Attention],
+          ['workboard.attention', 'attention', Attention], ['workboard.brief', 'brief', Brief],
         ];
         const BUILTIN_CATEGORY = {
           daily: ['today', 'clock', 'worldclock', 'weather', 'countdown', 'progress', 'habits', 'photo', 'nowplaying'],
-          agent: ['attention', 'agents', 'running', 'prompt', 'inbox', 'usage', 'outputs', 'tasks', 'pinned'],
+          agent: ['attention', 'agents', 'running', 'brief', 'prompt', 'inbox', 'usage', 'outputs', 'tasks', 'pinned'],
           news: ['trending', 'feed', 'videos', 'market', 'quote'],
           tools: ['todo', 'note', 'calendar', 'focus', 'ambient', 'links', 'git', 'github', 'system', 'files', 'clipboard', 'network'],
         };

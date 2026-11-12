@@ -44,7 +44,7 @@ const MAX_NOTE = 200_000;
 
 // storageDomain 要求 zod schema；插件不带 zod 依赖，用只实现 safeParse/parse 的透传对象，校验在本文件里做。
 const passthrough = {safeParse: data => ({success: true, data}), parse: data => data};
-const TABLES = ['boards', 'todos', 'notes', 'prefs', 'habits', 'inbox', 'reads', 'widgets'];
+const TABLES = ['boards', 'todos', 'notes', 'prefs', 'habits', 'inbox', 'reads', 'widgets', 'briefs'];
 const ICS_TTL = 15 * 60_000;
 const ICS_MAX_BYTES = 5_000_000;
 const FEED_TTL = 15 * 60_000;
@@ -62,6 +62,8 @@ const MAX_READ_BATCH = 200;
 const MAX_PROMPT = 20_000;
 const WIDGET_FETCH_TTL = 30_000;
 const MAX_WIDGET_ERROR = 2000;
+const MAX_BRIEF = 20_000;
+const DAILY_TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 // 自定义 widget 在 workboard.widget slot 里的 id 前缀；与 client.js 一致。
 export const CUSTOM_PREFIX = 'custom.';
 
@@ -71,7 +73,7 @@ export const BUILTIN_WIDGETS = [
   'workboard.agents', 'workboard.feed', 'workboard.habits',
   'workboard.prompt', 'workboard.inbox', 'workboard.usage', 'workboard.running', 'workboard.git', 'workboard.github', 'workboard.system', 'workboard.photo', 'workboard.market', 'workboard.trending',
   'workboard.outputs', 'workboard.schedules', 'workboard.pinned', 'workboard.files', 'workboard.clipboard', 'workboard.network',
-  'workboard.nowplaying', 'workboard.ambient', 'workboard.videos', 'workboard.attention',
+  'workboard.nowplaying', 'workboard.ambient', 'workboard.videos', 'workboard.attention', 'workboard.brief',
 ];
 
 export function defaultBoard(id) {
@@ -380,6 +382,20 @@ export function createStore(ctx) {
       return true;
     },
 
+    getBrief: () => table('briefs').get('latest') ?? null,
+    async putBrief(text) {
+      const value = String(text ?? '').trim().slice(0, MAX_BRIEF);
+      if (!value) throw new UserError('empty-text', 'text is required');
+      const brief = {text: value, at: Date.now()};
+      await table('briefs').put('latest', brief);
+      return brief;
+    },
+    getBriefScheduleId: () => table('briefs').get('schedule')?.id ?? '',
+    async setBriefScheduleId(id) {
+      if (id) await table('briefs').put('schedule', {id: String(id)});
+      else await table('briefs').delete('schedule');
+    },
+
     getNote: () => table('notes').get(NOTE_KEY) ?? {text: '', updatedAt: 0},
     async putNote(text) {
       const note = {text: String(text ?? '').slice(0, MAX_NOTE), updatedAt: Date.now()};
@@ -488,17 +504,19 @@ const scheduleRow = t => ({
   cwd: t.target?.create?.cwd ?? '',
 });
 
+const checkSchedule = result => {
+  if (result?.code === 'schedule_not_found') throw new UserError('not-found', 'the scheduled task no longer exists');
+  if (result?.code === 'schedule_conflict') throw new UserError('conflict', 'the scheduled task changed, try again');
+  return result;
+};
+
 export function createSchedules(ctx) {
   const service = () => {
     const s = ctx.get?.('schedule');
     if (typeof s?.catalog !== 'function') throw new UserError('unavailable', 'this Harness does not expose scheduled tasks');
     return s;
   };
-  const check = result => {
-    if (result?.code === 'schedule_not_found') throw new UserError('not-found', 'the scheduled task no longer exists');
-    if (result?.code === 'schedule_conflict') throw new UserError('conflict', 'the scheduled task changed, try again');
-    return result;
-  };
+  const check = checkSchedule;
   return {
     async list() {
       const s = ctx.get?.('schedule');
@@ -520,6 +538,49 @@ export function createSchedules(ctx) {
     },
     async clearEnded() {
       return service().deleteInactive();
+    },
+  };
+}
+
+// 每日简报的定时任务：每天在新会话里发送生成简报的 prompt；任务 id 存在 briefs 表，用户在别处删掉后视为未开启。
+export function createBriefSchedule(ctx, store) {
+  const schedule = () => ctx.get?.('schedule');
+  const find = async () => {
+    const id = store.getBriefScheduleId();
+    const s = schedule();
+    if (!id || typeof s?.catalog !== 'function') return null;
+    const task = (await s.catalog()).find(t => t?.id === id);
+    return task ? scheduleRow(task) : null;
+  };
+  return {
+    available: () => typeof schedule()?.create === 'function',
+    find,
+    async set({enabled, time, timeZone, title, prompt, cwd}) {
+      const s = schedule();
+      if (typeof s?.create !== 'function') throw new UserError('unavailable', 'this Harness cannot create scheduled tasks');
+      const current = await find();
+      if (!enabled) {
+        if (current) checkSchedule(await s.edit({id: current.id, action: 'delete'}, undefined, AbortSignal.timeout(15_000)));
+        await store.setBriefScheduleId('');
+        return null;
+      }
+      if (!DAILY_TIME.test(String(time ?? ''))) throw new UserError('bad-time', 'time must be HH:MM');
+      const text = String(prompt ?? '').trim().slice(0, MAX_PROMPT);
+      if (!text) throw new UserError('empty-text', 'prompt is required');
+      const dir = await resolveDir(cwd);
+      const request = {
+        title: String(title ?? '').trim().slice(0, 200) || 'Workboard daily brief',
+        prompt: text,
+        timing: {kind: 'daily', daily: {time: String(time), time_zone: String(timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone)}},
+        target: {kind: 'new', create: dir ? {cwd: dir} : {}},
+      };
+      if (current) {
+        const result = await s.edit({id: current.id, action: 'update', patch: {...request, active: true}}, undefined, AbortSignal.timeout(15_000));
+        if (result?.code !== 'schedule_not_found') return scheduleRow(checkSchedule(result));
+      }
+      const created = await s.create(request, undefined, AbortSignal.timeout(15_000));
+      await store.setBriefScheduleId(created.id);
+      return scheduleRow(created);
     },
   };
 }
@@ -945,6 +1006,15 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
     'dsh-workboard/todo.add': p => store.addTodo(p?.text),
     'dsh-workboard/todo.update': p => store.updateTodo(p?.id, {text: p?.text, done: p?.done}),
     'dsh-workboard/todo.remove': p => store.removeTodo(p?.id),
+    'dsh-workboard/brief.get': async () => ({
+      brief: store.getBrief(),
+      schedule: services.briefSchedule ? await services.briefSchedule.find() : null,
+      canSchedule: Boolean(services.briefSchedule?.available()),
+    }),
+    'dsh-workboard/brief.schedule': async p => {
+      if (!services.briefSchedule) throw new UserError('unavailable', 'this Harness cannot create scheduled tasks');
+      return services.briefSchedule.set({enabled: p?.enabled === true, time: p?.time, timeZone: p?.timeZone, title: p?.title, prompt: p?.prompt, cwd: p?.cwd});
+    },
     'dsh-workboard/note.get': () => store.getNote(),
     'dsh-workboard/note.put': p => store.putNote(p?.text),
   };
@@ -1067,6 +1137,34 @@ export function createTools(store, {context} = {}) {
       },
     },
     {
+      name: 'workboard_brief',
+      description: 'Read or replace the daily brief card on the user\'s Workboard dashboard. `read` returns the current brief and when it was written; `write` replaces it with `text`: short Markdown (headings, bullet lists, bold, inline code, links) in the user\'s language. Gather the day\'s data with `workboard_context` before writing.',
+      parameters: {
+        type: 'object',
+        properties: {
+          action: {type: 'string', enum: ['read', 'write']},
+          text: {type: 'string', description: 'Markdown brief, for write.'},
+        },
+        required: ['action'],
+        additionalProperties: false,
+      },
+      output: {schema: {type: 'object'}, render: (_args, value) => textResult(value)},
+      async execute(args) {
+        await store.ready;
+        const {action, text} = args ?? {};
+        if (action === 'read') {
+          const brief = store.getBrief();
+          return brief ? {text: brief.text, writtenAt: iso(brief.at)} : {text: '', writtenAt: null};
+        }
+        if (action === 'write') {
+          if (typeof text !== 'string') throw new Error('text is required');
+          const brief = await store.putBrief(text);
+          return {written: true, chars: brief.text.length, writtenAt: iso(brief.at)};
+        }
+        throw new Error(`unknown action ${action}`);
+      },
+    },
+    {
       name: 'workboard_widget',
       description: 'Create and change custom widgets on the user\'s Workboard dashboard: sandboxed HTML cards shown on their boards. Load the `workboard-widget` skill before writing or changing `html`. `list` returns each widget with its last runtime error; `get` returns the full definition and saved data; `create` needs `title` and `html`; `update` changes only the fields given for `id`; `set_data` replaces the saved data; `remove` deletes the widget from the library and every board.',
       parameters: {
@@ -1164,6 +1262,7 @@ export function apply(ctx) {
     nowPlaying: createNowPlaying({run, fetcher, cacheDir: join(tmpdir(), 'dsh-workboard-artwork'), media: createMediaRemote({spawn})}),
     videos: createVideos(fetcher),
     schedules: createSchedules(ctx),
+    briefSchedule: createBriefSchedule(ctx, store),
     outputs: createOutputs({root: join(dshHome(), 'sessions')}),
     files: createRecentFiles(),
     open: createOpener(ctx, run),
