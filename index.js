@@ -15,7 +15,7 @@ import {createTrending} from './lib/trending.js';
 import {createQuotes} from './lib/quote.js';
 import {createMediaRemote, createNowPlaying} from './lib/nowplaying.js';
 import {createVideos} from './lib/videos.js';
-import {MAX_WIDGETS, WidgetError, allowedUrl, checkHtml, cleanData, cleanSpec, widgetId} from './lib/widgets.js';
+import {MAX_WIDGETS, WidgetError, allowedUrl, checkHtml, cleanData, cleanSpec, packWidget, unpackWidget, widgetId} from './lib/widgets.js';
 import {createHash, randomUUID} from 'node:crypto';
 import {homedir, platform, tmpdir} from 'node:os';
 import {readFileSync} from 'node:fs';
@@ -856,6 +856,13 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       return widgetSummary(await store.updateWidget(p?.id, {title: p?.title, html: p?.html}));
     },
     'dsh-workboard/widget.remove': p => store.removeWidget(p?.id),
+    'dsh-workboard/widget.export': p => packWidget(store.getWidget(p?.id), p?.data === true),
+    // dryRun 只校验并返回预览，让用户看到会访问的地址后再确认。
+    'dsh-workboard/widget.import': async p => {
+      const {spec, data, warnings} = unpackWidget(p?.package);
+      if (p?.dryRun === true) return {widget: {title: spec.title, description: spec.description, sizes: spec.sizes, fetch: spec.fetch}, hasData: data != null, warnings};
+      return {widget: widgetSummary(await store.createWidget(data == null ? spec : {...spec, data})), warnings};
+    },
     'dsh-workboard/widget.save': async p => {
       const widget = await store.setWidgetData(p?.id, p?.data);
       return {dataRev: widget.dataRev, dataAt: widget.dataAt};

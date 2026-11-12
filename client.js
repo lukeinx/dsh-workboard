@@ -117,6 +117,9 @@ window.__ModuleLoader__.load({
       cw_editPrompt: '请修改我的工作台上的 widget「{title}」（id：{id}）：{desc}\n\n先加载 workboard-widget skill，用 workboard_widget get 读取当前定义后再改。',
       cw_fix: '让 Agent 修复', cw_fixPrompt: '我的工作台上的 widget「{title}」（id：{id}）运行出错：\n{error}\n\n请先加载 workboard-widget skill，用 workboard_widget get 读取当前定义，找到原因后修复。',
       cw_source: '源码', cw_title: '标题', cw_delete: '删除 widget', cw_fetch: '可访问的地址', cw_none: '无',
+      cw_export: '复制 JSON', cw_exported: '已复制', cw_withData: '包含已保存的数据',
+      imp_card: '粘贴导入', imp_hint: '导入别人分享的 widget JSON', imp_placeholder: '粘贴导出的 widget JSON',
+      imp_check: '检查', imp_go: '导入并放到看板', imp_fetch: '会访问', imp_offline: '不访问网络', imp_data: '附带已保存的数据',
       outputs: '产出物', d_outputs: 'Agent 交付和新建的文档，点开即用，可回到来源会话',
       o_presented: '交付', o_reveal: '定位', o_session: '会话', o_none: '还没有产出物', o_count: '{n} 个文件', o_missing: '已删除',
       f_created: '包含 Agent 新建的文档', f_showMissing: '显示已删除的文件',
@@ -230,6 +233,9 @@ window.__ModuleLoader__.load({
       cw_editPrompt: 'Change the widget “{title}” (id: {id}) on my Workboard dashboard: {desc}\n\nLoad the workboard-widget skill first, read the current definition with workboard_widget get, then change it.',
       cw_fix: 'Ask agent to fix', cw_fixPrompt: 'The widget “{title}” (id: {id}) on my Workboard dashboard fails:\n{error}\n\nLoad the workboard-widget skill, read the current definition with workboard_widget get, find the cause and fix it.',
       cw_source: 'Source', cw_title: 'Title', cw_delete: 'Delete widget', cw_fetch: 'Allowed addresses', cw_none: 'none',
+      cw_export: 'Copy JSON', cw_exported: 'Copied', cw_withData: 'Include saved data',
+      imp_card: 'Paste to import', imp_hint: 'Import a widget JSON someone shared', imp_placeholder: 'Paste an exported widget JSON',
+      imp_check: 'Check', imp_go: 'Import to this board', imp_fetch: 'Will access', imp_offline: 'No network access', imp_data: 'Comes with saved data',
       outputs: 'Outputs', d_outputs: 'Documents the agent presented or created; open them or jump back to the session',
       o_presented: 'Presented', o_reveal: 'Reveal', o_session: 'Session', o_none: 'No outputs yet', o_count: '{n} files', o_missing: 'Deleted',
       f_created: 'Include documents the agent created', f_showMissing: 'Show deleted files',
@@ -714,6 +720,9 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-card>.wb-hact:hover{color:var(--dsw-alias-brand-primary)}
 @media (hover:none){.wb-card>header .wb-hact,.wb-card>.wb-hact{opacity:.7}}
 .wb-gen{border-style:dashed;flex:none}
+.wb-gacts{display:grid;grid-template-columns:2fr 1fr;gap:8px;flex:none}
+.wb-impinfo{display:flex;flex-direction:column;gap:4px;font-size:12px;margin-top:8px;overflow-wrap:anywhere}
+.wb-impinfo b{font-size:13px}
 .wb-emptyacts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .wb-gen .wb-gname svg{color:var(--dsw-alias-brand-primary)}
 .wb-gentext{min-height:96px;resize:vertical;line-height:1.5}
@@ -907,6 +916,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
       pencil: () => svg(14, 'M4 20h4L18.5 9.5a2.83 2.83 0 0 0-4-4L4 16v4zM13.5 6.5l4 4'),
       sparkle: () => svg(14, ['M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z', 'M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z'], 1.6),
       code: () => svg(14, 'M8 7l-5 5 5 5M16 7l5 5-5 5'),
+      import: () => svg(14, 'M12 4v11M7 10l5 5 5-5M5 20h14'),
       copy: () => svg(14, ['M9 9h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1z', 'M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1'], 1.8),
       gear: () => svg(14, ['M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', 'M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z'], 1.6),
     };
@@ -2056,7 +2066,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
               h('button', {type: 'button', className: 'wb-action', 'data-primary': '', disabled: !dirty, onClick: save}, t('save'))));
         }
 
-        function Gallery({list, board, onAdd, onGenerate, onClose}) {
+        function Gallery({list, board, onAdd, onGenerate, onImport, onClose}) {
           const [cat, setCat] = useState('all');
           const [query, setQuery] = useState('');
           const q = query.trim().toLowerCase();
@@ -2082,8 +2092,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             h('div', {className: 'wb-tabs', role: 'tablist'}, ['all', ...present].map(c => h('button', {key: c, type: 'button', role: 'tab',
               className: 'wb-btn wb-tab', 'aria-selected': c === cat, onClick: () => setCat(c)}, t(`cat_${c}`))))),
           h('div', {className: 'wb-gbody'},
-            q ? null : h('button', {type: 'button', className: 'wb-btn wb-gcard wb-gen', onClick: onGenerate},
-              h('span', {className: 'wb-gname'}, h('b', null, t('gen_card')), h(Icon.sparkle)), h('small', null, t('gen_hint'))),
+            q ? null : h('div', {className: 'wb-gacts'},
+              h('button', {type: 'button', className: 'wb-btn wb-gcard wb-gen', onClick: onGenerate},
+                h('span', {className: 'wb-gname'}, h('b', null, t('gen_card')), h(Icon.sparkle)), h('small', null, t('gen_hint'))),
+              h('button', {type: 'button', className: 'wb-btn wb-gcard wb-gen', onClick: onImport},
+                h('span', {className: 'wb-gname'}, h('b', null, t('imp_card')), h(Icon.import)), h('small', null, t('imp_hint')))),
             body));
         }
 
@@ -2600,8 +2613,16 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const [error, setError] = useState('');
           const [busy, setBusy] = useState(false);
           const [confirm, setConfirm] = useState(false);
+          const [withData, setWithData] = useState(false);
+          const [copied, setCopied] = useState(false);
           const fail = e => { setError(String(e?.message || e)); setBusy(false); };
           useEffect(() => { call('widget.get', {id}).then(w => { setDef(w); setTitle(w.title); setHtml(w.html); }, fail); }, [id]);
+          const copyJson = () => {
+            setError('');
+            call('widget.export', {id, data: withData})
+              .then(pkg => navigator.clipboard.writeText(JSON.stringify(pkg, null, 2)))
+              .then(() => { setCopied(true); setTimeout(() => setCopied(false), 1500); }, fail);
+          };
           const dirty = def && (title.trim() !== def.title || html !== def.html);
           const save = () => {
             setBusy(true);
@@ -2616,6 +2637,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           return h(Modal, {title: `${widget.label()} · ${t('cw_source')}`, onClose, wide: true,
             footer: [
               h('button', {key: 'del', type: 'button', className: 'wb-action', 'data-danger': '', disabled: busy || !def, onClick: remove, onBlur: () => setConfirm(false)}, confirm ? t('confirmDelete') : t('cw_delete')),
+              h('button', {key: 'exp', type: 'button', className: 'wb-action', disabled: !def, onClick: copyJson}, copied ? h(Icon.check) : h(Icon.copy), copied ? t('cw_exported') : t('cw_export')),
+              def?.data != null ? h('label', {key: 'wd', className: 'wb-check wb-muted'}, h('input', {type: 'checkbox', checked: withData, onChange: e => setWithData(e.target.checked)}), t('cw_withData')) : null,
               h('span', {key: 'sp', className: 'wb-spacer'}),
               h('button', {key: 'c', type: 'button', className: 'wb-action', onClick: onClose}, t('cancel')),
               h('button', {key: 's', type: 'button', className: 'wb-action', 'data-primary': '', disabled: busy || !dirty || !title.trim(), onClick: save}, t('save')),
@@ -2626,6 +2649,46 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
               h('textarea', {className: 'wb-input wb-code', value: html, spellCheck: false, onChange: e => setHtml(e.target.value)})),
             h('div', {className: 'wb-muted wb-cwmeta'}, `${t('cw_fetch')}: ${def.fetch.length ? def.fetch.join('  ') : t('cw_none')}`),
             def.lastError ? h('div', {className: 'wb-calerr'}, def.lastError.message) : null) : null,
+          error ? h('div', {className: 'wb-error'}, error) : null);
+        }
+
+        // 粘贴导入：先预检，展示它会访问的地址，用户确认后才保存。
+        function ImportModal({onClose, onImported}) {
+          useLocale();
+          const [text, setText] = useState('');
+          const [preview, setPreview] = useState(null);
+          const [busy, setBusy] = useState(false);
+          const [error, setError] = useState('');
+          const fail = e => { setError(String(e?.message || e)); setBusy(false); };
+          const check = () => {
+            setBusy(true);
+            setError('');
+            call('widget.import', {package: text.trim(), dryRun: true}).then(p => { setPreview(p); setBusy(false); }, fail);
+          };
+          const confirm = () => {
+            setBusy(true);
+            setError('');
+            call('widget.import', {package: text.trim()})
+              .then(r => customs.refresh().then(() => onImported(r.widget)))
+              .then(onClose, fail);
+          };
+          const w = preview?.widget;
+          return h(Modal, {title: t('imp_card'), onClose,
+            footer: [
+              h('span', {key: 'sp', className: 'wb-spacer'}),
+              h('button', {key: 'c', type: 'button', className: 'wb-action', onClick: onClose}, t('cancel')),
+              preview
+                ? h('button', {key: 'go', type: 'button', className: 'wb-action', 'data-primary': '', disabled: busy, onClick: confirm}, h(Icon.import), t('imp_go'))
+                : h('button', {key: 'ck', type: 'button', className: 'wb-action', 'data-primary': '', disabled: busy || !text.trim(), onClick: check}, t('imp_check')),
+            ]},
+          h('textarea', {className: 'wb-input wb-gentext wb-code', autoFocus: true, value: text, disabled: busy, spellCheck: false,
+            placeholder: t('imp_placeholder'), onChange: e => { setText(e.target.value); setPreview(null); setError(''); }}),
+          w ? h('div', {className: 'wb-impinfo'},
+            h('b', null, w.title),
+            w.description ? h('span', {className: 'wb-muted'}, w.description) : null,
+            h('span', null, w.fetch.length ? `${t('imp_fetch')}: ${w.fetch.join('  ')}` : t('imp_offline')),
+            preview.hasData ? h('span', {className: 'wb-muted'}, t('imp_data')) : null,
+            preview.warnings.map(x => h('span', {key: x, className: 'wb-calerr'}, x))) : null,
           error ? h('div', {className: 'wb-error'}, error) : null);
         }
 
@@ -3673,7 +3736,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
               h('div', {className: 'wb-grid', 'data-editing': editing ? '' : undefined},
                 cells.map(card),
                 editing && board ? h('button', {type: 'button', className: 'wb-btn wb-addtile', onClick: () => setModal({type: 'gallery'})}, h(Icon.plus), t('addWidget')) : null)),
-            modal?.type === 'gallery' && board ? h(Gallery, {list, board, onAdd: addWidget, onGenerate: () => setModal({type: 'agent'}), onClose: () => setModal(null)}) : null,
+            modal?.type === 'gallery' && board ? h(Gallery, {list, board, onAdd: addWidget, onGenerate: () => setModal({type: 'agent'}), onImport: () => setModal({type: 'import'}), onClose: () => setModal(null)}) : null,
+            modal?.type === 'import' && board ? h(ImportModal, {onImported: w => addWidget({id: `${CUSTOM_PREFIX}${w.id}`, defaultSize: w.defaultSize}), onClose: () => setModal(null)}) : null,
             modal?.type === 'agent' && (!modal.id || modalCustom) ? h(AgentModal, {widget: modalCustom, onClose: () => setModal(null)}) : null,
             modal?.type === 'source' && modalCustom && board ? h(SourceModal, {widget: modalCustom, onClose: () => setModal(null), onRemoved: () => forgetCell(modal.id)}) : null,
             modalWidget ? h(SettingsModal, {widget: modalWidget, cell: board?.widgets.find(c => c.id === modal.id), onClose: () => setModal(null),

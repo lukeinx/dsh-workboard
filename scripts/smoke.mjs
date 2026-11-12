@@ -484,6 +484,21 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   assert.equal((await call('widget.fetch', {id: 'stars', url: 'https://other.example.com/x'})).error.code, 'dsh-workboard/not-allowed');
   assert.equal((await call('widget.put', {id: 'stars', html: '<script>}</script>'})).error.code, 'dsh-workboard/bad-html');
   assert.equal((await value('widget.put', {id: 'stars', title: 'Repo stars', html: '<i></i>'})).title, 'Repo stars');
+  const exported = await value('widget.export', {id: 'stars'});
+  assert.deepEqual([exported.format, exported.version, exported.widget.title, exported.widget.fetch, 'data' in exported], ['dsh-workboard.widget', 1, 'Repo stars', ['https://api.example.com/'], false]);
+  assert.deepEqual((await value('widget.export', {id: 'stars', data: true})).data, {n: 4});
+  const preview = await value('widget.import', {package: JSON.stringify(exported), dryRun: true});
+  assert.deepEqual([preview.widget.title, preview.widget.fetch, preview.hasData], ['Repo stars', ['https://api.example.com/'], false]);
+  assert.equal((await value('widget.list')).length, 1);
+  const imported = (await value('widget.import', {package: {...exported, data: {n: 9}}})).widget;
+  assert.notEqual(imported.id, 'stars');
+  assert.deepEqual([imported.title, imported.dataRev, (await value('widget.get', {id: imported.id})).data], ['Repo stars', 1, {n: 9}]);
+  assert.equal((await call('widget.import', {package: '{oops'})).error.code, 'dsh-workboard/bad-package');
+  assert.equal((await call('widget.import', {package: {format: 'other', widget: {}}})).error.code, 'dsh-workboard/bad-package');
+  assert.equal((await call('widget.import', {package: {...exported, widget: {...exported.widget, html: '<script>if (</script>'}}})).error.code, 'dsh-workboard/bad-html');
+  assert.equal((await call('widget.import', {package: {...exported, widget: {...exported.widget, fetch: ['file:///etc/']}}})).error.code, 'dsh-workboard/bad-widget');
+  await value('widget.remove', {id: imported.id});
+
 
   const work = await value('board.get', {id: 'work'});
   await value('board.put', {board: {...work, widgets: [...work.widgets, {id: 'custom.stars', size: 'm'}], known: [...work.known, 'custom.stars']}});
