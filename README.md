@@ -40,7 +40,7 @@ The default board holds Today, To-do, Calendar and Notes; add the rest from the 
 
 Choose **Edit** to drag cards, change sizes, remove cards, open a widget's settings or add widgets from the gallery, which groups them into Daily, Agent, News and Productivity & tools, can be searched and stays open so you can add several. Boards are tabs: **+** adds one, double-click renames it, and edit mode can delete it.
 
-Settings shared by several widgets (your name, week start, city and temperature unit, quote source, calendar subscriptions) are also on the Desk page under Plugins, so they stay reachable when no card that uses them is on a board. Both places edit the same values.
+Settings shared by several widgets (your name, week start, city and temperature unit, quote source, calendar subscriptions) are also under Settings → Desk (**Open settings** on the plugin's detail page opens the same page in the main area), so they stay reachable when no card that uses them is on a board. Both places edit the same values.
 
 Data stays on your machine, in the Harness profile storage (`~/.dsh/storages/dsh_desk.json`). Data from the earlier `dsh-bento` version (`dsh_bento.json`) is copied over on first start; the old file is left in place. The Host makes the only network requests and caches the responses:
 

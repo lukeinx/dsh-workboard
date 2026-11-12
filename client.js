@@ -7,6 +7,8 @@ window.__ModuleLoader__.load({
 
     const NS = 'dsh-desk';
     const PANEL = 'dsh-desk';
+    const SETTINGS_PANEL = 'dsh-desk-settings';
+    const PACKAGE = '@lukeinx/dsh-desk';
     const SLOT = 'desk.widget';
     const POLL_MS = 5000;
     const WEATHER_MS = 10 * 60_000;
@@ -40,7 +42,7 @@ window.__ModuleLoader__.load({
       allDay: '全天', noEvents: '没有日程', addIcs: '添加 ICS 订阅', todayEvents: '今天', tomorrowEvents: '明天', prevMonth: '上个月', nextMonth: '下个月', calError: '{n} 个订阅加载失败',
       work: '工作', untitled: '未命名', newBoard: '看板 {n}', newBoardLabel: '新建看板', rename: '双击改名',
       edit: '编辑', doneEdit: '完成', addWidget: '添加 widget', added: '已添加', add: '添加', settings: '设置', save: '保存', cancel: '取消',
-      saved: '已保存', cfg_personal: '个人', cfg_calendars: '{n} 个日历订阅', cfg_empty: '城市、称呼、格言和日历订阅',
+      saved: '已保存', cfg_personal: '个人', openSettings: '打开设置',
       searchWidget: '搜索 widget', cat_all: '全部', cat_daily: '日常', cat_agent: 'Agent', cat_news: '资讯', cat_tools: '效率与工具', cat_plugin: '插件',
       deleteBoard: '删除看板', confirmDelete: '确认删除', size: '尺寸', drag: '拖动排序',
       size_bar: '横栏', size_s: '小 1×1', size_m: '中 2×1', size_t: '竖 1×2', size_l: '大 2×2', size_w: '通栏 4×1',
@@ -110,7 +112,7 @@ window.__ModuleLoader__.load({
       allDay: 'All day', noEvents: 'No events', addIcs: 'Add an ICS subscription', todayEvents: 'Today', tomorrowEvents: 'Tomorrow', prevMonth: 'Previous month', nextMonth: 'Next month', calError: '{n} subscription(s) failed to load',
       work: 'Work', untitled: 'Untitled', newBoard: 'Board {n}', newBoardLabel: 'New board', rename: 'Double-click to rename',
       edit: 'Edit', doneEdit: 'Done', addWidget: 'Add widget', added: 'Added', add: 'Add', settings: 'Settings', save: 'Save', cancel: 'Cancel',
-      saved: 'Saved', cfg_personal: 'Personal', cfg_calendars: '{n} calendar subscription(s)', cfg_empty: 'City, name, quotes and calendar subscriptions',
+      saved: 'Saved', cfg_personal: 'Personal', openSettings: 'Open settings',
       searchWidget: 'Search widgets', cat_all: 'All', cat_daily: 'Daily', cat_agent: 'Agent', cat_news: 'News', cat_tools: 'Productivity & tools', cat_plugin: 'Plugins',
       deleteBoard: 'Delete board', confirmDelete: 'Confirm delete', size: 'Size', drag: 'Drag to reorder',
       size_bar: 'Banner', size_s: 'Small 1×1', size_m: 'Medium 2×1', size_t: 'Tall 1×2', size_l: 'Large 2×2', size_w: 'Wide 4×1',
@@ -302,7 +304,9 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 .bnt-results button{text-align:left;padding:6px 8px;border-radius:6px}
 .bnt-results button:hover{background:var(--dsw-alias-bg-layer-2)}
 .bnt-foot{display:flex;justify-content:flex-end;align-items:center;gap:8px}
-.bnt-settings{display:flex;flex-direction:column;gap:20px;max-width:560px;color:var(--dsw-alias-label-primary);font-size:13px}
+.bnt-settings{display:flex;flex-direction:column;gap:20px;color:var(--dsw-alias-label-primary);font-size:13px}
+.bnt-settings h2{margin:0;font-size:16px;line-height:24px;font-weight:500}
+.bnt-cfgmain{max-width:640px;margin:0 auto;padding:48px clamp(16px,4vw,48px) 32px}
 .bnt-settings>section{display:flex;flex-direction:column;gap:12px}
 .bnt-settings h3{margin:0;font-size:13px;font-weight:600}
 .bnt-settings .bnt-foot{justify-content:flex-start;flex-direction:row-reverse}
@@ -636,6 +640,12 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
       inject: ['slots', 'connection', 'locale'],
       apply(ctx) {
         ctx.effect(() => ctx.locale.register(NS, {zh, en}), 'dsh-desk: dictionaries');
+        ctx.effect(() => {
+          const tag = document.createElement('style');
+          tag.textContent = CSS;
+          document.head.appendChild(tag);
+          return () => tag.remove();
+        }, 'dsh-desk: styles');
         const t = ctx.locale.bind(NS);
         const call = async (method, payload = {}) => {
           const result = await ctx.connection.rpc.call('/api', `dsh-desk/${method}`, payload);
@@ -1323,7 +1333,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           fields.map(f => fieldView(f, values[f.key], set)), error ? h('div', {className: 'bnt-error'}, error) : null);
         }
 
-        // 插件页里工作台详情页的全局设置；与卡片弹窗里 scope: 'global' 的字段读写同一份 prefs。
+        // 「设置 → 工作台」；与卡片弹窗里 scope: 'global' 的字段读写同一份 prefs。
         const SETTING_GROUPS = [
           ['cfg_personal', [NAME_FIELD, WEEK_START_FIELD]],
           ['weather', LOCATION_FIELDS],
@@ -1332,7 +1342,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
         ];
         const SETTING_FIELDS = SETTING_GROUPS.flatMap(([, fields]) => fields);
 
-        function DeskSettings({view}) {
+        function DeskSettings() {
           useLocale();
           const prefsSnap = useSyncExternalStore(prefsStore.subscribe, prefsStore.getSnapshot, prefsStore.getSnapshot);
           useEffect(() => { void prefsStore.load(); }, []);
@@ -1342,11 +1352,6 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           const [status, setStatus] = useState('');
           useEffect(() => { if (prefsSnap.loaded && !values) setValues(stored()); }, [prefsSnap.loaded]);
 
-          if (view !== 'page') {
-            const calendars = String(prefs.calendarUrls ?? '').split(/\s+/).filter(Boolean).length;
-            const parts = [prefs.location?.name, prefs.name, calendars ? fill(t('cfg_calendars'), {n: calendars}) : ''].filter(Boolean);
-            return parts.length ? parts.join(' · ') : t('cfg_empty');
-          }
           if (!values) return null;
           const dirty = SETTING_FIELDS.some(f => JSON.stringify(values[f.key] ?? null) !== JSON.stringify(stored()[f.key] ?? null));
           const set = (key, v) => { setValues(x => ({...x, [key]: v})); setStatus(''); };
@@ -1357,7 +1362,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             } catch (e) { setStatus(String(e?.message || e)); }
           };
           return h('div', {className: 'bnt-settings'},
-            h('style', null, CSS),
+            h('h2', null, t('title')),
             SETTING_GROUPS.map(([title, fields]) => h('section', {key: title},
               h('h3', null, t(title)), fields.map(f => fieldView(f, values[f.key], set)))),
             h('div', {className: 'bnt-foot'},
@@ -2152,7 +2157,6 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           };
 
           return h('div', {className: 'bnt-page'},
-            h('style', null, CSS),
             h('div', {className: 'bnt-inner'},
               h('div', {className: 'bnt-head', 'data-editing': editing ? '' : undefined}, showTabs ? tabs : null, h('span', {className: 'bnt-spacer'}), ...actions),
               shownError ? h('div', {className: 'bnt-error', role: 'alert'}, shownError) : null,
@@ -2173,9 +2177,29 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
         ctx.effect(() => ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
           name: 'sidebar.panellist', id: PANEL, order: 30, label: () => t('title'),
         }, PanelIcon)), 'dsh-desk: sidebar entry');
-        ctx.effect(() => ctx.slots.inject('plugins.bundle.config', () => ctx.slots.register({
-          name: 'plugins.bundle.config', key: '@lukeinx/dsh-desk',
-        }, DeskSettings)), 'dsh-desk: settings');
+        ctx.effect(() => ctx.slots.inject('settings.section', () => ctx.slots.register({
+          name: 'settings.section', id: PANEL, order: 40, label: () => t('title'), locale: NS, inject: () => ({}),
+        }, DeskSettings)), 'dsh-desk: settings section');
+
+        // 设置弹窗没有公开「打开指定栏目」的接口：插件详情页的按钮改为在主区域打开同一面板。
+        if (typeof ctx.inject === 'function') {
+          const SettingsPanel = () => h('div', {className: 'bnt-page'}, h('div', {className: 'bnt-cfgmain'}, h(DeskSettings)));
+          function OpenSettings({subject, onOpen}) {
+            useLocale();
+            if (subject?.kind !== 'bundle' && subject?.kind !== 'row') return null;
+            if (subject.pkg?.name !== PACKAGE) return null;
+            if (subject.kind === 'row' && subject.row?.moduleName !== PACKAGE) return null;
+            return h('button', {type: 'button', className: 'bnt-action', onClick: onOpen}, t('openSettings'));
+          }
+          ctx.inject(['layout'], pageCtx => pageCtx.slots.inject('main', () => {
+            const stopPanel = pageCtx.slots.register({name: 'main', key: SETTINGS_PANEL, locale: NS, inject: () => ({})}, SettingsPanel);
+            const stopAction = pageCtx.slots.inject('plugins.detail.actions', () => pageCtx.slots.register({
+              name: 'plugins.detail.actions', id: `${SETTINGS_PANEL}-open`, order: 20, locale: NS,
+              inject: () => ({onOpen: () => pageCtx.layout.selectPanel(SETTINGS_PANEL)}),
+            }, OpenSettings));
+            return () => { stopAction(); stopPanel(); };
+          }));
+        }
 
         builtins.forEach(([id, key, component], i) => {
           ctx.effect(() => ctx.slots.inject(SLOT, () => ctx.slots.register({
