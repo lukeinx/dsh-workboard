@@ -58,7 +58,7 @@ ctx.effect(() => ctx.slots.inject('desk.widget', () => ctx.slots.register({
 }, Hello)), 'hello widget');
 ```
 
-完整示例见 [`examples/hello-widget`](examples/hello-widget)。新装的 widget 会自动加入看板一次。
+完整示例见 [`examples/hello-widget`](examples/hello-widget)。新装的 widget 只自动加入当前打开的看板一次，其他看板只在组件库里出现。
 
 | 档位 | 列 × 行 | |
 |---|---|---|
@@ -69,7 +69,7 @@ ctx.effect(() => ctx.slots.inject('desk.widget', () => ctx.slots.register({
 | `l` | 2 × 2 | 大 |
 | `w` | 4 × 1 | 通栏 |
 
-`sizes` 第一个为默认。其他 manifest 字段：
+`defaultSize` 指定添加时的尺寸，须在 `sizes` 内；未设置时取 `sizes` 第一个。尺寸菜单始终按上表顺序排列。其他 manifest 字段：
 
 - `title: false` 隐藏卡片标题，`banner: true` 无框渲染。
 - `description` 显示在组件库里。

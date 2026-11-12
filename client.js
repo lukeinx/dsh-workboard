@@ -1041,12 +1041,14 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           return ctx.slots.entries(SLOT).map(entry => {
             const {id, label} = entry.options;
             const manifest = entry.component?.desk ?? {};
-            const sizes = (Array.isArray(manifest.sizes) ? manifest.sizes : []).filter(s => SIZES[s]);
+            const declared = (Array.isArray(manifest.sizes) ? manifest.sizes : []).filter(s => SIZES[s]);
+            const sizes = declared.length ? Object.keys(SIZES).filter(s => declared.includes(s)) : ['m'];
             return {
               id: id ?? '',
               label: () => resolveText(label) || id,
               description: manifest.description,
-              sizes: sizes.length ? sizes : ['m'],
+              sizes,
+              defaultSize: sizes.includes(manifest.defaultSize) ? manifest.defaultSize : (declared[0] ?? 'm'),
               banner: manifest.banner === true,
               title: manifest.title !== false,
               settings: Array.isArray(manifest.settings) ? manifest.settings.filter(f => f && typeof f.key === 'string') : [],
@@ -1329,13 +1331,16 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             setBoards(bs => bs?.map(b => (b.id === next.id ? {id: next.id, title: next.title} : b)));
             call('board.put', {board: next}).catch(fail);
           };
-          // 新安装插件的 widget 自动加入一次；记入 known 后用户移除不再回来。升级带来的新内置 widget 只进组件库。
+          // 新安装插件的 widget 只自动加入当前看板一次，其余看板仅记入 known；用户移除后不再回来。升级带来的新内置 widget 只进组件库。
           useEffect(() => {
-            if (!board) return;
+            if (!board) return undefined;
             const known = new Set(board.known ?? []);
             const fresh = list.filter(w => w.id && !known.has(w.id));
-            const placed = fresh.filter(w => !BUILTIN_IDS.has(w.id));
-            if (fresh.length) saveBoard({...board, widgets: [...board.widgets, ...placed.map(w => ({id: w.id, size: w.sizes[0]}))], known: [...known, ...fresh.map(w => w.id)]});
+            if (!fresh.length) return undefined;
+            let alive = true;
+            const place = fresh.filter(w => !BUILTIN_IDS.has(w.id)).map(w => ({id: w.id, size: w.defaultSize}));
+            call('board.adopt', {id: board.id, known: fresh.map(w => w.id), place}).then(b => { if (alive) setBoard(b); }, fail);
+            return () => { alive = false; };
           }, [board, list]);
 
           const boardTitle = b => b.title || (b.id === 'work' ? t('work') : t('untitled'));
@@ -1370,7 +1375,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           const updateCell = (id, patch) => saveBoard({...board, widgets: board.widgets.map(c => (c.id === id ? {...c, ...patch} : c))});
           const removeCell = id => saveBoard({...board, widgets: board.widgets.filter(c => c.id !== id)});
           const addWidget = w => {
-            saveBoard({...board, widgets: [...board.widgets, {id: w.id, size: w.sizes[0]}], known: [...new Set([...(board.known ?? []), w.id])]});
+            saveBoard({...board, widgets: [...board.widgets, {id: w.id, size: w.defaultSize}], known: [...new Set([...(board.known ?? []), w.id])]});
             setModal(null);
           };
           const drop = (targetId, after) => {
@@ -1407,7 +1412,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 
           const card = cell => {
             const w = byId.get(cell.id);
-            const size = w.sizes.includes(cell.size) ? cell.size : w.sizes[0];
+            const size = w.sizes.includes(cell.size) ? cell.size : w.defaultSize;
             const [c, r] = SIZES[size];
             const openSettings = () => setModal({type: 'settings', id: cell.id});
             return h('section', {

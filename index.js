@@ -167,6 +167,22 @@ export function createStore(ctx) {
       await table('boards').put(clean.id, clean);
       return clean;
     },
+    async adoptWidgets(id, known, place) {
+      const ids = (Array.isArray(known) ? known : []).map(String);
+      const cells = (Array.isArray(place) ? place : []).filter(w => w && ids.includes(w.id));
+      let target = null;
+      for (const b of this.listBoards()) {
+        const board = this.getBoard(b.id);
+        const seen = new Set(board.known ?? []);
+        const fresh = ids.filter(x => !seen.has(x));
+        if (b.id !== id && !fresh.length) continue;
+        const widgets = b.id === id ? [...board.widgets, ...cells.filter(w => !seen.has(w.id))] : board.widgets;
+        const saved = await this.putBoard({...board, widgets, known: [...seen, ...fresh]});
+        if (b.id === id) target = saved;
+      }
+      if (!target) throw new UserError('not-found', `no board ${id}`);
+      return target;
+    },
 
     listTodos(now = Date.now()) {
       const all = [...table('todos').entries()].map(([, v]) => v);
@@ -358,6 +374,7 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null) 
     'dsh-desk/calendar.events': p => calendar({urls: p?.urls, from: p?.from, to: p?.to}),
     'dsh-desk/board.get': p => store.getBoard(String(p?.id || 'work')),
     'dsh-desk/board.put': p => store.putBoard(p?.board),
+    'dsh-desk/board.adopt': p => store.adoptWidgets(String(p?.id), p?.known, p?.place),
     'dsh-desk/todo.list': () => store.listTodos(),
     'dsh-desk/todo.add': p => store.addTodo(p?.text),
     'dsh-desk/todo.update': p => store.updateTodo(p?.id, {text: p?.text, done: p?.done}),

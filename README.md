@@ -58,7 +58,7 @@ ctx.effect(() => ctx.slots.inject('desk.widget', () => ctx.slots.register({
 }, Hello)), 'hello widget');
 ```
 
-A complete bundle is in [`examples/hello-widget`](examples/hello-widget). A newly installed widget is added to the board once.
+A complete bundle is in [`examples/hello-widget`](examples/hello-widget). A newly installed widget is added once, to the board that is open; other boards only list it in the gallery.
 
 | Size | Columns × rows | |
 |---|---|---|
@@ -69,7 +69,7 @@ A complete bundle is in [`examples/hello-widget`](examples/hello-widget). A newl
 | `l` | 2 × 2 | Large |
 | `w` | 4 × 1 | Wide |
 
-The first entry of `sizes` is the default. Other manifest fields:
+`defaultSize` sets the size used when the card is added and must be one of `sizes`; without it, the first entry of `sizes` is used. The size menu always lists sizes in the order of the table above. Other manifest fields:
 
 - `title: false` hides the card header; `banner: true` renders without a frame.
 - `description` is shown in the widget gallery.
