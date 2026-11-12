@@ -115,7 +115,7 @@ ctx.effect(() => ctx.slots.inject('workboard.widget', () => ctx.slots.register({
 
 - `title: false` 隐藏卡片标题，`banner: true` 无框渲染。
 - `description` 显示在组件库里。
-- `category` 决定在组件库里的分组：`daily`（日常）、`agent`（Agent）、`news`（资讯）、`tools`（效率与工具）；未填或其他值归入「插件」。
+- `category` 决定在组件库里的分组：`daily`（日常）、`agent`（DeepSeek）、`news`（资讯）、`tools`（效率与工具）；未填或其他值归入「插件」。
 - `settings` 是设置弹窗的字段列表：`{key, type, label, default?, options?, placeholder?}`，`type` 可选 `text`、`textarea`、`select`（配 `options: [{value, label}]`）、`toggle`。label 可以是字符串，也可以是返回字符串的函数。
 
 组件收到 `size`、`config`（这张卡保存的设置）、`editing` 和 `openSettings()`。
