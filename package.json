@@ -4,6 +4,10 @@
   "description": "DeepSeek Harness plugin: a modular dashboard with 34 built-in widgets, plus widgets your agent builds for you.",
   "type": "module",
   "license": "MIT",
+  "author": "lukeinx",
+  "repository": {"type": "git", "url": "git+https://github.com/lukeinx/dsh-workboard.git"},
+  "homepage": "https://github.com/lukeinx/dsh-workboard#readme",
+  "bugs": "https://github.com/lukeinx/dsh-workboard/issues",
   "keywords": ["dsh-plugin", "deepseek-harness", "deepseek-desktop", "dashboard", "widgets", "todo", "calendar", "deepseek", "dsh", "ai-agent", "工作台"],
   "exports": {
     ".": "./index.js",
