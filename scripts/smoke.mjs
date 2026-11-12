@@ -5,7 +5,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {zstdCompressSync} from 'node:zlib';
 import {execFileSync} from 'node:child_process';
-import {apply, createStore, createHandlers, createAgentWatch, createLauncher, createRunning, createGit, createGithub, migrateLegacy} from '../index.js';
+import {apply, createStore, createHandlers, createAgentWatch, createLauncher, createWorkspaces, createRunning, createGit, createGithub, migrateLegacy} from '../index.js';
 import {createRunner} from '../lib/exec.js';
 import {createSystem, parsePmset, parseVmStat, parseMeminfo} from '../lib/system.js';
 import {createPhotos, findPhotos} from '../lib/photo.js';
@@ -199,6 +199,11 @@ assert.deepEqual([prompted[0].sessionId, prompted[0].mode, prompted[0].content],
 await assert.rejects(launchHandlers['dsh-desk/agent.start']({prompt: 'x', cwd: 'relative/dir'}), /absolute/);
 await assert.rejects(launchHandlers['dsh-desk/agent.start']({prompt: 'x', cwd: '/definitely/missing'}), /not a directory/);
 await assert.rejects(createHandlers(createStore({}))['dsh-desk/agent.start']({prompt: 'x'}), /cannot start/);
+
+// 工作区列表：只返回 id / path / title，没有 registry 时为 null。
+const wsCtx = {get: key => (key === 'workspaceRegistry' ? {list: () => [{id: 'w1', path: '/tmp/a', title: 'A', sessionIds: ['s1']}, {id: 'w2', path: ''}]} : undefined)};
+assert.deepEqual(await createHandlers(createStore({}), feedFetcher, null, null, {workspaces: createWorkspaces(wsCtx)})['dsh-desk/workspace.list'](), [{id: 'w1', path: '/tmp/a', title: 'A'}]);
+assert.equal(await createHandlers(createStore({}), feedFetcher, null, null, {workspaces: createWorkspaces({get: () => undefined})})['dsh-desk/workspace.list'](), null);
 
 // 用量：多 frame zstd 日志（末尾半个 frame 模拟正在写入）+ 未压缩日志；不报 usage 的请求只计请求数。
 const usageRoot = mkdtempSync(join(tmpdir(), 'desk-usage-'));

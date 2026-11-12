@@ -16,6 +16,7 @@ window.__ModuleLoader__.load({
     const CAL_MS = 15 * 60_000;
     const FEED_MS = 15 * 60_000;
     const AGENT_MS = 5000;
+    const WORKSPACE_MS = 60_000;
     const USAGE_MS = 60_000;
     const GIT_MS = 30_000;
     const GITHUB_MS = 5 * 60_000;
@@ -93,7 +94,7 @@ window.__ModuleLoader__.load({
       u_unreported: '{n} 次请求未上报 token（{p}）', u_none: '这段时间没有请求', u_day: '{d}：{t} token，{r} 次请求',
       f_prices: '单价（每行一个：模型 输入 输出 [缓存读] [缓存写]，美元 / 百万 token；模型可写前缀）',
       d_prompt: '一句话或预设模板直接开新会话', d_inbox: '随手收集链接和想法，一键交给 Agent 处理；Agent 可读写',
-      promptPlaceholder: '让 Agent 做点什么，回车发送', sending: '发送中…', f_presets: '预设（每行一个：名称 | prompt）', f_cwd: '工作目录（留空用默认）',
+      promptPlaceholder: '让 Agent 做点什么，回车发送', sending: '发送中…', f_presets: '预设（每行一个：名称 | prompt）', f_cwd: '工作目录（留空用默认）', ws_label: '工作区', ws_default: '默认工作区',
       defaultPresets: '今日计划 | 读取我 Desk 上的待办和收集箱，帮我排出今天最该做的三件事\n整理收集箱 | 用 desk_inbox 读取我的收集箱，逐条整理成待办或给出处理建议，处理完的条目移除\n周报草稿 | 读取我 Desk 上本周完成的待办，写一份简短的周报草稿',
       inboxPlaceholder: '收集一条，回车保存', inboxEmpty: '收集箱是空的', toAgent: '交给 Agent', inboxCount: '{n} 条',
       inboxPrompt: '用 desk_inbox 工具读取我的收集箱，逐条处理：能直接回答或完成的就完成；需要我跟进的用 desk_todos 转成待办；链接先读一下再给一句话摘要。处理完的条目用 desk_inbox remove 移除，最后汇总你做了什么。',
@@ -164,7 +165,7 @@ window.__ModuleLoader__.load({
       u_unreported: '{n} requests reported no tokens ({p})', u_none: 'No requests in this period', u_day: '{d}: {t} tokens, {r} requests',
       f_prices: 'Prices, one per line: model input output [cache read] [cache write], USD per million tokens; a model prefix matches',
       d_prompt: 'Start a new session from a line of text or a preset', d_inbox: 'Collect links and ideas, then hand them to the agent; the agent can read and edit',
-      promptPlaceholder: 'Ask the agent something, Enter to send', sending: 'Sending…', f_presets: 'Presets, one per line: name | prompt', f_cwd: 'Working directory (empty uses the default)',
+      promptPlaceholder: 'Ask the agent something, Enter to send', sending: 'Sending…', f_presets: 'Presets, one per line: name | prompt', f_cwd: 'Working directory (empty uses the default)', ws_label: 'Workspace', ws_default: 'Default workspace',
       defaultPresets: 'Plan today | Read my Desk to-dos and inbox and pick the three things I should do today\nSort inbox | Use desk_inbox to read my inbox, turn each item into a to-do or a suggestion, and remove the items you handled\nWeekly note | Read the to-dos I completed on Desk this week and draft a short weekly update',
       inboxPlaceholder: 'Capture something, Enter to save', inboxEmpty: 'Inbox is empty', toAgent: 'Hand to agent', inboxCount: '{n} items',
       inboxPrompt: 'Use the desk_inbox tool to read my inbox and work through it: finish what you can answer or do directly; turn anything I need to follow up into a to-do with desk_todos; read links and give a one-line summary. Remove handled items with desk_inbox remove, then summarize what you did.',
@@ -257,6 +258,10 @@ window.__ModuleLoader__.load({
 .bnt-note{flex:1;resize:none;border:0;outline:none;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary);border-radius:8px;padding:10px 12px;line-height:1.65;font:inherit;font-size:13px;min-height:0}
 .bnt-notefoot{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--dsw-alias-label-secondary);margin-top:8px;min-height:18px}
 .bnt-notefoot button{color:var(--dsw-alias-brand-primary)}
+.bnt-wsel{min-width:0;max-width:60%;flex:0 1 auto;appearance:none;border:0;background:none;color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;padding:0 12px 0 0;cursor:pointer;text-overflow:ellipsis;outline:none;background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);background-position:calc(100% - 6px) 55%,calc(100% - 3px) 55%;background-size:3px 3px;background-repeat:no-repeat}
+.bnt-wsel:hover,.bnt-wsel:focus-visible{color:var(--dsw-alias-label-primary)}
+.bnt-footact{display:flex;align-items:center;gap:10px;min-width:0;justify-content:flex-end}
+.bnt-prompt .bnt-notefoot{margin-top:0}
 
 .bnt-head{display:flex;align-items:center;gap:8px;padding:20px 0 16px;flex-wrap:wrap}
 .bnt-head[data-editing]{position:sticky;top:0;z-index:5;background:var(--dsw-alias-bg-base)}
@@ -1443,11 +1448,29 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
         };
         const baseName = path => String(path ?? '').split('/').filter(Boolean).pop() ?? '';
 
+        // 新会话的工作区：各 Agent widget 共用一个选择，存在 prefs.agentWorkspace（目录路径，'' 为默认）。
+        const useWorkspace = fallback => {
+          const prefs = usePrefs();
+          const res = useRemote('workspace.list', {}, WORKSPACE_MS);
+          const list = res.value ?? [];
+          const path = prefs.agentWorkspace ?? fallback ?? '';
+          return {list, path, id: list.find(w => w.path === path)?.id, set: p => { void prefsStore.put({agentWorkspace: p}); }};
+        };
+        function WorkspaceSelect({ws}) {
+          if (!ws.list.length) return null;
+          const extra = ws.path && !ws.list.some(w => w.path === ws.path);
+          return h('select', {className: 'bnt-wsel', value: ws.path, 'aria-label': t('ws_label'), title: ws.path || t('ws_default'), onChange: e => ws.set(e.target.value)},
+            h('option', {value: ''}, t('ws_default')),
+            extra ? h('option', {value: ws.path}, baseName(ws.path) || ws.path) : null,
+            ws.list.map(w => h('option', {key: w.id, value: w.path}, w.title || baseName(w.path))));
+        }
+
         function Agents({size, config}) {
           useLocale();
           const now = useNow();
           const res = useRemote('agent.overview', {}, AGENT_MS);
           const ui = ctx.get?.('uiWorkspace');
+          const ws = useWorkspace();
           const v = res.value;
           if (!v) return h('div', {className: 'bnt-blank'}, res.error || '…');
           if (!v.sessions) return h('div', {className: 'bnt-blank'}, t('agentsUnavailable'));
@@ -1476,7 +1499,8 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
               schedules.map(taskRow)),
             h('div', {className: 'bnt-notefoot'},
               h('span', null, active.length ? fill(t('activeCount'), {n: active.length}) : ''),
-              typeof ui?.startSession === 'function' ? h('button', {type: 'button', className: 'bnt-btn', onClick: () => ui.startSession()}, t('newSession')) : null));
+              typeof ui?.startSession === 'function' ? h('div', {className: 'bnt-footact'}, h(WorkspaceSelect, {ws}),
+                h('button', {type: 'button', className: 'bnt-btn', onClick: () => ui.startSession(ws.id)}, t('newSession'))) : null));
         }
         Agents.desk = {
           apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_agents'),
@@ -1582,14 +1606,14 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
         Habits.desk = {apiVersion: 1, sizes: ['m', 'l', 't', 'w'], description: () => t('d_habits')};
 
         // 新开会话并直接发送；Host 不支持时退回到把 prompt 预填进新会话草稿。
-        const launch = async (prompt, cwd) => {
+        const launch = async (prompt, cwd, workspaceId) => {
           const ui = ctx.get?.('uiWorkspace');
           try {
             const {sessionId} = await call('agent.start', {prompt, cwd: cwd || undefined, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone});
             ui?.openSession?.(sessionId);
           } catch (error) {
             if (typeof ui?.startSession !== 'function' || !/cannot start sessions/.test(String(error?.message))) throw error;
-            ui.startSession(undefined, {prompt, whenDraftExists: 'replace'});
+            ui.startSession(workspaceId, {prompt, whenDraftExists: 'replace'});
           }
         };
         const parsePresets = text => String(text ?? '').split('\n').map(line => {
@@ -1605,11 +1629,12 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           const [busy, setBusy] = useState(false);
           const [error, setError] = useState('');
           const presets = parsePresets(config?.presets ?? t('defaultPresets'));
+          const ws = useWorkspace(config?.cwd);
           const send = prompt => {
             if (busy || !prompt.trim()) return;
             setBusy(true);
             setError('');
-            launch(prompt.trim(), config?.cwd).then(() => setText(''), e => setError(String(e?.message || e))).finally(() => setBusy(false));
+            launch(prompt.trim(), ws.path, ws.id).then(() => setText(''), e => setError(String(e?.message || e))).finally(() => setBusy(false));
           };
           const onKeyDown = e => {
             if (e.key !== 'Enter' || e.shiftKey || e.nativeEvent.isComposing) return;
@@ -1619,7 +1644,8 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           return h('div', {className: 'bnt-prompt', 'data-size': size},
             size === 's' ? null : h('textarea', {value: text, placeholder: t('promptPlaceholder'), disabled: busy, spellCheck: false, onChange: e => setText(e.target.value), onKeyDown}),
             presets.length ? h('div', {className: 'bnt-chips'}, presets.map((p, i) => h('button', {key: i, type: 'button', className: 'bnt-btn bnt-chip', title: p.prompt, disabled: busy, onClick: () => send(p.prompt)}, p.name))) : null,
-            busy || error ? h('div', {className: error ? 'bnt-calerr' : 'bnt-muted', style: {fontSize: 12}}, error || t('sending')) : null);
+            busy || error ? h('div', {className: error ? 'bnt-calerr' : 'bnt-muted', style: {fontSize: 12}}, error || t('sending')) : null,
+            size === 's' || !ws.list.length ? null : h('div', {className: 'bnt-notefoot'}, h(WorkspaceSelect, {ws})));
         }
         Prompt.desk = {
           apiVersion: 1, sizes: ['m', 'w', 'l', 't', 's'], description: () => t('d_prompt'),
@@ -1636,6 +1662,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           const [text, setText] = useState('');
           const [error, setError] = useState('');
           const [busy, setBusy] = useState(false);
+          const ws = useWorkspace();
           const fail = e => setError(String(e?.message || e));
           const load = () => { if (!document.hidden) call('inbox.list').then(list => { setItems(list); setError(''); }, fail); };
           useEffect(() => {
@@ -1656,7 +1683,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           };
           const handOff = () => {
             setBusy(true);
-            launch(t('inboxPrompt')).catch(fail).finally(() => setBusy(false));
+            launch(t('inboxPrompt'), ws.path, ws.id).catch(fail).finally(() => setBusy(false));
           };
           const list = items ?? [];
           return h(React.Fragment, null,
@@ -1670,7 +1697,8 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             h('label', {className: 'bnt-add'}, h(Icon.plus),
               h('input', {value: text, placeholder: t('inboxPlaceholder'), enterKeyHint: 'done', onChange: e => setText(e.target.value), onKeyDown: submit})),
             list.length ? h('div', {className: 'bnt-notefoot'}, h('span', null, fill(t('inboxCount'), {n: list.length})),
-              h('button', {type: 'button', className: 'bnt-btn', disabled: busy, onClick: handOff}, busy ? t('sending') : t('toAgent'))) : null);
+              h('div', {className: 'bnt-footact'}, h(WorkspaceSelect, {ws}),
+                h('button', {type: 'button', className: 'bnt-btn', disabled: busy, onClick: handOff}, busy ? t('sending') : t('toAgent')))) : null);
         }
         Inbox.desk = {apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_inbox')};
 

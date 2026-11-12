@@ -435,6 +435,14 @@ export function createLauncher(ctx) {
   };
 }
 
+export function createWorkspaces(ctx) {
+  return () => {
+    const registry = ctx.get?.('workspaceRegistry');
+    if (typeof registry?.list !== 'function') return null;
+    return registry.list().filter(w => w?.id && w.path).map(w => ({id: w.id, path: w.path, title: String(w.title ?? '')}));
+  };
+}
+
 // 目标与后台任务只存在于 live Agent：遍历 agents.list()，逐个问 goals / jobs。已卸载的历史会话不在其中。
 const RECENT_MS = 15 * 60_000;
 export function createRunning(ctx, now = Date.now) {
@@ -563,6 +571,7 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       if (!launch) throw new UserError('unavailable', 'this Harness cannot start sessions');
       return launch({prompt: p?.prompt, cwd: p?.cwd, timeZone: p?.timeZone});
     },
+    'dsh-desk/workspace.list': () => (services.workspaces ? services.workspaces() : null),
     'dsh-desk/usage.get': async p => {
       if (!services.usage) throw new UserError('unavailable', 'usage is not available');
       return services.usage.summary({days: p?.days});
@@ -734,6 +743,7 @@ export function apply(ctx) {
   const services = {
     usage: createUsage({root: join(dshHome(), 'sessions')}),
     running: createRunning(ctx),
+    workspaces: createWorkspaces(ctx),
     git: createGit(ctx, run),
     github: createGithub(run),
     system: createSystem({run}),
