@@ -16,6 +16,7 @@ window.__ModuleLoader__.load({
     const USAGE_MS = 60_000;
     const GIT_MS = 30_000;
     const GITHUB_MS = 5 * 60_000;
+    const SYSTEM_MS = 5000;
     // 尺寸档位：[列, 行]，行单位 80px；「横栏」半高，其余行数成对。
     const SIZES = {bar: [4, 1], s: [1, 2], m: [2, 2], t: [1, 4], l: [2, 4], w: [4, 2]};
 
@@ -57,7 +58,9 @@ window.__ModuleLoader__.load({
       f_showRecent: '显示最近会话', f_showSchedules: '显示定时任务',
       f_feeds: '订阅地址（每行一个 RSS / Atom）', defaultFeeds: 'https://sspai.com/feed', feedError: '{n} 个订阅加载失败', noItems: '没有内容',
       addHabit: '添加习惯', noHabits: '还没有习惯', streak: '连续 {n} 天', markDay: '{d} 打卡',
-      prompt: 'Prompt 快启', inbox: '收集箱', usage: '用量', running: '运行中', git: 'Git 工作区', github: 'GitHub',
+      prompt: 'Prompt 快启', inbox: '收集箱', usage: '用量', running: '运行中', git: 'Git 工作区', github: 'GitHub', system: '系统状态',
+      d_system: '本机 CPU、内存、磁盘和电池', s_cpu: 'CPU', s_mem: '内存', s_disk: '磁盘', s_battery: '电池', s_cores: '{n} 核 · 负载 {l}', s_free: '剩余 {n}',
+      s_charging: '充电中', s_plugged: '已接电源', s_left: '剩 {t}', s_uptime: '已运行 {t}', s_load: '负载 {l}',
       d_git: '各仓库的分支、未提交改动、未推送 / 落后提交和可清理的分支', d_github: '等我 review 的 PR、我的 PR 和指派给我的 issue，用本机 gh CLI',
       f_repos: '仓库路径（每行一个；留空用 Harness 里的工作区）', g_changes: '{n} 处改动', g_conflicts: '{n} 处冲突', g_gone: '{n} 个可清理分支', g_clean: '干净', g_noUpstream: '无上游',
       g_none: '没有找到 Git 仓库', g_attention: '{n} 个仓库待处理', g_allClean: '全部干净', g_fetch: '获取远端', g_fetching: '获取中…',
@@ -115,7 +118,9 @@ window.__ModuleLoader__.load({
       f_showRecent: 'Show recent sessions', f_showSchedules: 'Show scheduled tasks',
       f_feeds: 'Feed URLs, one RSS or Atom feed per line', defaultFeeds: 'https://hnrss.org/frontpage', feedError: '{n} feed(s) failed to load', noItems: 'Nothing here',
       addHabit: 'Add a habit', noHabits: 'No habits yet', streak: '{n}-day streak', markDay: 'Check in for {d}',
-      prompt: 'Quick prompt', inbox: 'Inbox', usage: 'Usage', running: 'Running', git: 'Git repos', github: 'GitHub',
+      prompt: 'Quick prompt', inbox: 'Inbox', usage: 'Usage', running: 'Running', git: 'Git repos', github: 'GitHub', system: 'System',
+      d_system: 'CPU, memory, disk and battery of this machine', s_cpu: 'CPU', s_mem: 'Memory', s_disk: 'Disk', s_battery: 'Battery', s_cores: '{n} cores · load {l}', s_free: '{n} free',
+      s_charging: 'Charging', s_plugged: 'Plugged in', s_left: '{t} left', s_uptime: 'Up {t}', s_load: 'Load {l}',
       d_git: 'Branch, uncommitted changes, unpushed or missing commits and branches to clean up, per repository', d_github: 'PRs awaiting your review, your PRs and issues assigned to you, through the local gh CLI',
       f_repos: 'Repository paths, one per line (empty uses the Harness workspaces)', g_changes: '{n} changes', g_conflicts: '{n} conflicts', g_gone: '{n} stale branches', g_clean: 'Clean', g_noUpstream: 'No upstream',
       g_none: 'No Git repositories found', g_attention: '{n} need attention', g_allClean: 'All clean', g_fetch: 'Fetch', g_fetching: 'Fetching…',
@@ -355,6 +360,17 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 .bnt-prow span:last-child{text-align:right;color:var(--dsw-alias-label-primary)}
 .bnt-pbar{height:6px;border-radius:3px;background:var(--dsw-alias-bg-layer-2);overflow:hidden}
 .bnt-pbar i{display:block;height:100%;background:var(--dsw-alias-label-secondary);opacity:.5}
+.bnt-sys{display:flex;flex-direction:column;gap:10px;height:100%;min-height:0}
+.bnt-sys[data-size=w]{flex-direction:row;align-items:stretch;gap:16px}
+.bnt-sys .bnt-prog{height:auto;flex:1;min-width:0}
+.bnt-sys[data-detail] .bnt-prog{grid-template-columns:max-content minmax(0,1fr) max-content max-content}
+.bnt-prow small{font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap}
+.bnt-prow[data-hot] i{background:var(--dsw-alias-state-warn-primary);opacity:1}
+.bnt-prow[data-hot] span:last-of-type{color:var(--dsw-alias-state-warn-primary)}
+.bnt-spark{flex:1;min-height:32px;min-width:0;position:relative}
+.bnt-spark svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.bnt-spark polyline{fill:none;stroke:var(--dsw-alias-brand-primary);stroke-width:1.5;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.bnt-spark polygon{fill:var(--dsw-alias-brand-primary);opacity:.08}
 
 .bnt-rowbtn{width:100%;text-align:left;border-radius:8px;color:inherit;text-decoration:none;box-sizing:border-box}
 .bnt-rowbtn:hover{background:var(--dsw-alias-bg-layer-2)}
@@ -1542,6 +1558,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
         const duration = ms => {
           const m = Math.max(0, Math.round(ms / 60_000));
           if (m < 60) return new Intl.NumberFormat(t('lang'), {style: 'unit', unit: 'minute', unitDisplay: 'short'}).format(Math.max(1, m));
+          if (m >= 2880) return new Intl.NumberFormat(t('lang'), {style: 'unit', unit: 'day', unitDisplay: 'short', maximumFractionDigits: 0}).format(m / 1440);
           return new Intl.NumberFormat(t('lang'), {style: 'unit', unit: 'hour', unitDisplay: 'short', maximumFractionDigits: 1}).format(m / 60);
         };
 
@@ -1679,13 +1696,50 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           ],
         };
 
+        const bytes = n => {
+          const gb = n / 1024 ** 3;
+          return gb >= 1000 ? `${(gb / 1024).toFixed(1)} TB` : `${gb >= 100 ? Math.round(gb) : gb.toFixed(1)} GB`;
+        };
+
+        function System({size}) {
+          useLocale();
+          const res = useRemote('system.get', {}, SYSTEM_MS);
+          const v = res.value;
+          if (!v) return h('div', {className: 'bnt-blank'}, res.error || '…');
+          const load = v.load?.[0] != null ? v.load[0].toFixed(1) : '';
+          const memRatio = v.memory.used / v.memory.total;
+          const rows = [
+            ['cpu', v.cpu, fill(t('s_cores'), {n: v.cores, l: load}), v.cpu > 0.85],
+            ['mem', memRatio, `${bytes(v.memory.used)} / ${bytes(v.memory.total)}`, memRatio > 0.9],
+            v.disk ? ['disk', 1 - v.disk.free / v.disk.total, fill(t('s_free'), {n: bytes(v.disk.free)}), v.disk.free / v.disk.total < 0.1] : null,
+            v.battery ? ['battery', v.battery.percent / 100,
+              v.battery.charging ? t('s_charging') : v.battery.plugged ? t('s_plugged') : v.battery.minutes ? fill(t('s_left'), {t: duration(v.battery.minutes * 60_000)}) : '',
+              !v.battery.plugged && v.battery.percent <= 20] : null,
+          ].filter(Boolean);
+          const detail = size === 'l' || size === 'w';
+          const spark = (size === 't' || size === 'l' || size === 'w') && v.history.length > 1;
+          const pts = v.history.map(([cpu], i, all) => `${(i / Math.max(1, all.length - 1)) * 100},${(1 - cpu) * 30}`);
+          return h('div', {className: 'bnt-sys', 'data-size': size, 'data-detail': detail ? '' : undefined},
+            h('div', {className: 'bnt-prog', 'data-size': size}, rows.map(([key, ratio, note, hot]) => h('div', {key, className: 'bnt-prow', 'data-hot': hot ? '' : undefined, title: note},
+              h('span', null, t(`s_${key}`)),
+              h('div', {className: 'bnt-pbar'}, h('i', {style: {width: `${Math.round(Math.min(1, Math.max(0, ratio)) * 100)}%`}})),
+              h('span', {className: 'bnt-num'}, `${Math.round(ratio * 100)}%`),
+              detail ? h('small', null, note) : null))),
+            spark ? h('div', {className: 'bnt-spark', title: `${t('s_cpu')} · ${duration(v.history.length * v.sampleMs)}`},
+              h('svg', {viewBox: '0 0 100 30', preserveAspectRatio: 'none'},
+                h('polygon', {points: `0,30 ${pts.join(' ')} 100,30`}),
+                h('polyline', {points: pts.join(' ')}))) : null,
+            size === 't' || size === 'l' ? h('div', {className: 'bnt-notefoot'}, h('span', null, fill(t('s_uptime'), {t: duration(v.uptime * 1000)})), size === 't' && load ? h('span', null, fill(t('s_load'), {l: load})) : null) : null);
+        }
+        System.desk = {apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], description: () => t('d_system')};
+
         const builtins = [
           ['desk.today', 'today', Today], ['desk.todo', 'todo', Todo], ['desk.note', 'note', Note], ['desk.calendar', 'calendar', Calendar],
           ['desk.weather', 'weather', Weather], ['desk.clock', 'clock', Clock], ['desk.quote', 'quote', Quote], ['desk.countdown', 'countdown', Countdown],
           ['desk.worldclock', 'worldclock', WorldClock], ['desk.focus', 'focus', Focus], ['desk.links', 'links', Links], ['desk.progress', 'progress', Progress],
           ['desk.agents', 'agents', Agents], ['desk.feed', 'feed', Feed], ['desk.habits', 'habits', Habits],
           ['desk.prompt', 'prompt', Prompt], ['desk.inbox', 'inbox', Inbox], ['desk.usage', 'usage', Usage], ['desk.running', 'running', Running],
-          ['desk.git', 'git', Git], ['desk.github', 'github', GitHub],
+          ['desk.git', 'git', Git], ['desk.github', 'github', GitHub], ['desk.system', 'system', System],
         ];
         const BUILTIN_IDS = new Set(builtins.map(([id]) => id));
 

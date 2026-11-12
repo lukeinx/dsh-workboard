@@ -7,6 +7,7 @@ import {createUsage} from './lib/usage.js';
 import {createRunner} from './lib/exec.js';
 import {repoStatus, fetchRepo} from './lib/git.js';
 import {githubOverview} from './lib/github.js';
+import {createSystem} from './lib/system.js';
 import {randomUUID} from 'node:crypto';
 import {homedir} from 'node:os';
 import {stat} from 'node:fs/promises';
@@ -44,7 +45,7 @@ export const BUILTIN_WIDGETS = [
   'desk.today', 'desk.todo', 'desk.note', 'desk.calendar', 'desk.weather', 'desk.clock',
   'desk.quote', 'desk.countdown', 'desk.worldclock', 'desk.focus', 'desk.links', 'desk.progress',
   'desk.agents', 'desk.feed', 'desk.habits',
-  'desk.prompt', 'desk.inbox', 'desk.usage', 'desk.running', 'desk.git', 'desk.github',
+  'desk.prompt', 'desk.inbox', 'desk.usage', 'desk.running', 'desk.git', 'desk.github', 'desk.system',
 ];
 
 export function defaultBoard(id) {
@@ -552,6 +553,10 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       if (!services.git) throw new UserError('unavailable', 'git is not available');
       return services.git.fetch({paths: p?.paths});
     },
+    'dsh-desk/system.get': async () => {
+      if (!services.system) throw new UserError('unavailable', 'system status is not available');
+      return services.system.get();
+    },
     'dsh-desk/github.get': async p => {
       if (!services.github) throw new UserError('unavailable', 'GitHub is not available');
       return services.github({fresh: p?.fresh === true});
@@ -683,7 +688,7 @@ export function createTools(store) {
 export function apply(ctx) {
   const store = createStore(ctx);
   const run = createRunner();
-  const services = {usage: createUsage({root: join(dshHome(), 'sessions')}), running: createRunning(ctx), git: createGit(ctx, run), github: createGithub(run)};
+  const services = {usage: createUsage({root: join(dshHome(), 'sessions')}), running: createRunning(ctx), git: createGit(ctx, run), github: createGithub(run), system: createSystem({run})};
   const handlers = createHandlers(store, createFetcher(), createAgentWatch(ctx), createLauncher(ctx), services);
   ctx.effect(() => () => { void store.close(); }, 'dsh-desk: storage');
 

@@ -7,6 +7,7 @@ import {zstdCompressSync} from 'node:zlib';
 import {execFileSync} from 'node:child_process';
 import {apply, createStore, createHandlers, createAgentWatch, createLauncher, createRunning, createGit, createGithub, migrateLegacy} from '../index.js';
 import {createRunner} from '../lib/exec.js';
+import {createSystem, parsePmset, parseVmStat, parseMeminfo} from '../lib/system.js';
 import {createUsage, zstdFrames} from '../lib/usage.js';
 
 const routes = new Map();
@@ -273,5 +274,19 @@ await gh({fresh: true});
 assert.equal(ghCalls.length, 6);
 const missing = createGithub(async () => { const e = new Error('spawn gh ENOENT'); e.code = 'not-found'; throw e; });
 await assert.rejects(missing({}), /not installed/);
+
+// 系统状态：解析 vm_stat / meminfo / pmset，采样进环形缓冲。
+assert.equal(parseVmStat('Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free: 10.\nPages active: 100.\nPages wired down: 50.\nPages occupied by compressor: 10.\n', 1e12), 160 * 16384);
+assert.equal(parseMeminfo('MemTotal:       1000 kB\nMemFree: 100 kB\nMemAvailable:    400 kB\n'), 600 * 1024);
+assert.deepEqual(parsePmset("Now drawing from 'AC Power'\n -InternalBattery-0 (id=1)\t80%; AC attached; not charging present: true"), {percent: 80, charging: false, plugged: true, minutes: null});
+assert.deepEqual(parsePmset("Now drawing from 'Battery Power'\n -InternalBattery-0 (id=1)\t42%; discharging; 3:05 remaining present: true"), {percent: 42, charging: false, plugged: false, minutes: 185});
+assert.equal(parsePmset('No batteries'), null);
+const sys = createSystem({os: 'darwin', run: async cmd => Buffer.from(cmd === 'vm_stat' ? '(page size of 4096 bytes)\nPages active: 1000.\n' : '-InternalBattery-0\t55%; charging; 0:40 remaining')});
+const sv = await createHandlers(createStore({}), feedFetcher, null, null, {system: sys})['dsh-desk/system.get']();
+sys.stop();
+assert.equal(sv.memory.used, 4096 * 1000);
+assert.deepEqual(sv.battery, {percent: 55, charging: true, plugged: true, minutes: 40});
+assert.ok(sv.cpu >= 0 && sv.cpu <= 1 && sv.cores > 0 && sv.disk.total > sv.disk.free);
+assert.equal(sv.history.length, 1);
 
 console.log('smoke ok');
