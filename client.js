@@ -40,6 +40,7 @@ window.__ModuleLoader__.load({
       allDay: '全天', noEvents: '没有日程', addIcs: '添加 ICS 订阅', todayEvents: '今天', tomorrowEvents: '明天', prevMonth: '上个月', nextMonth: '下个月', calError: '{n} 个订阅加载失败',
       work: '工作', untitled: '未命名', newBoard: '看板 {n}', newBoardLabel: '新建看板', rename: '双击改名',
       edit: '编辑', doneEdit: '完成', addWidget: '添加 widget', added: '已添加', add: '添加', settings: '设置', save: '保存', cancel: '取消',
+      saved: '已保存', cfg_personal: '个人', cfg_calendars: '{n} 个日历订阅', cfg_empty: '城市、称呼、格言和日历订阅',
       searchWidget: '搜索 widget', cat_all: '全部', cat_daily: '日常', cat_agent: 'Agent', cat_news: '资讯', cat_tools: '效率与工具', cat_plugin: '插件',
       deleteBoard: '删除看板', confirmDelete: '确认删除', size: '尺寸', drag: '拖动排序',
       size_bar: '横栏', size_s: '小 1×1', size_m: '中 2×1', size_t: '竖 1×2', size_l: '大 2×2', size_w: '通栏 4×1',
@@ -109,6 +110,7 @@ window.__ModuleLoader__.load({
       allDay: 'All day', noEvents: 'No events', addIcs: 'Add an ICS subscription', todayEvents: 'Today', tomorrowEvents: 'Tomorrow', prevMonth: 'Previous month', nextMonth: 'Next month', calError: '{n} subscription(s) failed to load',
       work: 'Work', untitled: 'Untitled', newBoard: 'Board {n}', newBoardLabel: 'New board', rename: 'Double-click to rename',
       edit: 'Edit', doneEdit: 'Done', addWidget: 'Add widget', added: 'Added', add: 'Add', settings: 'Settings', save: 'Save', cancel: 'Cancel',
+      saved: 'Saved', cfg_personal: 'Personal', cfg_calendars: '{n} calendar subscription(s)', cfg_empty: 'City, name, quotes and calendar subscriptions',
       searchWidget: 'Search widgets', cat_all: 'All', cat_daily: 'Daily', cat_agent: 'Agent', cat_news: 'News', cat_tools: 'Productivity & tools', cat_plugin: 'Plugins',
       deleteBoard: 'Delete board', confirmDelete: 'Confirm delete', size: 'Size', drag: 'Drag to reorder',
       size_bar: 'Banner', size_s: 'Small 1×1', size_m: 'Medium 2×1', size_t: 'Tall 1×2', size_l: 'Large 2×2', size_w: 'Wide 4×1',
@@ -299,7 +301,11 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 .bnt-results{display:flex;flex-direction:column}
 .bnt-results button{text-align:left;padding:6px 8px;border-radius:6px}
 .bnt-results button:hover{background:var(--dsw-alias-bg-layer-2)}
-.bnt-foot{display:flex;justify-content:flex-end;gap:8px}
+.bnt-foot{display:flex;justify-content:flex-end;align-items:center;gap:8px}
+.bnt-settings{display:flex;flex-direction:column;gap:20px;max-width:560px;color:var(--dsw-alias-label-primary);font-size:13px}
+.bnt-settings>section{display:flex;flex-direction:column;gap:12px}
+.bnt-settings h3{margin:0;font-size:13px;font-weight:600}
+.bnt-settings .bnt-foot{justify-content:flex-start;flex-direction:row-reverse}
 .bnt-modal[data-wide]{width:min(760px,100%);height:min(640px,80vh);overflow:hidden}
 .bnt-gtop{display:flex;flex-direction:column;gap:10px;flex:none}
 .bnt-gbody{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:16px;margin:0 -4px;padding:0 4px}
@@ -708,6 +714,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
         const greet = (prefs, hour) => (prefs.name ? fill(t('greetName'), {g: greeting(t, hour), name: prefs.name}) : greeting(t, hour));
         const deg = v => (Number.isFinite(v) ? `${Math.round(v)}°` : '–');
 
+        const NAME_FIELD = {key: 'name', type: 'text', scope: 'global', label: () => t('f_name')};
         const LOCATION_FIELDS = [
           {key: 'location', type: 'location', scope: 'global', label: () => t('f_location')},
           {key: 'unit', type: 'select', scope: 'global', default: 'c', label: () => t('f_unit'), options: [{value: 'c', label: () => t('celsius')}, {value: 'f', label: () => t('fahrenheit')}]},
@@ -781,7 +788,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
         Today.desk = {
           apiVersion: 1, sizes: ['bar'], banner: true, description: () => t('d_today'),
           settings: [
-            {key: 'name', type: 'text', scope: 'global', label: () => t('f_name')},
+            NAME_FIELD,
             ...LOCATION_FIELDS,
             {key: 'showWeather', type: 'toggle', default: true, label: () => t('f_showWeather')},
             {key: 'showQuote', type: 'toggle', default: true, label: () => t('f_showQuote')},
@@ -802,7 +809,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             h('span', {className: 'bnt-muted'}, `${now.toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'})} · ${fill(t('week'), {n: isoWeek(now)})}`),
             size === 's' ? null : h('div', {className: 'bnt-yearbar', title: fill(t('year'), {n: yearPct})}, h('i', {style: {width: `${yearPct}%`}})));
         }
-        Clock.desk = {apiVersion: 1, sizes: ['m', 's'], title: false, description: () => t('d_clock'), settings: [{key: 'name', type: 'text', scope: 'global', label: () => t('f_name')}]};
+        Clock.desk = {apiVersion: 1, sizes: ['m', 's'], title: false, description: () => t('d_clock'), settings: [NAME_FIELD]};
 
         function TodoRow({todo, today}) {
           return h('li', {'data-done': todo.done ? '' : undefined},
@@ -993,13 +1000,12 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             urls.length ? h('div', {className: 'bnt-events'}, list(sel, sel === todayKey ? t('todayEvents') : selDate.toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'}))) : null,
             footer);
         }
+        const CALENDAR_URLS_FIELD = {key: 'calendarUrls', type: 'textarea', scope: 'global', label: () => t('f_urls'), placeholder: 'https://…/calendar.ics'};
+        const WEEK_START_FIELD = {key: 'weekStart', type: 'select', scope: 'global', label: () => t('f_weekStart'), default: () => (t('lang').startsWith('zh') ? '1' : '0'),
+          options: [{value: '1', label: () => t('monday')}, {value: '0', label: () => t('sunday')}]};
         Calendar.desk = {
           apiVersion: 1, sizes: ['t', 'l', 's', 'm'], description: () => t('d_calendar'),
-          settings: [
-            {key: 'calendarUrls', type: 'textarea', scope: 'global', label: () => t('f_urls'), placeholder: 'https://…/calendar.ics'},
-            {key: 'weekStart', type: 'select', scope: 'global', label: () => t('f_weekStart'), default: () => (t('lang').startsWith('zh') ? '1' : '0'),
-              options: [{value: '1', label: () => t('monday')}, {value: '0', label: () => t('sunday')}]},
-          ],
+          settings: [CALENDAR_URLS_FIELD, WEEK_START_FIELD],
         };
 
         function Quote({size}) {
@@ -1278,12 +1284,25 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
               h('b', null, r.name), ' ', h('span', {className: 'bnt-muted'}, r.region))) : h('span', {className: 'bnt-muted'}, t('noResults'))) : null);
         }
 
+        const fieldDefault = f => (typeof f.default === 'function' ? f.default() : f.default);
+        const fieldView = (f, v, set) => {
+          const label = resolveText(f.label) || f.key;
+          if (f.type === 'toggle') return h('label', {key: f.key, className: 'bnt-check'}, h('input', {type: 'checkbox', checked: v !== false && v != null, onChange: e => set(f.key, e.target.checked)}), label);
+          let control;
+          if (f.type === 'location') control = h(LocationField, {value: v, onChange: x => set(f.key, x)});
+          else if (f.type === 'select') control = h('select', {className: 'bnt-input', value: v ?? '', onChange: e => set(f.key, e.target.value)},
+            (f.options ?? []).map(o => h('option', {key: o.value, value: o.value}, resolveText(o.label) || o.value)));
+          else if (f.type === 'textarea') control = h('textarea', {className: 'bnt-input', value: v ?? '', placeholder: f.placeholder, spellCheck: false, onChange: e => set(f.key, e.target.value)});
+          else control = h('input', {className: 'bnt-input', value: v ?? '', placeholder: f.placeholder, onChange: e => set(f.key, e.target.value)});
+          return h('div', {key: f.key, className: 'bnt-field'}, h('span', null, label), control);
+        };
+
         function SettingsModal({widget, cell, onSaveConfig, onClose}) {
           const prefs = usePrefs();
           const fields = widget.settings;
           const initial = () => Object.fromEntries(fields.map(f => {
             const stored = f.scope === 'global' ? prefs[f.key] : cell?.config?.[f.key];
-            return [f.key, stored ?? (typeof f.default === 'function' ? f.default() : f.default)];
+            return [f.key, stored ?? fieldDefault(f)];
           }));
           const [values, setValues] = useState(initial);
           const [error, setError] = useState('');
@@ -1298,22 +1317,52 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
               onClose();
             } catch (e) { setError(String(e?.message || e)); }
           };
-          const field = f => {
-            const v = values[f.key];
-            const label = resolveText(f.label) || f.key;
-            if (f.type === 'toggle') return h('label', {key: f.key, className: 'bnt-check'}, h('input', {type: 'checkbox', checked: v !== false && v != null, onChange: e => set(f.key, e.target.checked)}), label);
-            let control;
-            if (f.type === 'location') control = h(LocationField, {value: v, onChange: x => set(f.key, x)});
-            else if (f.type === 'select') control = h('select', {className: 'bnt-input', value: v ?? '', onChange: e => set(f.key, e.target.value)},
-              (f.options ?? []).map(o => h('option', {key: o.value, value: o.value}, resolveText(o.label) || o.value)));
-            else if (f.type === 'textarea') control = h('textarea', {className: 'bnt-input', value: v ?? '', placeholder: f.placeholder, spellCheck: false, onChange: e => set(f.key, e.target.value)});
-            else control = h('input', {className: 'bnt-input', value: v ?? '', placeholder: f.placeholder, onChange: e => set(f.key, e.target.value)});
-            return h('div', {key: f.key, className: 'bnt-field'}, h('span', null, label), control);
-          };
           return h(Modal, {title: `${widget.label()} · ${t('settings')}`, onClose,
             footer: [h('button', {key: 'c', type: 'button', className: 'bnt-action', onClick: onClose}, t('cancel')),
               h('button', {key: 's', type: 'button', className: 'bnt-action', 'data-primary': '', onClick: save}, t('save'))]},
-          fields.map(field), error ? h('div', {className: 'bnt-error'}, error) : null);
+          fields.map(f => fieldView(f, values[f.key], set)), error ? h('div', {className: 'bnt-error'}, error) : null);
+        }
+
+        // 插件页里工作台详情页的全局设置；与卡片弹窗里 scope: 'global' 的字段读写同一份 prefs。
+        const SETTING_GROUPS = [
+          ['cfg_personal', [NAME_FIELD, WEEK_START_FIELD]],
+          ['weather', LOCATION_FIELDS],
+          ['quote', QUOTE_FIELDS],
+          ['calendar', [CALENDAR_URLS_FIELD]],
+        ];
+        const SETTING_FIELDS = SETTING_GROUPS.flatMap(([, fields]) => fields);
+
+        function DeskSettings({view}) {
+          useLocale();
+          const prefsSnap = useSyncExternalStore(prefsStore.subscribe, prefsStore.getSnapshot, prefsStore.getSnapshot);
+          useEffect(() => { void prefsStore.load(); }, []);
+          const prefs = prefsSnap.values;
+          const stored = () => Object.fromEntries(SETTING_FIELDS.map(f => [f.key, prefs[f.key] ?? fieldDefault(f)]));
+          const [values, setValues] = useState(null);
+          const [status, setStatus] = useState('');
+          useEffect(() => { if (prefsSnap.loaded && !values) setValues(stored()); }, [prefsSnap.loaded]);
+
+          if (view !== 'page') {
+            const calendars = String(prefs.calendarUrls ?? '').split(/\s+/).filter(Boolean).length;
+            const parts = [prefs.location?.name, prefs.name, calendars ? fill(t('cfg_calendars'), {n: calendars}) : ''].filter(Boolean);
+            return parts.length ? parts.join(' · ') : t('cfg_empty');
+          }
+          if (!values) return null;
+          const dirty = SETTING_FIELDS.some(f => JSON.stringify(values[f.key] ?? null) !== JSON.stringify(stored()[f.key] ?? null));
+          const set = (key, v) => { setValues(x => ({...x, [key]: v})); setStatus(''); };
+          const save = async () => {
+            try {
+              await prefsStore.put(Object.fromEntries(SETTING_FIELDS.map(f => [f.key, values[f.key] ?? null])));
+              setStatus(t('saved'));
+            } catch (e) { setStatus(String(e?.message || e)); }
+          };
+          return h('div', {className: 'bnt-settings'},
+            h('style', null, CSS),
+            SETTING_GROUPS.map(([title, fields]) => h('section', {key: title},
+              h('h3', null, t(title)), fields.map(f => fieldView(f, values[f.key], set)))),
+            h('div', {className: 'bnt-foot'},
+              status ? h('span', {className: 'bnt-muted', role: 'status'}, status) : null,
+              h('button', {type: 'button', className: 'bnt-action', 'data-primary': '', disabled: !dirty, onClick: save}, t('save'))));
         }
 
         function Gallery({list, board, onAdd, onClose}) {
@@ -2124,6 +2173,9 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
         ctx.effect(() => ctx.slots.inject('sidebar.panellist', () => ctx.slots.register({
           name: 'sidebar.panellist', id: PANEL, order: 30, label: () => t('title'),
         }, PanelIcon)), 'dsh-desk: sidebar entry');
+        ctx.effect(() => ctx.slots.inject('plugins.bundle.config', () => ctx.slots.register({
+          name: 'plugins.bundle.config', key: '@lukeinx/dsh-desk',
+        }, DeskSettings)), 'dsh-desk: settings');
 
         builtins.forEach(([id, key, component], i) => {
           ctx.effect(() => ctx.slots.inject(SLOT, () => ctx.slots.register({
