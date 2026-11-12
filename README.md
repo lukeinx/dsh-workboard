@@ -153,7 +153,7 @@ Manifest fields:
 - `sizes` lists the allowed sizes; `defaultSize` must be one of them and defaults to the first.
 - `title: false` hides the card header; `banner: true` renders without a frame.
 - `description` is shown in the widget gallery.
-- `category` groups the widget in the gallery: `daily`, `agent`, `news` or `tools`. Anything else goes under Plugins.
+- `category` groups the widget in the gallery: `daily` (Daily), `agent` (DeepSeek), `news` (News) or `tools` (Productivity & tools). Anything else goes under Plugins.
 - `settings` lists the fields of the settings dialog: `{key, type, label, default?, options?, placeholder?}`, with `type` one of `text`, `textarea`, `select` (with `options: [{value, label}]`) or `toggle`. Labels can be strings or functions that return a string.
 
 The component receives `size`, `config` (the saved settings for this card), `editing` and `openSettings()`.
