@@ -2,7 +2,7 @@
 
 [简体中文](README.zh.md)
 
-Desk (`@lukeinx/dsh-desk`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with 25 widgets, including a today banner, to-dos, notes, an ICS calendar, weather, an agent session monitor, quick prompts, usage stats, Git repositories, system status and markets, works with zero configuration, and lets the agent read and change your to-dos, notes and inbox from any conversation. Other plugins can add their own widgets.
+Desk (`@lukeinx/dsh-desk`) adds a modular dashboard to the DeepSeek Harness sidebar. It ships with 25 widgets, including a today banner, to-dos, notes, an ICS calendar, weather, an agent session monitor, quick prompts, usage stats, Git repositories, system status and markets, works with zero configuration, and lets the agent read and change your to-dos, notes and inbox from any conversation. The agent can also build new widgets from a sentence, and other plugins can add their own.
 
 Status: early (P0b). MIT licensed.
 
@@ -62,8 +62,17 @@ Usage counts the usage fields in the logs. Some providers do not report tokens; 
 - `desk_todos` — `list`, `add`, `complete`, `reopen`, `remove`
 - `desk_note` — `read`, `append`, `replace`
 - `desk_inbox` — `list`, `add`, `remove`, `clear`
+- `desk_widget` — `list`, `get`, `create`, `update`, `set_data`, `remove` custom widgets; the `desk-widget` skill tells the agent how to write them
 
 The page refreshes every 5 seconds while it is visible, so changes made by the agent appear without a reload.
+
+## Generate a widget with the agent
+
+In the widget gallery choose **Generate with agent** (also offered on an empty board), describe the card, and send it: a new session opens where the agent builds the widget, and it appears on the board you had open, under **Mine** in the gallery. You can also just ask for a Desk widget in any conversation.
+
+A custom widget is HTML that the agent writes. It runs in a sandboxed frame with no access to the Harness page, cookies, browser storage or the network, and is styled with the Harness theme. It reaches Desk only through `window.desk`: its settings and saved data, requests to the http(s) address prefixes the widget declares (made by the Host, cached for 30 seconds), saving its own data, opening links, and opening a new session draft that you send yourself.
+
+On a custom card, the sparkle in the header (or in edit mode) asks the agent to change it; edit mode also has **Source**, where you can edit the HTML, see the declared addresses, or delete the widget. Runtime errors show on the card with **Ask agent to fix**, and the agent sees the last error through `desk_widget`. Definitions and data are stored with the rest of Desk; at most 50 widgets of 200 KB HTML and 200 KB data each.
 
 ## Install
 
@@ -110,4 +119,4 @@ The component receives `size`, `config` (the saved settings for this card), `edi
 npm run check   # syntax check, Host smoke test and ICS tests
 ```
 
-Files: `index.js` (Host routes under `/api/dsh-desk/*`, storage, agent tools), `lib/` (HTTP cache, weather, ICS and feed parsing, session-log usage, subprocesses, Git, GitHub, system status, photos, markets, trending), `client.js` (sidebar entry, panel, built-in widgets), `cordis.patch.yml`, `locale/`, `icon.svg`.
+Files: `index.js` (Host routes under `/api/dsh-desk/*`, storage, agent tools), `skills/desk-widget.md` (the agent's widget-writing guide), `lib/` (HTTP cache, custom widget validation, weather, ICS and feed parsing, session-log usage, subprocesses, Git, GitHub, system status, photos, markets, trending), `client.js` (sidebar entry, panel, built-in widgets), `cordis.patch.yml`, `locale/`, `icon.svg`.

@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-工作台（`@lukeinx/dsh-desk`）在 DeepSeek Harness 侧栏增加一个模块化工作台。内置 25 个 widget，包括今日横栏、待办、速记、ICS 日历、天气、Agent 会话、Prompt 快启、用量统计、Git 工作区、系统状态和行情，零配置可用；Agent 可以在任意对话里读写你的待办、速记和收集箱；其他插件可以注册自己的 widget。
+工作台（`@lukeinx/dsh-desk`）在 DeepSeek Harness 侧栏增加一个模块化工作台。内置 25 个 widget，包括今日横栏、待办、速记、ICS 日历、天气、Agent 会话、Prompt 快启、用量统计、Git 工作区、系统状态和行情，零配置可用；Agent 可以在任意对话里读写你的待办、速记和收集箱；还可以一句话让 Agent 生成新的 widget，其他插件也可以注册自己的 widget。
 
 状态：早期（P0b）。MIT 许可。
 
@@ -62,8 +62,17 @@ Agent、Prompt 快启和收集箱共用同一个工作区选择，选项来自 H
 - `desk_todos`：`list`、`add`、`complete`、`reopen`、`remove`
 - `desk_note`：`read`、`append`、`replace`
 - `desk_inbox`：`list`、`add`、`remove`、`clear`
+- `desk_widget`：自定义 widget 的 `list`、`get`、`create`、`update`、`set_data`、`remove`；配套的 `desk-widget` skill 告诉 Agent 怎么写
 
 页面可见时每 5 秒刷新，Agent 的改动不用刷新页面就会出现。
+
+## 用 Agent 生成 widget
+
+在组件库里选 **用 Agent 生成**（空看板上也有），描述想要的卡片后发送：会打开一个新会话由 Agent 制作，做好后出现在你当时打开的看板上，组件库里归在 **我的**。也可以在任何对话里直接让 Agent 给工作台做一个 widget。
+
+自定义 widget 是 Agent 写的 HTML，运行在沙箱 iframe 里：访问不到 Harness 页面、cookie、浏览器存储，也不能直接联网，样式跟随 Harness 主题。它只能通过 `window.desk` 使用 Desk：读自己的设置和已保存数据、请求 widget 声明过的 http(s) 地址前缀（由 Host 发出并缓存 30 秒）、保存自己的数据、打开链接、打开一个需要你确认发送的新会话草稿。
+
+自定义卡片标题栏（或编辑模式）里的星光按钮可以让 Agent 修改；编辑模式里还有 **源码**，可以直接改 HTML、查看声明的地址或删除 widget。运行出错时卡片上会显示错误和 **让 Agent 修复**，Agent 也能通过 `desk_widget` 看到最近一次错误。定义和数据与 Desk 其余数据存在一起；最多 50 个，每个 HTML 和数据各不超过 200 KB。
 
 ## 安装
 
@@ -110,4 +119,4 @@ ctx.effect(() => ctx.slots.inject('desk.widget', () => ctx.slots.register({
 npm run check   # 语法检查 + Host 端冒烟 + ICS 测试
 ```
 
-文件：`index.js`（Host 端 `/api/dsh-desk/*` 路由、存储、Agent 工具）、`lib/`（HTTP 缓存、天气、ICS 与订阅解析、会话日志用量、子进程、Git、GitHub、系统状态、相框、行情、热榜）、`client.js`（侧栏入口、面板、内置 widget）、`cordis.patch.yml`、`locale/`、`icon.svg`。
+文件：`index.js`（Host 端 `/api/dsh-desk/*` 路由、存储、Agent 工具）、`skills/desk-widget.md`（Agent 编写 widget 的指南）、`lib/`（HTTP 缓存、自定义 widget 校验、天气、ICS 与订阅解析、会话日志用量、子进程、Git、GitHub、系统状态、相框、行情、热榜）、`client.js`（侧栏入口、面板、内置 widget）、`cordis.patch.yml`、`locale/`、`icon.svg`。
