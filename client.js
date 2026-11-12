@@ -561,10 +561,13 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-row .wb-del{align-self:center}
 .wb-row:hover .wb-del{display:grid}
 
-.wb-hrow{display:flex;align-items:center;gap:10px;padding:5px 2px;border-radius:8px;min-width:0}
+.wb-habits{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;column-gap:10px;row-gap:2px;align-content:start}
+.wb-habits[data-compact]{grid-template-columns:minmax(0,1fr) auto auto}
+.wb-habits>.wb-blank{grid-column:1/-1}
+.wb-hrow{display:grid;grid-template-columns:subgrid;grid-column:1/-1;align-items:center;padding:5px 2px;border-radius:8px;min-width:0}
 .wb-hrow:hover{background:var(--dsw-alias-bg-layer-2)}
-.wb-hrow>b{flex:1;min-width:0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wb-hrow small{font-size:12px;color:var(--dsw-alias-label-secondary);flex:none;min-width:44px;text-align:right}
+.wb-hrow>b{min-width:0;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-hrow small{font-size:12px;color:var(--dsw-alias-label-secondary);min-width:5em;text-align:right}
 .wb-hdays{display:flex;gap:4px;flex:none}
 .wb-hday{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--dsw-alias-border-l2);box-sizing:border-box;display:grid;place-items:center}
 .wb-hday:hover{border-color:var(--dsw-alias-brand-primary)}
@@ -2230,7 +2233,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             size === 't' ? null : h('small'),
             h('i', {className: 'wb-hsp'})) : null;
           return h(React.Fragment, null,
-            h('div', {className: 'wb-rows'},
+            h('div', {className: 'wb-rows wb-habits', 'data-compact': size === 't' ? '' : undefined},
               habits && !habits.length ? h('div', {className: 'wb-blank'}, t('noHabits')) : null,
               head,
               (habits ?? []).map(habit => {
