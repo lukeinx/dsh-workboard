@@ -12,7 +12,7 @@ import {createPhotos} from './lib/photo.js';
 import {createMarket} from './lib/market.js';
 import {createTrending} from './lib/trending.js';
 import {createQuotes} from './lib/quote.js';
-import {randomUUID} from 'node:crypto';
+import {createHash, randomUUID} from 'node:crypto';
 import {homedir, tmpdir} from 'node:os';
 import {stat} from 'node:fs/promises';
 import {isAbsolute, join} from 'node:path';
@@ -31,7 +31,7 @@ const MAX_NOTE = 200_000;
 
 // storageDomain 要求 zod schema；插件不带 zod 依赖，用只实现 safeParse/parse 的透传对象，校验在本文件里做。
 const passthrough = {safeParse: data => ({success: true, data}), parse: data => data};
-const TABLES = ['boards', 'todos', 'notes', 'prefs', 'habits', 'inbox'];
+const TABLES = ['boards', 'todos', 'notes', 'prefs', 'habits', 'inbox', 'reads'];
 const ICS_TTL = 15 * 60_000;
 const ICS_MAX_BYTES = 5_000_000;
 const FEED_TTL = 15 * 60_000;
@@ -43,6 +43,9 @@ const HABIT_DAYS_KEPT = 400;
 const DAY_KEY = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_INBOX = 200;
 const MAX_INBOX_TEXT = 4000;
+const READ_KEEP_MS = 90 * 86400_000;
+const MAX_READS = 5000;
+const MAX_READ_BATCH = 200;
 const MAX_PROMPT = 20_000;
 
 export const BUILTIN_WIDGETS = [
@@ -121,6 +124,12 @@ export function createStore(ctx) {
     const value = String(text ?? '').replace(/\s+/g, ' ').trim();
     if (!value) throw new UserError('empty-text', 'text is required');
     return value.slice(0, MAX_TEXT);
+  };
+  const readKey = url => createHash('sha1').update(url).digest('hex').slice(0, 24);
+  const readUrls = urls => (Array.isArray(urls) ? urls : []).map(u => String(u ?? '').trim()).filter(u => u && u.length <= 2048).slice(0, MAX_READ_BATCH);
+  const pruneReads = async now => {
+    const all = [...table('reads').entries()].sort((a, b) => b[1].at - a[1].at);
+    for (const [key] of all.filter(([, v], i) => i >= MAX_READS || now - v.at > READ_KEEP_MS)) await table('reads').delete(key);
   };
   const requireTodo = id => {
     const todo = table('todos').get(String(id));
@@ -271,6 +280,18 @@ export function createStore(ctx) {
       const ids = [...table('inbox').entries()].map(([k]) => k);
       for (const id of ids) await table('inbox').delete(id);
       return ids.length;
+    },
+
+    readOf: urls => readUrls(urls).filter(u => table('reads').get(readKey(u))),
+    async markRead(urls, read = true) {
+      const list = readUrls(urls);
+      const now = Date.now();
+      for (const u of list) {
+        if (read) await table('reads').put(readKey(u), {at: now});
+        else await table('reads').delete(readKey(u));
+      }
+      if (read && list.length) await pruneReads(now);
+      return list.length;
     },
 
     getNote: () => table('notes').get(NOTE_KEY) ?? {text: '', updatedAt: 0},
@@ -584,6 +605,8 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
     'dsh-desk/inbox.add': p => store.addInbox(p?.text),
     'dsh-desk/inbox.remove': p => store.removeInbox(p?.id),
     'dsh-desk/inbox.clear': () => store.clearInbox(),
+    'dsh-desk/read.check': p => store.readOf(p?.urls),
+    'dsh-desk/read.mark': p => store.markRead(p?.urls, p?.read !== false),
     'dsh-desk/habit.list': () => store.listHabits(),
     'dsh-desk/habit.add': p => store.addHabit(p?.name),
     'dsh-desk/habit.check': p => store.checkHabit(p?.id, p?.day, p?.done),

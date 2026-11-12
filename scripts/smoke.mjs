@@ -132,14 +132,21 @@ assert.equal((await call('habit.check', {id: habit.id, day: 'yesterday'})).error
 assert.deepEqual((await value('habit.list')).map(h => h.id), [habit.id]);
 await value('habit.remove', {id: habit.id});
 assert.deepEqual(await value('habit.list'), []);
+// 已读：标记、查询、取消，忽略空值。
+assert.deepEqual(await value('read.check', {urls: ['https://r.example/1', 'https://r.example/2']}), []);
+assert.equal(await value('read.mark', {urls: ['https://r.example/1', '', null]}), 1);
+assert.deepEqual(await value('read.check', {urls: ['https://r.example/1', 'https://r.example/2']}), ['https://r.example/1']);
+await value('read.mark', {urls: ['https://r.example/1'], read: false});
+assert.deepEqual(await value('read.check', {urls: ['https://r.example/1']}), []);
 
 // 订阅：两个源按时间合并，失败的源进 errors。
-const rss = '<rss version="2.0"><channel><title>R</title><item><title>Old</title><link>https://r.example/1</link><pubDate>Mon, 09 Nov 2026 10:00:00 GMT</pubDate></item></channel></rss>';
+const rss = '<rss version="2.0"><channel><title>R</title><item><title>Old</title><link>https://r.example/1</link><guid>r-1</guid><pubDate>Mon, 09 Nov 2026 10:00:00 GMT</pubDate></item></channel></rss>';
 const atomFeed = '<feed xmlns="http://www.w3.org/2005/Atom"><title>A</title><entry><title>New</title><link href="https://a.example/2"/><updated>2026-11-11T10:00:00Z</updated></entry></feed>';
 const feedFetcher = {get: async url => { if (url.includes('bad')) throw new Error('HTTP 500'); return url.includes('atom') ? atomFeed : rss; }};
 const feed = await createHandlers(createStore({}), feedFetcher)['dsh-desk/feed.get']({urls: ['https://x.example/rss', 'https://x.example/atom', 'https://bad.example/f']});
 assert.deepEqual(feed.items.map(i => [i.title, i.feed, i.link]), [['New', 'A', 'https://a.example/2'], ['Old', 'R', 'https://r.example/1']]);
 assert.deepEqual(feed.errors.map(e => e.message), ['HTTP 500']);
+assert.deepEqual(feed.items.map(i => i.guid), ['', 'r-1']);
 
 // Agent 概览：假 sessionController / schedule，等待确认时标 waiting，答复后清除。
 const listeners = new Map();

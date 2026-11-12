@@ -23,7 +23,7 @@ Status: early (P0b). MIT licensed.
 | Links | `m` `s` `w` `t` `l` | One `name URL` per line; only http, https and mailto |
 | Time progress | `m` `s` `w` | How much of today, this week, month and year has passed |
 | Agent | `t` `l` `m` `w` | Sessions waiting for you first, then running and recent ones; click to open. Upcoming scheduled tasks and a new-session button |
-| Feeds | `t` `l` `m` `w` | RSS / Atom, several feeds merged by date; defaults to Hacker News (English) or ifanr and Ruan Yifeng's blog (Chinese) |
+| Feeds | `t` `l` `m` `w` | RSS / Atom, several feeds merged by date; defaults to Hacker News (English) or ifanr and Ruan Yifeng's blog (Chinese); opened items turn grey, with mark-all-read and an optional hide-read setting |
 | Habits | `m` `l` `t` `w` | Check in for any day of the last week, with your current streak |
 | Quick prompt | `m` `w` `l` `t` `s` | Type or pick a preset to start a new session and send it right away, optionally in a chosen directory |
 | Inbox | `t` `l` `m` `w` | Things you jot down, handed to the agent to sort with one click |
@@ -34,7 +34,7 @@ Status: early (P0b). MIT licensed.
 | System | `m` `s` `t` `l` `w` | CPU, memory, disk, battery and a five-minute CPU sparkline |
 | Photo frame | `m` `s` `t` `l` `w` | Cycles through photos in a local folder (`~/Pictures` by default); click for the next one |
 | Markets | `t` `m` `s` `l` `w` | Exchange rates (`USD/CNY`), China / Hong Kong / US stocks (`sh600519`, `hk00700`, `usAAPL`) and crypto (`BTC`, `cg:<id>`); red or green for gains |
-| Trending | `l` `t` `m` `w` | Hot lists, one tab per source: Weibo, Zhihu, 36Kr, sspai, Hacker News, GitHub Trending, Product Hunt and Reddit (world news, technology, science); Bilibili and V2EX can be turned on in settings |
+| Trending | `l` `t` `m` `w` | Hot lists, one tab per source: Weibo, Zhihu, 36Kr, sspai, Hacker News, GitHub Trending, Product Hunt and Reddit (world news, technology, science); Bilibili and V2EX can be turned on in settings; opened items turn grey |
 
 The default board holds Today, To-do, Calendar and Notes; add the rest from the gallery. Built-in widgets added by an upgrade appear only in the gallery and are not placed on existing boards.
 

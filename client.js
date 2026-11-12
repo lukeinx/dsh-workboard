@@ -67,6 +67,7 @@ window.__ModuleLoader__.load({
       noSessions: '还没有会话', noActive: '没有进行中的会话', agentsUnavailable: '当前 Harness 不支持读取会话', activeCount: '{n} 个进行中',
       f_showRecent: '显示最近会话', f_showSchedules: '显示定时任务',
       f_feeds: '订阅地址（每行一个 RSS / Atom）', defaultFeeds: 'https://www.ifanr.com/feed\nhttps://www.ruanyifeng.com/blog/atom.xml', feedError: '{n} 个订阅加载失败', noItems: '没有内容',
+      markAllRead: '全部已读', unreadCount: '{n} 条未读', f_hideRead: '隐藏已读',
       addHabit: '添加习惯', noHabits: '还没有习惯', streak: '连续 {n} 天', markDay: '{d} 打卡',
       prompt: 'Prompt 快启', inbox: '收集箱', usage: '用量', running: '运行中', git: 'Git 工作区', github: 'GitHub', system: '系统状态', photo: '相框', market: '行情',
       d_market: '汇率、A 股 / 港股 / 美股和加密货币报价', f_symbols: '代码（每行一个，后面可加名称）', f_upColor: '涨跌颜色', up_red: '红涨绿跌', up_green: '绿涨红跌',
@@ -137,6 +138,7 @@ window.__ModuleLoader__.load({
       noSessions: 'No sessions yet', noActive: 'Nothing running', agentsUnavailable: 'This Harness does not expose sessions', activeCount: '{n} active',
       f_showRecent: 'Show recent sessions', f_showSchedules: 'Show scheduled tasks',
       f_feeds: 'Feed URLs, one RSS or Atom feed per line', defaultFeeds: 'https://hnrss.org/frontpage', feedError: '{n} feed(s) failed to load', noItems: 'Nothing here',
+      markAllRead: 'Mark all read', unreadCount: '{n} unread', f_hideRead: 'Hide read items',
       addHabit: 'Add a habit', noHabits: 'No habits yet', streak: '{n}-day streak', markDay: 'Check in for {d}',
       prompt: 'Quick prompt', inbox: 'Inbox', usage: 'Usage', running: 'Running', git: 'Git repos', github: 'GitHub', system: 'System', photo: 'Photo frame', market: 'Markets',
       d_market: 'Exchange rates, China / Hong Kong / US stocks and crypto prices', f_symbols: 'Symbols, one per line, optionally followed by a name', f_upColor: 'Gain colour', up_red: 'Red for gains', up_green: 'Green for gains',
@@ -372,6 +374,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 .bnt-row .bnt-big{font-size:20px;font-weight:600;flex:none}
 .bnt-row .bnt-big small{font-size:12px;font-weight:400;margin-left:2px}
 .bnt-row[data-dim]{color:var(--dsw-alias-label-secondary)}
+.bnt-row[data-read] b{font-weight:400;color:var(--dsw-alias-label-secondary)}
 .bnt-hero{display:flex;flex-direction:column;justify-content:center;height:100%;gap:2px;min-width:0}
 .bnt-hero .bnt-big{font-size:36px;font-weight:600;letter-spacing:-1px;line-height:1.1}
 .bnt-hero .bnt-big small{font-size:14px;font-weight:400;letter-spacing:0;margin-left:4px}
@@ -715,6 +718,38 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           const reload = () => { if (entry) { entry.at = 0; entry.load?.(); } };
           return {value: entry?.value, error: entry?.error ?? '', pending: Boolean(key) && !entry?.at, reload};
         }
+
+        // 已读记录存在 Host 端，各 widget 共享；只增不减，打开链接即标记。
+        const readSet = new Set();
+        const readListeners = new Set();
+        let readRev = 0;
+        const readEmit = () => { readRev++; for (const l of readListeners) l(); };
+        const readSubscribe = fn => { readListeners.add(fn); return () => readListeners.delete(fn); };
+        const readSnapshot = () => readRev;
+        const markRead = urls => {
+          const list = urls.filter(u => u && !readSet.has(u));
+          if (!list.length) return;
+          for (const u of list) readSet.add(u);
+          readEmit();
+          call('read.mark', {urls: list}).catch(() => {});
+        };
+        function useRead(urls) {
+          useSyncExternalStore(readSubscribe, readSnapshot, readSnapshot);
+          const key = urls.join('\n');
+          useEffect(() => {
+            if (!urls.length) return undefined;
+            const load = () => call('read.check', {urls}).then(hit => { for (const u of hit) readSet.add(u); readEmit(); }, () => {});
+            load();
+            window.addEventListener('focus', load);
+            return () => window.removeEventListener('focus', load);
+          }, [key]);
+          return readSet;
+        }
+        const readProps = (read, url) => ({
+          'data-read': read.has(url) ? '' : undefined,
+          onClick: () => markRead([url]),
+          onAuxClick: e => { if (e.button === 1) markRead([url]); },
+        });
 
         const useWeather = prefs => {
           const loc = prefs.location;
@@ -1457,21 +1492,31 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           const now = useNow();
           const urls = String(config?.urls || t('defaultFeeds')).split(/\s+/).filter(Boolean);
           const res = useRemote('feed.get', {urls, limit: 40}, FEED_MS);
-          const items = res.value?.items ?? [];
+          const all = res.value?.items ?? [];
           const failed = res.value?.errors?.length ?? 0;
           const many = urls.length > 1;
+          const keyOf = it => it.link || it.guid || '';
+          const read = useRead(all.map(keyOf).filter(Boolean));
+          const unread = all.map(keyOf).filter(k => k && !read.has(k));
+          const items = config?.hideRead ? all.filter(it => !read.has(keyOf(it))) : all;
           return h(React.Fragment, null,
             h('div', {className: 'bnt-rows'},
               items.length ? null : h('div', {className: 'bnt-blank'}, res.pending ? '…' : res.error || t('noItems')),
-              items.map((it, i) => h(it.link ? 'a' : 'div', {key: i, className: 'bnt-row bnt-rowbtn', title: it.title, ...(it.link ? {href: it.link, target: '_blank', rel: 'noopener noreferrer'} : {})},
+              items.map((it, i) => h(it.link ? 'a' : 'div', {key: keyOf(it) || i, className: 'bnt-row bnt-rowbtn', title: it.title, ...(keyOf(it) ? readProps(read, keyOf(it)) : {}), ...(it.link ? {href: it.link, target: '_blank', rel: 'noopener noreferrer'} : {})},
                 h('div', null, h('b', null, it.title || it.link),
                   size === 'w' && !many ? null : h('small', null, [many ? it.feed : '', it.date ? relTime(it.date, now.getTime()) : ''].filter(Boolean).join(' · '))),
                 size === 'w' && !many && it.date ? h('time', null, relTime(it.date, now.getTime())) : null))),
-            failed ? h('div', {className: 'bnt-calerr', title: res.value.errors.map(e => `${e.url}: ${e.message}`).join('\n')}, fill(t('feedError'), {n: failed})) : null);
+            failed ? h('div', {className: 'bnt-calerr', title: res.value.errors.map(e => `${e.url}: ${e.message}`).join('\n')}, fill(t('feedError'), {n: failed})) : null,
+            unread.length ? h('div', {className: 'bnt-notefoot'},
+              h('span', null, fill(t('unreadCount'), {n: unread.length})),
+              h('button', {type: 'button', className: 'bnt-btn', onClick: () => markRead(unread)}, t('markAllRead'))) : null);
         }
         Feed.desk = {
           apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_feed'),
-          settings: [{key: 'urls', type: 'textarea', label: () => t('f_feeds'), default: () => t('defaultFeeds')}],
+          settings: [
+            {key: 'urls', type: 'textarea', label: () => t('f_feeds'), default: () => t('defaultFeeds')},
+            {key: 'hideRead', type: 'toggle', default: false, label: () => t('f_hideRead')},
+          ],
         };
 
         function Habits({size}) {
@@ -1964,14 +2009,15 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           const [picked, setPicked] = useState(null);
           const source = enabled.includes(picked) ? picked : enabled[0];
           const res = useRemote('trending.get', source ? {source} : null, TRENDING_MS);
+          const v = source && res.value?.source === source ? res.value : null;
+          const read = useRead(v ? v.items.map(it => it.url).filter(Boolean) : []);
           if (!source) return h('div', {className: 'bnt-photo-msg'}, h('button', {type: 'button', className: 'bnt-btn bnt-cta', onClick: openSettings}, t('tr_none')));
-          const v = res.value?.source === source ? res.value : null;
           const compact = new Intl.NumberFormat(t('lang'), {notation: 'compact', maximumFractionDigits: 1});
           const hot = n => (n == null ? '' : `${v.metric === 'stars' ? '+' : ''}${compact.format(n)}`);
           return h('div', {className: 'bnt-trend'},
             enabled.length > 1 ? h('div', {className: 'bnt-seg', role: 'tablist'}, enabled.map(id => h('button', {key: id, type: 'button', role: 'tab', className: 'bnt-btn', 'aria-pressed': id === source, onClick: () => setPicked(id)}, t(`tr_${id}`)))) : null,
             h('div', {className: 'bnt-rows'},
-              v ? v.items.map((it, i) => h('a', {key: `${i}${it.url}`, className: 'bnt-row bnt-rowbtn', href: it.url, target: '_blank', rel: 'noopener noreferrer', title: [it.title, it.meta].filter(Boolean).join('\n')},
+              v ? v.items.map((it, i) => h('a', {key: `${i}${it.url}`, className: 'bnt-row bnt-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer', title: [it.title, it.meta].filter(Boolean).join('\n')},
                 h('span', {className: 'bnt-rank bnt-num', 'data-top': i < 3 ? '' : undefined}, i + 1),
                 h('div', null, h('b', null, it.title), size === 'l' && it.meta ? h('small', null, it.meta) : null),
                 size === 't' ? null : h('span', {className: 'bnt-num'}, hot(it.hot))))
