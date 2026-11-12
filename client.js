@@ -332,7 +332,7 @@ window.__ModuleLoader__.load({
 .wb-today .wb-greet{grid-area:greet;align-self:end;font-size:15px;font-weight:600}
 .wb-today .wb-date{grid-area:date;align-self:start;color:var(--dsw-alias-label-secondary)}
 .wb-sep{width:1px;align-self:stretch;margin:14px 0;background:var(--dsw-alias-border-l1)}
-.wb-tquote{flex:1!important;min-width:0;text-align:left}
+.wb-tquote{flex:1!important;min-width:0;text-align:right}
 .wb-tquote .wb-qtext{margin:0;font-size:15px;line-height:1.5;font-family:"New York","Songti SC",Georgia,serif;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .wb-tquote[data-len=short] .wb-qtext{font-size:18px;line-height:1.4}
 .wb-tquote[data-len=long] .wb-qtext{font-size:13px;line-height:1.45;-webkit-line-clamp:3}
