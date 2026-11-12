@@ -26,6 +26,7 @@ import {PassThrough} from 'node:stream';
 import {createVideos, parseSource, parseYoutubeFeed, parseBiliArchives, parseChannelId} from '../lib/videos.js';
 import {parseFeed} from '../lib/feed.js';
 import {createAttention} from '../lib/attention.js';
+import {createContext, localIso, streakOf} from '../lib/context.js';
 
 const routes = new Map();
 const tools = new Map();
@@ -362,6 +363,39 @@ assert.deepEqual(await slowGh({}), {items: [], sources: {sessions: false, runnin
 const noGh = createAttention({store: createStore({}), github: createGithub(async () => { const e = new Error('ENOENT'); e.code = 'not-found'; throw e; })});
 assert.equal((await noGh({})).sources.github, 'missing');
 
+// workboard_context：按 section 汇总，未配置或不可用的 section 给出 note / error，不影响其余；单个 section 超时不拖住整体。
+const ctxDay = new Date(); ctxDay.setHours(0, 0, 0, 0);
+const keyOf = d => localIso(d.getTime()).slice(0, 10);
+const runHabit = await attnStore.addHabit('Run');
+for (const back of [0, 1, 2, 4]) { const d = new Date(ctxDay); d.setDate(d.getDate() - back); await attnStore.checkHabit(runHabit.id, keyOf(d), true); }
+assert.equal(streakOf(attnStore.listHabits()[0].days, ctxDay.getTime()), 3);
+await attnStore.putNote('hello note');
+const context = createContext({store: attnStore, call: (m, p) => attnHandlers[`dsh-workboard/${m}`](p)});
+const snapshot = await context({});
+assert.match(snapshot.now, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}[+-]\d{2}:\d{2}$/);
+assert.deepEqual(snapshot.attention.map(x => x.kind), ['waiting', 'blocked', 'failed', 'review', 'inbox']);
+assert.deepEqual(snapshot.todos.open.map(x => [x.text, x.carriedOver ?? false]), [['carry me', false]]);
+assert.deepEqual(snapshot.habits, [{name: 'Run', doneToday: true, streak: 3}]);
+assert.deepEqual(snapshot.inbox.map(x => x.text), ['later']);
+assert.equal(snapshot.note.text, 'hello note');
+assert.deepEqual(snapshot.calendar, {events: []});
+assert.deepEqual(snapshot.weather, {note: 'no city set'});
+assert.match(snapshot.usage.error, /not available/);
+assert.deepEqual(snapshot.running.goals.map(g => [g.objective, g.phase, g.blockedReason]), [['Stuck goal', 'blocked', 'needs token']]);
+assert.deepEqual(snapshot.github.reviewRequested.map(x => [x.ref, x.url]), [['o/r#7', 'https://github.com/o/r/pull/7']]);
+assert.deepEqual(snapshot.sessions.map(s => s.id), ['s1', 's3', 's2']);
+assert.match(snapshot.schedules.error, /not available/);
+assert.match(snapshot.git.error, /git is not available/);
+const some = await context({sections: ['todos', 'bogus', 'inbox']});
+assert.deepEqual(Object.keys(some), ['now', 'weekday', 'timeZone', 'todos', 'inbox']);
+const stuck = createContext({store: attnStore, call: () => new Promise(() => {}), timeoutMs: 20});
+assert.deepEqual((await stuck({sections: ['sessions', 'todos']})).sessions, {error: 'sessions timed out'});
+const ctxTool = tools.get('workboard_context');
+assert.ok(ctxTool.parameters.properties.sections.items.enum.includes('attention'));
+const toolSnap = await ctxTool.execute({sections: ['todos', 'note', 'usage']});
+assert.ok(Array.isArray(toolSnap.todos.open));
+assert.ok(toolSnap.usage.error || toolSnap.usage.today);
+
 // 系统状态：解析 vm_stat / meminfo / pmset，采样进环形缓冲。
 assert.equal(parseVmStat('Mach Virtual Memory Statistics: (page size of 16384 bytes)\nPages free: 10.\nPages active: 100.\nPages wired down: 50.\nPages occupied by compressor: 10.\n', 1e12), 160 * 16384);
 assert.equal(parseMeminfo('MemTotal:       1000 kB\nMemFree: 100 kB\nMemAvailable:    400 kB\n'), 600 * 1024);
@@ -484,6 +518,7 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   assert.equal((await call('widget.fetch', {id: 'stars', url: 'https://other.example.com/x'})).error.code, 'dsh-workboard/not-allowed');
   assert.equal((await call('widget.put', {id: 'stars', html: '<script>}</script>'})).error.code, 'dsh-workboard/bad-html');
   assert.equal((await value('widget.put', {id: 'stars', title: 'Repo stars', html: '<i></i>'})).title, 'Repo stars');
+
   const exported = await value('widget.export', {id: 'stars'});
   assert.deepEqual([exported.format, exported.version, exported.widget.title, exported.widget.fetch, 'data' in exported], ['dsh-workboard.widget', 1, 'Repo stars', ['https://api.example.com/'], false]);
   assert.deepEqual((await value('widget.export', {id: 'stars', data: true})).data, {n: 4});
@@ -498,7 +533,6 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   assert.equal((await call('widget.import', {package: {...exported, widget: {...exported.widget, html: '<script>if (</script>'}}})).error.code, 'dsh-workboard/bad-html');
   assert.equal((await call('widget.import', {package: {...exported, widget: {...exported.widget, fetch: ['file:///etc/']}}})).error.code, 'dsh-workboard/bad-widget');
   await value('widget.remove', {id: imported.id});
-
 
   const work = await value('board.get', {id: 'work'});
   await value('board.put', {board: {...work, widgets: [...work.widgets, {id: 'custom.stars', size: 'm'}], known: [...work.known, 'custom.stars']}});

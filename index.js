@@ -25,6 +25,7 @@ import {createRecentFiles, isRisky} from './lib/files.js';
 import {createClipboard} from './lib/clipboard.js';
 import {createNetwork} from './lib/network.js';
 import {createAttention} from './lib/attention.js';
+import {CONTEXT_SECTIONS, createContext} from './lib/context.js';
 import {stat} from 'node:fs/promises';
 import {isAbsolute, join} from 'node:path';
 
@@ -989,7 +990,7 @@ const SETTING_ITEM = {
 
 const toolWidget = w => ({...widgetSummary(w), updatedAt: iso(w.updatedAt), lastError: w.lastError ? {...w.lastError, at: iso(w.lastError.at)} : null});
 
-export function createTools(store) {
+export function createTools(store, {context} = {}) {
   return [
     {
       name: 'workboard_todos',
@@ -1119,6 +1120,23 @@ export function createTools(store) {
         throw new Error(`unknown action ${action}`);
       },
     },
+    ...(context ? [{
+      name: 'workboard_context',
+      description: 'Read what is on the user\'s Workboard dashboard in one call: what needs them now (sessions waiting for approval, blocked goals, failed jobs, PRs to review, carried-over to-dos, unsorted inbox), calendar, weather, to-dos, habits, inbox, scratch note, recent sessions, running goals and jobs, scheduled tasks, recent deliverables, token usage, Git repositories and GitHub. Read-only. Use it to plan the user\'s day or answer what they should do next; pass `sections` to read only some. Times are local ISO 8601 with offset; a section that cannot be read carries `error`.',
+      parameters: {
+        type: 'object',
+        properties: {
+          sections: {type: 'array', items: {type: 'string', enum: CONTEXT_SECTIONS}, description: 'Sections to read; omit for all.'},
+          days: {type: 'integer', minimum: 1, maximum: 7, description: 'Calendar days to include, starting today; defaults to 2.'},
+        },
+        additionalProperties: false,
+      },
+      output: {schema: {type: 'object'}, render: (_args, value) => textResult(value)},
+      async execute(args) {
+        await store.ready;
+        return context(args ?? {});
+      },
+    }] : []),
   ];
 }
 
@@ -1153,6 +1171,7 @@ export function apply(ctx) {
     network: createNetwork({run}),
   };
   const handlers = createHandlers(store, fetcher, createAgentWatch(ctx), createLauncher(ctx), services);
+  const context = createContext({store, call: (method, payload) => handlers[`dsh-workboard/${method}`](payload)});
   ctx.effect(() => () => { void store.close(); }, 'dsh-workboard: storage');
   ctx.effect(() => () => { services.system.stop(); services.clipboard.stop(); services.network.stop(); services.nowPlaying.stop(); }, 'dsh-workboard: samplers');
 
@@ -1167,7 +1186,7 @@ export function apply(ctx) {
   }
 
   const tools = ctx.get('tools');
-  if (tools) for (const tool of createTools(store)) ctx.effect(() => tools.register(tool), `dsh-workboard: ${tool.name} tool`);
+  if (tools) for (const tool of createTools(store, {context})) ctx.effect(() => tools.register(tool), `dsh-workboard: ${tool.name} tool`);
 
   const skills = ctx.get?.('skills');
   if (typeof skills?.register === 'function') {
