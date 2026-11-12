@@ -49,7 +49,7 @@ window.__ModuleLoader__.load({
       aqi0: '优', aqi1: '良', aqi2: '轻度污染', aqi3: '中度污染', aqi4: '重度污染', aqi5: '严重污染',
       allDay: '全天', noEvents: '没有日程', addIcs: '添加 ICS 订阅', todayEvents: '今天', tomorrowEvents: '明天', prevMonth: '上个月', nextMonth: '下个月', calError: '{n} 个订阅加载失败',
       calConnect: '连接系统日历', calAsking: '等待授权…', calDenied: '在「系统设置 → 隐私与安全性 → 日历」里允许 DeepSeek Harness', f_systemCalendar: '显示 macOS 系统日历',
-      work: '工作', untitled: '未命名', newBoard: '看板 {n}', newBoardLabel: '新建看板', rename: '双击改名',
+      defaultBoard: '默认', untitled: '未命名', newBoard: '看板 {n}', newBoardLabel: '新建看板', rename: '双击改名',
       edit: '编辑', doneEdit: '完成', addWidget: '添加 widget', added: '已添加', add: '添加', settings: '设置', save: '保存', cancel: '取消',
       saved: '已保存', cfg_personal: '个人', openSettings: '打开设置',
       searchWidget: '搜索 widget', cat_all: '全部', cat_daily: '日常', cat_agent: 'DeepSeek', cat_news: '资讯', cat_tools: '效率与工具', cat_plugin: '插件',
@@ -159,7 +159,7 @@ window.__ModuleLoader__.load({
       aqi0: 'Good', aqi1: 'Moderate', aqi2: 'Sensitive', aqi3: 'Unhealthy', aqi4: 'Very unhealthy', aqi5: 'Hazardous',
       allDay: 'All day', noEvents: 'No events', addIcs: 'Add an ICS subscription', todayEvents: 'Today', tomorrowEvents: 'Tomorrow', prevMonth: 'Previous month', nextMonth: 'Next month', calError: '{n} subscription(s) failed to load',
       calConnect: 'Connect system calendar', calAsking: 'Waiting for permission…', calDenied: 'Allow DeepSeek Harness in System Settings → Privacy & Security → Calendars', f_systemCalendar: 'Show macOS system calendar',
-      work: 'Work', untitled: 'Untitled', newBoard: 'Board {n}', newBoardLabel: 'New board', rename: 'Double-click to rename',
+      defaultBoard: 'Default', untitled: 'Untitled', newBoard: 'Board {n}', newBoardLabel: 'New board', rename: 'Double-click to rename',
       edit: 'Edit', doneEdit: 'Done', addWidget: 'Add widget', added: 'Added', add: 'Add', settings: 'Settings', save: 'Save', cancel: 'Cancel',
       saved: 'Saved', cfg_personal: 'Personal', openSettings: 'Open settings',
       searchWidget: 'Search widgets', cat_all: 'All', cat_daily: 'Daily', cat_agent: 'DeepSeek', cat_news: 'News', cat_tools: 'Productivity & tools', cat_plugin: 'Plugins',
@@ -3495,7 +3495,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             return () => window.removeEventListener('keydown', onKey);
           }, [editing, modal, renaming]);
 
-          const boardTitle = b => b.title || (b.id === 'work' ? t('work') : t('untitled'));
+          const boardTitle = b => b.title || (b.id === 'work' ? t('defaultBoard') : t('untitled'));
           const switchTo = id => {
             setRenaming(false);
             setConfirmDelete(false);
