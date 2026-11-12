@@ -10,13 +10,13 @@ Status: early (P0b). MIT licensed.
 
 | Widget | Sizes | What it shows |
 |---|---|---|
-| Today | banner | Time, greeting, date, ISO week, current weather and a daily quote; click the quote for another |
+| Today | banner | Time, greeting, date, ISO week, current weather and a daily quote from the built-in set, Hitokoto or your own; click the quote for another |
 | To-do | `l` `m` `t` | Open items first, completed items collapsed; unfinished items from earlier days are marked as carried over |
 | Notes | `l` `t` `m` `s` | Autosaving scratch note; turn the current line into a to-do |
 | Calendar | `t` `l` `s` `m` | Month grid and the selected day's events from one or more ICS subscriptions, recurring events included |
 | Weather | `m` `s` | Current conditions, today's high and low, air quality and the next hours |
 | Clock | `m` `s` | Time, greeting, date and year progress |
-| Quote | `m` `w` `s` | A daily quote; click for another. Your own quotes are shared with the Today banner |
+| Quote | `m` `w` `s` | A daily quote; click for another. The source (built-in, Hitokoto or your own) is shared with the Today banner |
 | Countdown | `m` `s` `t` | Days until the weekend, month end, year end and your own dates; `12-25` without a year repeats yearly |
 | World clock | `m` `s` `w` `t` | Time in several IANA zones with the offset and day difference from local |
 | Focus | `m` `s` | Pomodoro timer that keeps running across boards and panels, notifies when done and counts today's sessions |
@@ -43,6 +43,7 @@ Choose **Edit** to drag cards, change sizes, remove cards, open a widget's setti
 Data stays on your machine, in the Harness profile storage (`~/.dsh/storages/dsh_desk.json`). Data from the earlier `dsh-bento` version (`dsh_bento.json`) is copied over on first start; the old file is left in place. The Host makes the only network requests and caches the responses:
 
 - Weather and city search: [Open-Meteo](https://open-meteo.com) (no key, data under CC BY 4.0), only once you set a city
+- Quotes: [Hitokoto](https://hitokoto.cn) (Chinese), only when you choose it as the quote source
 - Calendars and feeds: the ICS and RSS / Atom addresses you add
 - Markets: Tencent quotes (`qt.gtimg.cn`) for stocks, [open.er-api.com](https://open.er-api.com) for exchange rates (updated daily), [CoinGecko](https://www.coingecko.com) for crypto
 - GitHub: the local `gh` CLI with its existing sign-in

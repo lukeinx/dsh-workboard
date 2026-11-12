@@ -13,6 +13,7 @@ import {createMarket, parseSymbol} from '../lib/market.js';
 import {createTrending, parseGithubTrending, parseZhihuHeat} from '../lib/trending.js';
 import {createFetcher} from '../lib/http.js';
 import {createUsage, zstdFrames} from '../lib/usage.js';
+import {createQuotes, parseHitokoto} from '../lib/quote.js';
 
 const routes = new Map();
 const tools = new Map();
@@ -350,5 +351,15 @@ assert.deepEqual(trendCalls.map(c => c[1]), ['GET', 'POST']);
 assert.equal(trendCalls[0][2], 'https://weibo.com/');
 await assert.rejects(trendHandle({source: 'hn'}), /503/);
 await assert.rejects(trendHandle({source: '__proto__'}), /unknown source/);
+
+assert.deepEqual(parseHitokoto({hitokoto: ' 一句 ', from: '书', from_who: '某人'}), {text: '一句', by: '某人 《书》'});
+assert.equal(parseHitokoto({hitokoto: ''}), null);
+{
+  let seq = 0;
+  const quotes = createQuotes({get: async () => ({hitokoto: `q${seq++}`, from: 'x'})});
+  assert.deepEqual((await Promise.all([quotes.get({day: 'd1', n: 1}), quotes.get({day: 'd1', n: 0})])).map(q => q.text), ['q1', 'q0']);
+  assert.equal((await quotes.get({day: 'd1', n: 1})).text, 'q1');
+  assert.equal((await quotes.get({day: 'd2', n: 0})).text, 'q2');
+}
 
 console.log('smoke ok');

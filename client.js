@@ -10,6 +10,7 @@ window.__ModuleLoader__.load({
     const SLOT = 'desk.widget';
     const POLL_MS = 5000;
     const WEATHER_MS = 10 * 60_000;
+    const QUOTE_MS = 6 * 3600_000;
     const CAL_MS = 15 * 60_000;
     const FEED_MS = 15 * 60_000;
     const AGENT_MS = 5000;
@@ -47,7 +48,8 @@ window.__ModuleLoader__.load({
       quote: '格言', countdown: '倒数日', worldclock: '世界时钟', focus: '专注', links: '快捷链接', progress: '时间进度',
       d_quote: '每日一句，点一下换一条，可换成自己的句子', d_countdown: '距周末、月底、年底和你设定的日子还有几天', d_worldclock: '多个时区的当前时间',
       d_focus: '番茄钟，结束时发系统通知', d_links: '常用网址一键打开', d_progress: '今天、本周、本月、今年已过去多少',
-      f_quotes: '自定义格言（每行一条：句子 — 作者；留空用内置）',
+      f_quoteSource: '格言来源', qs_builtin: '内置', qs_hitokoto: '一言（hitokoto.cn）', qs_custom: '自定义',
+      f_quotes: '自定义格言（来源为「自定义」时使用，每行一条：句子 — 作者）',
       f_events: '日子（每行一个，如 2026-12-25 圣诞节；只写 12-25 则每年重复）', f_builtinCountdown: '显示周末、月底、年底',
       weekend: '周末', monthEnd: '月底', yearEnd: '年底', dayUnit: '天', dayUnits: '天', isToday: '今天', addEvents: '添加日子',
       f_zones: '时区（每行一个：IANA 时区 名称）', tomorrowShort: '明天', yesterdayShort: '昨天', hoursDiff: '{n} 小时', sameTime: '同本地',
@@ -115,7 +117,8 @@ window.__ModuleLoader__.load({
       quote: 'Quote', countdown: 'Countdown', worldclock: 'World clock', focus: 'Focus', links: 'Links', progress: 'Time progress',
       d_quote: 'A daily quote; click for another, or use your own', d_countdown: 'Days until the weekend, month end, year end and your own dates', d_worldclock: 'Current time in several time zones',
       d_focus: 'Pomodoro timer with a system notification when it ends', d_links: 'Open the sites you use most', d_progress: 'How much of today, this week, month and year has passed',
-      f_quotes: 'Your own quotes, one per line: text — author (empty uses the built-in set)',
+      f_quoteSource: 'Quote source', qs_builtin: 'Built-in', qs_hitokoto: 'Hitokoto (hitokoto.cn, Chinese)', qs_custom: 'Your own',
+      f_quotes: 'Your own quotes, used when the source is Your own; one per line: text — author',
       f_events: 'Dates, one per line, e.g. 2026-12-25 Christmas; 12-25 alone repeats every year', f_builtinCountdown: 'Show weekend, month end and year end',
       weekend: 'Weekend', monthEnd: 'Month end', yearEnd: 'Year end', dayUnit: 'day', dayUnits: 'days', isToday: 'Today', addEvents: 'Add dates',
       f_zones: 'Time zones, one per line: IANA zone and a name', tomorrowShort: 'Tomorrow', yesterdayShort: 'Yesterday', hoursDiff: '{n}h', sameTime: 'Same as local',
@@ -710,9 +713,12 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           {key: 'unit', type: 'select', scope: 'global', default: 'c', label: () => t('f_unit'), options: [{value: 'c', label: () => t('celsius')}, {value: 'f', label: () => t('fahrenheit')}]},
         ];
 
+        // 未选来源时沿用旧行为：填了自定义格言就用自定义。
+        const QUOTE_SOURCES = ['builtin', 'hitokoto', 'custom'];
+        const quoteSource = prefs => (QUOTE_SOURCES.includes(prefs.quoteSource) ? prefs.quoteSource : String(prefs.quotes ?? '').trim() ? 'custom' : 'builtin');
         // 自定义格言每行「句子 — 作者」，作者可省略；为空时用内置一组。
         const quoteAt = (prefs, index) => {
-          const own = String(prefs.quotes ?? '').split('\n').map(s => s.trim()).filter(Boolean).map(line => {
+          const own = quoteSource(prefs) !== 'custom' ? [] : String(prefs.quotes ?? '').split('\n').map(s => s.trim()).filter(Boolean).map(line => {
             const m = line.match(/^(.*\S)\s+(?:——|—|--|–)\s*(.+)$/);
             return m ? {text: m[1], by: m[2]} : {text: line, by: ''};
           });
@@ -721,7 +727,22 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           const zhQuote = t('lang').startsWith('zh');
           return {text: zhQuote ? q.zh : q.en, by: zhQuote ? q.by.zh : q.by.en};
         };
-        const QUOTE_FIELD = {key: 'quotes', type: 'textarea', scope: 'global', label: () => t('f_quotes')};
+        // 一言取不到时退回内置；加载中保留上一条，避免先闪内置再跳。
+        function useQuote(prefs, now, index, n) {
+          const online = quoteSource(prefs) === 'hitokoto';
+          const day = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+          const res = useRemote('quote.get', online ? {day, n} : null, QUOTE_MS);
+          const last = useRef(null);
+          if (!online) return quoteAt(prefs, index);
+          if (res.value) last.current = res.value;
+          if (res.value || (res.pending && last.current)) return res.value ?? last.current;
+          return res.pending ? {text: '', by: ''} : quoteAt(prefs, index);
+        }
+        const QUOTE_FIELDS = [
+          {key: 'quoteSource', type: 'select', scope: 'global', default: () => quoteSource(prefsStore.getSnapshot().values), label: () => t('f_quoteSource'),
+            options: QUOTE_SOURCES.map(v => ({value: v, label: () => t(`qs_${v}`)}))},
+          {key: 'quotes', type: 'textarea', scope: 'global', label: () => t('f_quotes')},
+        ];
 
         function Today({config, openSettings}) {
           useLocale();
@@ -732,7 +753,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           const showQuote = config?.showQuote !== false;
           const wx = useWeather(showWeather ? prefs : {});
           const lang = t('lang');
-          const q = quoteAt(prefs, dayOfYear(now) + offset);
+          const q = useQuote(prefs, now, dayOfYear(now) + offset, offset * 2);
           const w = wx.value;
           let weather = null;
           if (showWeather && !wx.loc) weather = h('button', {type: 'button', className: 'bnt-btn bnt-cta', onClick: openSettings}, t('setCity'));
@@ -764,7 +785,7 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             ...LOCATION_FIELDS,
             {key: 'showWeather', type: 'toggle', default: true, label: () => t('f_showWeather')},
             {key: 'showQuote', type: 'toggle', default: true, label: () => t('f_showQuote')},
-            QUOTE_FIELD,
+            ...QUOTE_FIELDS,
           ],
         };
 
@@ -986,12 +1007,12 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
           const now = useNow();
           const prefs = usePrefs();
           const [offset, setOffset] = useState(0);
-          const q = quoteAt(prefs, dayOfYear(now) + offset + 1);
+          const q = useQuote(prefs, now, dayOfYear(now) + offset + 1, offset * 2 + 1);
           return h('button', {type: 'button', className: 'bnt-btn bnt-qcard', 'data-size': size, title: t('nextQuote'), onClick: () => setOffset(o => o + 1)},
             h('span', {className: 'bnt-qtext'}, q.text),
             q.by ? h('cite', null, `— ${q.by}`) : null);
         }
-        Quote.desk = {apiVersion: 1, sizes: ['m', 'w', 's'], title: false, description: () => t('d_quote'), settings: [QUOTE_FIELD]};
+        Quote.desk = {apiVersion: 1, sizes: ['m', 'w', 's'], title: false, description: () => t('d_quote'), settings: QUOTE_FIELDS};
 
         const DATE_LINE = /^(?:(\d{4})[-/.])?(\d{1,2})[-/.](\d{1,2})(?:\s+(.*))?$/;
         function countdownItems(config, now) {

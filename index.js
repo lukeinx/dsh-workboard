@@ -11,6 +11,7 @@ import {createSystem} from './lib/system.js';
 import {createPhotos} from './lib/photo.js';
 import {createMarket} from './lib/market.js';
 import {createTrending} from './lib/trending.js';
+import {createQuotes} from './lib/quote.js';
 import {randomUUID} from 'node:crypto';
 import {homedir, tmpdir} from 'node:os';
 import {stat} from 'node:fs/promises';
@@ -532,7 +533,9 @@ export const dshHome = () => process.env.DSH_HOME || join(homedir(), '.dsh');
 export function createHandlers(store, fetcher = createFetcher(), agents = null, launch = null, services = {}) {
   const calendar = createCalendar(fetcher);
   const feeds = createFeeds(fetcher);
+  const quotes = createQuotes(fetcher);
   return {
+    'dsh-desk/quote.get': p => quotes.get({day: p?.day, n: p?.n}),
     'dsh-desk/feed.get': p => feeds({urls: p?.urls, limit: p?.limit}),
     'dsh-desk/agent.overview': () => (agents ? agents.overview() : {sessions: null, schedules: null}),
     'dsh-desk/agent.start': async p => {
