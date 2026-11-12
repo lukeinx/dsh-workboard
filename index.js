@@ -1,5 +1,5 @@
 // Host 端：/api/dsh-desk/* 路由、看板 / 待办 / 速记存储、天气与日历代理、Agent 工具。
-import {createFetcher} from './lib/http.js';
+import {FetchError, createFetcher} from './lib/http.js';
 import {getWeather, searchPlaces} from './lib/weather.js';
 import {parseICS, expandEvents} from './lib/ics.js';
 import {parseFeed} from './lib/feed.js';
@@ -12,8 +12,10 @@ import {createPhotos} from './lib/photo.js';
 import {createMarket} from './lib/market.js';
 import {createTrending} from './lib/trending.js';
 import {createQuotes} from './lib/quote.js';
+import {MAX_WIDGETS, WidgetError, allowedUrl, checkHtml, cleanData, cleanSpec, widgetId} from './lib/widgets.js';
 import {createHash, randomUUID} from 'node:crypto';
 import {homedir, tmpdir} from 'node:os';
+import {readFileSync} from 'node:fs';
 import {stat} from 'node:fs/promises';
 import {isAbsolute, join} from 'node:path';
 
@@ -31,7 +33,7 @@ const MAX_NOTE = 200_000;
 
 // storageDomain 要求 zod schema；插件不带 zod 依赖，用只实现 safeParse/parse 的透传对象，校验在本文件里做。
 const passthrough = {safeParse: data => ({success: true, data}), parse: data => data};
-const TABLES = ['boards', 'todos', 'notes', 'prefs', 'habits', 'inbox', 'reads'];
+const TABLES = ['boards', 'todos', 'notes', 'prefs', 'habits', 'inbox', 'reads', 'widgets'];
 const ICS_TTL = 15 * 60_000;
 const ICS_MAX_BYTES = 5_000_000;
 const FEED_TTL = 15 * 60_000;
@@ -47,6 +49,10 @@ const READ_KEEP_MS = 90 * 86400_000;
 const MAX_READS = 5000;
 const MAX_READ_BATCH = 200;
 const MAX_PROMPT = 20_000;
+const WIDGET_FETCH_TTL = 30_000;
+const MAX_WIDGET_ERROR = 2000;
+// 自定义 widget 在 desk.widget slot 里的 id 前缀；与 client.js 一致。
+export const CUSTOM_PREFIX = 'custom.';
 
 export const BUILTIN_WIDGETS = [
   'desk.today', 'desk.todo', 'desk.note', 'desk.calendar', 'desk.weather', 'desk.clock',
@@ -292,6 +298,57 @@ export function createStore(ctx) {
       }
       if (read && list.length) await pruneReads(now);
       return list.length;
+    },
+
+    listWidgets: () => [...table('widgets').entries()].map(([, v]) => v).sort((a, b) => a.createdAt - b.createdAt),
+    getWidget(id) {
+      const widget = table('widgets').get(widgetId(id));
+      if (!widget) throw new UserError('not-found', `no widget with id ${id}`);
+      return widget;
+    },
+    async createWidget(input) {
+      if (this.listWidgets().length >= MAX_WIDGETS) throw new UserError('too-many', `at most ${MAX_WIDGETS} widgets`);
+      const id = input?.id ? widgetId(input.id) : `w${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
+      if (table('widgets').get(id)) throw new UserError('exists', `widget ${id} already exists`);
+      const now = Date.now();
+      const withData = input?.data !== undefined;
+      const widget = {id, ...cleanSpec(input), data: cleanData(input?.data), rev: 1, dataRev: withData ? 1 : 0, dataAt: withData ? now : 0, lastError: null, createdAt: now, updatedAt: now};
+      await table('widgets').put(id, widget);
+      return widget;
+    },
+    async updateWidget(id, input) {
+      const base = this.getWidget(id);
+      const now = Date.now();
+      const widget = {...base, ...cleanSpec(input, base), rev: base.rev + 1, lastError: null, updatedAt: now};
+      if (input?.data !== undefined) Object.assign(widget, {data: cleanData(input.data), dataRev: base.dataRev + 1, dataAt: now});
+      await table('widgets').put(widget.id, widget);
+      return widget;
+    },
+    async setWidgetData(id, data) {
+      const base = this.getWidget(id);
+      const widget = {...base, data: cleanData(data), dataRev: base.dataRev + 1, dataAt: Date.now()};
+      await table('widgets').put(widget.id, widget);
+      return widget;
+    },
+    // 只在错误变化时写入，页面反复回报同一个错误不产生写盘。
+    async reportWidget(id, message) {
+      const base = this.getWidget(id);
+      const text = message ? String(message).slice(0, MAX_WIDGET_ERROR) : '';
+      if ((base.lastError?.message ?? '') === text) return base;
+      const widget = {...base, lastError: text ? {message: text, at: Date.now(), rev: base.rev} : null};
+      await table('widgets').put(widget.id, widget);
+      return widget;
+    },
+    async removeWidget(id) {
+      const widget = this.getWidget(id);
+      await table('widgets').delete(widget.id);
+      const slotId = `${CUSTOM_PREFIX}${widget.id}`;
+      for (const b of this.listBoards()) {
+        const board = this.getBoard(b.id);
+        if (!board.widgets.some(w => w.id === slotId) && !(board.known ?? []).includes(slotId)) continue;
+        await this.putBoard({...board, widgets: board.widgets.filter(w => w.id !== slotId), known: (board.known ?? []).filter(k => k !== slotId)});
+      }
+      return true;
     },
 
     getNote: () => table('notes').get(NOTE_KEY) ?? {text: '', updatedAt: 0},
@@ -610,6 +667,28 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       if (!services.github) throw new UserError('unavailable', 'GitHub is not available');
       return services.github({fresh: p?.fresh === true});
     },
+    'dsh-desk/widget.list': () => store.listWidgets().map(widgetSummary),
+    'dsh-desk/widget.get': p => store.getWidget(p?.id),
+    'dsh-desk/widget.put': async p => {
+      if (p?.html !== undefined) {
+        const {errors} = checkHtml(String(p.html));
+        if (errors.length) throw new UserError('bad-html', errors.join('\n'));
+      }
+      return widgetSummary(await store.updateWidget(p?.id, {title: p?.title, html: p?.html}));
+    },
+    'dsh-desk/widget.remove': p => store.removeWidget(p?.id),
+    'dsh-desk/widget.save': async p => {
+      const widget = await store.setWidgetData(p?.id, p?.data);
+      return {dataRev: widget.dataRev, dataAt: widget.dataAt};
+    },
+    'dsh-desk/widget.report': async p => { await store.reportWidget(p?.id, p?.error); return true; },
+    'dsh-desk/widget.fetch': async p => {
+      const widget = store.getWidget(p?.id);
+      const url = allowedUrl(p?.url, widget.fetch);
+      const as = ['json', 'text', 'dataUrl'].includes(p?.as) ? p.as : 'json';
+      const value = await fetcher.get(url, {ttlMs: p?.fresh === true ? 0 : WIDGET_FETCH_TTL, type: as === 'dataUrl' ? 'bytes' : as, maxBytes: as === 'dataUrl' ? 1_500_000 : 2_000_000});
+      return as === 'dataUrl' ? `data:${value.type};base64,${value.base64}` : value;
+    },
     'dsh-desk/inbox.list': () => store.listInbox(),
     'dsh-desk/inbox.add': p => store.addInbox(p?.text),
     'dsh-desk/inbox.remove': p => store.removeInbox(p?.id),
@@ -651,11 +730,35 @@ export async function handleRequest(request, handlers, store) {
     await store.ready;
     return reply(rpcId, ok(await handler(message.payload)));
   } catch (error) {
-    return reply(rpcId, fail(error instanceof UserError ? error.code : 'failed', String(error?.message || error)));
+    const known = error instanceof UserError || error instanceof WidgetError || error instanceof FetchError;
+    return reply(rpcId, fail(known ? error.code : 'failed', String(error?.message || error)));
   }
 }
 
 const textResult = value => [{type: 'text', text: typeof value === 'string' ? value : JSON.stringify(value, null, 2)}];
+const iso = ms => (ms ? new Date(ms).toISOString() : null);
+
+export function widgetSummary(w) {
+  return {
+    id: w.id, title: w.title, description: w.description, sizes: w.sizes, defaultSize: w.defaultSize, header: w.header,
+    settings: w.settings, fetch: w.fetch, rev: w.rev, dataRev: w.dataRev, updatedAt: w.updatedAt, lastError: w.lastError,
+  };
+}
+
+const SETTING_ITEM = {
+  type: 'object',
+  properties: {
+    key: {type: 'string'},
+    type: {type: 'string', enum: ['text', 'textarea', 'select', 'toggle']},
+    label: {type: 'string'},
+    default: {description: 'String, or boolean for toggle.'},
+    placeholder: {type: 'string'},
+    options: {type: 'array', description: 'For select.', items: {type: 'object', properties: {value: {type: 'string'}, label: {type: 'string'}}, required: ['value']}},
+  },
+  required: ['key', 'type', 'label'],
+};
+
+const toolWidget = w => ({...widgetSummary(w), updatedAt: iso(w.updatedAt), lastError: w.lastError ? {...w.lastError, at: iso(w.lastError.at)} : null});
 
 export function createTools(store) {
   return [
@@ -733,8 +836,68 @@ export function createTools(store) {
         throw new Error(`unknown action ${action}`);
       },
     },
+    {
+      name: 'desk_widget',
+      description: 'Create and change custom widgets on the user\'s Desk dashboard: sandboxed HTML cards shown on their boards. Load the `desk-widget` skill before writing or changing `html`. `list` returns each widget with its last runtime error; `get` returns the full definition and saved data; `create` needs `title` and `html`; `update` changes only the fields given for `id`; `set_data` replaces the saved data; `remove` deletes the widget from the library and every board.',
+      parameters: {
+        type: 'object',
+        properties: {
+          action: {type: 'string', enum: ['list', 'get', 'create', 'update', 'set_data', 'remove']},
+          id: {type: 'string', description: 'Widget id; required except for list. Optional for create: 2-40 lowercase letters, digits or hyphens.'},
+          title: {type: 'string', description: 'Card title, at most 40 characters, in the user\'s language.'},
+          description: {type: 'string', description: 'One line shown in the widget gallery.'},
+          html: {type: 'string', description: 'Body markup with inline <style> and <script>.'},
+          sizes: {type: 'array', items: {type: 'string', enum: ['bar', 's', 'm', 't', 'l', 'w']}, description: 'Allowed card sizes; defaults to ["m"].'},
+          defaultSize: {type: 'string', enum: ['bar', 's', 'm', 't', 'l', 'w'], description: 'Size when added; defaults to the first of sizes.'},
+          header: {type: 'boolean', description: 'false hides the card title bar.'},
+          settings: {type: 'array', items: SETTING_ITEM, description: 'Fields the user edits in the card settings dialog; values arrive as desk.config.'},
+          fetch: {type: 'array', items: {type: 'string'}, description: 'http(s) URL prefixes that desk.fetch may request.'},
+          data: {type: 'object', additionalProperties: true, description: 'Saved data, arriving as desk.data; for create, update and set_data.'},
+        },
+        required: ['action'],
+        additionalProperties: false,
+      },
+      output: {schema: {type: 'object'}, render: (_args, value) => textResult(value)},
+      async execute(args) {
+        await store.ready;
+        const {action, id} = args ?? {};
+        const check = html => {
+          if (html === undefined) return [];
+          const {errors, warnings} = checkHtml(String(html));
+          if (errors.length) throw new Error(`html not saved:\n${errors.join('\n')}`);
+          return warnings;
+        };
+        if (action === 'list') return {widgets: store.listWidgets().map(w => ({id: w.id, title: w.title, description: w.description, updatedAt: iso(w.updatedAt), lastError: w.lastError?.message ?? null}))};
+        if (action === 'get') {
+          const w = store.getWidget(id);
+          return {...toolWidget(w), html: w.html, data: w.data, dataAt: iso(w.dataAt)};
+        }
+        if (action === 'create') {
+          const warnings = check(args.html ?? '');
+          return {created: toolWidget(await store.createWidget(args)), warnings};
+        }
+        if (action === 'update') {
+          const warnings = check(args.html);
+          const {action: _a, id: _i, ...patch} = args;
+          return {updated: toolWidget(await store.updateWidget(id, patch)), warnings};
+        }
+        if (action === 'set_data') {
+          if (args.data === undefined) throw new Error('data is required');
+          const w = await store.setWidgetData(id, args.data);
+          return {id: w.id, dataRev: w.dataRev, dataAt: iso(w.dataAt)};
+        }
+        if (action === 'remove') return {removed: await store.removeWidget(id)};
+        throw new Error(`unknown action ${action}`);
+      },
+    },
   ];
 }
+
+const SKILL = {
+  name: 'desk-widget',
+  description: 'Build, change or fix a custom widget on the user\'s Desk dashboard in DeepSeek Harness with the desk_widget tool: a sandboxed HTML card that can show web API data, data the agent writes, or a small interactive tool. Use when the user asks to add, make, generate, change or fix a Desk (工作台) widget or card.',
+  source: 'custom',
+};
 
 export function apply(ctx) {
   const store = createStore(ctx);
@@ -766,4 +929,10 @@ export function apply(ctx) {
 
   const tools = ctx.get('tools');
   if (tools) for (const tool of createTools(store)) ctx.effect(() => tools.register(tool), `dsh-desk: ${tool.name} tool`);
+
+  const skills = ctx.get?.('skills');
+  if (typeof skills?.register === 'function') {
+    const content = readFileSync(new URL('./skills/desk-widget.md', import.meta.url), 'utf8');
+    ctx.effect(() => skills.register({...SKILL, content}), 'dsh-desk: desk-widget skill');
+  }
 }

@@ -14,12 +14,15 @@ import {createTrending, parseGithubTrending, parseZhihuHeat} from '../lib/trendi
 import {createFetcher} from '../lib/http.js';
 import {createUsage, zstdFrames} from '../lib/usage.js';
 import {createQuotes, parseHitokoto} from '../lib/quote.js';
+import {checkHtml, allowedUrl, cleanSpec} from '../lib/widgets.js';
 
 const routes = new Map();
 const tools = new Map();
+const skills = new Map();
 const ctx = {
   effect: fn => fn(),
-  get: key => (key === 'tools' ? {register: t => { tools.set(t.name, t); return () => {}; }} : undefined),
+  get: key => (key === 'tools' ? {register: t => { tools.set(t.name, t); return () => {}; }}
+    : key === 'skills' ? {register: s => { skills.set(s.name, s); return () => {}; }} : undefined),
   connection: {fetch: {register: r => { routes.set(r.path, r); return () => {}; }}},
 };
 apply(ctx);
@@ -372,6 +375,64 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   assert.deepEqual((await Promise.all([quotes.get({day: 'd1', n: 1}), quotes.get({day: 'd1', n: 0})])).map(q => q.text), ['q1', 'q0']);
   assert.equal((await quotes.get({day: 'd1', n: 1})).text, 'q1');
   assert.equal((await quotes.get({day: 'd2', n: 0})).text, 'q2');
+}
+
+// 自定义 widget：脚本语法检查、增改删、数据、错误回报、联网白名单，删除时清理看板。
+{
+  assert.ok(skills.get('desk-widget')?.content.includes('window.desk'));
+  assert.deepEqual(checkHtml('<div></div><script>const a = 1;</script>'), {errors: [], warnings: []});
+  assert.match(checkHtml('<p>x</p>\n<script>\nconst a = ;\n</script>').errors[0], /^line 3: SyntaxError/);
+  assert.match(checkHtml('<script src="https://cdn.x/y.js"></script>').errors[0], /external scripts/);
+  assert.equal(checkHtml('<script type="application/json">{not js</script>').errors.length, 0);
+  assert.equal(checkHtml('<img src="https://x/y.png"><script>fetch("/a")</script>').warnings.length, 2);
+  assert.equal(checkHtml('<script>desk.fetch("https://x")</script>').warnings.length, 0);
+  assert.throws(() => cleanSpec({title: 'x', html: '<b></b>', sizes: ['huge']}), /sizes/);
+  assert.equal(cleanSpec({title: 't', html: 'h', sizes: ['l', 'm'], defaultSize: 's'}).defaultSize, 'l');
+  assert.equal(allowedUrl('https://api.github.com/repos/a/b', ['https://api.github.com/repos/']), 'https://api.github.com/repos/a/b');
+  assert.throws(() => allowedUrl('https://api.github.com.evil.io/x', ['https://api.github.com/']), /not under/);
+
+  const tool = tools.get('desk_widget');
+  await assert.rejects(tool.execute({action: 'create', title: 'Bad', html: '<script>if (</script>'}), /html not saved/);
+  const {created, warnings} = await tool.execute({action: 'create', id: 'stars', title: '  Stars  ', html: '<b id=n></b><script>n.textContent = desk.config.repo</script>',
+    sizes: ['s', 'm'], settings: [{key: 'repo', type: 'text', label: 'Repo', default: 'a/b'}], fetch: ['https://api.example.com/']});
+  assert.deepEqual(warnings, []);
+  assert.equal(created.title, 'Stars');
+  assert.equal(created.rev, 1);
+  await assert.rejects(tool.execute({action: 'create', id: 'stars', title: 'x', html: 'x'}), /already exists/);
+  const listed = await value('widget.list');
+  assert.deepEqual(listed.map(w => [w.id, w.defaultSize, w.html]), [['stars', 's', undefined]]);
+
+  await value('widget.report', {id: 'stars', error: 'line 1: boom'});
+  assert.equal((await tool.execute({action: 'list'})).widgets[0].lastError, 'line 1: boom');
+  const updated = (await tool.execute({action: 'update', id: 'stars', sizes: ['m']})).updated;
+  assert.equal(updated.rev, 2);
+  assert.equal(updated.lastError, null);
+  assert.deepEqual(updated.settings.map(f => f.key), ['repo']);
+
+  assert.equal((await tool.execute({action: 'set_data', id: 'stars', data: {n: 3}})).dataRev, 1);
+  assert.equal((await value('widget.save', {id: 'stars', data: {n: 4}})).dataRev, 2);
+  assert.deepEqual((await tool.execute({action: 'get', id: 'stars'})).data, {n: 4});
+  assert.equal((await call('widget.save', {id: 'stars', data: {big: 'x'.repeat(210_000)}})).error.code, 'dsh-desk/too-large');
+
+  assert.equal((await call('widget.fetch', {id: 'stars', url: 'https://other.example.com/x'})).error.code, 'dsh-desk/not-allowed');
+  assert.equal((await call('widget.put', {id: 'stars', html: '<script>}</script>'})).error.code, 'dsh-desk/bad-html');
+  assert.equal((await value('widget.put', {id: 'stars', title: 'Repo stars', html: '<i></i>'})).title, 'Repo stars');
+
+  const work = await value('board.get', {id: 'work'});
+  await value('board.put', {board: {...work, widgets: [...work.widgets, {id: 'custom.stars', size: 'm'}], known: [...work.known, 'custom.stars']}});
+  assert.equal((await tool.execute({action: 'remove', id: 'stars'})).removed, true);
+  const after = await value('board.get', {id: 'work'});
+  assert.ok(!after.widgets.some(w => w.id === 'custom.stars') && !after.known.includes('custom.stars'));
+  assert.equal((await call('widget.get', {id: 'stars'})).error.code, 'dsh-desk/not-found');
+  assert.equal((await call('widget.get', {id: '../x'})).error.code, 'dsh-desk/bad-widget');
+}
+{
+  const widgetFetcher = createFetcher({fetchImpl: async url => (url.endsWith('.png') ? new Response(new Uint8Array([1, 2, 3]), {headers: {'content-type': 'image/png'}}) : Response.json({ok: url}))});
+  const store = createStore({});
+  const handle = createHandlers(store, widgetFetcher);
+  await store.createWidget({id: 'img', title: 'I', html: 'x', fetch: ['https://cdn.example.com/']});
+  assert.deepEqual(await handle['dsh-desk/widget.fetch']({id: 'img', url: 'https://cdn.example.com/a.json'}), {ok: 'https://cdn.example.com/a.json'});
+  assert.equal(await handle['dsh-desk/widget.fetch']({id: 'img', url: 'https://cdn.example.com/a.png', as: 'dataUrl'}), 'data:image/png;base64,AQID');
 }
 
 console.log('smoke ok');
