@@ -196,7 +196,7 @@ window.__ModuleLoader__.load({
 
     const CSS = `
 .bnt-page{height:100%;overflow:auto;background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font-size:13px}
-.bnt-inner{max-width:1120px;margin:0 auto;padding:20px 24px 32px;box-sizing:border-box}
+.bnt-inner{max-width:1120px;margin:0 auto;padding:0 24px 32px;box-sizing:border-box}
 .bnt-error{color:var(--dsw-alias-state-error-primary);font-size:12px;margin-bottom:8px}
 .bnt-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:80px;grid-auto-flow:row dense;gap:16px}
 .bnt-card{grid-column:span var(--c);grid-row:span var(--r);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:12px;padding:16px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;box-sizing:border-box}
@@ -249,7 +249,7 @@ window.__ModuleLoader__.load({
 .bnt-notefoot{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--dsw-alias-label-secondary);margin-top:8px;min-height:18px}
 .bnt-notefoot button{color:var(--dsw-alias-brand-primary)}
 
-.bnt-head{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.bnt-head{display:flex;align-items:center;gap:8px;padding:20px 0 16px;flex-wrap:wrap;position:sticky;top:0;z-index:5;background:var(--dsw-alias-bg-base)}
 .bnt-tabs{display:flex;align-items:center;gap:2px;flex-wrap:wrap;min-width:0}
 .bnt-tab{height:30px;padding:0 12px;border-radius:8px;color:var(--dsw-alias-label-secondary);font-weight:500;white-space:nowrap}
 .bnt-tab:hover{color:var(--dsw-alias-label-primary)}
@@ -1972,6 +1972,12 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
             call('board.adopt', {id: board.id, known: fresh.map(w => w.id), place}).then(b => { if (alive) setBoard(b); }, fail);
             return () => { alive = false; };
           }, [board, list]);
+          useEffect(() => {
+            if (!editing || modal || renaming) return undefined;
+            const onKey = e => { if (e.key === 'Escape' && !e.isComposing) { setEditing(false); setConfirmDelete(false); } };
+            window.addEventListener('keydown', onKey);
+            return () => window.removeEventListener('keydown', onKey);
+          }, [editing, modal, renaming]);
 
           const boardTitle = b => b.title || (b.id === 'work' ? t('work') : t('untitled'));
           const switchTo = id => {
