@@ -702,6 +702,11 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-card>header .wb-hact{opacity:0;width:24px;height:24px;margin:-4px -6px -4px 0;border-radius:6px;display:grid;place-items:center;color:var(--dsw-alias-label-secondary);flex:none}
 .wb-card:hover>header .wb-hact,.wb-card>header .wb-hact:focus-visible{opacity:1}
 .wb-card>header .wb-hact:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-brand-primary)}
+.wb-card>.wb-hact{position:absolute;top:8px;right:8px;z-index:2;opacity:0;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);color:var(--dsw-alias-label-secondary)}
+.wb-card[data-banner]>.wb-hact{top:50%;right:0;transform:translateY(-50%)}
+.wb-card:hover>.wb-hact,.wb-card>.wb-hact:focus-visible{opacity:1}
+.wb-card>.wb-hact:hover{color:var(--dsw-alias-brand-primary)}
+@media (hover:none){.wb-card>header .wb-hact,.wb-card>.wb-hact{opacity:.7}}
 .wb-gen{border-style:dashed;flex:none}
 .wb-emptyacts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
 .wb-gen .wb-gname svg{color:var(--dsw-alias-brand-primary)}
@@ -3592,7 +3597,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
               w.custom ? h('button', {type: 'button', className: 'wb-btn', 'aria-label': t('cw_source'), title: t('cw_source'), onClick: () => setModal({type: 'source', id: cell.id})}, h(Icon.code)) : null,
               w.settings.length ? h('button', {type: 'button', className: 'wb-btn', 'aria-label': t('settings'), title: t('settings'), onClick: openSettings}, h(Icon.gear)) : null,
               h('button', {type: 'button', className: 'wb-btn', 'aria-label': t('remove'), title: t('remove'), onClick: () => removeCell(cell.id)}, h(Icon.x))) : null,
+            !editing && w.settings.length && !(w.title && !w.banner) ? h('button', {type: 'button', className: 'wb-btn wb-hact', 'aria-label': t('settings'), title: t('settings'), onClick: openSettings}, h(Icon.gear)) : null,
             w.title && !w.banner ? h('header', null, h('h3', null, w.label()),
+              !editing && w.settings.length ? h('button', {type: 'button', className: 'wb-btn wb-hact', 'aria-label': t('settings'), title: t('settings'), onClick: openSettings}, h(Icon.gear)) : null,
               w.custom && !editing ? h('button', {type: 'button', className: 'wb-btn wb-hact', 'aria-label': t('cw_edit'), title: t('cw_edit'), onClick: () => setModal({type: 'agent', id: cell.id})}, h(Icon.sparkle)) : null) : null,
             h('div', {className: 'wb-body'}, renderSlot(SLOT, {size, config: cell.config ?? {}, editing, openSettings}, {only: cell.id})));
           };
