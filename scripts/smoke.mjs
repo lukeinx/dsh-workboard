@@ -4,7 +4,9 @@ import {mkdtempSync, mkdirSync, writeFileSync, rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {zstdCompressSync} from 'node:zlib';
-import {apply, createStore, createHandlers, createAgentWatch, createLauncher, createRunning, migrateLegacy} from '../index.js';
+import {execFileSync} from 'node:child_process';
+import {apply, createStore, createHandlers, createAgentWatch, createLauncher, createRunning, createGit, createGithub, migrateLegacy} from '../index.js';
+import {createRunner} from '../lib/exec.js';
 import {createUsage, zstdFrames} from '../lib/usage.js';
 
 const routes = new Map();
@@ -230,5 +232,46 @@ assert.deepEqual(running.jobs.map(j => [j.id, j.sessionId, j.status]), [['bash-1
 assert.deepEqual(await runHandlers['dsh-desk/running.kill']({id: 'bash-1', sessionId: 's1'}), {result: 'requested'});
 assert.deepEqual(killedJobs, [['bash-1', 's1', 'stopped from Desk']]);
 assert.deepEqual(await createHandlers(createStore({}), feedFetcher, null, null, {running: createRunning({get: () => undefined})})['dsh-desk/running.get'](), {goals: null, jobs: null});
+
+// Git：真实仓库，领先 1 个提交、一处改动、一个未跟踪文件、一个上游已删除的分支；工作区里的非仓库跳过，设置里的非仓库报错。
+const gitRoot = mkdtempSync(join(tmpdir(), 'desk-git-'));
+const g = (cwd, ...args) => execFileSync('git', args, {cwd, stdio: 'pipe', env: {...process.env, GIT_AUTHOR_NAME: 't', GIT_AUTHOR_EMAIL: 't@t', GIT_COMMITTER_NAME: 't', GIT_COMMITTER_EMAIL: 't@t'}});
+mkdirSync(join(gitRoot, 'remote.git'));
+g(join(gitRoot, 'remote.git'), 'init', '--bare', '-q', '-b', 'main');
+g(gitRoot, 'clone', '-q', join(gitRoot, 'remote.git'), 'work');
+const gitWork = join(gitRoot, 'work');
+writeFileSync(join(gitWork, 'a.txt'), '1');
+g(gitWork, 'add', '.'); g(gitWork, 'commit', '-qm', 'one'); g(gitWork, 'push', '-q', 'origin', 'main');
+g(gitWork, 'checkout', '-qb', 'feature'); g(gitWork, 'push', '-qu', 'origin', 'feature'); g(gitWork, 'checkout', '-q', 'main');
+g(gitWork, 'push', '-q', 'origin', '--delete', 'feature'); g(gitWork, 'fetch', '-q', '--prune');
+writeFileSync(join(gitWork, 'a.txt'), '2'); g(gitWork, 'commit', '-qam', 'two');
+writeFileSync(join(gitWork, 'a.txt'), '3'); writeFileSync(join(gitWork, 'new.txt'), 'x');
+mkdirSync(join(gitRoot, 'plain'));
+const gitSvc = createGit({get: () => ({list: () => [{path: gitWork}, {path: join(gitRoot, 'plain')}]})}, createRunner());
+const gitHandlers = createHandlers(createStore({}), feedFetcher, null, null, {git: gitSvc});
+const repos = (await gitHandlers['dsh-desk/git.status']({})).repos;
+assert.deepEqual(repos.map(r => [r.name, r.branch, r.upstream, r.ahead, r.behind, r.changed, r.untracked, r.gone, r.lastSubject]), [['work', 'main', 'origin/main', 1, 0, 1, 1, ['feature'], 'two']]);
+const explicitRepos = (await gitHandlers['dsh-desk/git.status']({paths: `${gitWork}\n${join(gitRoot, 'plain')}`})).repos;
+assert.equal(explicitRepos.length, 2);
+assert.match(explicitRepos[1].error, /not a git repository/);
+assert.equal((await gitHandlers['dsh-desk/git.fetch']({})).errors.length, 0);
+rmSync(gitRoot, {recursive: true, force: true});
+
+// GitHub：假 gh，三类查询各一次，结果缓存；gh 不存在时给出可读错误。
+const ghCalls = [];
+const fakeGh = async (cmd, args) => {
+  ghCalls.push(args.slice(0, 3).join(' '));
+  return Buffer.from(JSON.stringify(args[2] === '--review-requested=@me' ? [{number: 7, title: 'Fix', url: 'https://github.com/o/r/pull/7', repository: {nameWithOwner: 'o/r'}, author: {login: 'amy'}, isDraft: false, updatedAt: '2026-11-12T01:00:00Z'}] : []));
+};
+const gh = createGithub(fakeGh);
+const ghValue = await createHandlers(createStore({}), feedFetcher, null, null, {github: gh})['dsh-desk/github.get']({});
+assert.deepEqual(ghValue.review.map(x => [x.repo, x.number, x.author, x.url]), [['o/r', 7, 'amy', 'https://github.com/o/r/pull/7']]);
+assert.deepEqual([ghValue.mine, ghValue.assigned], [[], []]);
+await gh({});
+assert.equal(ghCalls.length, 3);
+await gh({fresh: true});
+assert.equal(ghCalls.length, 6);
+const missing = createGithub(async () => { const e = new Error('spawn gh ENOENT'); e.code = 'not-found'; throw e; });
+await assert.rejects(missing({}), /not installed/);
 
 console.log('smoke ok');

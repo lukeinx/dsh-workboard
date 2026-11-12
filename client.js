@@ -14,6 +14,8 @@ window.__ModuleLoader__.load({
     const FEED_MS = 15 * 60_000;
     const AGENT_MS = 5000;
     const USAGE_MS = 60_000;
+    const GIT_MS = 30_000;
+    const GITHUB_MS = 5 * 60_000;
     // 尺寸档位：[列, 行]，行单位 80px；「横栏」半高，其余行数成对。
     const SIZES = {bar: [4, 1], s: [1, 2], m: [2, 2], t: [1, 4], l: [2, 4], w: [4, 2]};
 
@@ -55,7 +57,13 @@ window.__ModuleLoader__.load({
       f_showRecent: '显示最近会话', f_showSchedules: '显示定时任务',
       f_feeds: '订阅地址（每行一个 RSS / Atom）', defaultFeeds: 'https://sspai.com/feed', feedError: '{n} 个订阅加载失败', noItems: '没有内容',
       addHabit: '添加习惯', noHabits: '还没有习惯', streak: '连续 {n} 天', markDay: '{d} 打卡',
-      prompt: 'Prompt 快启', inbox: '收集箱', usage: '用量', running: '运行中',
+      prompt: 'Prompt 快启', inbox: '收集箱', usage: '用量', running: '运行中', git: 'Git 工作区', github: 'GitHub',
+      d_git: '各仓库的分支、未提交改动、未推送 / 落后提交和可清理的分支', d_github: '等我 review 的 PR、我的 PR 和指派给我的 issue，用本机 gh CLI',
+      f_repos: '仓库路径（每行一个；留空用 Harness 里的工作区）', g_changes: '{n} 处改动', g_conflicts: '{n} 处冲突', g_gone: '{n} 个可清理分支', g_clean: '干净', g_noUpstream: '无上游',
+      g_none: '没有找到 Git 仓库', g_attention: '{n} 个仓库待处理', g_allClean: '全部干净', g_fetch: '获取远端', g_fetching: '获取中…',
+      gitPrompt: '检查当前目录的 Git 仓库（{name}）：未提交改动、未推送提交、是否落后上游、已合并或上游已删除的本地分支。先汇报现状和建议，不要直接提交、推送或删除。',
+      f_showReview: '显示等我 review', f_showMine: '显示我的 PR', f_showAssigned: '显示指派给我的 issue', gh_review: '等我 review', gh_mine: '我的 PR', gh_assigned: '指派给我',
+      gh_none: '没有待处理的 PR 或 issue', gh_missing: '本机未安装 GitHub CLI（gh）', gh_login: '在终端运行 gh auth login 后重试', gh_draft: '草稿', refresh: '刷新', updated: '更新于 {t}',
       d_running: 'Agent 正在推进的目标和后台任务，可停止任务', r_goals: '目标', r_jobs: '后台任务', r_idle: '没有进行中的目标或后台任务', r_unavailable: '当前 Harness 不支持读取目标和后台任务',
       r_round: '第 {n}/{m} 轮', r_active: '进行中', r_paused: '已暂停', r_blocked: '受阻', r_complete: '已完成', r_disarmed: '等待恢复',
       r_running: '已运行 {t}', r_stopping: '正在停止', r_completed: '已完成', r_killed: '已停止', r_failed: '失败', r_kill: '停止', r_count: '{g} 个目标 · {j} 个任务',
@@ -107,7 +115,13 @@ window.__ModuleLoader__.load({
       f_showRecent: 'Show recent sessions', f_showSchedules: 'Show scheduled tasks',
       f_feeds: 'Feed URLs, one RSS or Atom feed per line', defaultFeeds: 'https://hnrss.org/frontpage', feedError: '{n} feed(s) failed to load', noItems: 'Nothing here',
       addHabit: 'Add a habit', noHabits: 'No habits yet', streak: '{n}-day streak', markDay: 'Check in for {d}',
-      prompt: 'Quick prompt', inbox: 'Inbox', usage: 'Usage', running: 'Running',
+      prompt: 'Quick prompt', inbox: 'Inbox', usage: 'Usage', running: 'Running', git: 'Git repos', github: 'GitHub',
+      d_git: 'Branch, uncommitted changes, unpushed or missing commits and branches to clean up, per repository', d_github: 'PRs awaiting your review, your PRs and issues assigned to you, through the local gh CLI',
+      f_repos: 'Repository paths, one per line (empty uses the Harness workspaces)', g_changes: '{n} changes', g_conflicts: '{n} conflicts', g_gone: '{n} stale branches', g_clean: 'Clean', g_noUpstream: 'No upstream',
+      g_none: 'No Git repositories found', g_attention: '{n} need attention', g_allClean: 'All clean', g_fetch: 'Fetch', g_fetching: 'Fetching…',
+      gitPrompt: 'Check the Git repository in the current directory ({name}): uncommitted changes, unpushed commits, whether it is behind upstream, and local branches that are merged or whose upstream is gone. Report the state and your suggestions first; do not commit, push or delete anything yet.',
+      f_showReview: 'Show review requests', f_showMine: 'Show my PRs', f_showAssigned: 'Show issues assigned to me', gh_review: 'Review requested', gh_mine: 'My PRs', gh_assigned: 'Assigned to me',
+      gh_none: 'No open PRs or issues for you', gh_missing: 'GitHub CLI (gh) is not installed on this machine', gh_login: 'Run gh auth login in a terminal, then retry', gh_draft: 'Draft', refresh: 'Refresh', updated: 'Updated {t}',
       d_running: 'Goals the agent is pursuing and background jobs, which you can stop', r_goals: 'Goals', r_jobs: 'Background jobs', r_idle: 'No active goals or background jobs', r_unavailable: 'This Harness does not expose goals or jobs',
       r_round: 'Round {n}/{m}', r_active: 'Active', r_paused: 'Paused', r_blocked: 'Blocked', r_complete: 'Complete', r_disarmed: 'Waiting to resume',
       r_running: 'Running for {t}', r_stopping: 'Stopping', r_completed: 'Completed', r_killed: 'Stopped', r_failed: 'Failed', r_kill: 'Stop', r_count: '{g} goals · {j} jobs',
@@ -398,6 +412,10 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
 .bnt-table>.bnt-th{color:var(--dsw-alias-label-secondary)}
 .bnt-table small{color:var(--dsw-alias-label-secondary);margin-left:6px}
 .bnt-foot-note{font-size:11px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bnt-rowact{display:none;flex:none;height:24px;padding:0 8px;border-radius:6px;font-size:12px;color:var(--dsw-alias-brand-primary);align-self:center}
+.bnt-rowact:hover{background:var(--dsw-alias-bg-layer-1)}
+.bnt-row:hover .bnt-rowact{display:block}
+.bnt-row:hover .bnt-rowact~time{display:none}
 
 @media (max-width:900px){.bnt-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.bnt-card[data-c="4"]{grid-column:span 2}.bnt-today .bnt-quote,.bnt-today .bnt-qsep{display:none}}
 @media (max-width:600px){.bnt-grid{grid-template-columns:minmax(0,1fr)}.bnt-card{grid-column:auto!important}}
@@ -594,13 +612,15 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
               entry.job = call(method, payload).then(v => { entry.value = v; entry.error = ''; }, e => { entry.error = String(e?.message || e); })
                 .finally(() => { entry.at = Date.now(); entry.job = null; for (const l of entry.listeners) l(); });
             };
+            entry.load = load;
             load();
             const id = setInterval(load, intervalMs);
             document.addEventListener('visibilitychange', load);
             return () => { clearInterval(id); document.removeEventListener('visibilitychange', load); entry.listeners.delete(listener); };
           }, [key]);
           const entry = key ? remoteCache.get(key) : null;
-          return {value: entry?.value, error: entry?.error ?? '', pending: Boolean(key) && !entry?.at};
+          const reload = () => { if (entry) { entry.at = 0; entry.load?.(); } };
+          return {value: entry?.value, error: entry?.error ?? '', pending: Boolean(key) && !entry?.at, reload};
         }
 
         const useWeather = prefs => {
@@ -1575,12 +1595,97 @@ textarea.bnt-input{resize:vertical;min-height:84px;line-height:1.5}
         }
         Running.desk = {apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_running')};
 
+        function Git({size, config}) {
+          useLocale();
+          const now = useNow();
+          const res = useRemote('git.status', {paths: String(config?.paths ?? '')}, GIT_MS);
+          const [busy, setBusy] = useState(false);
+          const [error, setError] = useState('');
+          const v = res.value;
+          if (!v) return h('div', {className: 'bnt-blank'}, res.error || '…');
+          const weight = r => (r.error ? 5 : r.conflicts ? 4 : r.changed + r.untracked ? 3 : r.ahead || r.behind ? 2 : r.gone?.length ? 1 : 0);
+          const repos = [...v.repos].sort((a, b) => weight(b) - weight(a) || (b.lastCommitAt ?? 0) - (a.lastCommitAt ?? 0));
+          const attention = repos.filter(r => weight(r) > 0).length;
+          const fetchAll = () => {
+            setBusy(true);
+            setError('');
+            call('git.fetch', {paths: String(config?.paths ?? '')}).then(r => { if (r.errors?.length) setError(r.errors.map(e => `${e.path.split('/').pop()}: ${e.message}`).join('\n')); res.reload(); }, e => setError(String(e?.message || e))).finally(() => setBusy(false));
+          };
+          const row = r => {
+            if (r.error) return h('div', {key: r.path, className: 'bnt-row', 'data-state': 'blocked', title: r.path}, h('span', {className: 'bnt-dot', 'data-state': 'blocked'}), h('div', null, h('b', null, r.name), h('small', null, r.error)));
+            const dirty = r.changed + r.untracked;
+            const state = r.conflicts ? 'blocked' : dirty ? 'waiting' : r.ahead || r.behind ? 'running' : undefined;
+            const parts = [r.branch,
+              r.ahead ? `↑${r.ahead}` : '', r.behind ? `↓${r.behind}` : '',
+              r.conflicts ? fill(t('g_conflicts'), {n: r.conflicts}) : dirty ? fill(t('g_changes'), {n: dirty}) : '',
+              r.gone.length ? fill(t('g_gone'), {n: r.gone.length}) : '',
+              !r.upstream && size !== 'm' ? t('g_noUpstream') : ''].filter(Boolean);
+            if (parts.length === 1) parts.push(t('g_clean'));
+            return h('div', {key: r.path, className: 'bnt-row', 'data-state': state === 'blocked' ? 'blocked' : undefined, title: [r.path, r.lastSubject].filter(Boolean).join('\n')},
+              h('span', {className: 'bnt-dot', 'data-state': state}),
+              h('div', null, h('b', null, r.name), h('small', {className: 'bnt-num'}, parts.join(' · '))),
+              h('button', {type: 'button', className: 'bnt-btn bnt-rowact', onClick: () => { launch(fill(t('gitPrompt'), {name: r.name}), r.path).catch(e => setError(String(e?.message || e))); }}, t('toAgent')),
+              r.lastCommitAt && size !== 'm' ? h('time', null, relTime(r.lastCommitAt, now.getTime())) : null);
+          };
+          return h(React.Fragment, null,
+            h('div', {className: 'bnt-rows'}, repos.length ? repos.map(row) : h('div', {className: 'bnt-blank'}, t('g_none'))),
+            error ? h('div', {className: 'bnt-calerr', title: error}, error.split('\n')[0]) : null,
+            h('div', {className: 'bnt-notefoot'}, h('span', null, repos.length ? (attention ? fill(t('g_attention'), {n: attention}) : t('g_allClean')) : ''),
+              repos.some(r => r.upstream) ? h('button', {type: 'button', className: 'bnt-btn', disabled: busy, onClick: fetchAll}, busy ? t('g_fetching') : t('g_fetch')) : null));
+        }
+        Git.desk = {
+          apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_git'),
+          settings: [{key: 'paths', type: 'textarea', label: () => t('f_repos'), placeholder: '~/Vibe/dsh-bento'}],
+        };
+
+        function GitHub({size, config}) {
+          useLocale();
+          const now = useNow();
+          const res = useRemote('github.get', {}, GITHUB_MS);
+          const [busy, setBusy] = useState(false);
+          const v = res.value;
+          if (!v) {
+            if (!res.error) return h('div', {className: 'bnt-blank'}, '…');
+            const missing = /not installed/.test(res.error);
+            return h('div', {className: 'bnt-blank'}, missing ? t('gh_missing') : h(React.Fragment, null, h('div', {className: 'bnt-calerr'}, res.error), h('div', null, t('gh_login'))));
+          }
+          const nowMs = now.getTime();
+          const groups = [
+            ['review', config?.showReview !== false],
+            ['mine', config?.showMine !== false],
+            ['assigned', config?.showAssigned !== false],
+          ].filter(([key, on]) => on && v[key]?.length).map(([key]) => [key, v[key]]);
+          const refresh = () => {
+            setBusy(true);
+            call('github.get', {fresh: true}).then(() => res.reload(), () => res.reload()).finally(() => setBusy(false));
+          };
+          const row = (key, x) => h('a', {key: `${key}${x.url}`, className: 'bnt-row bnt-rowbtn', href: x.url || undefined, target: '_blank', rel: 'noopener noreferrer', title: x.title},
+            h('div', null, h('b', null, x.title),
+              h('small', {className: 'bnt-num'}, [`${x.repo}#${x.number}`, key === 'mine' ? '' : x.author, x.draft ? t('gh_draft') : '', size === 'm' ? '' : relTime(x.updatedAt, nowMs)].filter(Boolean).join(' · '))));
+          return h(React.Fragment, null,
+            h('div', {className: 'bnt-rows'},
+              groups.length ? groups.map(([key, list]) => h(React.Fragment, {key},
+                h('div', {className: 'bnt-sect'}, `${t(`gh_${key}`)} ${list.length}`),
+                list.map(x => row(key, x)))) : h('div', {className: 'bnt-blank'}, t('gh_none'))),
+            size === 'm' ? null : h('div', {className: 'bnt-notefoot'}, h('span', null, v.fetchedAt ? fill(t('updated'), {t: relTime(v.fetchedAt, nowMs)}) : ''),
+              h('button', {type: 'button', className: 'bnt-btn', disabled: busy, onClick: refresh}, busy ? '…' : t('refresh'))));
+        }
+        GitHub.desk = {
+          apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_github'),
+          settings: [
+            {key: 'showReview', type: 'toggle', default: true, label: () => t('f_showReview')},
+            {key: 'showMine', type: 'toggle', default: true, label: () => t('f_showMine')},
+            {key: 'showAssigned', type: 'toggle', default: true, label: () => t('f_showAssigned')},
+          ],
+        };
+
         const builtins = [
           ['desk.today', 'today', Today], ['desk.todo', 'todo', Todo], ['desk.note', 'note', Note], ['desk.calendar', 'calendar', Calendar],
           ['desk.weather', 'weather', Weather], ['desk.clock', 'clock', Clock], ['desk.quote', 'quote', Quote], ['desk.countdown', 'countdown', Countdown],
           ['desk.worldclock', 'worldclock', WorldClock], ['desk.focus', 'focus', Focus], ['desk.links', 'links', Links], ['desk.progress', 'progress', Progress],
           ['desk.agents', 'agents', Agents], ['desk.feed', 'feed', Feed], ['desk.habits', 'habits', Habits],
           ['desk.prompt', 'prompt', Prompt], ['desk.inbox', 'inbox', Inbox], ['desk.usage', 'usage', Usage], ['desk.running', 'running', Running],
+          ['desk.git', 'git', Git], ['desk.github', 'github', GitHub],
         ];
         const BUILTIN_IDS = new Set(builtins.map(([id]) => id));
 

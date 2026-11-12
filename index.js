@@ -4,6 +4,9 @@ import {getWeather, searchPlaces} from './lib/weather.js';
 import {parseICS, expandEvents} from './lib/ics.js';
 import {parseFeed} from './lib/feed.js';
 import {createUsage} from './lib/usage.js';
+import {createRunner} from './lib/exec.js';
+import {repoStatus, fetchRepo} from './lib/git.js';
+import {githubOverview} from './lib/github.js';
 import {randomUUID} from 'node:crypto';
 import {homedir} from 'node:os';
 import {stat} from 'node:fs/promises';
@@ -41,7 +44,7 @@ export const BUILTIN_WIDGETS = [
   'desk.today', 'desk.todo', 'desk.note', 'desk.calendar', 'desk.weather', 'desk.clock',
   'desk.quote', 'desk.countdown', 'desk.worldclock', 'desk.focus', 'desk.links', 'desk.progress',
   'desk.agents', 'desk.feed', 'desk.habits',
-  'desk.prompt', 'desk.inbox', 'desk.usage', 'desk.running',
+  'desk.prompt', 'desk.inbox', 'desk.usage', 'desk.running', 'desk.git', 'desk.github',
 ];
 
 export function defaultBoard(id) {
@@ -469,6 +472,57 @@ export function createRunning(ctx, now = Date.now) {
   };
 }
 
+const GIT_TTL = 15_000;
+const GITHUB_TTL = 5 * 60_000;
+const MAX_REPOS = 20;
+
+// 仓库列表：设置里写了路径就用设置（非仓库报错），否则用 Harness 登记的工作区（非仓库跳过）。
+export function createGit(ctx, run, now = Date.now) {
+  const cache = new Map();
+  const targets = async raw => {
+    const lines = (Array.isArray(raw) ? raw : String(raw ?? '').split('\n')).map(x => String(x).trim()).filter(Boolean);
+    if (lines.length) return {explicit: true, paths: [...new Set(await Promise.all(lines.slice(0, MAX_REPOS).map(l => resolveDir(l).catch(() => l))))]};
+    const registry = ctx.get?.('workspaceRegistry');
+    const paths = typeof registry?.list === 'function' ? registry.list().map(w => w.path).filter(Boolean) : [];
+    return {explicit: false, paths: [...new Set(paths)].slice(0, MAX_REPOS)};
+  };
+  const one = async (path, explicit, fresh) => {
+    let hit = cache.get(path);
+    if (fresh || !hit || now() - hit.at >= GIT_TTL) {
+      hit = await repoStatus(run, path).then(value => ({at: now(), value}), error => ({at: now(), error: String(error?.message || error)}));
+      cache.set(path, hit);
+    }
+    if (hit.value) return hit.value;
+    return explicit ? {path, name: path.split('/').filter(Boolean).pop() ?? path, error: hit.error} : null;
+  };
+  return {
+    async status({paths, fresh} = {}) {
+      const {explicit, paths: list} = await targets(paths);
+      return {source: explicit ? 'config' : 'workspaces', repos: (await Promise.all(list.map(p => one(p, explicit, fresh)))).filter(Boolean)};
+    },
+    async fetch({paths} = {}) {
+      const {explicit, paths: list} = await targets(paths);
+      const current = (await Promise.all(list.map(p => one(p, explicit)))).filter(r => r && !r.error && r.upstream);
+      const errors = [];
+      await Promise.all(current.map(r => fetchRepo(run, r.path).catch(e => errors.push({path: r.path, message: String(e?.message || e)}))));
+      return {...(await this.status({paths, fresh: true})), errors};
+    },
+  };
+}
+
+export function createGithub(run, now = Date.now) {
+  let hit = null;
+  let job = null;
+  return async ({fresh} = {}) => {
+    if (!fresh && hit && now() - hit.at < GITHUB_TTL) return hit.value;
+    job ??= githubOverview(run).then(value => { hit = {at: now(), value: {...value, fetchedAt: now()}}; return hit.value; }, error => {
+      if (error?.code === 'not-found') throw new UserError('gh-missing', 'GitHub CLI (gh) is not installed');
+      throw new UserError('gh-failed', String(error?.message || error));
+    }).finally(() => { job = null; });
+    return job;
+  };
+}
+
 export const dshHome = () => process.env.DSH_HOME || join(homedir(), '.dsh');
 
 export function createHandlers(store, fetcher = createFetcher(), agents = null, launch = null, services = {}) {
@@ -489,6 +543,18 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
     'dsh-desk/running.kill': async p => {
       if (!services.running) throw new UserError('unavailable', 'background jobs are not available');
       return services.running.kill({id: p?.id, sessionId: p?.sessionId});
+    },
+    'dsh-desk/git.status': async p => {
+      if (!services.git) throw new UserError('unavailable', 'git is not available');
+      return services.git.status({paths: p?.paths});
+    },
+    'dsh-desk/git.fetch': async p => {
+      if (!services.git) throw new UserError('unavailable', 'git is not available');
+      return services.git.fetch({paths: p?.paths});
+    },
+    'dsh-desk/github.get': async p => {
+      if (!services.github) throw new UserError('unavailable', 'GitHub is not available');
+      return services.github({fresh: p?.fresh === true});
     },
     'dsh-desk/inbox.list': () => store.listInbox(),
     'dsh-desk/inbox.add': p => store.addInbox(p?.text),
@@ -616,7 +682,8 @@ export function createTools(store) {
 
 export function apply(ctx) {
   const store = createStore(ctx);
-  const services = {usage: createUsage({root: join(dshHome(), 'sessions')}), running: createRunning(ctx)};
+  const run = createRunner();
+  const services = {usage: createUsage({root: join(dshHome(), 'sessions')}), running: createRunning(ctx), git: createGit(ctx, run), github: createGithub(run)};
   const handlers = createHandlers(store, createFetcher(), createAgentWatch(ctx), createLauncher(ctx), services);
   ctx.effect(() => () => { void store.close(); }, 'dsh-desk: storage');
 
