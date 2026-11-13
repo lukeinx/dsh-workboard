@@ -47,6 +47,7 @@ window.__ModuleLoader__.load({
     const PACKAGES_MS = 30 * 60_000;
     const WEREAD_MS = 15 * 60_000;
     const POETRY_MS = 60 * 60_000;
+    const PODCASTS_MS = 20 * 60_000;
     const MAX_PINNED = 20;
     const MAX_APPS = 32;
     // 尺寸档位：[列, 行]，行单位 80px；「横栏」半高，其余行数成对。
@@ -238,6 +239,14 @@ window.__ModuleLoader__.load({
       f_wrKey: '微信读书 API Key（可选，在 weread.qq.com/r/weread-skills 扫码获取 wrk-…，解锁个人书架与划线）',
       wr_bookPrompt: '解读《{title}》（{author}）：\n{intro}\n请提炼这本书的核心论点、结构脉络、优缺点与适合人群，并给出延伸阅读建议。',
       wr_notePrompt: '结合《{title}》（{author}）中的这段划线笔记：\n「{text}」\n请解读这段话的深层含义、上下文背景，并结合实际给出延伸思考。',
+      podcasts: '播客', d_podcasts: '小宇宙、Apple Podcasts 与 RSS 播客最新单集与科技热榜，支持页内播放与交给 Agent 总结',
+      pod_episodes: '最新单集', pod_top: '科技热榜', pod_play: '播放', pod_pause: '暂停', pod_stop: '停止',
+      pod_error: '{n} 个播客加载失败', pod_none: '暂无播客单集',
+      f_podSources: '播客订阅（每行一个：小宇宙主页链接、Apple Podcasts 链接 / apple:ID、RSS / rsshub://，或直接填播客名称）',
+      f_podRegion: '科技热榜地区', pod_reg_auto: '跟随界面语言（中文中国区 / 英文美国区）', pod_reg_cn: '中国区', pod_reg_us: '美国区',
+      defaultPodcasts: 'https://www.xiaoyuzhoufm.com/podcast/626b46ea9cbbf0451cf5a962 张小珺Jùn｜商业访谈录\nhttps://feeds.fireside.fm/sv101/rss 硅谷101\nhttps://www.xiaoyuzhoufm.com/podcast/5e280faa418a84a0461f9ad8 日谈公园',
+      pod_prompt: '总结播客《{podcast}》单集「{title}」的核心内容：\n{url}\n{notes}\n请提炼核心观点、关键论据与嘉宾金句，并列出值得深入思考的延伸问题。',
+      pod_topPrompt: '介绍播客《{name}》（主理人：{author}）：\n{url}\n{summary}\n请介绍这档播客的定位、代表性话题与适合收听的人群。',
     };
     const en = {
       lang: 'en-US', title: 'Workboard', loadFailed: 'Failed to load', empty: 'No widgets on this board yet',
@@ -423,6 +432,14 @@ window.__ModuleLoader__.load({
       f_wrKey: 'WeRead API Key (optional, wrk-… from weread.qq.com/r/weread-skills to unlock your shelf and highlights)',
       wr_bookPrompt: 'Summarize the book “{title}” by {author}:\n{intro}\nOutline its core arguments, structure, strengths and who should read it.',
       wr_notePrompt: 'Reflect on this highlight from “{title}” ({author}):\n“{text}”\nExplain its context, deeper meaning and practical takeaways.',
+      podcasts: 'Podcasts', d_podcasts: 'Latest episodes from Podcast RSS, Apple Podcasts and Xiaoyuzhou plus Tech charts, with in-card playback and agent summaries',
+      pod_episodes: 'Episodes', pod_top: 'Top Tech', pod_play: 'Play', pod_pause: 'Pause', pod_stop: 'Stop',
+      pod_error: '{n} podcast(s) failed to load', pod_none: 'No podcast episodes',
+      f_podSources: 'Podcasts, one per line: RSS / rsshub:// URL, Apple Podcasts link or apple:ID, Xiaoyuzhou link, or podcast name',
+      f_podRegion: 'Top chart region', pod_reg_auto: 'Match UI language (CN in Chinese, US in English)', pod_reg_cn: 'China (CN)', pod_reg_us: 'United States (US)',
+      defaultPodcasts: 'https://lexfridman.com/feed/podcast/ Lex Fridman Podcast\nhttps://api.substack.com/feed/podcast/1084089.rss Latent Space\nhttps://changelog.com/podcast/feed The Changelog',
+      pod_prompt: 'Summarize the podcast episode “{title}” from {podcast}:\n{url}\n{notes}\nExtract the core takeaways, key arguments and notable quotes, then suggest follow-up questions.',
+      pod_topPrompt: 'Tell me about the podcast “{name}” (by {author}):\n{url}\n{summary}\nExplain what it covers, notable episodes and who would enjoy it.',
     };
 
     // 公共领域的经典短句，按日期轮换。
@@ -1104,6 +1121,17 @@ a.wb-otd-title:hover{color:var(--dsw-alias-brand-primary)}
 .wb-poem-note{margin:2px 0 0;font-size:12px;line-height:1.45;color:var(--dsw-alias-label-secondary);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .wb-poem[data-size=l] .wb-poem-note{-webkit-line-clamp:3}
 .wb-word[data-size=t] .wb-word-def,.wb-word[data-size=l] .wb-word-def,.wb-word[data-size=t] .wb-word-ex,.wb-word[data-size=l] .wb-word-ex{-webkit-line-clamp:4}
+.wb-podcover{width:32px;height:32px;border-radius:6px;flex:none;background:var(--dsw-alias-bg-layer-2);overflow:hidden;position:relative;display:grid;place-items:center}
+.wb-podcover img{width:100%;height:100%;object-fit:cover;display:block}
+.wb-podplay{width:24px;height:24px;border-radius:12px;flex:none;display:grid;place-items:center;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
+.wb-podplay:hover,.wb-podplay[data-active]{background:var(--dsw-alias-brand-primary);${onBrand('color')}}
+.wb-podbar{display:flex;align-items:center;gap:8px;padding:6px 8px;margin-top:4px;border-radius:8px;background:var(--dsw-alias-bg-layer-2);font-size:12px;flex:none;min-width:0}
+.wb-podbar-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.wb-podbar-top{display:flex;justify-content:space-between;gap:8px;min-width:0}
+.wb-podbar-top b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-podbar-top span{color:var(--dsw-alias-label-secondary);flex:none}
+.wb-podbar .wb-pbar{height:4px;cursor:pointer}
+.wb-podbar .wb-pbar i{background:var(--dsw-alias-brand-primary)}
 .wb-list,.wb-events,.wb-rows,.wb-links,.wb-quotes,.wb-chips,.wb-table,.wb-vgrid,.wb-vlist{margin-right:-8px;padding-right:8px}
 .wb-card ::-webkit-scrollbar{width:4px;height:4px}
 .wb-card ::-webkit-scrollbar-track,.wb-card ::-webkit-scrollbar-corner{background:transparent}
@@ -5148,6 +5176,190 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           settings: [{key: 'apiKey', type: 'text', label: () => t('f_wrKey'), placeholder: 'wrk-…'}],
         };
 
+        // 播客封面按需由 Host 代理成 data: URL。
+        const podThumbCache = new Map();
+        const podThumbQueue = [];
+        let podThumbActive = 0;
+        const pumpPodThumbs = () => {
+          while (podThumbActive < 4 && podThumbQueue.length) {
+            const {url, resolve, reject} = podThumbQueue.shift();
+            podThumbActive++;
+            call('podcasts.thumb', {url}).then(resolve, reject).finally(() => { podThumbActive--; pumpPodThumbs(); });
+          }
+        };
+        const loadPodThumb = url => {
+          let entry = podThumbCache.get(url);
+          if (!entry) {
+            entry = {src: '', job: new Promise((resolve, reject) => { podThumbQueue.push({url, resolve, reject}); pumpPodThumbs(); })};
+            entry.job.then(src => { entry.src = src; }, () => {});
+            podThumbCache.set(url, entry);
+            if (podThumbCache.size > 300) podThumbCache.delete(podThumbCache.keys().next().value);
+          }
+          return entry.job;
+        };
+        function PodThumb({url}) {
+          const [src, setSrc] = useState(() => podThumbCache.get(url)?.src ?? '');
+          useEffect(() => {
+            if (!url) return undefined;
+            let alive = true;
+            loadPodThumb(url).then(s => { if (alive) setSrc(s); }, () => {});
+            return () => { alive = false; };
+          }, [url]);
+          return h('div', {className: 'wb-podcover'}, src ? h('img', {src, alt: '', draggable: false}) : null);
+        }
+
+        // 模块级跨平台播客播放器：切换看板或面板时不中断。
+        const podPlayer = (() => {
+          const subs = new Set();
+          let audio = null;
+          let snap = {item: null, playing: false, currentTime: 0, duration: 0, rate: 1};
+          const emit = next => { snap = {...snap, ...next}; subs.forEach(fn => fn()); };
+          const ensure = () => {
+            if (audio || typeof Audio !== 'function') return audio;
+            audio = new Audio();
+            audio.preload = 'metadata';
+            audio.addEventListener('play', () => emit({playing: true}));
+            audio.addEventListener('pause', () => emit({playing: false}));
+            audio.addEventListener('ended', () => emit({playing: false, currentTime: 0}));
+            audio.addEventListener('timeupdate', () => emit({currentTime: audio.currentTime || 0, duration: audio.duration || snap.item?.duration || 0}));
+            audio.addEventListener('loadedmetadata', () => emit({duration: audio.duration || snap.item?.duration || 0}));
+            return audio;
+          };
+          return {
+            subscribe: fn => { subs.add(fn); return () => subs.delete(fn); },
+            getSnapshot: () => snap,
+            toggle(it) {
+              if (!it?.audio) return;
+              const el = ensure();
+              if (!el) return;
+              if (snap.item?.id === it.id) {
+                if (el.paused) el.play().catch(() => {});
+                else el.pause();
+                return;
+              }
+              el.pause();
+              el.src = it.audio;
+              el.playbackRate = snap.rate;
+              emit({item: it, playing: false, currentTime: 0, duration: it.duration || 0});
+              el.play().catch(() => {});
+            },
+            seek(ratio) {
+              if (!audio || !snap.duration) return;
+              audio.currentTime = Math.max(0, Math.min(snap.duration, ratio * snap.duration));
+            },
+            cycleRate() {
+              const rates = [1, 1.25, 1.5, 2];
+              const next = rates[(rates.indexOf(snap.rate) + 1) % rates.length] || 1;
+              if (audio) audio.playbackRate = next;
+              emit({rate: next});
+            },
+            stop() {
+              if (audio) { audio.pause(); audio.removeAttribute('src'); audio.load(); }
+              emit({item: null, playing: false, currentTime: 0, duration: 0});
+            },
+          };
+        })();
+
+        const POD_TABS = ['episodes', 'top'];
+        function Podcasts({size, config}) {
+          useLocale();
+          const now = useNow();
+          const ws = useWorkspace();
+          const [picked, setPicked] = useState('episodes');
+          const [error, setError] = useState('');
+          const tab = POD_TABS.includes(picked) ? picked : 'episodes';
+          const sources = String(config?.sources ?? t('defaultPodcasts'));
+          const zh = t('lang').startsWith('zh');
+          const region = config?.region === 'cn' || config?.region === 'us' ? config.region : (zh ? 'cn' : 'us');
+          const res = useRemote('podcasts.list', {sources, region}, PODCASTS_MS);
+          const v = res.value;
+          const items = v?.items ?? [];
+          const top = v?.top ?? [];
+          const failed = v?.errors ?? [];
+          const read = useRead((tab === 'top' ? top : items).map(it => it.url));
+          const playSnap = useSyncExternalStore(podPlayer.subscribe, podPlayer.getSnapshot, podPlayer.getSnapshot);
+
+          const fmtDur = sec => {
+            if (!sec || sec <= 0) return '';
+            const m = Math.round(sec / 60);
+            return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`;
+          };
+          const askEp = (e, it) => {
+            e.preventDefault();
+            e.stopPropagation();
+            launch(fill(t('pod_prompt'), {podcast: it.podcast, title: it.title, url: it.url, notes: it.notes || ''}).trim(), ws.path, ws.id)
+              .then(() => setError(''), err => setError(String(err?.message || err)));
+          };
+          const askTop = (e, it) => {
+            e.preventDefault();
+            e.stopPropagation();
+            launch(fill(t('pod_topPrompt'), {name: it.name, author: it.author, url: it.url, summary: it.summary || ''}).trim(), ws.path, ws.id)
+              .then(() => setError(''), err => setError(String(err?.message || err)));
+          };
+          const playClick = (e, it) => {
+            e.preventDefault();
+            e.stopPropagation();
+            podPlayer.toggle(it);
+          };
+
+          const epRow = it => {
+            const active = playSnap.item?.id === it.id;
+            const sub = [it.podcast, fmtDur(it.duration), it.date ? relTime(it.date, now.getTime()) : '', (size === 'l' || size === 'w') && it.notes ? it.notes : ''].filter(Boolean).join(' · ');
+            return h('a', {key: it.id, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer',
+              title: [it.title, it.podcast, it.notes].filter(Boolean).join('\n')},
+              size === 'm' ? null : h(PodThumb, {url: it.thumb}),
+              h('div', null, h('b', null, it.title), size === 'm' ? null : h('small', null, sub)),
+              size === 'm' ? null : h('button', {type: 'button', className: 'wb-btn wb-rowact', onClick: e => askEp(e, it)}, t('toAgent')),
+              it.audio ? h('button', {type: 'button', className: 'wb-btn wb-podplay', 'data-active': active && playSnap.playing ? '' : undefined,
+                title: active && playSnap.playing ? t('pod_pause') : t('pod_play'), onClick: e => playClick(e, it)},
+                active && playSnap.playing ? h(Icon.pause) : h(Icon.play)) : null);
+          };
+
+          const topRow = it => {
+            const sub = [it.author, it.category, (size === 'l' || size === 'w') && it.summary ? it.summary : ''].filter(Boolean).join(' · ');
+            return h('a', {key: it.id, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer',
+              title: [it.name, it.author, it.summary].filter(Boolean).join('\n')},
+              h('span', {className: 'wb-rank wb-num', 'data-top': it.rank <= 3 ? '' : undefined}, it.rank),
+              size === 'm' ? null : h(PodThumb, {url: it.thumb}),
+              h('div', null, h('b', null, it.name), size === 'm' ? null : h('small', null, sub)),
+              size === 'm' ? null : h('button', {type: 'button', className: 'wb-btn wb-rowact', onClick: e => askTop(e, it)}, t('toAgent')));
+          };
+
+          const list = tab === 'top'
+            ? (top.length ? top.map(topRow) : blank(res.pending ? '…' : res.error || t('noItems')))
+            : (items.length ? items.map(epRow) : blank(res.pending ? '…' : res.error || t('pod_none')));
+
+          const cur = playSnap.item;
+          const pct = cur && playSnap.duration > 0 ? Math.min(100, Math.round((playSnap.currentTime / playSnap.duration) * 100)) : 0;
+          const playerBar = cur ? h('div', {className: 'wb-podbar wb-num'},
+            h('button', {type: 'button', className: 'wb-btn wb-podplay', 'data-active': playSnap.playing ? '' : undefined, onClick: () => podPlayer.toggle(cur)},
+              playSnap.playing ? h(Icon.pause) : h(Icon.play)),
+            h('div', {className: 'wb-podbar-main'},
+              h('div', {className: 'wb-podbar-top'},
+                h('b', {title: `${cur.podcast} · ${cur.title}`}, cur.title),
+                h('span', null, `${clockText(playSnap.currentTime * 1000)}${playSnap.duration ? ` / ${clockText(playSnap.duration * 1000)}` : ''}`)),
+              h('div', {className: 'wb-pbar', onClick: e => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                if (rect.width > 0) podPlayer.seek((e.clientX - rect.left) / rect.width);
+              }}, h('i', {style: {width: `${pct}%`}}))),
+            h('button', {type: 'button', className: 'wb-btn wb-muted', onClick: () => podPlayer.cycleRate()}, `${playSnap.rate}×`),
+            h('button', {type: 'button', className: 'wb-btn wb-muted', title: t('pod_stop'), onClick: () => podPlayer.stop()}, h(Icon.x))) : null;
+
+          return h('div', {className: 'wb-trend'},
+            h('div', {className: 'wb-seg', role: 'tablist'}, POD_TABS.map(k => h('button', {key: k, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': k === tab, onClick: () => setPicked(k)}, t(`pod_${k}`)))),
+            h('div', {className: 'wb-rows'}, list),
+            playerBar,
+            tab === 'episodes' && failed.length ? h('div', {className: 'wb-calerr', title: failed.map(e => `${e.source}: ${e.message}`).join('\n')}, fill(t('pod_error'), {n: failed.length})) : null,
+            error ? h('div', {className: 'wb-calerr', title: error}, error) : null);
+        }
+        Podcasts.workboard = {
+          apiVersion: 1, sizes: ['l', 't', 'm', 'w'], defaultSize: 'l', description: () => t('d_podcasts'),
+          settings: [
+            {key: 'sources', type: 'textarea', label: () => t('f_podSources'), default: () => t('defaultPodcasts')},
+            {key: 'region', type: 'select', default: 'auto', label: () => t('f_podRegion'), options: ['auto', 'cn', 'us'].map(v => ({value: v, label: () => t(`pod_reg_${v}`)}))},
+          ],
+        };
+
         const builtins = [
           ['workboard.today', 'today', Today], ['workboard.todo', 'todo', Todo], ['workboard.note', 'note', Note], ['workboard.calendar', 'calendar', Calendar],
           ['workboard.weather', 'weather', Weather], ['workboard.clock', 'clock', Clock], ['workboard.quote', 'quote', Quote], ['workboard.countdown', 'countdown', Countdown],
@@ -5164,12 +5376,12 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           ['workboard.apps', 'apps', Apps], ['workboard.models', 'models', Models], ['workboard.onthisday', 'onthisday', OnThisDay], ['workboard.wallpaper', 'wallpaper', Wallpaper],
           ['workboard.leaderboard', 'leaderboard', Leaderboard], ['workboard.mcps', 'mcps', Mcps], ['workboard.word', 'word', Word],
           ['workboard.astronomy', 'astronomy', Astronomy], ['workboard.packages', 'packages', Packages], ['workboard.releases', 'releases', Releases],
-          ['workboard.poetry', 'poetry', Poetry], ['workboard.weread', 'weread', Weread],
+          ['workboard.poetry', 'poetry', Poetry], ['workboard.weread', 'weread', Weread], ['workboard.podcasts', 'podcasts', Podcasts],
         ];
         const BUILTIN_CATEGORY = {
           daily: ['today', 'clock', 'worldclock', 'weather', 'astronomy', 'countdown', 'holiday', 'onthisday', 'word', 'poetry', 'progress', 'habits', 'photo', 'wallpaper', 'nowplaying'],
           agent: ['attention', 'agents', 'running', 'brief', 'prompt', 'usage', 'activity', 'status', 'mcps', 'outputs', 'tasks', 'pinned'],
-          news: ['trending', 'feed', 'weread', 'papers', 'models', 'leaderboard', 'videos', 'market', 'quote'],
+          news: ['trending', 'feed', 'weread', 'papers', 'models', 'leaderboard', 'videos', 'podcasts', 'market', 'quote'],
           tools: ['todo', 'note', 'calendar', 'focus', 'ambient', 'links', 'apps', 'git', 'github', 'releases', 'packages', 'system', 'files', 'clipboard', 'network', 'ports'],
         };
         for (const [category, keys] of Object.entries(BUILTIN_CATEGORY)) {

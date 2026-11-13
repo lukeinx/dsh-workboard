@@ -41,6 +41,7 @@ import {createReleases, parseReleaseAtom, parseReleaseSpecs} from '../lib/releas
 import {createPackages, parsePackageSpecs, summarizeRange} from '../lib/packages.js';
 import {createWeread, parseNotebooks, parseRankBooks, parseShelf} from '../lib/weread.js';
 import {createPoetry, parseJinrishici} from '../lib/poetry.js';
+import {createPodcasts, parseDuration, parseItunesTop, parsePodcastFeed, parsePodcastSource, parseXiaoyuzhou} from '../lib/podcasts.js';
 
 const routes = new Map();
 const tools = new Map();
@@ -1323,6 +1324,40 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   assert.equal(calls, 1);
   await poH['dsh-workboard/poetry.get']({day: '2026-11-13', n: 1});
   assert.equal(calls, 2);
+}
+
+// 播客：小宇宙、Apple Podcasts、标准 Podcast RSS、时长解析与封面代理。
+{
+  assert.equal(parseDuration('01:02:03'), 3723);
+  assert.equal(parseDuration('45:10'), 2710);
+  assert.equal(parseDuration('1800'), 1800);
+  assert.deepEqual(parsePodcastSource('https://www.xiaoyuzhoufm.com/podcast/626b46ea9cbbf0451cf5a962 张小珺'), {kind: 'xiaoyuzhou', id: '626b46ea9cbbf0451cf5a962', label: '张小珺'});
+  assert.deepEqual(parsePodcastSource('https://podcasts.apple.com/cn/podcast/id1498541229 硅谷101'), {kind: 'apple', id: '1498541229', label: '硅谷101'});
+  assert.deepEqual(parsePodcastSource('rsshub://xiaoyuzhou/podcast/123', 'https://rss.example.com'), {kind: 'rss', id: 'https://rss.example.com/xiaoyuzhou/podcast/123', label: ''});
+  assert.deepEqual(parsePodcastSource('Hard Fork'), {kind: 'search', id: 'Hard Fork', label: ''});
+
+  const rssXml = `<rss><channel><title>SV101</title><itunes:image href="https://img.example/pod.jpg"/><item><title>Ep 1</title><link>https://pod.example/ep1</link><enclosure url="https://cdn.example/ep1.mp3" type="audio/mpeg"/><itunes:duration>30:00</itunes:duration><itunes:summary>Show notes</itunes:summary><pubDate>Thu, 12 Nov 2026 10:00:00 GMT</pubDate></item></channel></rss>`;
+  const xyzHtml = `<script id="__NEXT_DATA__" type="application/json">${JSON.stringify({props: {pageProps: {podcast: {title: '小宇宙播客', image: {smallPicUrl: 'https://img.example/xyz.png'}, episodes: [{eid: 'e1', title: '第一期', duration: 1200, pubDate: '2026-11-13T08:00:00Z', description: '内容摘要', enclosure: {url: 'https://media.xyzcdn.net/e1.m4a'}}]}}}})}</script>`;
+  const topBody = {feed: {entry: [{id: {label: 'https://podcasts.apple.com/cn/podcast/id1', attributes: {'im:id': '1'}}, 'im:name': {label: 'Top Pod'}, 'im:artist': {label: 'Host'}, summary: {label: 'About'}, category: {attributes: {label: 'Tech'}}, 'im:image': [{label: 'https://img.example/top.jpg'}]}]}};
+
+  assert.equal(parsePodcastFeed(rssXml).items[0].duration, 1800);
+  assert.equal(parseXiaoyuzhou(xyzHtml).items[0].audio, 'https://media.xyzcdn.net/e1.m4a');
+  assert.equal(parseItunesTop(topBody)[0].name, 'Top Pod');
+
+  const pods = createPodcasts({get: async url => {
+    if (url.includes('xiaoyuzhoufm.com')) return xyzHtml;
+    if (url.includes('itunes.apple.com/lookup')) return {results: [{feedUrl: 'https://pod.example/rss', collectionName: 'SV101', artworkUrl600: 'https://img.example/pod.jpg'}]};
+    if (url.includes('pod.example/rss')) return rssXml;
+    if (url.includes('toppodcasts')) return topBody;
+    if (url.includes('img.example')) return {type: 'image/jpeg', base64: 'AA=='};
+    throw new Error(url);
+  }});
+  const podH = createHandlers(createStore({}), undefined, null, null, {podcasts: pods});
+  const podRes = await podH['dsh-workboard/podcasts.list']({sources: 'xyz:626b46ea9cbbf0451cf5a962\napple:1498541229', region: 'cn'});
+  assert.deepEqual(podRes.items.map(x => [x.title, x.duration]), [['第一期', 1200], ['Ep 1', 1800]]);
+  assert.equal(podRes.top[0].name, 'Top Pod');
+  assert.equal(await podH['dsh-workboard/podcasts.thumb']({url: 'https://img.example/xyz.png'}), 'data:image/jpeg;base64,AA==');
+  await assert.rejects(podH['dsh-workboard/podcasts.thumb']({url: 'https://evil.example/x.png'}), /unknown podcast thumbnail/);
 }
 
 console.log('smoke ok');

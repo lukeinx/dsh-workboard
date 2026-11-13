@@ -38,6 +38,7 @@ import {createReleases} from './lib/releases.js';
 import {createPackages} from './lib/packages.js';
 import {createWeread} from './lib/weread.js';
 import {createPoetry} from './lib/poetry.js';
+import {createPodcasts} from './lib/podcasts.js';
 import {CONTEXT_SECTIONS, createContext} from './lib/context.js';
 import {stat} from 'node:fs/promises';
 import {isAbsolute, join} from 'node:path';
@@ -88,7 +89,7 @@ export const BUILTIN_WIDGETS = [
   'workboard.ports', 'workboard.status', 'workboard.papers', 'workboard.holiday', 'workboard.activity', 'workboard.apps',
   'workboard.models', 'workboard.onthisday', 'workboard.wallpaper',
   'workboard.leaderboard', 'workboard.mcps', 'workboard.word', 'workboard.astronomy', 'workboard.packages', 'workboard.releases',
-  'workboard.weread', 'workboard.poetry',
+  'workboard.weread', 'workboard.poetry', 'workboard.podcasts',
 ];
 
 export function defaultBoard(id) {
@@ -1055,6 +1056,14 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       if (!services.poetry) throw new UserError('unavailable', 'poetry is not available');
       return services.poetry.get({day: p?.day, n: p?.n});
     },
+    'dsh-workboard/podcasts.list': async p => {
+      if (!services.podcasts) throw new UserError('unavailable', 'podcasts are not available');
+      return services.podcasts.list({sources: p?.sources, rsshub: String(p?.rsshub ?? ''), region: String(p?.region ?? 'cn')});
+    },
+    'dsh-workboard/podcasts.thumb': async p => {
+      if (!services.podcasts) throw new UserError('unavailable', 'podcasts are not available');
+      return services.podcasts.thumb({url: p?.url});
+    },
     'dsh-workboard/read.check': p => store.readOf(p?.urls),
     'dsh-workboard/read.mark': p => store.markRead(p?.urls, p?.read !== false),
     'dsh-workboard/habit.list': () => store.listHabits(),
@@ -1329,6 +1338,7 @@ export function apply(ctx) {
     packages: createPackages(fetcher),
     weread: createWeread(fetcher),
     poetry: createPoetry(fetcher),
+    podcasts: createPodcasts(fetcher),
   };
   const handlers = createHandlers(store, fetcher, createAgentWatch(ctx), createLauncher(ctx), services);
   const context = createContext({store, call: (method, payload) => handlers[`dsh-workboard/${method}`](payload)});

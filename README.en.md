@@ -1,6 +1,6 @@
 # Workboard
 
-**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 52 widgets out of the box — and your agent builds the rest.**
+**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 53 widgets out of the box — and your agent builds the rest.**
 
 [简体中文](README.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
@@ -8,14 +8,14 @@
 
 ## Highlights
 
-### 52 widgets, ready to use
+### 53 widgets, ready to use
 
 Open the widget gallery, search, and drop cards straight onto your board across four categories:
 
 - **Agent workflows**: active and waiting sessions, running goals and background jobs, daily briefs, quick prompts, token usage and cost estimates, activity heatmap, service status, popular MCP servers, deliverables, scheduled tasks, and pinned sessions
 - **Productivity & dev tools**: to-dos, scratch notes, ICS calendar, Pomodoro focus timer, ambient sound, quick links, installed apps, Git repos, GitHub PRs and issues, release tracker, package downloads, system monitor, recent files, clipboard history, network speed and latency, and local listening ports
-- **Daily essentials**: Today banner, clock, world clock, weather, sun & moon phases, countdowns, public holidays, on this day, daily dev concept, time progress, habit tracker, photo frame, daily wallpaper, and now playing
-- **News & markets**: multi-source trending lists, RSS / Atom feeds, AI papers, OpenRouter models, LLM Arena leaderboard, video subscriptions, stocks / forex / crypto markets, and daily quotes
+- **Daily essentials**: Today banner, clock, world clock, weather, sun & moon phases, countdowns, public holidays, on this day, daily dev concept, classical poetry, time progress, habit tracker, photo frame, daily wallpaper, and now playing
+- **News & markets**: multi-source trending lists, RSS / Atom feeds, WeRead, AI papers, OpenRouter models, LLM Arena leaderboard, video subscriptions, podcasts, stocks / forex / crypto markets, and daily quotes
 
 Most widgets work with zero configuration; a few only ask for essentials like your city, an ICS calendar URL, or ticker symbols.
 
@@ -75,7 +75,7 @@ If you are an agent interacting with Workboard:
 ## Reference
 
 <details>
-<summary><b>All 52 built-in widgets</b></summary>
+<summary><b>All 53 built-in widgets</b></summary>
 
 | Widget | Sizes | What it shows |
 |---|---|---|
@@ -133,6 +133,7 @@ If you are an agent interacting with Workboard:
 | Models | `l` `t` `m` `w` | Trending and newest models on OpenRouter with input / output prices and context length, filterable by vendor |
 | LLM Arena | `l` `t` `m` `w` | LMArena blind-test leaderboards (Text, WebDev, Agent, Vision, Search), filterable by open-weight license and vendor |
 | Videos | `l` `t` `m` `w` | Latest uploads from YouTube channels (link, `UC…` ID, or `@handle`), Bilibili creators (space link or UID), and RSS feeds with images, with thumbnails |
+| Podcasts | `l` `t` `m` `w` | Latest episodes from Podcast RSS / `rsshub://`, Apple Podcasts (link, `apple:ID`, or name), and Xiaoyuzhou plus Tech podcast charts, with cross-platform in-card playback and one-click agent episode summaries |
 | Markets | `t` `m` `s` `l` `w` | Forex (`USD/CNY`), China / HK / US equities (`sh600519`, `hk00700`, `usAAPL`), and crypto (`BTC`, `cg:<id>`) |
 | Quote | `m` `w` `s` | A daily quote (click for another), sharing its source setting with the Today banner |
 
@@ -154,6 +155,7 @@ All external network requests are made and cached by the Host:
 - **GitHub**: uses your local `gh` CLI and its existing sign-in
 - **Trending**: public web endpoints for Weibo, Zhihu, 36Kr, sspai, Bilibili, and V2EX (unofficial and may break if a site changes), the [HN Algolia API](https://hn.algolia.com/api), the GitHub Trending page, and official Product Hunt and Reddit feeds; cached for 10 minutes
 - **Videos**: YouTube channel RSS feeds (channel pages only to resolve an `@handle`), Bilibili's public creator archive endpoint (unofficial, rate-limited at times), and thumbnails proxied as data URLs; cached for 15 minutes
+- **Podcasts**: configured Podcast RSS / Atom feeds, Xiaoyuzhou podcast pages (`xiaoyuzhoufm.com`, unofficial), or feeds and Tech podcast charts resolved through the Apple iTunes Podcast Directory API (`itunes.apple.com`), with cover art proxied by the Host as data URLs; feeds cached for 20 minutes, charts for 60 minutes
 - **Network**: public IP from [ipinfo.io](https://ipinfo.io) (falling back to [ip.sb](https://ip.sb)) and host latency via `curl`, respecting the system proxy when set; tests Google, GitHub, and Cloudflare by default (Baidu, GitHub, and Google in Chinese)
 - **Service status**: each configured page's Statuspage `/api/v2/summary.json`; the DeepSeek status page (hosted on Flashcat) has no public API, so its embedded page data is parsed (unofficial, may break if the page changes); defaults to DeepSeek, Claude, OpenAI, GitHub, and npm; cached for 2 minutes
 - **AI papers**: the [Hugging Face](https://huggingface.co) daily papers and trending Spaces APIs (falling back to [hf-mirror.com](https://hf-mirror.com) when huggingface.co is unreachable) and the [arXiv API](https://info.arxiv.org/help/api/index.html) for latest preprints by subject area; cached for 30 minutes
@@ -235,7 +237,7 @@ npm run check   # syntax check, Host smoke test, and ICS parser tests
 ```
 
 - `index.js`: Host routes (`/api/dsh-workboard/*`), storage tables, and agent tools
-- `client.js`: sidebar entry, board container, and the 52 built-in widgets
+- `client.js`: sidebar entry, board container, and the 53 built-in widgets
 - `lib/`: data fetchers, parsers, and system probes
 - `skills/workboard-widget.md`: agent skill for building custom widgets
 
@@ -256,6 +258,7 @@ Workboard builds on the following projects and services. Feed and trending conte
 | [HN Algolia API](https://hn.algolia.com/api), [hnrss.org](https://hnrss.org) | Hacker News hot list and default English feed | Public API and feeds |
 | Weibo, Zhihu, 36Kr, sspai, Bilibili, V2EX, GitHub Trending, Product Hunt, Reddit | Trending lists | Public pages, feeds, and unofficial endpoints |
 | YouTube, Bilibili | Video subscriptions and thumbnails | Public channel feeds and unofficial endpoints |
+| Apple Podcasts (`itunes.apple.com`), Xiaoyuzhou (`xiaoyuzhoufm.com`), and publisher Podcast RSS feeds | Podcast subscriptions, episode audio, and Tech podcast charts | Public directory APIs, publisher RSS feeds, and public pages |
 | [ifanr](https://www.ifanr.com), [Ruan Yifeng's blog](https://www.ruanyifeng.com/blog/) | Default Chinese RSS feeds | Publishers' RSS feeds |
 | [GitHub CLI](https://cli.github.com), GitHub Atom feeds & search API | GitHub widget, Releases, and Popular MCPs | MIT / public feeds & API |
 | [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter) | System now-playing info, bundled in `vendor/` | BSD-3-Clause |

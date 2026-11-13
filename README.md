@@ -1,6 +1,6 @@
 # 工作台 Workboard
 
-**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 52 个 widget，开箱即用；不够用的，让 Agent 现做。**
+**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 53 个 widget，开箱即用；不够用的，让 Agent 现做。**
 
 [English](README.en.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
@@ -8,14 +8,14 @@
 
 ## 亮点
 
-### 内置 52 个 widget，开箱即用
+### 内置 53 个 widget，开箱即用
 
 覆盖四大场景，打开组件库即可搜索、预览并连续添加到看板：
 
 - **Agent 协作**：待确认与运行中会话、长程目标与后台作业、每日简报、Prompt 快启、Token 用量与费用估算、活跃热力图、服务状态、热门 MCP、产出物、定时任务、收藏会话
 - **效率与开发**：待办、速记、ICS 日历、专注番茄钟、白噪音、快捷链接、快捷应用、Git 工作区、GitHub（PR / Issue）、发版追踪、包下载量、系统状态、最近文件、剪贴板、网络测速、本机端口
-- **日常桌面**：今日横栏、时钟、世界时钟、天气、日出日落与月相、倒数日、节假日、历史上的今天、每日一词、时间进度、习惯打卡、本机相框、每日壁纸、正在播放
-- **资讯与行情**：多源热榜、RSS / Atom 订阅、AI 论文、模型行情、大模型竞技场、视频订阅、A 股 / 港股 / 美股 / 汇率 / 加密货币行情、每日格言
+- **日常桌面**：今日横栏、时钟、世界时钟、天气、日出日落与月相、倒数日、节假日、历史上的今天、每日一词、诗词典籍、时间进度、习惯打卡、本机相框、每日壁纸、正在播放
+- **资讯与行情**：多源热榜、RSS / Atom 订阅、微信读书、AI 论文、模型行情、大模型竞技场、视频订阅、播客、A 股 / 港股 / 美股 / 汇率 / 加密货币行情、每日格言
 
 绝大多数零配置即用；少数仅需填入城市、日历订阅链接或股票代码等个人信息。
 
@@ -75,7 +75,7 @@ dsh-workboard
 ## 参考
 
 <details>
-<summary><b>全部 52 个内置 widget</b></summary>
+<summary><b>全部 53 个内置 widget</b></summary>
 
 | Widget | 档位 | 说明 |
 |---|---|---|
@@ -133,6 +133,7 @@ dsh-workboard
 | 模型行情 | `l` `t` `m` `w` | OpenRouter 本周热门与最新上架的模型，附输入 / 输出单价与上下文长度，可按厂商筛选 |
 | 大模型竞技场 | `l` `t` `m` `w` | LMArena 盲测排行榜（文本、WebDev、Agent、视觉、搜索），支持仅看开源模型与按厂商筛选 |
 | 视频订阅 | `l` `t` `m` `w` | B 站 UP 主（空间链接或 UID）、YouTube 频道（链接、`UC…` ID 或 `@handle`）与带封面的 RSS 的最新视频，带封面 |
+| 播客 | `l` `t` `m` `w` | 小宇宙播客主页、Apple Podcasts（链接、`apple:ID` 或直接填名称）与 Podcast RSS / `rsshub://` 的最新单集及科技播客榜，支持跨平台页内播放与交给 Agent 总结单集 |
 | 行情 | `t` `m` `s` `l` `w` | 支持汇率（`USD/CNY`）、A 股 / 港股 / 美股（`sh600519`、`hk00700`、`usAAPL`）与加密货币（`BTC`、`cg:<id>`） |
 | 格言 | `m` `w` `s` | 每日一句，点击换一条，信源与今日横栏共享 |
 
@@ -154,6 +155,7 @@ dsh-workboard
 - **GitHub**：调用本机 `gh` CLI，复用其已有登录态
 - **热榜**：微博、知乎、36 氪、少数派、B 站、V2EX 使用各站公开网页接口（非官方，站点改版可能失效）；Hacker News 使用 [HN Algolia API](https://hn.algolia.com/api)；GitHub 读取 Trending 页面；Product Hunt 与 Reddit 读取官方订阅源；结果缓存 10 分钟
 - **视频订阅**：YouTube 频道 RSS（仅在解析 `@handle` 时请求频道页）、B 站 UP 主投稿公开接口（非官方，偶尔限频），封面由 Host 代理成 data URL；缓存 15 分钟
+- **播客**：请求所填的 Podcast RSS / Atom 地址、小宇宙播客主页（`xiaoyuzhoufm.com`，非官方）或经 Apple iTunes Podcast Directory API（`itunes.apple.com`）解析出的订阅源与科技播客榜，封面由 Host 代理成 data URL；列表缓存 20 分钟、榜单缓存 60 分钟
 - **网络**：公网 IP 查询使用 [ipinfo.io](https://ipinfo.io)（失败时回退至 [ip.sb](https://ip.sb)），站点延迟通过 `curl` 测算（配置了系统代理时自动走代理），默认测百度、GitHub 与 Google（英文界面为 Google、GitHub 与 Cloudflare）
 - **服务状态**：请求各状态页的 Statuspage 接口 `/api/v2/summary.json`；DeepSeek 状态页托管在 Flashcat，没有公开接口，改为解析页面内嵌数据（非官方，页面改版可能失效）；默认 DeepSeek、Claude、OpenAI、GitHub 与 npm；缓存 2 分钟
 - **AI 论文**：[Hugging Face](https://huggingface.co) 每日论文与热门 Spaces 接口（huggingface.co 不通时改走 [hf-mirror.com](https://hf-mirror.com) 镜像），以及 [arXiv API](https://info.arxiv.org/help/api/index.html) 按领域筛选的最新论文；缓存 30 分钟
@@ -235,7 +237,7 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 ```
 
 - `index.js`：Host 端 `/api/dsh-workboard/*` 路由、数据存储与 Agent 工具注册
-- `client.js`：侧栏入口、看板容器与 52 个内置 widget
+- `client.js`：侧栏入口、看板容器与 53 个内置 widget
 - `lib/`：各数据源请求、解析与系统采样模块
 - `skills/workboard-widget.md`：供 Agent 编写自定义 widget 的规范指南
 
@@ -256,6 +258,7 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 | [HN Algolia API](https://hn.algolia.com/api)、[hnrss.org](https://hnrss.org) | Hacker News 热榜与默认英文订阅源 | 公开 API 与订阅源 |
 | 微博、知乎、36 氪、少数派、B 站、V2EX、GitHub Trending、Product Hunt、Reddit | 多源热榜 | 公开页面、订阅源与非官方接口 |
 | YouTube、B 站 | 视频订阅与封面 | 公开频道订阅源与非官方接口 |
+| Apple Podcasts（`itunes.apple.com`）、小宇宙（`xiaoyuzhoufm.com`）与各播客发布者 RSS | 播客订阅、单集音频与科技播客榜 | 公开目录 API、发布者 RSS 与公开页面 |
 | [爱范儿](https://www.ifanr.com)、[阮一峰的网络日志](https://www.ruanyifeng.com/blog/) | 默认中文 RSS 订阅源 | 发布者 RSS |
 | [GitHub CLI](https://cli.github.com)、GitHub Atom 订阅源与搜索接口 | GitHub widget、发版追踪与热门 MCP | MIT / 公开接口与订阅源 |
 | [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter) | 读取系统「正在播放」，内置于 `vendor/` | BSD-3-Clause |
