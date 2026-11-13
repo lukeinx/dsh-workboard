@@ -1007,7 +1007,7 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
     },
     'dsh-workboard/papers.get': async p => {
       if (!services.papers) throw new UserError('unavailable', 'papers are not available');
-      return services.papers.list({kind: String(p?.kind ?? '')});
+      return services.papers.list({kind: String(p?.kind ?? ''), cats: String(p?.cats ?? '')});
     },
     'dsh-workboard/models.get': async p => {
       if (!services.models) throw new UserError('unavailable', 'models are not available');

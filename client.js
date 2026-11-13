@@ -179,8 +179,9 @@ window.__ModuleLoader__.load({
       st_all: '全部正常', st_issues: '{n} 个服务异常', st_error: '无法读取',
       f_statusSources: '状态页（每行一个：名称 地址；支持 Statuspage 与 DeepSeek 状态页）',
       defaultStatus: 'DeepSeek https://status.deepseek.com\nClaude https://status.claude.com\nOpenAI https://status.openai.com\nGitHub https://www.githubstatus.com\nnpm https://status.npmjs.org',
-      papers: 'AI 论文', d_papers: 'Hugging Face 每日论文与热门模型，论文可交给 Agent 解读',
-      pp_papers: '论文', pp_models: '模型', pp_votes: '{n} 人点赞', pp_likes: '{n} 人喜欢', pp_downloads: '{n} 下载', f_ppModels: '显示热门模型',
+      papers: 'AI 论文', d_papers: 'Hugging Face 每日论文、arXiv 最新论文与热门 Spaces，论文可交给 Agent 解读',
+      pp_papers: 'HF 每日', pp_arxiv: 'arXiv', pp_spaces: 'Spaces', pp_votes: '{n} 人点赞', pp_likes: '{n} 人喜欢',
+      f_ppCats: 'arXiv 分类（空格分隔，如 cs.AI cs.CL cs.LG）', f_ppSpaces: '显示热门 Spaces',
       pp_prompt: '读一下这篇论文：{title}\n{url}\n用中文讲清楚它要解决的问题、核心方法、主要结果和局限，最后说说可能的应用场景。',
       models: '模型行情', d_models: 'OpenRouter 本周热门与最新上架的模型，附价格与上下文长度',
       md_top: '热门', md_new: '最新', md_free: '免费', md_price: '输入 ${i} · 输出 ${o}（美元 / 百万 token）', md_ctx: '{n} 上下文', md_none: '没有匹配的模型',
@@ -322,8 +323,9 @@ window.__ModuleLoader__.load({
       st_all: 'All operational', st_issues: '{n} service(s) with issues', st_error: 'Unavailable',
       f_statusSources: 'Status pages, one per line: name URL (Statuspage or the DeepSeek status page)',
       defaultStatus: 'DeepSeek https://status.deepseek.com\nClaude https://status.claude.com\nOpenAI https://status.openai.com\nGitHub https://www.githubstatus.com\nnpm https://status.npmjs.org',
-      papers: 'AI papers', d_papers: 'Hugging Face daily papers and trending models; hand a paper to the agent to explain',
-      pp_papers: 'Papers', pp_models: 'Models', pp_votes: '{n} upvotes', pp_likes: '{n} likes', pp_downloads: '{n} downloads', f_ppModels: 'Show trending models',
+      papers: 'AI papers', d_papers: 'Hugging Face daily papers, latest arXiv preprints and trending Spaces; hand a paper to the agent to explain',
+      pp_papers: 'HF daily', pp_arxiv: 'arXiv', pp_spaces: 'Spaces', pp_votes: '{n} upvotes', pp_likes: '{n} likes',
+      f_ppCats: 'arXiv categories, space-separated (e.g. cs.AI cs.CL cs.LG)', f_ppSpaces: 'Show trending Spaces',
       pp_prompt: 'Read this paper: {title}\n{url}\nExplain the problem it tackles, the core method, the main results and the limitations, then suggest where it could be applied.',
       models: 'Models', d_models: 'Trending and newest models on OpenRouter, with prices and context length',
       md_top: 'Trending', md_new: 'Newest', md_free: 'Free', md_price: 'Input ${i} · output ${o} (USD per million tokens)', md_ctx: '{n} context', md_none: 'No matching models',
@@ -4033,37 +4035,50 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         function Papers({size, config}) {
           useLocale();
           const ws = useWorkspace();
-          const kinds = config?.models === false ? ['papers'] : ['papers', 'models'];
+          const kinds = config?.spaces === false ? ['papers', 'arxiv'] : ['papers', 'arxiv', 'spaces'];
           const [picked, setPicked] = useState('papers');
           const [error, setError] = useState('');
           const kind = kinds.includes(picked) ? picked : kinds[0];
-          const res = useRemote('papers.get', {kind}, PAPERS_MS);
+          const cats = String(config?.cats ?? '').trim();
+          const res = useRemote('papers.get', kind === 'arxiv' ? {kind, cats} : {kind}, PAPERS_MS);
           const v = res.value?.kind === kind ? res.value : null;
           const read = useRead(v ? v.items.map(it => it.url) : []);
-          const compact = new Intl.NumberFormat(t('lang'), {notation: 'compact', maximumFractionDigits: 1});
+          const lang = t('lang');
+          const compact = new Intl.NumberFormat(lang, {notation: 'compact', maximumFractionDigits: 1});
+          const isPaper = kind === 'papers' || kind === 'arxiv';
           const ask = (e, it) => {
             e.preventDefault();
             e.stopPropagation();
             launch(fill(t('pp_prompt'), {url: it.url, title: it.title}), ws.path, ws.id).then(() => setError(''), err => setError(String(err?.message || err)));
           };
-          const meta = it => (kind === 'papers'
-            ? [size === 'l' ? it.summary : it.keywords.join(', ')].filter(Boolean)
-            : [it.task, fill(t('pp_downloads'), {n: compact.format(it.downloads)})].filter(Boolean)).join(' · ');
+          const meta = it => {
+            if (kind === 'papers') return [size === 'l' ? it.summary : it.keywords.join(', ')].filter(Boolean).join(' · ');
+            if (kind === 'arxiv') return [size === 'l' ? it.summary : (it.authors ?? []).join(', '), (it.keywords ?? []).join(', ')].filter(Boolean).join(' · ');
+            return [it.id, it.sdk, size === 'l' ? it.summary : ''].filter(Boolean).join(' · ');
+          };
+          const right = it => {
+            if (size === 't') return null;
+            if (kind === 'arxiv') return it.at ? h('span', {className: 'wb-num'}, new Date(it.at).toLocaleDateString(lang, {month: 'short', day: 'numeric'})) : null;
+            const n = kind === 'papers' ? it.votes : it.likes;
+            return h('span', {className: 'wb-num', title: fill(t(kind === 'papers' ? 'pp_votes' : 'pp_likes'), {n})}, `▲ ${compact.format(n)}`);
+          };
           const row = (it, i) => h('a', {key: it.id, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer',
-            title: [it.title, kind === 'papers' ? it.summary : meta(it)].filter(Boolean).join('\n')},
-            h('span', {className: 'wb-rank wb-num', 'data-top': i < 3 ? '' : undefined}, i + 1),
+            title: [it.title, it.summary || meta(it)].filter(Boolean).join('\n')},
+            h('span', {className: 'wb-rank wb-num', 'data-top': kind !== 'arxiv' && i < 3 ? '' : undefined}, i + 1),
             h('div', null, h('b', null, it.title), size === 'm' || !meta(it) ? null : h('small', null, meta(it))),
-            kind === 'papers' && size !== 'm' ? h('button', {type: 'button', className: 'wb-btn wb-rowact', onClick: e => ask(e, it)}, t('toAgent')) : null,
-            size === 't' ? null : h('span', {className: 'wb-num', title: kind === 'papers' ? fill(t('pp_votes'), {n: it.votes}) : fill(t('pp_likes'), {n: it.likes})},
-              `▲ ${compact.format(kind === 'papers' ? it.votes : it.likes)}`));
+            isPaper && size !== 'm' ? h('button', {type: 'button', className: 'wb-btn wb-rowact', onClick: e => ask(e, it)}, t('toAgent')) : null,
+            right(it));
           return h('div', {className: 'wb-trend'},
-            kinds.length > 1 ? h('div', {className: 'wb-seg', role: 'tablist'}, kinds.map(k => h('button', {key: k, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': k === kind, onClick: () => setPicked(k)}, t(`pp_${k}`)))) : null,
+            h('div', {className: 'wb-seg', role: 'tablist'}, kinds.map(k => h('button', {key: k, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': k === kind, onClick: () => setPicked(k)}, t(`pp_${k}`)))),
             h('div', {className: 'wb-rows'}, v ? v.items.map(row) : blank(res.error || '…')),
             error ? h('div', {className: 'wb-calerr', title: error}, error) : null);
         }
         Papers.workboard = {
           apiVersion: 1, sizes: ['l', 't', 'm', 'w'], defaultSize: 'l', description: () => t('d_papers'),
-          settings: [{key: 'models', type: 'toggle', default: true, label: () => t('f_ppModels')}],
+          settings: [
+            {key: 'cats', type: 'text', default: 'cs.AI cs.CL cs.LG', label: () => t('f_ppCats'), placeholder: 'cs.AI cs.CL cs.LG'},
+            {key: 'spaces', type: 'toggle', default: true, label: () => t('f_ppSpaces')},
+          ],
         };
 
         const usd = v => (v >= 100 ? v.toFixed(0) : v >= 1 ? v.toFixed(2).replace(/\.?0+$/, '') : String(Number(v.toPrecision(2))));
