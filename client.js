@@ -589,7 +589,7 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-wxmini>span{display:flex;align-items:center;gap:6px}
 .wb-wxmini svg{color:var(--dsw-alias-label-secondary)}
 .wb-wxmini .wb-wxt{font-size:24px;letter-spacing:-.5px}
-.wb-wxmini .wb-aqi{margin-left:6px;line-height:18px;display:inline-block}
+.wb-wxmini .wb-aqi{line-height:18px;display:inline-block}
 .wb-wxmini .wb-aqi[data-level=ok]{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-secondary)}
 .wb-wxskel{display:flex;align-items:center;gap:12px;opacity:.6}
 .wb-wxskel i{display:block;border-radius:6px;background:var(--dsw-alias-bg-layer-2)}
@@ -1374,15 +1374,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           if (showWeather && !wx.loc) weather = h('button', {type: 'button', className: 'wb-btn wb-tcity', onClick: openSettings}, h(Icon.pin), t('setCity'));
           else if (showWeather && w) {
             const aqi = w.aqi != null ? aqiLevel(w.aqi) : null;
-            const feels = Number.isFinite(w.current.feels) ? ` · ${fill(t('feels'), {n: Math.round(w.current.feels)})}` : '';
             weather = h('div', {className: 'wb-wxmini'},
               h('span', null,
                 h(WxIcon, {code: w.current.code, isDay: w.current.isDay, size: 26}),
                 h('span', {className: 'wb-wxt wb-num'}, deg(w.current.temp))),
               h('div', null,
-                h('div', null, `${wx.loc.name} · ${t(wxKind(w.current.code, w.current.isDay)[1])}`,
-                  aqi ? h('span', {className: 'wb-aqi wb-num', 'data-level': aqi.index <= 1 ? 'ok' : aqi.index === 2 ? 'warn' : 'bad', title: `AQI ${w.aqi}`}, aqi.index <= 1 ? t(aqi.key) : `${t(aqi.key)} ${w.aqi}`) : null),
-                h('div', {className: 'wb-muted wb-num'}, `${deg(w.today.lo)} / ${deg(w.today.hi)}${feels}`)));
+                h('div', {className: 'wb-num'}, `${wx.loc.name} · ${t(wxKind(w.current.code, w.current.isDay)[1])} · ${deg(w.today.lo)} / ${deg(w.today.hi)}`),
+                aqi ? h('div', null, h('span', {className: 'wb-aqi wb-num', 'data-level': aqi.index <= 1 ? 'ok' : aqi.index === 2 ? 'warn' : 'bad', title: `AQI ${w.aqi}`}, aqi.index <= 1 ? t(aqi.key) : `${t(aqi.key)} ${w.aqi}`)) : null));
           } else if (showWeather && wx.pending) {
             weather = h('div', {className: 'wb-wxskel', 'aria-hidden': true},
               h('i', {style: {width: 58, height: 26}}),
