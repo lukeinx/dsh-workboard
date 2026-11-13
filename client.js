@@ -188,7 +188,7 @@ window.__ModuleLoader__.load({
       f_mdVendors: '只看这些厂商（空格分隔，如 deepseek anthropic openai；留空看全部）',
       onthisday: '历史上的今天', d_onthisday: '百度百科与维基百科记载的今日历史事件',
       otd_ago: '{n} 年前', f_otdSource: '数据来源', otd_auto: '跟随界面语言（中文百度 / 英文维基）', otd_baidu: '百度百科', otd_wiki: '维基百科',
-      otd_all: '全部', otd_event: '大事', otd_people: '人物', otd_prev: '前一天', otd_next: '后一天', otd_nextItem: '换一条',
+      otd_prev: '前一天', otd_next: '后一天', otd_nextItem: '换一条',
       otd_prompt: '讲讲 {year} 年 {date} 的这件事：{title}\n{desc}\n用中文介绍它的前因后果、关键细节和历史影响。',
       wallpaper: '每日壁纸', d_wallpaper: 'Bing 每日壁纸与维基共享资源每日图片，点击切换最近 8 天',
       wp_open: '详情', f_wpSource: '来源', wp_bing: 'Bing 每日壁纸', wp_wikimedia: 'Wikimedia 每日图片', f_wpCaption: '显示标题与署名',
@@ -337,7 +337,7 @@ window.__ModuleLoader__.load({
       f_mdVendors: 'Only these vendors, space-separated (e.g. deepseek anthropic openai); empty shows all',
       onthisday: 'On this day', d_onthisday: 'Historical events on today\'s date from Wikipedia and Baidu Baike',
       otd_ago: '{n}y ago', f_otdSource: 'Source', otd_auto: 'Match UI language (Wikipedia in EN, Baidu in ZH)', otd_baidu: 'Baidu Baike', otd_wiki: 'Wikipedia',
-      otd_all: 'All', otd_event: 'Events', otd_people: 'People', otd_prev: 'Previous day', otd_next: 'Next day', otd_nextItem: 'Next event',
+      otd_prev: 'Previous day', otd_next: 'Next day', otd_nextItem: 'Next event',
       otd_prompt: 'Tell me about this event on {date}, {year}: {title}\n{desc}\nExplain the background, key details and historical impact.',
       wallpaper: 'Daily wallpaper', d_wallpaper: 'Bing daily wallpaper and Wikimedia Picture of the Day; click to cycle the last 8 days',
       wp_open: 'Info', f_wpSource: 'Source', wp_bing: 'Bing daily wallpaper', wp_wikimedia: 'Wikimedia Picture of the Day', f_wpCaption: 'Show title and credit',
@@ -4176,18 +4176,17 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           const lang = t('lang');
           const source = String(config?.source || 'auto');
           const [dayOffset, setDayOffset] = useState(0);
-          const [cat, setCat] = useState('all');
           const [index, setIndex] = useState(0);
           const [error, setError] = useState('');
           const day = dayOffset ? shiftDay(today, dayOffset) : today;
-          useEffect(() => { setIndex(0); }, [day, source, cat]);
+          useEffect(() => { setIndex(0); }, [day, source]);
           const res = useRemote('onthisday.get', {source, lang, day}, DAILY_MS);
           const v = res.value;
           const read = useRead(v ? v.items.map(it => it.url).filter(Boolean) : []);
           const thisYear = now.getFullYear();
           const dateStr = keyDate(day).toLocaleDateString(lang, {month: 'short', day: 'numeric'});
           const agoText = y => { const a = thisYear - y; return a > 0 ? fill(t('otd_ago'), {n: a}) : ''; };
-          const rank = it => (it.cover ? 4 : it.featured && it.type === 'event' ? 3 : it.featured ? 2 : it.type === 'event' ? 1 : 0);
+          const rank = it => (it.cover ? 2 : it.featured ? 1 : 0);
           const picked = v ? [...v.items].sort((a, b) => rank(b) - rank(a) || b.year - a.year) : [];
 
           if (size === 's' || size === 'm') {
@@ -4221,11 +4220,7 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
               it.desc ? h('small', null, it.desc) : null)));
           }
 
-          const hasPeople = Boolean(v?.items.some(x => x.type === 'birth' || x.type === 'death'));
-          const activeCat = hasPeople ? cat : 'all';
-          const filtered = !v ? [] : activeCat === 'event' ? v.items.filter(x => x.type === 'event')
-            : activeCat === 'people' ? v.items.filter(x => x.type === 'birth' || x.type === 'death') : v.items;
-          const items = filtered.length ? filtered : (v?.items ?? []);
+          const items = v?.items ?? [];
           const ask = (e, it) => {
             e.preventDefault();
             e.stopPropagation();
@@ -4248,8 +4243,6 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           };
           return h('div', {className: 'wb-otd'},
             h('div', {className: 'wb-otd-bar'},
-              hasPeople ? h('div', {className: 'wb-seg', role: 'tablist'},
-                ['all', 'event', 'people'].map(k => h('button', {key: k, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': k === activeCat, onClick: () => setCat(k)}, t(`otd_${k}`)))) : null,
               h('div', {className: 'wb-otd-nav'},
                 h('button', {type: 'button', className: 'wb-btn wb-iconbtn', 'aria-label': t('otd_prev'), title: t('otd_prev'), onClick: () => setDayOffset(d => d - 1)}, h(Icon.left)),
                 h('button', {type: 'button', className: 'wb-btn wb-otd-date wb-num', 'data-offset': dayOffset ? '' : undefined, onClick: () => setDayOffset(0)}, dateStr),

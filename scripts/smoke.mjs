@@ -1046,8 +1046,8 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
 
 // 历史上的今天与每日壁纸：百度与维基解析、Bing 与 Wikimedia 壁纸代理成 data: URL。
 {
-  const bd = {'11': {'1113': [{year: '1587', title: '<b>海瑞</b>逝世', desc: '明代清官', link: 'https://baike.baidu.com/item/1', type: 'death', recommend: true}, {year: '1995', title: '事件', link: 'javascript:bad', cover: true}]}};
-  assert.deepEqual(parseBaiduOnThisDay(bd, '1113').map(x => [x.year, x.title, x.url, Boolean(x.cover), Boolean(x.featured)]), [[1995, '事件', '', true, true], [1587, '海瑞逝世', 'https://baike.baidu.com/item/1', false, true]]);
+  const bd = {'11': {'1113': [{year: '1587', title: '<b>海瑞</b>逝世', type: 'death'}, {year: '1929', title: '<b>嘎达梅林</b>起义', desc: '起义', link: 'https://baike.baidu.com/item/1', type: 'event', recommend: true}, {year: '1995', title: '事件', link: 'javascript:bad', cover: true}]}};
+  assert.deepEqual(parseBaiduOnThisDay(bd, '1113').map(x => [x.year, x.title, x.url, Boolean(x.cover), Boolean(x.featured)]), [[1995, '事件', '', true, true], [1929, '嘎达梅林起义', 'https://baike.baidu.com/item/1', false, true]]);
   const wk = {
     onthisday: [{year: 2001, text: 'Wikipedia launched', pages: [{extract: 'Online encyclopedia', content_urls: {desktop: {page: 'https://en.wikipedia.org/wiki/W'}}}]}],
     image: {title: 'File:Bird.jpg', thumbnail: {source: 'https://upload.wikimedia.org/bird.jpg'}, description: {text: 'A bird'}, artist: {text: 'Bob'}, file_page: 'https://commons.wikimedia.org/wiki/File:Bird.jpg'},
