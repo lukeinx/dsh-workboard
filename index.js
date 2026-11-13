@@ -73,6 +73,7 @@ const MAX_READS = 5000;
 const MAX_READ_BATCH = 200;
 const MAX_PROMPT = 20_000;
 const WIDGET_FETCH_TTL = 30_000;
+const WIDGET_FRESH_TTL = 5_000;
 const MAX_WIDGET_ERROR = 2000;
 const MAX_BRIEF = 20_000;
 const DAILY_TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -784,7 +785,7 @@ export function createRunning(ctx, now = Date.now) {
 }
 
 const GIT_TTL = 15_000;
-const GITHUB_TTL = 5 * 60_000;
+const GITHUB_TTL = 4 * 60_000;
 const MAX_REPOS = 20;
 
 // 仓库列表：设置里写了路径就用设置（非仓库报错），否则用 Harness 登记的工作区（非仓库跳过）。
@@ -931,7 +932,7 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       const widget = store.getWidget(p?.id);
       const url = allowedUrl(p?.url, widget.fetch);
       const as = ['json', 'text', 'dataUrl'].includes(p?.as) ? p.as : 'json';
-      const value = await fetcher.get(url, {ttlMs: p?.fresh === true ? 0 : WIDGET_FETCH_TTL, type: as === 'dataUrl' ? 'bytes' : as, maxBytes: as === 'dataUrl' ? 1_500_000 : 2_000_000});
+      const value = await fetcher.get(url, {ttlMs: p?.fresh === true ? WIDGET_FRESH_TTL : WIDGET_FETCH_TTL, type: as === 'dataUrl' ? 'bytes' : as, maxBytes: as === 'dataUrl' ? 1_500_000 : 2_000_000});
       return as === 'dataUrl' ? `data:${value.type};base64,${value.base64}` : value;
     },
     'dsh-workboard/session.list': async () => (agents ? agents.sessions() : null),

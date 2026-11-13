@@ -618,6 +618,24 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   assert.equal(await handle['dsh-workboard/widget.fetch']({id: 'img', url: 'https://cdn.example.com/a.png', as: 'dataUrl'}), 'data:image/png;base64,AQID');
 }
 
+// 外部请求缓存在 TTL 的 90% 处过期，避免与同间隔的前端轮询错位；失败时仍回退旧值。
+{
+  let clock = 0;
+  let hits = 0;
+  let down = false;
+  const f = createFetcher({now: () => clock, fetchImpl: async () => { hits++; if (down) throw Object.assign(new Error('The operation was aborted due to timeout'), {name: 'TimeoutError'}); return Response.json({n: hits}); }});
+  const get = () => f.get('https://api.example.com/x', {ttlMs: 1000});
+  assert.deepEqual(await get(), {n: 1});
+  clock = 899;
+  assert.deepEqual([await get(), hits], [{n: 1}, 1]);
+  clock = 900;
+  assert.deepEqual([await get(), hits], [{n: 2}, 2]);
+  down = true; clock = 1900;
+  assert.deepEqual(await get(), {n: 2});
+  const cold = createFetcher({fetchImpl: async () => { throw Object.assign(new Error('The operation was aborted due to timeout'), {name: 'TimeoutError'}); }});
+  await assert.rejects(cold.get('https://api.example.com/y', {ttlMs: 1000}), e => e.code === 'timeout');
+}
+
 // 定时任务：列表字段、暂停 / 恢复 / 删除映射到 schedule.edit，立即运行与执行中、不存在的结果。
 {
   const edits = [];

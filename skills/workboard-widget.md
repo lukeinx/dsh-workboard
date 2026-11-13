@@ -57,7 +57,7 @@ The card runs in a sandboxed frame with its own origin. It cannot reach the Harn
 | `workboard.theme` | `'light'` or `'dark'` |
 | `workboard.lang` | UI language tag, e.g. `zh-CN` or `en` |
 | `workboard.on(fn)` | Calls `fn(workboard)` after any of the values above change (size, settings, data, theme); returns an unsubscribe function |
-| `workboard.fetch(url, {as, fresh})` | Requests `url` through Workboard and resolves to parsed JSON (`as: 'json'`, default), a string (`'text'`) or a `data:` URL (`'dataUrl'`, for images). GET only, no custom headers, 10 s timeout, about 2 MB. Responses are cached for 30 s unless `fresh: true`. Rejects with an `Error` |
+| `workboard.fetch(url, {as, fresh})` | Requests `url` through Workboard and resolves to parsed JSON (`as: 'json'`, default), a string (`'text'`) or a `data:` URL (`'dataUrl'`, for images). GET only, no custom headers, 10 s timeout, about 2 MB. Responses are cached for 30 s; `fresh: true` shortens that to 5 s. Rejects with an `Error` |
 | `workboard.save(data)` | Replaces the saved data with a JSON object (≤ 200 KB) and resolves when stored. You can read it with `get` |
 | `workboard.open(url)` | Opens an http(s) or mailto link in a new browser tab; plain `<a href>` links do the same |
 | `workboard.ask(prompt)` | Opens a new agent session with `prompt` in the draft; the user sends it |

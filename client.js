@@ -11,6 +11,7 @@ window.__ModuleLoader__.load({
     const PACKAGE = 'dsh-workboard';
     const SLOT = 'workboard.widget';
     const POLL_MS = 5000;
+    const RETRY_MS = 30_000;
     const WEATHER_MS = 10 * 60_000;
     const QUOTE_MS = 6 * 3600_000;
     const CAL_MS = 15 * 60_000;
@@ -56,7 +57,7 @@ window.__ModuleLoader__.load({
     const CATEGORIES = ['daily', 'agent', 'news', 'tools', 'dev', 'mine', 'plugin'];
 
     const zh = {
-      lang: 'zh-CN', title: '工作台', loadFailed: '加载失败', empty: '看板上还没有 widget',
+      lang: 'zh-CN', title: '工作台', loadFailed: '加载失败', err_timeout: '请求超时，稍后自动重试', err_network: '网络不可用，稍后自动重试', err_busy: '服务暂时不可用，稍后自动重试', empty: '看板上还没有 widget',
       today: '今日', clock: '时钟', todo: '待办', note: '速记', calendar: '日历', weather: '天气',
       d_today: '问候、时间、天气、格言合成一条横栏', d_todo: '未完成自动结转，Agent 可读写', d_note: '自动保存，当前行可转待办',
       d_calendar: '系统日历和 ICS 订阅的日程与月历，中文界面显示农历', d_weather: 'Open-Meteo 天气与空气质量', d_clock: '时间、问候与年度进度',
@@ -246,7 +247,7 @@ window.__ModuleLoader__.load({
       pod_topPrompt: '介绍播客《{name}》（主理人：{author}）：\n{url}\n{summary}\n请介绍这档播客的定位、代表性话题与适合收听的人群。',
     };
     const en = {
-      lang: 'en-US', title: 'Workboard', loadFailed: 'Failed to load', empty: 'No widgets on this board yet',
+      lang: 'en-US', title: 'Workboard', loadFailed: 'Failed to load', err_timeout: 'Request timed out, retrying shortly', err_network: 'Network unavailable, retrying shortly', err_busy: 'Service unavailable, retrying shortly', empty: 'No widgets on this board yet',
       today: 'Today', clock: 'Clock', todo: 'To-do', note: 'Notes', calendar: 'Calendar', weather: 'Weather',
       d_today: 'Greeting, time, weather and a quote in one banner', d_todo: 'Unfinished items carry over; the agent can read and edit', d_note: 'Autosaves; turn the current line into a to-do',
       d_calendar: 'Events from your macOS calendars and ICS subscriptions, with a month view', d_weather: 'Weather and air quality from Open-Meteo', d_clock: 'Time, greeting and year progress',
@@ -1412,7 +1413,7 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
         const call = async (method, payload = {}) => {
           const result = await ctx.connection.rpc.call('/api', `dsh-workboard/${method}`, payload);
           if (result?.ok === true) return result.value;
-          throw new Error(result?.error?.message || t('loadFailed'));
+          throw Object.assign(new Error(result?.error?.message || t('loadFailed')), {code: String(result?.error?.code ?? '').replace(`${NS}/`, '')});
         };
         const data = createData(call);
         const useData = () => useSyncExternalStore(data.subscribe, data.getSnapshot, data.getSnapshot);
@@ -1452,30 +1453,52 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
         };
 
         // 同一请求在多个 widget 间共享结果，页面可见时按间隔刷新；Host 端另有缓存。
+        // 失败后从 RETRY_MS 起指数退避重试，不超过正常间隔；网络恢复时立即重试。
         const remoteCache = new Map();
+        const REMOTE_ERRORS = {timeout: 'err_timeout', network: 'err_network'};
+        const remoteError = entry => {
+          const key = REMOTE_ERRORS[entry.code] ?? (entry.code === 'http' && /\b(429|5\d\d)\b/.test(entry.error) ? 'err_busy' : '');
+          return key ? t(key) : entry.error;
+        };
         function useRemote(method, payload, intervalMs) {
           const key = payload ? `${method}:${JSON.stringify(payload)}` : '';
           const [, force] = useState(0);
           useEffect(() => {
             if (!key) return undefined;
             let entry = remoteCache.get(key);
-            if (!entry) { entry = {value: undefined, error: '', at: 0, job: null, listeners: new Set()}; remoteCache.set(key, entry); }
+            if (!entry) { entry = {value: undefined, error: '', code: '', at: 0, next: 0, fails: 0, retry: 0, job: null, listeners: new Set()}; remoteCache.set(key, entry); }
             const listener = () => force(x => x + 1);
             entry.listeners.add(listener);
             const load = () => {
-              if (document.hidden || entry.job || (entry.at && Date.now() - entry.at < intervalMs / 2)) return;
-              entry.job = call(method, payload).then(v => { entry.value = v; entry.error = ''; }, e => { entry.error = String(e?.message || e); })
-                .finally(() => { entry.at = Date.now(); entry.job = null; for (const l of entry.listeners) l(); });
+              if (document.hidden || entry.job || Date.now() < entry.next) return;
+              clearTimeout(entry.retry);
+              entry.job = call(method, payload).then(v => {
+                entry.value = v; entry.error = ''; entry.code = ''; entry.fails = 0;
+                entry.next = Date.now() + intervalMs / 2;
+              }, e => {
+                entry.error = String(e?.message || e); entry.code = e?.code ?? '';
+                const wait = Math.min(intervalMs, RETRY_MS * 2 ** entry.fails++);
+                entry.next = Date.now() + wait;
+                entry.retry = setTimeout(() => { if (entry.listeners.size) entry.load?.(); }, wait);
+              }).finally(() => { entry.at = Date.now(); entry.job = null; for (const l of entry.listeners) l(); });
             };
+            const online = () => { if (entry.error) { entry.next = 0; load(); } };
             entry.load = load;
             load();
             const id = setInterval(load, intervalMs);
             document.addEventListener('visibilitychange', load);
-            return () => { clearInterval(id); document.removeEventListener('visibilitychange', load); entry.listeners.delete(listener); };
+            window.addEventListener('online', online);
+            return () => {
+              clearInterval(id);
+              document.removeEventListener('visibilitychange', load);
+              window.removeEventListener('online', online);
+              entry.listeners.delete(listener);
+              if (!entry.listeners.size) clearTimeout(entry.retry);
+            };
           }, [key]);
           const entry = key ? remoteCache.get(key) : null;
-          const reload = () => { if (entry) { entry.at = 0; entry.load?.(); } };
-          return {value: entry?.value, error: entry?.error ?? '', pending: Boolean(key) && !entry?.at, reload};
+          const reload = () => { if (entry) { entry.at = 0; entry.next = 0; entry.load?.(); } };
+          return {value: entry?.value, error: entry?.error ? remoteError(entry) : '', pending: Boolean(key) && !entry?.at, reload};
         }
 
         // 已读记录存在 Host 端，各 widget 共享；只增不减，打开链接即标记。
@@ -1715,7 +1738,8 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           const wx = useWeather(prefs);
           if (!wx.loc) return h('div', {className: 'wb-wx', style: {justifyContent: 'center', alignItems: 'flex-start'}}, h('button', {type: 'button', className: 'wb-btn wb-cta', onClick: openSettings}, t('setCity')));
           const w = wx.value;
-          if (!w) return h('div', {className: 'wb-wx wb-muted'}, wx.error || '…');
+          if (!w && wx.error) return h('div', {className: 'wb-wx wb-muted', style: {justifyContent: 'center', alignItems: 'flex-start', gap: 10}}, wx.error, h('button', {type: 'button', className: 'wb-btn', onClick: wx.reload}, t('refresh')));
+          if (!w) return h('div', {className: 'wb-wx wb-muted'}, '…');
           const [, textKey] = wxKind(w.current.code, w.current.isDay);
           const aqi = w.aqi != null ? aqiLevel(w.aqi) : null;
           const small = size === 's';
@@ -4882,7 +4906,7 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           const [error, setError] = useState('');
           const source = config?.source === 'jinrishici' ? 'jinrishici' : 'builtin';
           const cat = POEM_CATS.includes(config?.cat) ? config.cat : 'all';
-          const res = useRemote(source === 'jinrishici' ? 'poetry.get' : null, {day: today, n: offset}, POETRY_MS);
+          const res = useRemote('poetry.get', source === 'jinrishici' ? {day: today, n: offset} : null, POETRY_MS);
           const pool = cat === 'all' ? POEMS : POEMS.filter(p => p.cat === cat);
           const idx = ((dayOfYear(now) + offset) % pool.length + pool.length) % pool.length;
           const fallback = pool[idx];

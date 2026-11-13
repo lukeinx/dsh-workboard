@@ -166,7 +166,7 @@ All external network requests are made and cached by the Host:
 - **Packages**: public endpoints on npm (`registry.npmjs.org` and `api.npmjs.org`), [PyPI](https://pypi.org) and [PyPI Stats](https://pypistats.org), and [Crates.io](https://crates.io), defaulting to `dsh-workboard`, `@modelcontextprotocol/sdk`, `pypi:openai`, and `crate:tokio`; cached for 30 minutes
 - **China holidays**: [holiday-cn](https://github.com/NateScarlet/holiday-cn) data for this year and next via jsDelivr, falling back to GitHub raw; cached for 12 hours
 - **On this day & Daily wallpaper**: the [Wikimedia Feed API](https://api.wikimedia.org/wiki/Feed_API) (on-this-day events and Picture of the Day), Baidu Baike's monthly on-this-day JSON (`baike.baidu.com`, unofficial), and Bing's wallpaper archive (`www.bing.com/HPImageArchive.aspx`, unofficial); wallpaper images are proxied by the Host as data URLs; feeds cached for 2 hours, images for 6 hours
-- **Custom widgets**: limited to the `http(s)` URL prefixes declared in each widget's `fetch` allowlist; cached for 30 seconds
+- **Custom widgets**: limited to the `http(s)` URL prefixes declared in each widget's `fetch` allowlist; cached for 30 seconds, and for at least 5 seconds even when a fresh copy is requested
 
 Widgets that only read local state:
 

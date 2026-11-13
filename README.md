@@ -166,7 +166,7 @@ dsh-workboard
 - **包下载量**：npm（`registry.npmjs.org` 与 `api.npmjs.org`）、[PyPI](https://pypi.org) 与 [PyPI Stats](https://pypistats.org)、[Crates.io](https://crates.io) 公开接口，默认预填 `dsh-workboard`、`@modelcontextprotocol/sdk`、`pypi:openai` 与 `crate:tokio`；缓存 30 分钟
 - **节假日**：经 jsDelivr 读取 [holiday-cn](https://github.com/NateScarlet/holiday-cn) 今明两年的数据，失败时回退至 GitHub raw；缓存 12 小时
 - **历史上的今天 / 每日壁纸**：[Wikimedia Feed API](https://api.wikimedia.org/wiki/Feed_API)（历史上的今天与每日图片）、百度百科历史上的今天月度 JSON（`baike.baidu.com`，非官方）与 Bing 每日壁纸接口（`www.bing.com/HPImageArchive.aspx`，非官方）；壁纸图片由 Host 代理成 data URL；列表缓存 2 小时、图片缓存 6 小时
-- **自定义 widget**：仅可请求各自在 `fetch` 字段声明的 `http(s)` 地址前缀，Host 缓存 30 秒
+- **自定义 widget**：仅可请求各自在 `fetch` 字段声明的 `http(s)` 地址前缀，Host 缓存 30 秒，强制刷新时也至少缓存 5 秒
 
 仅读取本机数据的组件：
 
