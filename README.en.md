@@ -1,6 +1,6 @@
 # Workboard
 
-**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 42 widgets out of the box — and your agent builds the rest.**
+**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 45 widgets out of the box — and your agent builds the rest.**
 
 [简体中文](README.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
@@ -8,7 +8,7 @@
 
 ## Highlights
 
-### 42 widgets, ready to use
+### 45 widgets, ready to use
 
 Open the widget gallery, search, and drop cards straight onto your board across four categories:
 
@@ -75,7 +75,7 @@ If you are an agent interacting with Workboard:
 ## Reference
 
 <details>
-<summary><b>All 42 built-in widgets</b></summary>
+<summary><b>All 45 built-in widgets</b></summary>
 
 | Widget | Sizes | What it shows |
 |---|---|---|
@@ -113,14 +113,17 @@ If you are an agent interacting with Workboard:
 | Weather | `m` `s` | Current conditions, today's high and low, air quality, and hourly forecast |
 | Countdown | `m` `s` `t` | Days until the weekend, month end, year end, and custom dates (`MM-DD` without a year repeats annually) |
 | China holidays | `m` `s` `t` | Next public holidays in mainland China with days off and make-up workdays, plus today's lunar date |
+| On this day | `t` `l` `m` `w` `s` | Historical events on today's date from Wikipedia and Baidu Baike, newest year first |
+| Daily Wikipedia | `l` `t` `m` `w` | Wikipedia's featured article of the day and most-read articles, in English or Chinese |
 | Time progress | `m` `s` `w` | Percentage of today, this week, this month, and this year elapsed |
 | Habits | `m` `l` `t` `w` | Check in for any day of the past week and track your current streak |
 | Photo frame | `l` `m` `s` `t` `w` | Cycles through photos from a local folder (`~/Pictures` by default), every 1 minute to 1 day or only on click |
+| Daily wallpaper | `l` `m` `s` `t` `w` | Bing daily wallpaper and Wikimedia Picture of the Day; click to cycle the last 8 days |
 | Now playing | `m` `s` `w` `t` | Track, artwork, and progress of whatever macOS reports as now playing (Music, Spotify, QQ Music, browsers…), with play / pause and skip |
 | **News & markets** | | |
-| Trending | `l` `t` `m` `w` | Tabbed hot lists from Weibo, Zhihu, 36Kr, sspai, Hacker News, GitHub Trending, Product Hunt, and Reddit (Bilibili and V2EX optional) |
-| Feeds | `t` `l` `m` `w` | Multiple RSS / Atom feeds merged chronologically; visited items dim automatically |
-| AI papers | `l` `t` `m` `w` | Hugging Face daily papers ranked by upvotes and trending models; hand a paper to the agent to explain |
+| Trending | `l` `t` `m` `w` | Tabbed hot lists from Weibo, Zhihu, 36Kr, sspai, Hacker News, GitHub Trending (with time range and language filter), Product Hunt, and Reddit (Bilibili, V2EX, and self-hosted DailyHotApi / NewsNow optional) |
+| Feeds | `t` `l` `m` `w` | Multiple RSS / Atom feeds merged chronologically, with `rsshub://` route shorthand and custom instance URL; visited items dim automatically |
+| AI papers | `l` `t` `m` `w` | Hugging Face daily papers, latest arXiv preprints by category, and trending Spaces; hand a paper to the agent to explain |
 | Models | `l` `t` `m` `w` | Trending and newest models on OpenRouter with input / output prices and context length, filterable by vendor |
 | Videos | `l` `t` `m` `w` | Latest uploads from YouTube channels (link, `UC…` ID, or `@handle`), Bilibili creators (space link or UID), and RSS feeds with images, with thumbnails |
 | Markets | `t` `m` `s` `l` `w` | Forex (`USD/CNY`), China / HK / US equities (`sh600519`, `hk00700`, `usAAPL`), and crypto (`BTC`, `cg:<id>`) |
@@ -137,16 +140,17 @@ All external network requests are made and cached by the Host:
 
 - **Weather & city search**: [Open-Meteo](https://open-meteo.com), requested only after you set a city
 - **Quotes**: [Hitokoto](https://hitokoto.cn), requested only when selected as the quote source
-- **Calendars & feeds**: the ICS and RSS / Atom URLs you configure; the Feeds widget starts with [hnrss.org](https://hnrss.org) front page (ifanr and Ruan Yifeng's blog in Chinese), editable in its settings
+- **Calendars & feeds**: the ICS and RSS / Atom URLs you configure (`rsshub://` routes expand against your [RSSHub](https://docs.rsshub.app) instance URL, or `rsshub.app` when left empty); the Feeds widget starts with [hnrss.org](https://hnrss.org) front page (ifanr and Ruan Yifeng's blog in Chinese), editable in its settings
 - **Markets**: Tencent Finance (`qt.gtimg.cn`) for equities, [open.er-api.com](https://open.er-api.com) for exchange rates, and [CoinGecko](https://www.coingecko.com) for crypto
 - **GitHub**: uses your local `gh` CLI and its existing sign-in
-- **Trending**: public web endpoints for Weibo, Zhihu, 36Kr, sspai, Bilibili, and V2EX (unofficial and may break if a site changes), the [HN Algolia API](https://hn.algolia.com/api), the GitHub Trending page, and official Product Hunt and Reddit feeds; cached for 10 minutes
+- **Trending**: public web endpoints for Weibo, Zhihu, 36Kr, sspai, Bilibili, and V2EX (unofficial and may break if a site changes), the [HN Algolia API](https://hn.algolia.com/api), the GitHub Trending page (with time range and language path), official Product Hunt and Reddit feeds, plus your self-hosted DailyHotApi or NewsNow instance when configured; cached for 10 minutes
 - **Videos**: YouTube channel RSS feeds (channel pages only to resolve an `@handle`), Bilibili's public creator archive endpoint (unofficial, rate-limited at times), and thumbnails proxied as data URLs; cached for 15 minutes
 - **Network**: public IP from [ipinfo.io](https://ipinfo.io) (falling back to [ip.sb](https://ip.sb)) and host latency via `curl`, respecting the system proxy when set; tests Google, GitHub, and Cloudflare by default (Baidu, GitHub, and Google in Chinese)
 - **Service status**: each configured page's Statuspage `/api/v2/summary.json`; the DeepSeek status page (hosted on Flashcat) has no public API, so its embedded page data is parsed (unofficial, may break if the page changes); defaults to DeepSeek, Claude, OpenAI, GitHub, and npm; cached for 2 minutes
-- **AI papers**: the [Hugging Face](https://huggingface.co) daily papers and models APIs, falling back to the [hf-mirror.com](https://hf-mirror.com) mirror when huggingface.co is unreachable; cached for 30 minutes
+- **AI papers**: the [Hugging Face](https://huggingface.co) daily papers and trending Spaces APIs (falling back to [hf-mirror.com](https://hf-mirror.com) when huggingface.co is unreachable) and the [arXiv API](https://info.arxiv.org/help/api/index.html) for latest preprints by category (`cs.AI cs.CL cs.LG` by default); cached for 30 minutes
 - **Models**: the public [OpenRouter](https://openrouter.ai) models API (no key needed); the Usage widget reads the same API when "Estimate from OpenRouter list prices" is on; cached for 30 minutes
 - **China holidays**: [holiday-cn](https://github.com/NateScarlet/holiday-cn) data for this year and next via jsDelivr, falling back to GitHub raw; cached for 12 hours
+- **On this day, Daily Wikipedia & Daily wallpaper**: the [Wikimedia Feed API](https://api.wikimedia.org/wiki/Feed_API) (featured article, most-read, on-this-day events, and Picture of the Day), Baidu Baike's monthly on-this-day JSON (`baike.baidu.com`, unofficial), and Bing's wallpaper archive (`www.bing.com/HPImageArchive.aspx`, unofficial); wallpaper images are proxied by the Host as data URLs; feeds cached for 2 hours, images for 6 hours
 - **Custom widgets**: limited to the `http(s)` URL prefixes declared in each widget's `fetch` allowlist; cached for 30 seconds
 
 Widgets that only read local state:
@@ -217,7 +221,7 @@ npm run check   # syntax check, Host smoke test, and ICS parser tests
 ```
 
 - `index.js`: Host routes (`/api/dsh-workboard/*`), storage tables, and agent tools
-- `client.js`: sidebar entry, board container, and the 42 built-in widgets
+- `client.js`: sidebar entry, board container, and the 45 built-in widgets
 - `lib/`: data fetchers, parsers, and system probes
 - `skills/workboard-widget.md`: agent skill for building custom widgets
 
@@ -243,9 +247,14 @@ Workboard builds on the following projects and services. Feed and trending conte
 | [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter) | System now-playing info, bundled in `vendor/` | BSD-3-Clause |
 | [ipinfo.io](https://ipinfo.io), [ip.sb](https://ip.sb) | Public IP lookup in the Network widget | Public API |
 | Statuspage status pages of DeepSeek, Claude, OpenAI, GitHub, npm | Service status | Public status APIs; the DeepSeek page is parsed (unofficial) |
-| [Hugging Face](https://huggingface.co), [hf-mirror.com](https://hf-mirror.com) | Daily papers and trending models | Public API and community mirror |
+| [Hugging Face](https://huggingface.co), [hf-mirror.com](https://hf-mirror.com) | Daily papers and trending Spaces | Public API and community mirror |
+| [arXiv](https://arxiv.org) | Latest preprints by category | Public API (attribution required) |
 | [OpenRouter](https://openrouter.ai) | Models widget and list-price estimates in Usage | Public API |
 | [holiday-cn](https://github.com/NateScarlet/holiday-cn) | China public holidays and make-up workdays, via [jsDelivr](https://www.jsdelivr.com) | MIT |
+| [Wikimedia Foundation](https://api.wikimedia.org/wiki/Feed_API) (Wikipedia / Wikimedia Commons) | Daily Wikipedia, On this day, and Wikimedia Picture of the Day | Public API (content under CC BY-SA 4.0) |
+| Baidu Baike (`baike.baidu.com`) | Chinese On this day events | Unofficial endpoint |
+| Microsoft Bing (`www.bing.com`) | Bing daily wallpaper | Unofficial endpoint (photo copyright belongs to the respective photographers) |
+| [RSSHub](https://docs.rsshub.app), [DailyHotApi](https://github.com/imsyy/DailyHotApi), [NewsNow](https://github.com/ourongxing/newsnow) | Optional `rsshub://` feed routes and custom trending aggregator protocols | MIT (served by user-hosted instances) |
 | Classical texts (Laozi, Confucius, Xunzi, and others) | Built-in quotes | Public domain |
 
 ## License
