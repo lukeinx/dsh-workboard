@@ -872,6 +872,12 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-hdhead{flex:none;font-size:12px;color:var(--dsw-alias-label-secondary);padding:0 2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wb-activity{display:flex;flex-direction:column;gap:6px;height:100%;min-height:0}
 .wb-heatbox{flex:1;min-height:0;display:flex;align-items:center;justify-content:flex-end;overflow:hidden}
+.wb-heatwrap{display:grid;gap:4px}
+.wb-heatmon{position:relative}
+.wb-heatmon span{position:absolute;bottom:0;white-space:nowrap}
+.wb-heatwk{display:grid}
+.wb-heatwk span{display:flex;align-items:center;justify-content:flex-end}
+.wb-heatmon,.wb-heatwk{font-size:10px;line-height:1;color:var(--dsw-alias-label-secondary);user-select:none}
 .wb-heat{display:grid;grid-auto-flow:column}
 .wb-heat i{border-radius:2px;background:var(--dsw-alias-bg-layer-2)}
 .wb-heat i[data-level="1"]{background:#9be9a8}
@@ -3981,6 +3987,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
 
         const AC_GAP = 3;
         const AC_MAX_WEEKS = 53;
+        const AC_LAB_H = 12;
+        const AC_LAB_GAP = 4;
         function Activity({size, config}) {
           useLocale();
           const now = useNow();
@@ -4006,9 +4014,12 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             acc.requests += r.requests;
             byDay.set(r.day, acc);
           }
-          const cell = Math.max(6, Math.min(14, Math.floor((box.h - AC_GAP * 6) / 7)));
-          const weeks = Math.max(1, Math.min(AC_MAX_WEEKS, Math.floor((box.w + AC_GAP) / (cell + AC_GAP))));
-          const weekStart = Number(prefs.weekStart ?? (t('lang').startsWith('zh') ? '1' : '0'));
+          const lang = t('lang');
+          const zh = lang.startsWith('zh');
+          const labW = zh ? 12 : 24;
+          const cell = Math.max(6, Math.min(14, Math.floor((box.h - AC_LAB_H - AC_LAB_GAP - AC_GAP * 6) / 7)));
+          const weeks = Math.max(1, Math.min(AC_MAX_WEEKS, Math.floor((box.w - labW - AC_LAB_GAP + AC_GAP) / (cell + AC_GAP))));
+          const weekStart = Number(prefs.weekStart ?? (zh ? '1' : '0'));
           const today = v.today;
           const back = (keyDate(today).getDay() - weekStart + 7) % 7;
           const first = shiftDay(today, -back - (weeks - 1) * 7);
@@ -4018,7 +4029,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const cut = q => sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * q))] ?? 0;
           const steps = [cut(0.25), cut(0.5), cut(0.75)];
           const level = x => (x <= 0 ? 0 : 1 + steps.filter(s => x > s).length);
-          const lang = t('lang');
           const total = values.reduce((a, x) => a + x, 0);
           const active = sorted.length;
           let streak = 0;
@@ -4034,11 +4044,22 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
               const x = byDay.get(d);
               return h('i', {key: d, 'data-day': d, 'data-level': level(x?.[metric] ?? 0), 'data-today': d === today ? '' : undefined});
             }) : null);
+          const months = [];
+          for (let c = 0; c < weeks; c++) {
+            const d = cells.slice(c * 7, c * 7 + 7).find(x => x.endsWith('-01'));
+            if (!d || weeks - c < 3 || (months.length && c - months[months.length - 1].c < 3)) continue;
+            months.push({c, text: keyDate(d).toLocaleDateString(lang, {month: 'short'})});
+          }
+          const head = h('div', {className: 'wb-heatmon'},
+            box.w ? months.map(m => h('span', {key: m.c, style: {left: `${m.c * (cell + AC_GAP)}px`}}, m.text)) : null);
+          const side = h('div', {className: 'wb-heatwk', style: {gridTemplateRows: `repeat(7, ${cell}px)`, rowGap: `${AC_GAP}px`}},
+            box.w ? cells.slice(0, 7).map((d, r) => h('span', {key: r}, [1, 3, 5].includes((weekStart + r) % 7) ? keyDate(d).toLocaleDateString(lang, {weekday: zh ? 'narrow' : 'short'}) : '')) : null);
           const hx = hover ? byDay.get(hover) : null;
           const tip = hover ? fill(t('u_day'), {d: keyDate(hover).toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'}), t: compact(hx?.tokens ?? 0), r: hx?.requests ?? 0}) : '';
           const stats = [fill(t('ac_total'), {n: compact(total), u: unit}), fill(t('ac_days'), {n: active}), streak ? fill(t('ac_streak'), {n: streak}) : '', size === 'm' ? '' : fill(t('ac_best'), {n: best})].filter(Boolean);
           return h('div', {className: 'wb-activity'},
-            h('div', {className: 'wb-heatbox', ref}, grid),
+            h('div', {className: 'wb-heatbox', ref},
+              h('div', {className: 'wb-heatwrap', style: {gridTemplateColumns: `${labW}px auto`, gridTemplateRows: `${AC_LAB_H}px auto`}}, h('span'), head, side, grid)),
             h('div', {className: 'wb-notefoot wb-num', style: {marginTop: 0}}, h('span', null, tip || stats.join(' · '))));
         }
         Activity.workboard = {
