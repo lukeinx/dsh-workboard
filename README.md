@@ -1,6 +1,6 @@
 # 工作台 Workboard
 
-**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 44 个 widget，开箱即用；不够用的，让 Agent 现做。**
+**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 50 个 widget，开箱即用；不够用的，让 Agent 现做。**
 
 [English](README.en.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
@@ -8,14 +8,14 @@
 
 ## 亮点
 
-### 内置 44 个 widget，开箱即用
+### 内置 50 个 widget，开箱即用
 
 覆盖四大场景，打开组件库即可搜索、预览并连续添加到看板：
 
-- **Agent 协作**：待确认与运行中会话、长程目标与后台作业、Prompt 快启、Token 用量与费用估算、产出物、定时任务、收藏会话
-- **效率与开发**：待办、速记、ICS 日历、专注番茄钟、白噪音、快捷链接、Git 工作区、GitHub（PR / Issue）、系统状态、网络测速、剪贴板、最近文件
-- **日常桌面**：今日横栏、时钟、世界时钟、天气、倒数日、时间进度、习惯打卡、本机相框、正在播放
-- **资讯与行情**：多源热榜、RSS / Atom 订阅、视频订阅、A 股 / 港股 / 美股 / 汇率 / 加密货币行情、每日格言
+- **Agent 协作**：待确认与运行中会话、长程目标与后台作业、每日简报、Prompt 快启、Token 用量与费用估算、活跃热力图、服务状态、热门 MCP、产出物、定时任务、收藏会话
+- **效率与开发**：待办、速记、ICS 日历、专注番茄钟、白噪音、快捷链接、快捷应用、Git 工作区、GitHub（PR / Issue）、发版追踪、包下载量、系统状态、最近文件、剪贴板、网络测速、本机端口
+- **日常桌面**：今日横栏、时钟、世界时钟、天气、日出日落与月相、倒数日、节假日、历史上的今天、每日一词、时间进度、习惯打卡、本机相框、每日壁纸、正在播放
+- **资讯与行情**：多源热榜、RSS / Atom 订阅、AI 论文、模型行情、大模型竞技场、视频订阅、A 股 / 港股 / 美股 / 汇率 / 加密货币行情、每日格言
 
 绝大多数零配置即用；少数仅需填入城市、日历订阅链接或股票代码等个人信息。
 
@@ -75,7 +75,7 @@ dsh-workboard
 ## 参考
 
 <details>
-<summary><b>全部 44 个内置 widget</b></summary>
+<summary><b>全部 50 个内置 widget</b></summary>
 
 | Widget | 档位 | 说明 |
 |---|---|---|
@@ -88,6 +88,7 @@ dsh-workboard
 | 用量 | `l` `t` `m` `w` `s` | 从本机会话日志统计 Token、请求数、缓存命中率及各模型占比；填入单价或开启 OpenRouter 公开价后可估算花费 |
 | 活跃热力图 | `w` `l` `m` | 过去一年每天的 Agent 用量热力图，按 token 或请求数着色，附活跃天数与连续天数 |
 | 服务状态 | `t` `l` `m` `s` `w` | DeepSeek、Claude、OpenAI、GitHub、npm 及任意 Statuspage 状态页，有故障的服务置顶 |
+| 热门 MCP | `l` `t` `m` `w` | npm 周下载热门、GitHub 高星与官方 MCP Registry 最新上架的 MCP Server，支持按关键词过滤 |
 | 产出物 | `t` `l` `m` `w` | 按时间倒序展示 Agent 交付的文件；支持直接打开、在 Finder 中定位或跳回原会话 |
 | 定时任务 | `t` `l` `m` `w` | 查看所有定时任务的执行周期与下次触发时间；支持立即运行、暂停、恢复与删除 |
 | 收藏会话 | `t` `l` `m` `w` | 固定常用会话并展示最新一条消息预览 |
@@ -101,6 +102,8 @@ dsh-workboard
 | 快捷应用 | `m` `s` `w` `t` `l` | 从可搜索的本机应用列表中挑选常用 App，一键打开；正在运行的带圆点（支持 macOS 与 Windows） |
 | Git 工作区 | `t` `l` `m` `w` | 展示各仓库当前分支、未提交改动、领先 / 落后提交数及上游已删除分支；默认读取 Harness 工作区 |
 | GitHub | `t` `l` `m` `w` | 复用本机已登录的 `gh` CLI，展示待你 Review 的 PR、你发起的 PR 以及指派给你的 Issue |
+| 发版追踪 | `t` `l` `m` `w` | 聚合多个 GitHub 仓库的最新 Release 与变更摘要，可过滤预发布版本 |
+| 包下载量 | `t` `m` `l` `s` `w` | 追踪 npm、PyPI（`pypi:包名`）与 Crates.io（`crate:包名`）包的周下载量、月下载量与最新版本 |
 | 系统状态 | `m` `s` `t` `l` `w` | 实时查看 CPU、内存、磁盘、电池状态及最近 5 分钟 CPU 负载曲线 |
 | 最近文件 | `t` `l` `m` `w` | 列出 `~/Downloads`、`~/Desktop` 或指定文件夹的最新文件；支持打开、定位或直接发给 Agent |
 | 剪贴板 | `t` `l` `m` `w` | 记录面板打开期间复制过的文本；支持一键重复制，或套用「翻译」等预设发给 Agent |
@@ -111,9 +114,11 @@ dsh-workboard
 | 时钟 | `m` `s` | 当前时间、问候语、日期与年度进度条 |
 | 世界时钟 | `m` `s` `w` `t` | 对照多个 IANA 时区的当前时间、与本地时差及跨日状态 |
 | 天气 | `m` `s` | 当前天气、今日高低温、空气质量（AQI）及未来数小时预报 |
+| 日出日落与月相 | `m` `s` `t` `w` | 太阳轨迹、日出日落、黄金时刻、昼长及较昨日变化，附今日月相、照度与朔望倒计时（与天气共享城市设置） |
 | 倒数日 | `m` `s` `t` | 距离周末、月底、年底及自定义日期的天数；不带年份（如 `12-25`）时按每年重复计算 |
 | 节假日 | `m` `s` `t` | 中国大陆接下来的法定节假日、放假天数与调休上班日 |
 | 历史上的今天 | `t` `l` `m` `w` `s` | 百度百科与维基百科记载的今日历史事件，按年份倒序排列 |
+| 每日一词 | `m` `s` `t` `l` `w` | 每天精选一个 AI 与软件工程核心概念，附双语释义、代码示例与 Agent 深入解读按钮，点击可切换词条 |
 | 时间进度 | `m` `s` `w` | 今日、本周、本月与本年已度过的百分比 |
 | 习惯打卡 | `m` `l` `t` `w` | 支持最近一周打卡与补卡，自动计算当前连续达成天数 |
 | 相框 | `l` `m` `s` `t` `w` | 轮播本机文件夹（默认 `~/Pictures`）中的照片，切换间隔可选 1 分钟到 1 天或只在点击时切换 |
@@ -124,6 +129,7 @@ dsh-workboard
 | 订阅 | `t` `l` `m` `w` | 聚合多个 RSS / Atom 订阅源并按时间混排，支持 `rsshub://` 路由简写与自建实例，已读条目自动变灰 |
 | AI 论文 | `l` `t` `m` `w` | Hugging Face 每日论文、arXiv 分类最新论文与热门 Spaces，论文可一键交给 Agent 解读 |
 | 模型行情 | `l` `t` `m` `w` | OpenRouter 本周热门与最新上架的模型，附输入 / 输出单价与上下文长度，可按厂商筛选 |
+| 大模型竞技场 | `l` `t` `m` `w` | LMArena 盲测排行榜（文本、WebDev、Agent、视觉、搜索），支持仅看开源模型与按厂商筛选 |
 | 视频订阅 | `l` `t` `m` `w` | B 站 UP 主（空间链接或 UID）、YouTube 频道（链接、`UC…` ID 或 `@handle`）与带封面的 RSS 的最新视频，带封面 |
 | 行情 | `t` `m` `s` `l` `w` | 支持汇率（`USD/CNY`）、A 股 / 港股 / 美股（`sh600519`、`hk00700`、`usAAPL`）与加密货币（`BTC`、`cg:<id>`） |
 | 格言 | `m` `w` `s` | 每日一句，点击换一条，信源与今日横栏共享 |
@@ -148,6 +154,10 @@ dsh-workboard
 - **服务状态**：请求各状态页的 Statuspage 接口 `/api/v2/summary.json`；DeepSeek 状态页托管在 Flashcat，没有公开接口，改为解析页面内嵌数据（非官方，页面改版可能失效）；默认 DeepSeek、Claude、OpenAI、GitHub 与 npm；缓存 2 分钟
 - **AI 论文**：[Hugging Face](https://huggingface.co) 每日论文与热门 Spaces 接口（huggingface.co 不通时改走 [hf-mirror.com](https://hf-mirror.com) 镜像），以及 [arXiv API](https://info.arxiv.org/help/api/index.html) 按领域筛选的最新论文；缓存 30 分钟
 - **模型行情**：[OpenRouter](https://openrouter.ai) 公开模型列表接口（无需 key）；用量 widget 开启「按 OpenRouter 公开价估算」时也读取同一接口；缓存 30 分钟
+- **大模型竞技场**：经 [Hugging Face Datasets Server](https://huggingface.co/docs/dataset-viewer) 读取 [LMArena](https://lmarena.ai) 官方发布的 [`lmarena-ai/leaderboard-dataset`](https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset)（文本、WebDev、Agent、视觉、搜索）；缓存 60 分钟
+- **热门 MCP**：[npm 搜索接口](https://registry.npmjs.org)、[GitHub 仓库搜索接口](https://docs.github.com/rest/search) 与 [官方 MCP Registry](https://registry.modelcontextprotocol.io)；缓存 30 分钟
+- **发版追踪**：所填 GitHub 仓库的公开 `releases.atom` 订阅源（无需 key、不占 REST API 配额），默认预填 `anthropics/claude-code`、`modelcontextprotocol/servers`、`ollama/ollama` 与 `vercel/ai`；缓存 15 分钟
+- **包下载量**：npm（`registry.npmjs.org` 与 `api.npmjs.org`）、[PyPI](https://pypi.org) 与 [PyPI Stats](https://pypistats.org)、[Crates.io](https://crates.io) 公开接口，默认预填 `dsh-workboard`、`@modelcontextprotocol/sdk`、`pypi:openai` 与 `crate:tokio`；缓存 30 分钟
 - **节假日**：经 jsDelivr 读取 [holiday-cn](https://github.com/NateScarlet/holiday-cn) 今明两年的数据，失败时回退至 GitHub raw；缓存 12 小时
 - **历史上的今天 / 每日壁纸**：[Wikimedia Feed API](https://api.wikimedia.org/wiki/Feed_API)（历史上的今天与每日图片）、百度百科历史上的今天月度 JSON（`baike.baidu.com`，非官方）与 Bing 每日壁纸接口（`www.bing.com/HPImageArchive.aspx`，非官方）；壁纸图片由 Host 代理成 data URL；列表缓存 2 小时、图片缓存 6 小时
 - **自定义 widget**：仅可请求各自在 `fetch` 字段声明的 `http(s)` 地址前缀，Host 缓存 30 秒
@@ -164,6 +174,7 @@ dsh-workboard
 - **端口**：在 macOS 与 Linux 上调用 `lsof` 和 `ps` 列出监听中的 TCP 端口、工作目录与命令行；「停止」仅向仍在监听该端口的进程发送 `SIGTERM`，无需额外授权
 - **快捷应用**：在 macOS 上列出 `/Applications`、`/System/Applications`、`~/Applications` 及其 `Utilities` 子目录顶层的应用，用 `osascript`（JavaScript for Automation）读取 Finder 显示名与图标，用 `ps` 判断是否在运行；只用 `open -a` 打开上述目录内的应用，无需授权；在 Windows 上通过 PowerShell 读取「开始」菜单的应用列表（`shell:AppsFolder`，含商店应用），图标取自快捷方式指向的程序，用 `Get-Process` 判断是否在运行，只经 `explorer.exe` 打开列表内的应用；商店应用不显示图标与运行圆点
 - **白噪音**：在页面内用 Web Audio 合成，不读文件、不联网
+- **日出日落与月相 / 每日一词**：在页面内按所选城市经纬度（NOAA 太阳位置算法与朔望月周期）及内置开发者词库计算，不读文件、不联网（在日出日落与月相中搜索城市时复用天气 widget 的 Open-Meteo 城市搜索）
 - **最近文件**：仅列出目标文件夹顶层文件，不递归扫描
 - **剪贴板**：仅在卡片可见期间每 2 秒读取一次 `pbpaste`（macOS）或 `wl-paste` / `xclip`（Linux），历史仅保存在内存中，不落盘
 
@@ -220,7 +231,7 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 ```
 
 - `index.js`：Host 端 `/api/dsh-workboard/*` 路由、数据存储与 Agent 工具注册
-- `client.js`：侧栏入口、看板容器与 44 个内置 widget
+- `client.js`：侧栏入口、看板容器与 50 个内置 widget
 - `lib/`：各数据源请求、解析与系统采样模块
 - `skills/workboard-widget.md`：供 Agent 编写自定义 widget 的规范指南
 
@@ -242,11 +253,13 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 | 微博、知乎、36 氪、少数派、B 站、V2EX、GitHub Trending、Product Hunt、Reddit | 多源热榜 | 公开页面、订阅源与非官方接口 |
 | YouTube、B 站 | 视频订阅与封面 | 公开频道订阅源与非官方接口 |
 | [爱范儿](https://www.ifanr.com)、[阮一峰的网络日志](https://www.ruanyifeng.com/blog/) | 默认中文 RSS 订阅源 | 发布者 RSS |
-| [GitHub CLI](https://cli.github.com) | GitHub widget 数据源 | MIT |
+| [GitHub CLI](https://cli.github.com)、GitHub Atom 订阅源与搜索接口 | GitHub widget、发版追踪与热门 MCP | MIT / 公开接口与订阅源 |
 | [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter) | 读取系统「正在播放」，内置于 `vendor/` | BSD-3-Clause |
 | [ipinfo.io](https://ipinfo.io)、[ip.sb](https://ip.sb) | 网络 widget 公网 IP 查询 | 公开 API |
 | DeepSeek、Claude、OpenAI、GitHub、npm 的状态页 | 服务状态 | 公开状态接口；DeepSeek 为页面解析（非官方接口） |
-| [Hugging Face](https://huggingface.co)、[hf-mirror.com](https://hf-mirror.com) | 每日论文与热门 Spaces | 公开 API 与社区镜像 |
+| [Hugging Face](https://huggingface.co)、[hf-mirror.com](https://hf-mirror.com) | 每日论文、热门 Spaces 与 Datasets Server | 公开 API 与社区镜像 |
+| [LMArena](https://lmarena.ai)（[`lmarena-ai/leaderboard-dataset`](https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset)） | 大模型竞技场排行榜数据 | Apache-2.0 / CC BY 4.0 |
+| [Official MCP Registry](https://registry.modelcontextprotocol.io)、[npm](https://www.npmjs.com)、[PyPI](https://pypi.org) / [PyPI Stats](https://pypistats.org)、[Crates.io](https://crates.io) | 热门 MCP 与包下载量统计 | 公开注册表接口 |
 | [arXiv](https://arxiv.org) | 分类最新论文订阅 | 公开 API（需署名） |
 | [OpenRouter](https://openrouter.ai) | 模型行情与用量的公开价估算 | 公开 API |
 | [holiday-cn](https://github.com/NateScarlet/holiday-cn) | 中国法定节假日与调休数据，经 [jsDelivr](https://www.jsdelivr.com) 分发 | MIT |

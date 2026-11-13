@@ -32,6 +32,10 @@ import {createPapers} from './lib/papers.js';
 import {createModels} from './lib/models.js';
 import {createDaily} from './lib/daily.js';
 import {createHolidays} from './lib/holiday.js';
+import {createLeaderboard} from './lib/leaderboard.js';
+import {createMcps} from './lib/mcps.js';
+import {createReleases} from './lib/releases.js';
+import {createPackages} from './lib/packages.js';
 import {CONTEXT_SECTIONS, createContext} from './lib/context.js';
 import {stat} from 'node:fs/promises';
 import {isAbsolute, join} from 'node:path';
@@ -81,6 +85,7 @@ export const BUILTIN_WIDGETS = [
   'workboard.nowplaying', 'workboard.ambient', 'workboard.videos', 'workboard.attention', 'workboard.brief',
   'workboard.ports', 'workboard.status', 'workboard.papers', 'workboard.holiday', 'workboard.activity', 'workboard.apps',
   'workboard.models', 'workboard.onthisday', 'workboard.wallpaper',
+  'workboard.leaderboard', 'workboard.mcps', 'workboard.word', 'workboard.astronomy', 'workboard.packages', 'workboard.releases',
 ];
 
 export function defaultBoard(id) {
@@ -1023,6 +1028,22 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       if (!services.holidays) throw new UserError('unavailable', 'holidays are not available');
       return services.holidays.list({year: p?.year});
     },
+    'dsh-workboard/leaderboard.get': async p => {
+      if (!services.leaderboard) throw new UserError('unavailable', 'leaderboard is not available');
+      return services.leaderboard.list({kind: String(p?.kind || 'text'), openOnly: p?.openOnly === true, vendors: String(p?.vendors ?? '')});
+    },
+    'dsh-workboard/mcps.get': async p => {
+      if (!services.mcps) throw new UserError('unavailable', 'MCP directory is not available');
+      return services.mcps.list({kind: String(p?.kind || 'popular'), query: String(p?.query ?? '')});
+    },
+    'dsh-workboard/releases.get': async p => {
+      if (!services.releases) throw new UserError('unavailable', 'releases are not available');
+      return services.releases.list({repos: p?.repos, stableOnly: p?.stableOnly !== false});
+    },
+    'dsh-workboard/packages.get': async p => {
+      if (!services.packages) throw new UserError('unavailable', 'package stats are not available');
+      return services.packages.list({packages: String(p?.packages ?? '')});
+    },
     'dsh-workboard/read.check': p => store.readOf(p?.urls),
     'dsh-workboard/read.mark': p => store.markRead(p?.urls, p?.read !== false),
     'dsh-workboard/habit.list': () => store.listHabits(),
@@ -1291,6 +1312,10 @@ export function apply(ctx) {
     models: createModels(fetcher),
     daily: createDaily(fetcher),
     holidays: createHolidays(fetcher),
+    leaderboard: createLeaderboard(fetcher),
+    mcps: createMcps(fetcher),
+    releases: createReleases(fetcher),
+    packages: createPackages(fetcher),
   };
   const handlers = createHandlers(store, fetcher, createAgentWatch(ctx), createLauncher(ctx), services);
   const context = createContext({store, call: (method, payload) => handlers[`dsh-workboard/${method}`](payload)});

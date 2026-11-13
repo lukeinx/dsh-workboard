@@ -35,6 +35,10 @@ import {createDaily, parseBaiduOnThisDay, parseBingWallpapers, parseWikiImage, p
 import {createHolidays} from '../lib/holiday.js';
 import {createApps, parseRunning, parseWinApps, winTarget} from '../lib/apps.js';
 import {createRunner as createExecRunner} from '../lib/exec.js';
+import {createLeaderboard, filterLeaderboard, parseLeaderboard} from '../lib/leaderboard.js';
+import {createMcps, parseGithubMcps, parseNpmMcps, parseRegistryMcps} from '../lib/mcps.js';
+import {createReleases, parseReleaseAtom, parseReleaseSpecs} from '../lib/releases.js';
+import {createPackages, parsePackageSpecs, summarizeRange} from '../lib/packages.js';
 
 const routes = new Map();
 const tools = new Map();
@@ -1155,6 +1159,94 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   assert.ok(winCalls.filter(c => c[0] === 'powershell.exe').every(c => c[1].includes('-NoProfile') && c[1].includes('-EncodedCommand')));
   assert.equal(typeof createExecRunner({os: 'win32', env: {Path: 'C:\\Windows'}}), 'function');
   rmSync(appRoot, {recursive: true, force: true});
+}
+
+// 大模型竞技场：只取 overall 分类，支持开源与厂商过滤，主站失败时回退镜像。
+{
+  const body = {rows: [
+    {row: {rank: 2, model_name: 'DeepSeek V4', organization: 'DeepSeek', license: 'MIT', rating: 1512.4, vote_count: 3200, category: 'overall', leaderboard_publish_date: '2026-11-11'}},
+    {row: {rank: 1, model_name: 'Claude Opus 5.5', organization: 'Anthropic', license: 'Proprietary', rating: 1538.6, vote_count: 4500, category: 'overall', leaderboard_publish_date: '2026-11-11'}},
+    {row: {rank: 1, model_name: 'Subcat Row', organization: 'X', license: 'MIT', rating: 1600, category: 'hard_prompts'}},
+  ]};
+  const parsed = parseLeaderboard(body, 'text');
+  assert.deepEqual(parsed.map(m => [m.rank, m.name, m.vendor, m.open, m.score]), [
+    [1, 'Claude Opus 5.5', 'anthropic', false, 1539],
+    [2, 'DeepSeek V4', 'deepseek', true, 1512],
+  ]);
+  assert.deepEqual(filterLeaderboard(parsed, {openOnly: true}).map(m => m.name), ['DeepSeek V4']);
+  assert.deepEqual(filterLeaderboard(parsed, {vendors: 'Anthropic'}).map(m => m.name), ['Claude Opus 5.5']);
+  const agentBody = {rows: [{row: {rank: 1, model_name: 'Claude Fable 5.2', organization: 'anthropic', license: 'Proprietary', score: 0.3035, session_count: 4700, cost_per_task_p50: 7.431, category: 'overall', leaderboard_publish_date: '2026-11-11'}}]};
+  const lb = createLeaderboard({get: async url => (url.includes('config=agent') ? agentBody : body)});
+  const lbH = createHandlers(createStore({}), undefined, null, null, {leaderboard: lb});
+  const ar = await lbH['dsh-workboard/leaderboard.get']({kind: 'agent'});
+  assert.deepEqual([ar.date, ar.items[0].score, ar.items[0].cost, ar.items[0].votes], ['2026-11-11', 30.4, 7.43, 4700]);
+  await assert.rejects(lb.list({kind: 'bad'}), /unknown leaderboard/);
+}
+
+// 热门 MCP：npm、GitHub 与官方 Registry 三源解析与关键词过滤。
+{
+  const npmBody = {objects: [
+    {package: {name: 'mcp-server', version: '0.0.1'}, downloads: {weekly: 10, monthly: 40}},
+    {package: {name: '@upstash/context7-mcp', version: '4.7.0', description: 'Context7 MCP', links: {npm: 'https://www.npmjs.com/package/@upstash/context7-mcp', repository: 'git+https://github.com/upstash/context7.git'}}, downloads: {weekly: 1100000, monthly: 3200000}},
+  ]};
+  assert.deepEqual(parseNpmMcps(npmBody).map(x => [x.id, x.weekly, x.repo]), [['@upstash/context7-mcp', 1100000, 'https://github.com/upstash/context7']]);
+  const ghBody = {items: [
+    {name: 'awesome-mcp-servers', full_name: 'punkpeye/awesome-mcp-servers', html_url: 'https://github.com/punkpeye/awesome-mcp-servers', stargazers_count: 90000},
+    {name: 'github-mcp-server', full_name: 'github/github-mcp-server', html_url: 'https://github.com/github/github-mcp-server', stargazers_count: 34000, description: 'GitHub MCP', language: 'Go'},
+  ]};
+  assert.deepEqual(parseGithubMcps(ghBody).map(x => [x.id, x.stars, x.lang]), [['github/github-mcp-server', 34000, 'Go']]);
+  const regBody = {servers: [
+    {server: {name: 'io.github/one', title: 'One MCP', version: '1.0.0', description: 'First server', repository: {url: 'https://github.com/org/one'}}, _meta: {'io.modelcontextprotocol.registry/official': {updatedAt: '2026-11-10T00:00:00Z'}}},
+    {server: {name: 'io.github/one', title: 'One MCP', version: '0.9.0', description: 'Dup'}},
+    {server: {name: 'io.github/two', title: 'Two Browser', version: '2.0.0', description: 'Browser automation'}, _meta: {'io.modelcontextprotocol.registry/official': {updatedAt: '2026-11-12T00:00:00Z'}}},
+  ]};
+  assert.deepEqual(parseRegistryMcps(regBody).map(x => x.id), ['io.github/two', 'io.github/one']);
+  const mcps = createMcps({get: async () => regBody});
+  const mcpH = createHandlers(createStore({}), undefined, null, null, {mcps});
+  assert.deepEqual((await mcpH['dsh-workboard/mcps.get']({kind: 'registry', query: 'browser'})).items.map(x => x.id), ['io.github/two']);
+}
+
+// 发版追踪：仓库列表解析、预发布过滤、GitHub Atom 解析与多仓聚合。
+{
+  assert.deepEqual(parseReleaseSpecs('https://github.com/ollama/ollama.git Ollama\nanthropics/claude-code\nollama/ollama Dup\nbad'), [
+    {repo: 'ollama/ollama', label: 'Ollama'},
+    {repo: 'anthropics/claude-code', label: 'claude-code'},
+  ]);
+  const atom = `<feed><entry><link href="https://github.com/ollama/ollama/releases/tag/v0.40.17-rc0"/><title>v0.40.17-rc0</title><updated>2026-11-10T22:00:00Z</updated><content type="html">&lt;h2&gt;What&#39;s Changed&lt;/h2&gt;&lt;p&gt;RC fix&lt;/p&gt;</content></entry><entry><link href="https://github.com/ollama/ollama/releases/tag/v0.40.16"/><title>v0.40.16</title><updated>2026-11-09T22:00:00Z</updated><content type="html">Stable notes</content></entry></feed>`;
+  assert.equal(parseReleaseAtom(atom, {repo: 'ollama/ollama'}).length, 2);
+  const rel = createReleases({get: async () => atom});
+  const relH = createHandlers(createStore({}), undefined, null, null, {releases: rel});
+  assert.deepEqual((await relH['dsh-workboard/releases.get']({repos: 'ollama/ollama', stableOnly: true})).items.map(x => [x.tag, x.notes]), [['v0.40.16', 'Stable notes']]);
+  assert.deepEqual((await relH['dsh-workboard/releases.get']({repos: 'ollama/ollama', stableOnly: false})).items.map(x => [x.tag, x.prerelease]), [['v0.40.17-rc0', true], ['v0.40.16', false]]);
+}
+
+// 包下载量：npm / PyPI / Crates 规格解析与并发查询。
+{
+  assert.deepEqual(parsePackageSpecs('dsh-workboard\n@modelcontextprotocol/sdk MCP SDK\npypi:fastapi FastAPI\ncrate:tokio\nbad/a/b').map(x => [x.eco, x.name, x.label]), [
+    ['npm', 'dsh-workboard', ''],
+    ['npm', '@modelcontextprotocol/sdk', 'MCP SDK'],
+    ['pypi', 'fastapi', 'FastAPI'],
+    ['crates', 'tokio', ''],
+    ['unknown', 'bad/a/b', ''],
+  ]);
+  const days = Array.from({length: 14}, (_, i) => ({downloads: i < 7 ? 100 : 150}));
+  assert.deepEqual(summarizeRange(days), {weekly: 1050, monthly: 1750, pct: 50});
+  const pk = createPackages({get: async url => {
+    if (url.includes('registry.npmjs.org')) return {version: '1.2.0', description: 'pkg'};
+    if (url.includes('api.npmjs.org')) return {downloads: days};
+    if (url.includes('pypi.org')) return {info: {version: '0.115.0', summary: 'web'}};
+    if (url.includes('pypistats.org')) return {data: {last_week: 5000, last_month: 20000}};
+    if (url.includes('crates.io')) return {crate: {name: 'tokio', max_stable_version: '1.40.0', recent_downloads: 9000, downloads: 50000}};
+    throw new Error('HTTP 404');
+  }});
+  const pkgH = createHandlers(createStore({}), undefined, null, null, {packages: pk});
+  const pl = await pkgH['dsh-workboard/packages.get']({packages: 'vite\npypi:fastapi\ncrate:tokio\nbad/a/b'});
+  assert.deepEqual(pl.items.map(x => [x.eco, x.version, x.weekly, x.monthly, x.pct, x.error]), [
+    ['npm', '1.2.0', 1050, 1750, 50, undefined],
+    ['pypi', '0.115.0', 5000, 20000, null, undefined],
+    ['crates', '1.40.0', 700, 3000, null, undefined],
+    ['unknown', undefined, undefined, undefined, undefined, 'unknown package'],
+  ]);
 }
 
 console.log('smoke ok');

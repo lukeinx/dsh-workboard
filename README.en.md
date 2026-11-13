@@ -1,6 +1,6 @@
 # Workboard
 
-**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 44 widgets out of the box — and your agent builds the rest.**
+**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 50 widgets out of the box — and your agent builds the rest.**
 
 [简体中文](README.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
@@ -8,14 +8,14 @@
 
 ## Highlights
 
-### 44 widgets, ready to use
+### 50 widgets, ready to use
 
 Open the widget gallery, search, and drop cards straight onto your board across four categories:
 
-- **Agent workflows**: active and waiting sessions, running goals and background jobs, quick prompts, token usage and cost estimates, deliverables, scheduled tasks, and pinned sessions
-- **Productivity & dev tools**: to-dos, scratch notes, ICS calendar, Pomodoro focus timer, ambient sound, quick links, Git repos, GitHub PRs and issues, system monitor, network speed and latency, clipboard history, and recent files
-- **Daily essentials**: Today banner, clock, world clock, weather, countdowns, time progress, habit tracker, photo frame, and now playing
-- **News & markets**: multi-source trending lists, RSS / Atom feeds, video subscriptions, stocks / forex / crypto markets, and daily quotes
+- **Agent workflows**: active and waiting sessions, running goals and background jobs, daily briefs, quick prompts, token usage and cost estimates, activity heatmap, service status, popular MCP servers, deliverables, scheduled tasks, and pinned sessions
+- **Productivity & dev tools**: to-dos, scratch notes, ICS calendar, Pomodoro focus timer, ambient sound, quick links, installed apps, Git repos, GitHub PRs and issues, release tracker, package downloads, system monitor, recent files, clipboard history, network speed and latency, and local listening ports
+- **Daily essentials**: Today banner, clock, world clock, weather, sun & moon phases, countdowns, public holidays, on this day, daily dev concept, time progress, habit tracker, photo frame, daily wallpaper, and now playing
+- **News & markets**: multi-source trending lists, RSS / Atom feeds, AI papers, OpenRouter models, LLM Arena leaderboard, video subscriptions, stocks / forex / crypto markets, and daily quotes
 
 Most widgets work with zero configuration; a few only ask for essentials like your city, an ICS calendar URL, or ticker symbols.
 
@@ -75,7 +75,7 @@ If you are an agent interacting with Workboard:
 ## Reference
 
 <details>
-<summary><b>All 44 built-in widgets</b></summary>
+<summary><b>All 50 built-in widgets</b></summary>
 
 | Widget | Sizes | What it shows |
 |---|---|---|
@@ -88,6 +88,7 @@ If you are an agent interacting with Workboard:
 | Usage | `l` `t` `m` `w` `s` | Token counts, request totals, cache hit rate, and per-model breakdown from local session logs, plus cost estimates from prices you set or OpenRouter list prices |
 | Activity | `w` `l` `m` | A year of daily agent usage as a heatmap, shaded by tokens or requests, with active days and streaks |
 | Service status | `t` `l` `m` `s` `w` | Status of DeepSeek, Claude, OpenAI, GitHub, npm, or any Statuspage you add; services with incidents float to the top |
+| Popular MCPs | `l` `t` `m` `w` | Top MCP servers by npm weekly downloads, GitHub stars, and newest entries on the Official MCP Registry, filterable by keyword |
 | Outputs | `t` `l` `m` `w` | Deliverables presented by the agent, newest first; open, reveal in Finder, or jump to the source session |
 | Scheduled tasks | `t` `l` `m` `w` | All scheduled tasks with recurrence and next run time; run now, pause, resume, or delete |
 | Pinned sessions | `t` `l` `m` `w` | Your pinned sessions with a preview of each session's latest message |
@@ -101,6 +102,8 @@ If you are an agent interacting with Workboard:
 | Apps | `m` `s` `w` `t` `l` | Pick installed apps from a searchable list and open them in one click; running apps get a dot (macOS and Windows) |
 | Git repos | `t` `l` `m` `w` | Current branch, uncommitted changes, ahead / behind counts, and branches whose upstream is gone; defaults to your Harness workspaces |
 | GitHub | `t` `l` `m` `w` | PRs awaiting your review, your open PRs, and issues assigned to you via your signed-in `gh` CLI |
+| Releases | `t` `l` `m` `w` | Latest GitHub releases and release notes across repositories you track, with an option to hide pre-releases |
+| Packages | `t` `m` `l` `s` `w` | Weekly and monthly download counts and latest version for npm, PyPI (`pypi:name`), and Crates.io (`crate:name`) packages |
 | System | `m` `s` `t` `l` `w` | CPU, memory, disk, battery, and a 5-minute CPU load sparkline |
 | Recent files | `t` `l` `m` `w` | Newest files in `~/Downloads`, `~/Desktop`, or custom folders; open, reveal, or hand a file to the agent |
 | Clipboard | `t` `l` `m` `w` | Text copied while the panel is open; copy again or send to the agent with a preset like Translate |
@@ -111,9 +114,11 @@ If you are an agent interacting with Workboard:
 | Clock | `m` `s` | Current time, greeting, date, and year progress |
 | World clock | `m` `s` `w` `t` | Current time across multiple IANA time zones with local offset and day difference |
 | Weather | `m` `s` | Current conditions, today's high and low, air quality, and hourly forecast |
+| Sun & moon | `m` `s` `t` `w` | Solar arc, sunrise and sunset, golden hour, daylight duration and day-over-day change, plus moon phase, illumination, and next full / new moon (shares city with Weather) |
 | Countdown | `m` `s` `t` | Days until the weekend, month end, year end, and custom dates (`MM-DD` without a year repeats annually) |
 | China holidays | `m` `s` `t` | Next public holidays in mainland China with days off and make-up workdays |
 | On this day | `t` `l` `m` `w` `s` | Historical events on today's date from Wikipedia and Baidu Baike, newest year first |
+| Daily word | `m` `s` `t` `l` `w` | One core AI or software engineering concept a day with bilingual explanation, code snippet, and one-click agent deep dive; click to cycle |
 | Time progress | `m` `s` `w` | Percentage of today, this week, this month, and this year elapsed |
 | Habits | `m` `l` `t` `w` | Check in for any day of the past week and track your current streak |
 | Photo frame | `l` `m` `s` `t` `w` | Cycles through photos from a local folder (`~/Pictures` by default), every 1 minute to 1 day or only on click |
@@ -124,6 +129,7 @@ If you are an agent interacting with Workboard:
 | Feeds | `t` `l` `m` `w` | Multiple RSS / Atom feeds merged chronologically, with `rsshub://` route shorthand and custom instance URL; visited items dim automatically |
 | AI papers | `l` `t` `m` `w` | Hugging Face daily papers, latest arXiv preprints by category, and trending Spaces; hand a paper to the agent to explain |
 | Models | `l` `t` `m` `w` | Trending and newest models on OpenRouter with input / output prices and context length, filterable by vendor |
+| LLM Arena | `l` `t` `m` `w` | LMArena blind-test leaderboards (Text, WebDev, Agent, Vision, Search), filterable by open-weight license and vendor |
 | Videos | `l` `t` `m` `w` | Latest uploads from YouTube channels (link, `UC…` ID, or `@handle`), Bilibili creators (space link or UID), and RSS feeds with images, with thumbnails |
 | Markets | `t` `m` `s` `l` `w` | Forex (`USD/CNY`), China / HK / US equities (`sh600519`, `hk00700`, `usAAPL`), and crypto (`BTC`, `cg:<id>`) |
 | Quote | `m` `w` `s` | A daily quote (click for another), sharing its source setting with the Today banner |
@@ -148,6 +154,10 @@ All external network requests are made and cached by the Host:
 - **Service status**: each configured page's Statuspage `/api/v2/summary.json`; the DeepSeek status page (hosted on Flashcat) has no public API, so its embedded page data is parsed (unofficial, may break if the page changes); defaults to DeepSeek, Claude, OpenAI, GitHub, and npm; cached for 2 minutes
 - **AI papers**: the [Hugging Face](https://huggingface.co) daily papers and trending Spaces APIs (falling back to [hf-mirror.com](https://hf-mirror.com) when huggingface.co is unreachable) and the [arXiv API](https://info.arxiv.org/help/api/index.html) for latest preprints by subject area; cached for 30 minutes
 - **Models**: the public [OpenRouter](https://openrouter.ai) models API (no key needed); the Usage widget reads the same API when "Estimate from OpenRouter list prices" is on; cached for 30 minutes
+- **LLM Arena**: [LMArena](https://lmarena.ai)'s official [`lmarena-ai/leaderboard-dataset`](https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset) via the [Hugging Face Datasets Server](https://huggingface.co/docs/dataset-viewer) (Text, WebDev, Agent, Vision, and Search); cached for 60 minutes
+- **Popular MCPs**: the [npm search API](https://registry.npmjs.org), [GitHub repository search API](https://docs.github.com/rest/search), and the [Official MCP Registry](https://registry.modelcontextprotocol.io); cached for 30 minutes
+- **Releases**: each configured GitHub repository's public `releases.atom` feed (no key needed and not subject to REST API rate limits), defaulting to `anthropics/claude-code`, `modelcontextprotocol/servers`, `ollama/ollama`, and `vercel/ai`; cached for 15 minutes
+- **Packages**: public endpoints on npm (`registry.npmjs.org` and `api.npmjs.org`), [PyPI](https://pypi.org) and [PyPI Stats](https://pypistats.org), and [Crates.io](https://crates.io), defaulting to `dsh-workboard`, `@modelcontextprotocol/sdk`, `pypi:openai`, and `crate:tokio`; cached for 30 minutes
 - **China holidays**: [holiday-cn](https://github.com/NateScarlet/holiday-cn) data for this year and next via jsDelivr, falling back to GitHub raw; cached for 12 hours
 - **On this day & Daily wallpaper**: the [Wikimedia Feed API](https://api.wikimedia.org/wiki/Feed_API) (on-this-day events and Picture of the Day), Baidu Baike's monthly on-this-day JSON (`baike.baidu.com`, unofficial), and Bing's wallpaper archive (`www.bing.com/HPImageArchive.aspx`, unofficial); wallpaper images are proxied by the Host as data URLs; feeds cached for 2 hours, images for 6 hours
 - **Custom widgets**: limited to the `http(s)` URL prefixes declared in each widget's `fetch` allowlist; cached for 30 seconds
@@ -164,6 +174,7 @@ Widgets that only read local state:
 - **Ports**: runs `lsof` and `ps` on macOS and Linux to list listening TCP ports, their working folder, and command line; **Stop** sends `SIGTERM` only to a process that is still listening on that port, with no extra permission
 - **Apps**: on macOS, lists the top level of `/Applications`, `/System/Applications`, `~/Applications` and their `Utilities` folders, with Finder display names and icons via `osascript` (JavaScript for Automation), and running state via `ps`; it opens only apps found in those folders, with `open -a`, and needs no permission. On Windows, it reads the Start menu app list (`shell:AppsFolder`, including Store apps) through PowerShell, takes icons from each shortcut's target program, checks running state with `Get-Process`, and opens only apps from that list through `explorer.exe`; Store apps show no icon or running dot
 - **Ambient sound**: synthesized with Web Audio in the page, with no files or network
+- **Sun & moon / Daily word**: computed in the page from your selected city's coordinates (NOAA solar equations and synodic lunar cycle) and a built-in glossary of developer and AI concepts, with no files or network (city search in Sun & moon reuses the Weather widget's Open-Meteo geocoding)
 - **Recent files**: lists only the top level of each configured folder
 - **Clipboard**: polls `pbpaste` (macOS) or `wl-paste` / `xclip` (Linux) every 2 seconds while the card is visible; history stays in memory only
 
@@ -220,7 +231,7 @@ npm run check   # syntax check, Host smoke test, and ICS parser tests
 ```
 
 - `index.js`: Host routes (`/api/dsh-workboard/*`), storage tables, and agent tools
-- `client.js`: sidebar entry, board container, and the 44 built-in widgets
+- `client.js`: sidebar entry, board container, and the 50 built-in widgets
 - `lib/`: data fetchers, parsers, and system probes
 - `skills/workboard-widget.md`: agent skill for building custom widgets
 
@@ -242,11 +253,13 @@ Workboard builds on the following projects and services. Feed and trending conte
 | Weibo, Zhihu, 36Kr, sspai, Bilibili, V2EX, GitHub Trending, Product Hunt, Reddit | Trending lists | Public pages, feeds, and unofficial endpoints |
 | YouTube, Bilibili | Video subscriptions and thumbnails | Public channel feeds and unofficial endpoints |
 | [ifanr](https://www.ifanr.com), [Ruan Yifeng's blog](https://www.ruanyifeng.com/blog/) | Default Chinese RSS feeds | Publishers' RSS feeds |
-| [GitHub CLI](https://cli.github.com) | GitHub widget data | MIT |
+| [GitHub CLI](https://cli.github.com), GitHub Atom feeds & search API | GitHub widget, Releases, and Popular MCPs | MIT / public feeds & API |
 | [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter) | System now-playing info, bundled in `vendor/` | BSD-3-Clause |
 | [ipinfo.io](https://ipinfo.io), [ip.sb](https://ip.sb) | Public IP lookup in the Network widget | Public API |
 | Statuspage status pages of DeepSeek, Claude, OpenAI, GitHub, npm | Service status | Public status APIs; the DeepSeek page is parsed (unofficial) |
-| [Hugging Face](https://huggingface.co), [hf-mirror.com](https://hf-mirror.com) | Daily papers and trending Spaces | Public API and community mirror |
+| [Hugging Face](https://huggingface.co), [hf-mirror.com](https://hf-mirror.com) | Daily papers, trending Spaces, and Datasets Server | Public API and community mirror |
+| [LMArena](https://lmarena.ai) ([`lmarena-ai/leaderboard-dataset`](https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset)) | LLM Arena leaderboard data | Apache-2.0 / CC BY 4.0 |
+| [Official MCP Registry](https://registry.modelcontextprotocol.io), [npm](https://www.npmjs.com), [PyPI](https://pypi.org) / [PyPI Stats](https://pypistats.org), [Crates.io](https://crates.io) | Popular MCPs and package download stats | Public registry APIs |
 | [arXiv](https://arxiv.org) | Latest preprints by category | Public API (attribution required) |
 | [OpenRouter](https://openrouter.ai) | Models widget and list-price estimates in Usage | Public API |
 | [holiday-cn](https://github.com/NateScarlet/holiday-cn) | China public holidays and make-up workdays, via [jsDelivr](https://www.jsdelivr.com) | MIT |

@@ -41,6 +41,10 @@ window.__ModuleLoader__.load({
     const MODELS_MS = 30 * 60_000;
     const DAILY_MS = 60 * 60_000;
     const HOLIDAY_MS = 6 * 3600_000;
+    const LEADERBOARD_MS = 60 * 60_000;
+    const MCPS_MS = 30 * 60_000;
+    const RELEASES_MS = 15 * 60_000;
+    const PACKAGES_MS = 30 * 60_000;
     const MAX_PINNED = 20;
     const MAX_APPS = 32;
     // 尺寸档位：[列, 行]，行单位 80px；「横栏」半高，其余行数成对。
@@ -196,6 +200,31 @@ window.__ModuleLoader__.load({
       hd_now: '放假中', hd_off: '放假 {n} 天', hd_work: '{d} 上班', hd_todayOff: '今天放假（{name}）', hd_todayWork: '今天调休上班（{name}）', hd_none: '暂无已公布的假期安排',
       activity: '活跃热力图', d_activity: '过去一年每天的 Agent 用量，按 token 或请求数着色',
       ac_tokens: 'token', ac_requests: '请求', f_acMetric: '着色依据', ac_total: '共 {n} {u}', ac_days: '{n} 天活跃', ac_streak: '连续 {n} 天', ac_best: '最长连续 {n} 天',
+      leaderboard: '大模型竞技场', d_leaderboard: 'LMArena 官方对话、编程、Agent、视觉与搜索分榜排名',
+      lb_text: '对话', lb_webdev: '编程', lb_agent: 'Agent', lb_vision: '视觉', lb_search: '搜索',
+      lb_open: '开源', lb_votes: '{n} 票', lb_sessions: '{n} 场', lb_cost: '中位 ${n}/任务', f_lbOpen: '仅显示开源权重模型',
+      mcps: '热门 MCP', d_mcps: 'npm 高下载量、GitHub 高星与官方注册表最新上架的 MCP 服务，可交给 Agent 评估接入',
+      mcp_popular: '热门下载', mcp_github: 'GitHub 高星', mcp_registry: '最新上架', mcp_none: '没有匹配的 MCP 服务',
+      f_mcpQuery: '关键词过滤（如 browser postgres notion；留空看全部）',
+      mcp_prompt: '了解这个 MCP 服务：{name}\n{url}\n{desc}\n请介绍它的主要用途、提供的工具和配置方式，并评估是否适合接入我当前的环境。',
+      releases: '发版追踪', d_releases: '追踪常用开源仓库的最新 GitHub Release，可一键交给 Agent 解读更新日志',
+      f_relRepos: 'GitHub 仓库（每行一个 owner/repo，后面可加名称）', f_relStable: '隐藏预发布版本（alpha / beta / rc / nightly）',
+      defaultReleases: 'anthropics/claude-code Claude Code\nollama/ollama Ollama\nvitejs/vite Vite\noven-sh/bun Bun',
+      rel_error: '{n} 个仓库加载失败', rel_none: '暂无版本发布',
+      rel_prompt: '解读 {repo} 最新发布的 {tag} 版本：\n{url}\n{notes}\n用中文总结核心新特性、重要修复与潜在的破坏性变更（Breaking Changes）。',
+      packages: '包下载量', d_packages: '查询 npm、PyPI 与 Crates.io 包的最新版本、周下载量与月下载量',
+      f_packages: '包名（每行一个：默认 npm，前缀 pypi: 或 crate: 指定生态，后可加名称）',
+      defaultPackages: 'dsh-workboard\n@modelcontextprotocol/sdk MCP SDK\nvite\npypi:fastapi FastAPI',
+      pk_weekUnit: '/周', pk_wkShort: '{n}/周', pk_month: '月 {n}', pk_none: '在设置里添加包名',
+      astronomy: '日出日落与月相', d_astronomy: '今日日出、日落、黄金时刻、白昼时长变化与实时月相',
+      as_sunrise: '日出', as_sunset: '日落', as_noon: '正午', as_golden: '黄金时刻', as_daylight: '白昼 {h}h {m}m',
+      as_toSunrise: '距日出 {t}', as_toSunset: '距日落 {t}', as_afterSunset: '今日已日落',
+      as_illum: '照明 {n}%', as_age: '月龄 {n} 天', as_toFull: '{n} 天后满月', as_toNew: '{n} 天后新月',
+      mn_0: '新月', mn_1: '蛾眉月', mn_2: '上弦月', mn_3: '盈凸月', mn_4: '满月', mn_5: '亏凸月', mn_6: '下弦月', mn_7: '残月',
+      word: '每日一词', d_word: 'AI 工程术语与英语进阶高频词汇，带音标、双语释义、例句与朗读',
+      wd_next: '换一个', wd_speak: '朗读', f_wdBook: '词库',
+      wd_book_all: '综合（AI 工程 + 进阶英语）', wd_book_ai: 'AI 与计算机工程', wd_book_general: '英语进阶（IELTS / GRE）',
+      wd_prompt: '讲解英语单词「{word}」（{meaning}）：包括词源记忆法、常见固定搭配、易混近义词辨析，并结合真实场景造 3 个地道例句。',
     };
     const en = {
       lang: 'en-US', title: 'Workboard', loadFailed: 'Failed to load', empty: 'No widgets on this board yet',
@@ -345,6 +374,31 @@ window.__ModuleLoader__.load({
       hd_now: 'On break', hd_off: '{n} days off', hd_work: 'work on {d}', hd_todayOff: 'Day off today ({name})', hd_todayWork: 'Make-up workday today ({name})', hd_none: 'No holidays announced yet',
       activity: 'Activity', d_activity: 'Daily agent usage over the past year, shaded by tokens or requests',
       ac_tokens: 'tokens', ac_requests: 'requests', f_acMetric: 'Shade by', ac_total: '{n} {u}', ac_days: '{n} active days', ac_streak: '{n}-day streak', ac_best: 'best {n} days',
+      leaderboard: 'LLM Arena', d_leaderboard: 'Official LMArena rankings across text, coding, agent, vision and search',
+      lb_text: 'Text', lb_webdev: 'Coding', lb_agent: 'Agent', lb_vision: 'Vision', lb_search: 'Search',
+      lb_open: 'Open', lb_votes: '{n} votes', lb_sessions: '{n} runs', lb_cost: 'p50 ${n}/task', f_lbOpen: 'Open-weight models only',
+      mcps: 'MCP directory', d_mcps: 'Popular MCP packages on npm, top-starred GitHub repos and newest entries in the official MCP Registry',
+      mcp_popular: 'Popular', mcp_github: 'GitHub stars', mcp_registry: 'Newest', mcp_none: 'No matching MCP servers',
+      f_mcpQuery: 'Filter keyword (e.g. browser postgres notion; empty shows all)',
+      mcp_prompt: 'Check out this MCP server: {name}\n{url}\n{desc}\nExplain what it does, the tools it provides and how to configure it, then assess whether it fits my setup.',
+      releases: 'Releases', d_releases: 'Latest GitHub releases from repositories you follow; hand a release to the agent to summarize',
+      f_relRepos: 'GitHub repositories, one per line: owner/repo [label]', f_relStable: 'Hide pre-releases (alpha / beta / rc / nightly)',
+      defaultReleases: 'anthropics/claude-code Claude Code\nollama/ollama Ollama\nvitejs/vite Vite\noven-sh/bun Bun',
+      rel_error: '{n} repo(s) failed to load', rel_none: 'No releases found',
+      rel_prompt: 'Summarize release {tag} of {repo}:\n{url}\n{notes}\nHighlight the new features, notable fixes and any breaking changes.',
+      packages: 'Packages', d_packages: 'Latest version, weekly and monthly downloads of npm, PyPI and Crates.io packages',
+      f_packages: 'Packages, one per line (npm by default; prefix pypi: or crate: for others, optional label after)',
+      defaultPackages: 'dsh-workboard\n@modelcontextprotocol/sdk MCP SDK\nvite\npypi:fastapi FastAPI',
+      pk_weekUnit: '/wk', pk_wkShort: '{n}/wk', pk_month: '{n}/mo', pk_none: 'Add packages in settings',
+      astronomy: 'Sun & Moon', d_astronomy: 'Sunrise, sunset, golden hour, daylight change and live moon phase',
+      as_sunrise: 'Sunrise', as_sunset: 'Sunset', as_noon: 'Solar noon', as_golden: 'Golden hour', as_daylight: '{h}h {m}m daylight',
+      as_toSunrise: 'Sunrise in {t}', as_toSunset: 'Sunset in {t}', as_afterSunset: 'Sun has set',
+      as_illum: '{n}% lit', as_age: 'Day {n}', as_toFull: 'Full in {n}d', as_toNew: 'New in {n}d',
+      mn_0: 'New moon', mn_1: 'Waxing crescent', mn_2: 'First quarter', mn_3: 'Waxing gibbous', mn_4: 'Full moon', mn_5: 'Waning gibbous', mn_6: 'Last quarter', mn_7: 'Waning crescent',
+      word: 'Word of the day', d_word: 'Daily AI engineering and advanced English vocabulary with phonetics, definitions, examples and speech',
+      wd_next: 'Next', wd_speak: 'Speak', f_wdBook: 'Wordbook',
+      wd_book_all: 'All (AI & Tech + Academic)', wd_book_ai: 'AI & Software Engineering', wd_book_general: 'Academic & GRE / IELTS',
+      wd_prompt: 'Explain the word “{word}” ({meaning}): its etymology, common collocations, near-synonyms and 3 natural example sentences.',
     };
 
     // 公共领域的经典短句，按日期轮换。
@@ -993,6 +1047,28 @@ a.wb-otd-title:hover{color:var(--dsw-alias-brand-primary)}
 .wb-otd-cols{cursor:pointer;gap:14px}
 .wb-otd-cols>div{justify-content:center;gap:3px}
 .wb-otd-cols .wb-otd-big{font-size:20px}
+.wb-astro{display:flex;flex-direction:column;justify-content:space-between;gap:8px;height:100%;min-height:0}
+.wb-astro[data-size=w]{flex-direction:row;align-items:center;gap:24px}
+.wb-astro-top{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.wb-astro-sun{display:flex;gap:16px;align-items:baseline;min-width:0}
+.wb-astro-sun>div{display:flex;flex-direction:column;gap:1px;min-width:0}
+.wb-astro-sun b{font-size:22px;font-weight:600;letter-spacing:-.5px;line-height:1.1}
+.wb-astro-sun small,.wb-astro-moon small{font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-astro-moon{display:flex;align-items:center;gap:10px;min-width:0}
+.wb-astro-moon>div{display:flex;flex-direction:column;gap:1px;min-width:0}
+.wb-astro-moon b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-astro-bar{display:flex;flex-direction:column;gap:4px;min-width:0}
+.wb-astro-meta{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden}
+.wb-astro-bar .wb-pbar i{background:var(--dsw-alias-brand-primary);opacity:.85}
+.wb-word{display:flex;flex-direction:column;justify-content:space-between;gap:6px;height:100%;min-height:0}
+.wb-word-main{display:flex;flex-direction:column;gap:4px;min-height:0;overflow:auto;flex:1;justify-content:center}
+.wb-word-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0}
+.wb-word-head b{font-size:24px;font-weight:600;letter-spacing:-.5px;line-height:1.15}
+.wb-word[data-size=s] .wb-word-head b{font-size:20px}
+.wb-word-head span{font-size:12px;color:var(--dsw-alias-label-secondary)}
+.wb-word-def{margin:0;font-size:13px;line-height:1.45;color:var(--dsw-alias-label-primary);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wb-word-ex{margin:2px 0 0;font-size:12px;line-height:1.45;color:var(--dsw-alias-label-secondary);font-family:${SERIF};display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wb-word[data-size=t] .wb-word-def,.wb-word[data-size=l] .wb-word-def,.wb-word[data-size=t] .wb-word-ex,.wb-word[data-size=l] .wb-word-ex{-webkit-line-clamp:4}
 .wb-list,.wb-events,.wb-rows,.wb-links,.wb-quotes,.wb-chips,.wb-table,.wb-vgrid,.wb-vlist{margin-right:-8px;padding-right:8px}
 .wb-card ::-webkit-scrollbar{width:4px;height:4px}
 .wb-card ::-webkit-scrollbar-track,.wb-card ::-webkit-scrollbar-corner{background:transparent}
@@ -4072,12 +4148,8 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           'cs.SE': ['软件工程', 'SE'], 'cs.HC': ['人机交互', 'HCI'], 'cs.CR': ['安全', 'Security'],
           'cs.MA': ['多智能体', 'Multi-agent'], 'stat.ML': ['统计学习', 'Stat ML'],
         };
-        const splitPaperTitle = raw => {
-          const s = String(raw ?? '').replace(/\$+([^$]+)\$+/g, '$1').replace(/\s+/g, ' ').trim();
-          const m = /^([^:?]{2,80}?)(?::\s+|\?\s+)(.+)$/.exec(s);
-          if (!m) return [s, ''];
-          return [m[1].trim() + (s[m[1].length] === '?' ? '?' : ''), m[2].trim()];
-        };
+        const cleanPaperTitle = raw => String(raw ?? '').replace(/\$+([^$]+)\$+/g, '$1').replace(/\s+/g, ' ').trim();
+        const firstAuthor = it => (it.authors?.[0] ? (it.authors.length > 1 ? `${it.authors[0]} et al.` : it.authors[0]) : '');
         const PP_CAT_OPTIONS = [
           ['cs.AI cs.CL cs.LG', 'pp_cat_default'],
           ['cs.CL', 'pp_cat_cl'],
@@ -4109,6 +4181,19 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
             e.stopPropagation();
             launch(fill(t('pp_prompt'), {url: it.url, title: it.title}), ws.path, ws.id).then(() => setError(''), err => setError(String(err?.message || err)));
           };
+          const meta = it => {
+            if (kind === 'papers') {
+              const who = it.org || firstAuthor(it);
+              const kw = (it.keywords ?? []).find(k => k.length <= 28 && !it.title.toLowerCase().startsWith(k.toLowerCase())) || '';
+              const gh = it.github ? (it.stars > 0 ? `GitHub ★ ${compact.format(it.stars)}` : 'GitHub') : '';
+              return [who, kw, gh].filter(Boolean).join(' · ');
+            }
+            if (kind === 'arxiv') {
+              const tags = [...new Set((it.keywords ?? []).map(c => ARXIV_LABELS[c]?.[zh ? 0 : 1]).filter(Boolean))].slice(0, 2).join(' · ') || (it.keywords ?? [])[0] || '';
+              return [tags, firstAuthor(it)].filter(Boolean).join(' · ');
+            }
+            return it.summary || it.id.split('/')[0];
+          };
           const right = it => {
             if (size === 't') return null;
             if (kind === 'arxiv') return it.at ? h('span', {className: 'wb-num'}, new Date(it.at).toLocaleDateString(lang, {month: 'short', day: 'numeric'})) : null;
@@ -4116,15 +4201,12 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
             return h('span', {className: 'wb-num', title: fill(t(kind === 'papers' ? 'pp_votes' : 'pp_likes'), {n})}, `▲ ${compact.format(n)}`);
           };
           const row = (it, i) => {
-            const [head, sub] = isPaper && size !== 'm' ? splitPaperTitle(it.title) : [it.title, ''];
-            const tags = kind === 'arxiv' ? [...new Set((it.keywords ?? []).map(c => ARXIV_LABELS[c]?.[zh ? 0 : 1]).filter(Boolean))].slice(0, 2).join(' · ') : '';
-            const desc = kind === 'papers' ? (sub || (it.keywords ?? []).slice(0, 2).join(' · '))
-              : kind === 'arxiv' ? (sub || tags || (it.keywords ?? [])[0] || '')
-              : (it.summary || it.id.split('/')[0]);
+            const title = isPaper ? cleanPaperTitle(it.title) : it.title;
+            const desc = meta(it);
             return h('a', {key: it.id, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer',
               title: [it.title, it.summary || desc].filter(Boolean).join('\n')},
               h('span', {className: 'wb-rank wb-num', 'data-top': kind !== 'arxiv' && i < 3 ? '' : undefined}, i + 1),
-              h('div', null, h('b', null, head), size === 'm' || !desc ? null : h('small', null, desc)),
+              h('div', null, h('b', null, title), size === 'm' || !desc ? null : h('small', null, desc)),
               isPaper && size !== 'm' ? h('button', {type: 'button', className: 'wb-btn wb-rowact', onClick: e => ask(e, it)}, t('toAgent')) : null,
               right(it));
           };
@@ -4412,6 +4494,394 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           settings: [{key: 'metric', type: 'select', default: 'tokens', label: () => t('f_acMetric'), options: [{value: 'tokens', label: () => t('ac_tokens')}, {value: 'requests', label: () => t('ac_requests')}]}],
         };
 
+        const LB_KINDS = ['text', 'webdev', 'agent', 'vision', 'search'];
+        function Leaderboard({size, config}) {
+          useLocale();
+          const [picked, setPicked] = useState('text');
+          const kind = LB_KINDS.includes(picked) ? picked : 'text';
+          const openOnly = Boolean(config?.openOnly);
+          const vendors = String(config?.vendors ?? '');
+          const res = useRemote('leaderboard.get', {kind, openOnly, vendors}, LEADERBOARD_MS);
+          const v = res.value?.kind === kind ? res.value : null;
+          const lang = t('lang');
+          const compactNum = new Intl.NumberFormat(lang, {notation: 'compact', maximumFractionDigits: 1});
+          const meta = it => [
+            it.vendor,
+            it.open ? (it.license || t('lb_open')) : '',
+            it.votes ? fill(t(kind === 'agent' ? 'lb_sessions' : 'lb_votes'), {n: compactNum.format(it.votes)}) : '',
+            it.cost != null ? fill(t('lb_cost'), {n: it.cost}) : '',
+          ].filter(Boolean).join(' · ');
+          const scoreText = it => (kind === 'agent' ? `${it.score}%` : String(it.score));
+          const row = (it, i) => h('a', {key: `${it.name}${i}`, className: 'wb-row wb-rowbtn', href: it.url, target: '_blank', rel: 'noopener noreferrer',
+            title: [it.name, meta(it), v?.date ? `${t('updated').replace('{t}', v.date)}` : ''].filter(Boolean).join('\n')},
+            h('span', {className: 'wb-rank wb-num', 'data-top': i < 3 ? '' : undefined}, it.rank),
+            h('div', null, h('b', null, it.name), size === 'm' ? null : h('small', null, meta(it))),
+            size === 't' ? null : h('span', {className: 'wb-num'}, scoreText(it)));
+          return h('div', {className: 'wb-trend'},
+            h('div', {className: 'wb-seg', role: 'tablist'}, LB_KINDS.map(k => h('button', {key: k, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': k === kind, onClick: () => setPicked(k)}, t(`lb_${k}`)))),
+            h('div', {className: 'wb-rows'}, v ? (v.items.length ? v.items.map(row) : blank(t('md_none'))) : blank(res.error || '…')));
+        }
+        Leaderboard.workboard = {
+          apiVersion: 1, sizes: ['l', 't', 'm', 'w'], defaultSize: 'l', description: () => t('d_leaderboard'),
+          settings: [
+            {key: 'openOnly', type: 'toggle', default: false, label: () => t('f_lbOpen')},
+            {key: 'vendors', type: 'text', label: () => t('f_mdVendors'), placeholder: 'deepseek anthropic google openai'},
+          ],
+        };
+
+        const MCP_KINDS = ['popular', 'github', 'registry'];
+        function Mcps({size, config}) {
+          useLocale();
+          const ws = useWorkspace();
+          const [picked, setPicked] = useState('popular');
+          const [error, setError] = useState('');
+          const kind = MCP_KINDS.includes(picked) ? picked : 'popular';
+          const query = String(config?.query ?? '').trim();
+          const res = useRemote('mcps.get', {kind, query}, MCPS_MS);
+          const v = res.value?.kind === kind ? res.value : null;
+          const read = useRead(v ? v.items.map(it => it.url) : []);
+          const lang = t('lang');
+          const compactNum = new Intl.NumberFormat(lang, {notation: 'compact', maximumFractionDigits: 1});
+          const ask = (e, it) => {
+            e.preventDefault();
+            e.stopPropagation();
+            launch(fill(t('mcp_prompt'), {name: it.name, url: it.repo || it.url, desc: it.desc || ''}).trim(), ws.path, ws.id)
+              .then(() => setError(''), err => setError(String(err?.message || err)));
+          };
+          const meta = it => {
+            if (kind === 'popular') return [it.version ? `v${it.version}` : '', size === 'l' || size === 'w' ? it.desc : it.publisher || it.desc].filter(Boolean).join(' · ');
+            if (kind === 'github') return [it.lang, it.desc].filter(Boolean).join(' · ');
+            return [it.slug, it.desc].filter(Boolean).join(' · ');
+          };
+          const right = it => {
+            if (size === 't') return null;
+            if (kind === 'popular') return it.weekly ? h('span', {className: 'wb-num'}, fill(t('pk_wkShort'), {n: compactNum.format(it.weekly)})) : null;
+            if (kind === 'github') return h('span', {className: 'wb-num'}, `★ ${compactNum.format(it.stars)}`);
+            return it.version ? h('span', {className: 'wb-num'}, `v${String(it.version).replace(/^v/i, '')}`) : null;
+          };
+          const row = (it, i) => h('a', {key: it.id, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer',
+            title: [it.name, it.desc, it.url].filter(Boolean).join('\n')},
+            h('span', {className: 'wb-rank wb-num', 'data-top': kind !== 'registry' && i < 3 ? '' : undefined}, i + 1),
+            h('div', null, h('b', null, it.name), size === 'm' || !meta(it) ? null : h('small', null, meta(it))),
+            size === 'm' ? null : h('button', {type: 'button', className: 'wb-btn wb-rowact', onClick: e => ask(e, it)}, t('toAgent')),
+            right(it));
+          return h('div', {className: 'wb-trend'},
+            h('div', {className: 'wb-seg', role: 'tablist'}, MCP_KINDS.map(k => h('button', {key: k, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': k === kind, onClick: () => setPicked(k)}, t(`mcp_${k}`)))),
+            h('div', {className: 'wb-rows'}, v ? (v.items.length ? v.items.map(row) : blank(t('mcp_none'))) : blank(res.error || '…')),
+            error ? h('div', {className: 'wb-calerr', title: error}, error) : null);
+        }
+        Mcps.workboard = {
+          apiVersion: 1, sizes: ['l', 't', 'm', 'w'], defaultSize: 'l', description: () => t('d_mcps'),
+          settings: [{key: 'query', type: 'text', label: () => t('f_mcpQuery'), placeholder: 'browser postgres notion'}],
+        };
+
+        function Releases({size, config}) {
+          useLocale();
+          const ws = useWorkspace();
+          const [error, setError] = useState('');
+          const repos = String(config?.repos ?? t('defaultReleases'));
+          const stableOnly = config?.stableOnly !== false;
+          const res = useRemote('releases.get', {repos, stableOnly}, RELEASES_MS);
+          const v = res.value;
+          const read = useRead(v ? v.items.map(it => it.url) : []);
+          const lang = t('lang');
+          const ask = (e, it) => {
+            e.preventDefault();
+            e.stopPropagation();
+            launch(fill(t('rel_prompt'), {repo: it.repo, tag: it.tag, url: it.url, notes: it.notes || ''}).trim(), ws.path, ws.id)
+              .then(() => setError(''), err => setError(String(err?.message || err)));
+          };
+          const row = it => {
+            const sub = size === 'l' || size === 'w' ? (it.notes || it.title || it.repo) : (it.title || it.notes || it.repo);
+            const dateText = it.date ? new Date(it.date).toLocaleDateString(lang, {month: 'short', day: 'numeric'}) : '';
+            return h('a', {key: it.id, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer',
+              title: [`${it.repo} ${it.tag}`, it.title, it.notes].filter(Boolean).join('\n')},
+              h('div', null,
+                h('b', null, `${it.name} · ${it.tag}`),
+                size === 'm' || !sub ? null : h('small', null, sub)),
+              size === 'm' ? null : h('button', {type: 'button', className: 'wb-btn wb-rowact', onClick: e => ask(e, it)}, t('toAgent')),
+              dateText ? h('time', {className: 'wb-num'}, dateText) : null);
+          };
+          return h(React.Fragment, null,
+            h('div', {className: 'wb-rows'}, v ? (v.items.length ? v.items.map(row) : blank(t('rel_none'))) : blank(res.error || '…')),
+            v?.errors?.length ? h('div', {className: 'wb-calerr', title: v.errors.map(e => `${e.repo}: ${e.message}`).join('\n')}, fill(t('rel_error'), {n: v.errors.length})) : null,
+            error ? h('div', {className: 'wb-calerr', title: error}, error) : null);
+        }
+        Releases.workboard = {
+          apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], defaultSize: 't', description: () => t('d_releases'),
+          settings: [
+            {key: 'repos', type: 'textarea', label: () => t('f_relRepos'), default: () => t('defaultReleases')},
+            {key: 'stableOnly', type: 'toggle', default: true, label: () => t('f_relStable')},
+          ],
+        };
+
+        const ECO_NAMES = {npm: 'npm', pypi: 'PyPI', crates: 'Crates'};
+        function Packages({size, config}) {
+          useLocale();
+          const packages = String(config?.packages ?? t('defaultPackages'));
+          const res = useRemote('packages.get', {packages}, PACKAGES_MS);
+          const v = res.value;
+          const lang = t('lang');
+          const compactNum = new Intl.NumberFormat(lang, {notation: 'compact', maximumFractionDigits: 1});
+          if (!v) return blank(res.error || '…');
+          if (!v.items.length) return blank(t('pk_none'));
+          const errText = e => (e === 'unknown package' ? t('mk_unknown') : e === 'not found' ? t('mk_missing') : e);
+          const sub = it => (it.error
+            ? errText(it.error)
+            : [ECO_NAMES[it.eco] || it.eco, it.version ? `v${it.version}` : '', it.monthly ? fill(t('pk_month'), {n: compactNum.format(it.monthly)}) : '',
+              it.pct != null ? `${it.pct >= 0 ? '+' : ''}${it.pct}%` : ''].filter(Boolean).join(' · '));
+          if (size === 's') {
+            const p = v.items.find(x => !x.error) ?? v.items[0];
+            return h('div', {className: 'wb-hero', title: [p.name, p.desc, sub(p)].filter(Boolean).join('\n')},
+              h('small', null, p.label || p.name),
+              h('span', {className: 'wb-big wb-num'}, p.error ? '—' : compactNum.format(p.weekly), p.error ? null : h('small', null, t('pk_weekUnit'))),
+              h('small', null, sub(p)));
+          }
+          const row = it => {
+            const body = [
+              h('div', {key: 'b'}, h('b', null, it.label || it.name), h('small', null, sub(it))),
+              it.error ? null : h('span', {key: 'n', className: 'wb-big wb-num'}, compactNum.format(it.weekly), h('small', null, t('pk_weekUnit'))),
+            ];
+            return it.url
+              ? h('a', {key: it.id, className: 'wb-row wb-rowbtn', href: it.url, target: '_blank', rel: 'noopener noreferrer', title: [it.name, it.desc, sub(it)].filter(Boolean).join('\n')}, body)
+              : h('div', {key: it.id, className: 'wb-row', 'data-dim': '', title: sub(it)}, body);
+          };
+          return h('div', {className: 'wb-rows'}, v.items.map(row));
+        }
+        Packages.workboard = {
+          apiVersion: 1, sizes: ['t', 'm', 'l', 's', 'w'], defaultSize: 't', description: () => t('d_packages'),
+          settings: [{key: 'packages', type: 'textarea', label: () => t('f_packages'), default: () => t('defaultPackages')}],
+        };
+
+        // 天文计算：NOAA 太阳位置方程计算日出、日落、正午、黄金时刻与白昼时长；朔望月周期计算实时月相与照明度。
+        const DEG = Math.PI / 180;
+        const SYNODIC = 29.530588853;
+        const NEW_MOON_EPOCH = Date.UTC(2000, 0, 6, 18, 14, 0);
+
+        function calcMoon(date) {
+          const days = (date.getTime() - NEW_MOON_EPOCH) / 86400000;
+          const age = ((days % SYNODIC) + SYNODIC) % SYNODIC;
+          const phase = age / SYNODIC;
+          const illum = Math.round((1 - Math.cos(2 * Math.PI * phase)) * 50);
+          const index = Math.floor(((phase + 1 / 16) % 1) * 8);
+          const toFull = Math.max(1, Math.round(((0.5 - phase + 1) % 1) * SYNODIC));
+          const toNew = Math.max(1, Math.round(((1 - phase) % 1) * SYNODIC));
+          return {age: Math.round(age * 10) / 10, phase, illum, index, toFull, toNew};
+        }
+
+        function MoonDisc({phase, size = 32}) {
+          const r = 13;
+          const c = 16;
+          const p = ((phase % 1) + 1) % 1;
+          const waxing = p <= 0.5;
+          const u = waxing ? p * 2 : (p - 0.5) * 2;
+          const rx = Math.abs(Math.cos(u * Math.PI)) * r;
+          const outerSweep = waxing ? 1 : 0;
+          const innerSweep = u < 0.5 ? (waxing ? 0 : 1) : (waxing ? 1 : 0);
+          const d = p > 0.01 && p < 0.99
+            ? `M ${c} ${c - r} A ${r} ${r} 0 0 ${outerSweep} ${c} ${c + r} A ${rx.toFixed(2)} ${r} 0 0 ${innerSweep} ${c} ${c - r} Z`
+            : '';
+          return h('svg', {width: size, height: size, viewBox: '0 0 32 32', 'aria-hidden': 'true', style: {flex: 'none'}},
+            h('circle', {cx: c, cy: c, r, fill: 'var(--dsw-alias-bg-layer-2)', stroke: 'var(--dsw-alias-border-l2)', strokeWidth: 1.25}),
+            p >= 0.49 && p <= 0.51
+              ? h('circle', {cx: c, cy: c, r, fill: 'var(--dsw-alias-brand-primary)'})
+              : d ? h('path', {d, fill: 'var(--dsw-alias-brand-primary)'}) : null);
+        }
+
+        function sunDay(date, lat, lon) {
+          const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+          const doy = dayOfYear(start);
+          const tzMin = -start.getTimezoneOffset();
+          const g = (2 * Math.PI / 365) * (doy - 1 + 0.5);
+          const eq = 229.18 * (0.000075 + 0.001868 * Math.cos(g) - 0.032077 * Math.sin(g) - 0.014615 * Math.cos(2 * g) - 0.040849 * Math.sin(2 * g));
+          const decl = 0.006918 - 0.399912 * Math.cos(g) + 0.070257 * Math.sin(g) - 0.006758 * Math.cos(2 * g) + 0.000907 * Math.sin(2 * g) - 0.002697 * Math.cos(3 * g) + 0.00148 * Math.sin(3 * g);
+          const haOf = z => {
+            const cosH = (Math.cos(z * DEG) / (Math.cos(lat * DEG) * Math.cos(decl))) - Math.tan(lat * DEG) * Math.tan(decl);
+            return cosH < -1 || cosH > 1 ? null : Math.acos(cosH) / DEG;
+          };
+          const noon = 720 - 4 * lon - eq + tzMin;
+          const ha = haOf(90.833);
+          const haGold = haOf(84);
+          if (ha == null) return {noon, sunrise: null, sunset: null, golden: null, daylight: 0};
+          return {
+            sunrise: noon - ha * 4,
+            sunset: noon + ha * 4,
+            noon,
+            golden: haGold != null ? noon + haGold * 4 : null,
+            daylight: ha * 8,
+          };
+        }
+
+        const fmtMin = m => {
+          if (m == null) return '—';
+          const tot = ((Math.round(m) % 1440) + 1440) % 1440;
+          return `${pad(Math.floor(tot / 60))}:${pad(tot % 60)}`;
+        };
+        const fmtSpan = m => {
+          const tot = Math.max(0, Math.round(m));
+          const hCount = Math.floor(tot / 60);
+          const mCount = tot % 60;
+          return hCount > 0 ? `${hCount}h ${mCount}m` : `${mCount}m`;
+        };
+
+        function Astronomy({size, openSettings}) {
+          useLocale();
+          const now = useNow();
+          const prefs = usePrefs();
+          const loc = prefs.location && Number.isFinite(Number(prefs.location.lat)) && Number.isFinite(Number(prefs.location.lon)) ? prefs.location : null;
+          const moon = calcMoon(now);
+          const moonName = t(`mn_${moon.index}`);
+          const moonSub = [fill(t('as_illum'), {n: moon.illum}), moon.index === 4 ? fill(t('as_toNew'), {n: moon.toNew}) : fill(t('as_toFull'), {n: moon.toFull})].join(' · ');
+
+          if (!loc) {
+            return h('div', {className: 'wb-astro', 'data-size': size},
+              h('div', {className: 'wb-astro-moon'},
+                h(MoonDisc, {phase: moon.phase, size: 36}),
+                h('div', null, h('b', null, moonName), h('small', {className: 'wb-num'}, moonSub))),
+              h('button', {type: 'button', className: 'wb-btn wb-cta', style: { alignSelf: 'flex-start' }, onClick: openSettings}, t('setCity')));
+          }
+
+          const today = sunDay(now, Number(loc.lat), Number(loc.lon));
+          const prev = sunDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1), Number(loc.lat), Number(loc.lon));
+          const diff = Math.round(today.daylight - prev.daylight);
+          const diffStr = diff === 0 ? '' : ` (${diff > 0 ? '+' : ''}${diff}m)`;
+          const curMin = now.getHours() * 60 + now.getMinutes();
+          const pct = today.sunrise != null && today.sunset != null
+            ? Math.max(0, Math.min(100, Math.round(((curMin - today.sunrise) / Math.max(1, today.sunset - today.sunrise)) * 100)))
+            : 0;
+          const statusText = today.sunrise == null ? ''
+            : curMin < today.sunrise ? fill(t('as_toSunrise'), {t: fmtSpan(today.sunrise - curMin)})
+            : curMin < today.sunset ? fill(t('as_toSunset'), {t: fmtSpan(today.sunset - curMin)})
+            : t('as_afterSunset');
+          const dayStr = fill(t('as_daylight'), {h: Math.floor(today.daylight / 60), m: Math.round(today.daylight % 60)}) + diffStr;
+
+          if (size === 's') {
+            const beforeSet = today.sunset != null && curMin < today.sunset;
+            return h('div', {className: 'wb-astro', 'data-size': 's'},
+              h('div', {className: 'wb-astro-top'},
+                h('div', {className: 'wb-astro-sun'},
+                  h('div', null,
+                    h('small', null, beforeSet ? t('as_sunset') : t('as_sunrise')),
+                    h('b', {className: 'wb-num'}, fmtMin(beforeSet ? today.sunset : today.sunrise)))),
+                h(MoonDisc, {phase: moon.phase, size: 28})),
+              h('div', {className: 'wb-astro-bar'},
+                h('div', {className: 'wb-pbar'}, h('i', {style: {width: `${pct}%`}})),
+                h('div', {className: 'wb-astro-meta wb-num'}, h('span', null, `${moonName} ${moon.illum}%`), h('span', null, fmtMin(beforeSet ? today.sunrise : today.sunset)))));
+          }
+
+          return h('div', {className: 'wb-astro', 'data-size': size},
+            h('div', {className: 'wb-astro-top'},
+              h('div', {className: 'wb-astro-sun wb-num'},
+                h('div', null, h('small', null, t('as_sunrise')), h('b', null, fmtMin(today.sunrise))),
+                h('div', null, h('small', null, t('as_sunset')), h('b', null, fmtMin(today.sunset))),
+                size === 't' || size === 'w' ? h('div', null, h('small', null, t('as_golden')), h('b', null, fmtMin(today.golden))) : null),
+              h('div', {className: 'wb-astro-moon', title: fill(t('as_age'), {n: moon.age})},
+                h(MoonDisc, {phase: moon.phase, size: 34}),
+                h('div', null, h('b', null, moonName), h('small', {className: 'wb-num'}, moonSub)))),
+            size === 't' ? h('div', {className: 'wb-kv wb-num', style: {flex: 'none'}},
+              h('span', null, t('f_location')), h('span', null, loc.name), h('span', null, ''),
+              h('span', null, t('as_noon')), h('span', null, ''), h('span', null, fmtMin(today.noon)),
+              h('span', null, t('as_golden')), h('span', null, ''), h('span', null, fmtMin(today.golden)),
+              h('span', null, moonName), h('span', null, ''), h('span', null, fill(t('as_age'), {n: moon.age}))) : null,
+            h('div', {className: 'wb-astro-bar wb-num'},
+              h('div', {className: 'wb-pbar'}, h('i', {style: {width: `${pct}%`}})),
+              h('div', {className: 'wb-astro-meta'}, h('span', null, dayStr), h('span', null, statusText))));
+        }
+        Astronomy.workboard = {
+          apiVersion: 1, sizes: ['m', 's', 't', 'w'], defaultSize: 'm', description: () => t('d_astronomy'),
+          settings: [{key: 'location', type: 'location', label: () => t('f_location')}],
+        };
+
+        const WORDS = [
+          {w: 'idempotent', p: '/ˌaɪdɛmˈpoʊtənt/', pos: 'adj.', cat: 'ai', zh: '幂等的；多次执行与单次执行结果一致的', en: 'Denoting an operation that yields the same result whether run once or many times.', ex: 'HTTP PUT requests should be idempotent so network retries stay safe.', exZh: 'HTTP PUT 请求应当是幂等的，以便网络重试保持安全。'},
+          {w: 'heuristic', p: '/hjʊˈrɪstɪk/', pos: 'n. / adj.', cat: 'ai', zh: '启发式方法；经验法则的', en: 'A practical rule-of-thumb approach that finds good-enough solutions quickly.', ex: 'A* search uses an admissible heuristic to prune the search space.', exZh: 'A* 搜索利用可采纳的启发式函数剪枝搜索空间。'},
+          {w: 'ephemeral', p: '/ɪˈfɛmərəl/', pos: 'adj.', cat: 'ai', zh: '短暂的；临时的（如临时容器、临时端口）', en: 'Lasting for a very short time; transient.', ex: 'Sandboxed tasks run inside ephemeral containers that are wiped on exit.', exZh: '沙箱任务运行在退出即销毁的临时容器中。'},
+          {w: 'coalesce', p: '/ˌkoʊəˈlɛs/', pos: 'v.', cat: 'ai', zh: '合并；聚拢（请求、内存块或非空值）', en: 'Come together to form one mass or whole; merge multiple items into one.', ex: 'Inflight requests to the same URL are coalesced into a single fetch.', exZh: '同一地址的并发请求会被合并为一次网络拉取。'},
+          {w: 'backpressure', p: '/ˈbækˌprɛʃər/', pos: 'n.', cat: 'ai', zh: '背压；下游向上游反馈的限流信号', en: 'Resistance or force opposing the desired flow of data through a pipeline.', ex: 'Streams apply backpressure when the consumer is slower than the producer.', exZh: '当消费者慢于生产者时，流会施加背压。'},
+          {w: 'quorum', p: '/ˈkwɔːrəm/', pos: 'n.', cat: 'ai', zh: '法定多数；分布式共识所需的最小节点数', en: 'The minimum number of voting nodes required to validate a distributed operation.', ex: 'Raft requires a majority quorum before committing a log entry.', exZh: 'Raft 提交日志条目前需要达成多数派共识。'},
+          {w: 'deterministic', p: '/dɪˌtɜːrmɪˈnɪstɪk/', pos: 'adj.', cat: 'ai', zh: '确定性的；相同输入必得相同输出的', en: 'Producing the exact same output for a given input with no randomness.', ex: 'Setting temperature to zero makes token sampling nearly deterministic.', exZh: '将温度设为 0 会使 token 采样趋近于确定性。'},
+          {w: 'telemetry', p: '/təˈlɛmətri/', pos: 'n.', cat: 'ai', zh: '遥测；远端指标与运行状态采集', en: 'Automated collection and transmission of metrics, logs and traces from running systems.', ex: 'All data stays local on your machine with zero external telemetry.', exZh: '所有数据均保存在本机，不发送任何外部遥测。'},
+          {w: 'orchestrate', p: '/ˈɔːrkɪstreɪt/', pos: 'v.', cat: 'ai', zh: '编排；协调多服务或多智能体协作', en: 'Coordinate and direct multiple components, services or agents toward a goal.', ex: 'A lead agent orchestrates specialized worker subagents in parallel.', exZh: '主 Agent 并行编排多个专职子 Agent 协同工作。'},
+          {w: 'canonical', p: '/kəˈnɒnɪkəl/', pos: 'adj.', cat: 'ai', zh: '规范的；标准范式的；唯一真源的', en: 'Reduced to the simplest, standard, authoritative form.', ex: 'Paths are resolved to their canonical form before checking permissions.', exZh: '在检查权限前，路径会被解析为规范形式。'},
+          {w: 'monotonic', p: '/ˌmɒnəˈtɒnɪk/', pos: 'adj.', cat: 'ai', zh: '单调递增/递减的（如单调时钟）', en: 'Never decreasing or never increasing; moving in a single direction.', ex: 'Measure elapsed timeouts with a monotonic clock rather than wall time.', exZh: '用单调时钟而非挂钟时间来测量超时耗时。'},
+          {w: 'bottleneck', p: '/ˈbɒtlˌnɛk/', pos: 'n.', cat: 'ai', zh: '瓶颈；限制全链路吞吐的关键环节', en: 'A point of congestion that limits the throughput of an entire system.', ex: 'Memory bandwidth is the primary bottleneck during autoregressive decoding.', exZh: '显存带宽是自回归解码阶段的主要瓶颈。'},
+          {w: 'debounce', p: '/diːˈbaʊns/', pos: 'v.', cat: 'ai', zh: '防抖；连续触发停止后再执行一次', en: 'Delay execution until a burst of rapid events has paused for a set interval.', ex: 'Autosave debounces keystrokes by 500ms to avoid excessive disk writes.', exZh: '自动保存对按键进行 500 毫秒防抖，避免频繁写盘。'},
+          {w: 'invariant', p: '/ɪnˈvɛəriənt/', pos: 'n. / adj.', cat: 'ai', zh: '不变量；程序执行中始终成立的约束条件', en: 'A condition that can be relied upon to hold true before and after an operation.', ex: 'Property tests verify that tree invariants hold after random insertions.', exZh: '属性测试验证随机插入后树的不变量依然成立。'},
+          {w: 'amortize', p: '/ˈæmərtaɪz/', pos: 'v.', cat: 'ai', zh: '摊销；平摊高昂操作到多次调用中', en: 'Spread the cost of an expensive operation over a sequence of cheap ones.', ex: 'Doubling capacity gives dynamic arrays amortized O(1) append time.', exZh: '容量翻倍使动态数组获得均摊 O(1) 的追加时间。'},
+          {w: 'hermetic', p: '/hɜːrˈmɛtɪk/', pos: 'adj.', cat: 'ai', zh: '密封隔离的；不依赖宿主机外部状态的', en: 'Completely sealed and isolated from external environment differences.', ex: 'Hermetic builds pin every compiler and dependency hash for reproducibility.', exZh: '密封构建锁定所有编译器与依赖哈希以保证可复现性。'},
+          {w: 'serendipity', p: '/ˌsɛrənˈdɪpɪti/', pos: 'n.', cat: 'general', zh: '意外发现珍奇事物的机缘；不期而遇的美好', en: 'The occurrence of finding valuable or agreeable things by happy chance.', ex: 'Penicillin is a textbook example of scientific serendipity.', exZh: '青霉素是科学界意外机缘的经典范例。'},
+          {w: 'pragmatic', p: '/præɡˈmætɪk/', pos: 'adj.', cat: 'general', zh: '务实的；注重实效而非空谈理论的', en: 'Dealing with things sensibly and realistically in a way based on practical results.', ex: 'We took a pragmatic approach and shipped a simple SQLite store first.', exZh: '我们采取了务实的做法，先上线了简洁的 SQLite 存储。'},
+          {w: 'resilient', p: '/rɪˈzɪliənt/', pos: 'adj.', cat: 'general', zh: '有韧性的；能从故障或挫折中快速恢复的', en: 'Able to withstand or recover quickly from difficult conditions or failures.', ex: 'Stale-while-revalidate caching keeps the dashboard resilient to network blips.', exZh: '过期回退缓存让看板在网络抖动时依然保持韧性。'},
+          {w: 'meticulous', p: '/məˈtɪkjʊləs/', pos: 'adj.', cat: 'general', zh: '一丝不苟的；极度细致严谨的', en: 'Showing great attention to detail; very careful and precise.', ex: 'She kept meticulous notes on every benchmark run and regression.', exZh: '她对每次基准测试和回归结果都做了一丝不苟的记录。'},
+          {w: 'lucid', p: '/ˈluːsɪd/', pos: 'adj.', cat: 'general', zh: '清晰易懂的；条理分明的', en: 'Expressed clearly; easy to understand and logically coherent.', ex: 'Good documentation explains complex architecture in lucid prose.', exZh: '优秀的文档用清晰易懂的语言阐明复杂的架构。'},
+          {w: 'ubiquitous', p: '/juːˈbɪkwɪtəs/', pos: 'adj.', cat: 'general', zh: '无处不在的；随处可见的', en: 'Present, appearing or found everywhere at once.', ex: 'JSON has become the ubiquitous wire format for web APIs.', exZh: 'JSON 已成为 Web 接口无处不在的传输格式。'},
+          {w: 'paradigm', p: '/ˈpærədaɪm/', pos: 'n.', cat: 'general', zh: '范式；思维或工程的典型模式', en: 'A typical pattern, model or foundational framework of thought.', ex: 'Agentic workflows shift software from passive tools to autonomous collaborators.', exZh: 'Agent 工作流推动软件从被动工具转向自主协作的新范式。'},
+          {w: 'scrutinize', p: '/ˈskruːtɪnaɪz/', pos: 'v.', cat: 'general', zh: '仔细审视；严格核查', en: 'Examine or inspect closely and thoroughly.', ex: 'Always scrutinize third-party permissions before installing a plugin.', exZh: '安装插件前务必仔细审视其第三方权限声明。'},
+          {w: 'mitigate', p: '/ˈmɪtɪɡeɪt/', pos: 'v.', cat: 'general', zh: '缓解；减轻（风险、冲击或损失）', en: 'Make less severe, serious or painful; reduce risk or impact.', ex: 'Strict timeouts and byte caps mitigate the risk of slow upstream APIs.', exZh: '严格的超时与字节上限可减轻上游接口缓慢带来的风险。'},
+          {w: 'ambiguous', p: '/æmˈbɪɡjuəs/', pos: 'adj.', cat: 'general', zh: '模棱两可的；有歧义的', en: 'Open to more than one interpretation; not having one obvious meaning.', ex: 'When requirements are ambiguous, ask a concise clarifying question first.', exZh: '当需求有歧义时，先提一个简明的澄清问题。'},
+          {w: 'corroborate', p: '/kəˈrɒbəreɪt/', pos: 'v.', cat: 'general', zh: '证实；为（论点或发现）提供佐证', en: 'Confirm or give support to a statement, theory or finding with evidence.', ex: 'Production flamegraphs corroborated our hypothesis about lock contention.', exZh: '生产环境的火焰图证实了我们关于锁竞争的假设。'},
+          {w: 'succinct', p: '/səkˈsɪŋkt/', pos: 'adj.', cat: 'general', zh: '简明扼要的；言简意赅的', en: 'Briefly and clearly expressed, without wasted words.', ex: 'Lead with the conclusion and keep commit messages succinct.', exZh: '结论先行，并保持提交信息简明扼要。'},
+          {w: 'caveat', p: '/ˈkæviæt/', pos: 'n.', cat: 'general', zh: '注意事项；附加限制条件；警告', en: 'A warning or proviso of specific stipulations, conditions or limitations.', ex: 'One caveat is that unauthenticated requests are rate-limited to 60 per hour.', exZh: '一个需要注意的限制是未鉴权请求每小时限流 60 次。'},
+          {w: 'pivotal', p: '/ˈpɪvətl/', pos: 'adj.', cat: 'general', zh: '关键性的；中枢的；起决定性作用的', en: 'Of crucial importance in relation to the development or success of something.', ex: 'Clean data boundaries played a pivotal role in keeping the plugin maintainable.', exZh: '清晰的数据边界对保持插件的可维护性起到了关键作用。'},
+        ];
+
+        function Word({size, config}) {
+          useLocale();
+          const ws = useWorkspace();
+          const now = useNow();
+          const [offset, setOffset] = useState(0);
+          const [error, setError] = useState('');
+          const book = config?.book === 'ai' || config?.book === 'general' ? config.book : 'all';
+          const pool = book === 'all' ? WORDS : WORDS.filter(x => x.cat === book);
+          const idx = ((dayOfYear(now) + offset) % pool.length + pool.length) % pool.length;
+          const it = pool[idx];
+          const zh = t('lang').startsWith('zh');
+          const def = zh ? it.zh : it.en;
+          const subDef = (size === 't' || size === 'l') ? (zh ? it.en : it.zh) : '';
+          const next = () => setOffset(n => n + 1);
+          const speak = e => {
+            e.stopPropagation();
+            try {
+              if (typeof SpeechSynthesisUtterance === 'function' && window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(it.w);
+                u.lang = 'en-US';
+                window.speechSynthesis.speak(u);
+              }
+            } catch {}
+          };
+          const ask = e => {
+            e.stopPropagation();
+            launch(fill(t('wd_prompt'), {word: it.w, meaning: def}), ws.path, ws.id)
+              .then(() => setError(''), err => setError(String(err?.message || err)));
+          };
+          if (size === 's') {
+            return h('button', {type: 'button', className: 'wb-btn wb-word', 'data-size': 's', style: {textAlign: 'left', width: '100%'}, title: `${it.ex}\n${it.exZh}`, onClick: next},
+              h('div', {className: 'wb-word-main'},
+                h('div', {className: 'wb-word-head'}, h('b', null, it.w), h('span', null, it.pos)),
+                h('span', {className: 'wb-muted', style: {fontSize: '12px'}}, it.p),
+                h('p', {className: 'wb-word-def'}, def)));
+          }
+          return h('div', {className: 'wb-word', 'data-size': size},
+            h('div', {className: 'wb-word-main', title: `${it.ex}\n${it.exZh}`},
+              h('div', {className: 'wb-word-head'}, h('b', null, it.w), h('span', null, `${it.p} · ${it.pos}`)),
+              h('p', {className: 'wb-word-def'}, def),
+              subDef ? h('p', {className: 'wb-word-def wb-muted', style: {fontSize: '12px'}}, subDef) : null,
+              h('p', {className: 'wb-word-ex'}, it.ex),
+              (size === 't' || size === 'l') && zh ? h('p', {className: 'wb-word-ex', style: {fontFamily: 'inherit'}}, it.exZh) : null),
+            h('div', {className: 'wb-notefoot', style: {marginTop: 0}},
+              h('div', {className: 'wb-footact'},
+                h('button', {type: 'button', className: 'wb-btn', onClick: speak}, t('wd_speak')),
+                h('span', null, '·'),
+                h('button', {type: 'button', className: 'wb-btn', onClick: ask}, t('toAgent'))),
+              h('button', {type: 'button', className: 'wb-btn', onClick: next}, t('wd_next'))),
+            error ? h('div', {className: 'wb-calerr', title: error}, error) : null);
+        }
+        Word.workboard = {
+          apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], defaultSize: 'm', description: () => t('d_word'),
+          settings: [{key: 'book', type: 'select', default: 'all', label: () => t('f_wdBook'), options: ['all', 'ai', 'general'].map(v => ({value: v, label: () => t(`wd_book_${v}`)}))}],
+        };
+
         const builtins = [
           ['workboard.today', 'today', Today], ['workboard.todo', 'todo', Todo], ['workboard.note', 'note', Note], ['workboard.calendar', 'calendar', Calendar],
           ['workboard.weather', 'weather', Weather], ['workboard.clock', 'clock', Clock], ['workboard.quote', 'quote', Quote], ['workboard.countdown', 'countdown', Countdown],
@@ -4426,12 +4896,14 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           ['workboard.attention', 'attention', Attention], ['workboard.brief', 'brief', Brief],
           ['workboard.ports', 'ports', Ports], ['workboard.status', 'status', Status], ['workboard.papers', 'papers', Papers], ['workboard.holiday', 'holiday', Holiday], ['workboard.activity', 'activity', Activity],
           ['workboard.apps', 'apps', Apps], ['workboard.models', 'models', Models], ['workboard.onthisday', 'onthisday', OnThisDay], ['workboard.wallpaper', 'wallpaper', Wallpaper],
+          ['workboard.leaderboard', 'leaderboard', Leaderboard], ['workboard.mcps', 'mcps', Mcps], ['workboard.word', 'word', Word],
+          ['workboard.astronomy', 'astronomy', Astronomy], ['workboard.packages', 'packages', Packages], ['workboard.releases', 'releases', Releases],
         ];
         const BUILTIN_CATEGORY = {
-          daily: ['today', 'clock', 'worldclock', 'weather', 'countdown', 'holiday', 'onthisday', 'progress', 'habits', 'photo', 'wallpaper', 'nowplaying'],
-          agent: ['attention', 'agents', 'running', 'brief', 'prompt', 'usage', 'activity', 'status', 'outputs', 'tasks', 'pinned'],
-          news: ['trending', 'feed', 'papers', 'models', 'videos', 'market', 'quote'],
-          tools: ['todo', 'note', 'calendar', 'focus', 'ambient', 'links', 'apps', 'git', 'github', 'system', 'files', 'clipboard', 'network', 'ports'],
+          daily: ['today', 'clock', 'worldclock', 'weather', 'astronomy', 'countdown', 'holiday', 'onthisday', 'word', 'progress', 'habits', 'photo', 'wallpaper', 'nowplaying'],
+          agent: ['attention', 'agents', 'running', 'brief', 'prompt', 'usage', 'activity', 'status', 'mcps', 'outputs', 'tasks', 'pinned'],
+          news: ['trending', 'feed', 'papers', 'models', 'leaderboard', 'videos', 'market', 'quote'],
+          tools: ['todo', 'note', 'calendar', 'focus', 'ambient', 'links', 'apps', 'git', 'github', 'releases', 'packages', 'system', 'files', 'clipboard', 'network', 'ports'],
         };
         for (const [category, keys] of Object.entries(BUILTIN_CATEGORY)) {
           for (const key of keys) {
