@@ -190,7 +190,7 @@ window.__ModuleLoader__.load({
       otd_ago: '{n} 年前', f_otdSource: '数据来源', otd_auto: '跟随界面语言（中文百度 / 英文维基）', otd_baidu: '百度百科', otd_wiki: '维基百科',
       wallpaper: '每日壁纸', d_wallpaper: 'Bing 每日壁纸与维基共享资源每日图片，点击切换最近 8 天',
       wp_open: '详情', f_wpSource: '来源', wp_bing: 'Bing 每日壁纸', wp_wikimedia: 'Wikimedia 每日图片', f_wpCaption: '显示标题与署名',
-      holiday: '节假日', d_holiday: '中国大陆法定节假日、调休上班日与农历',
+      holiday: '节假日', d_holiday: '中国大陆法定节假日与调休上班日',
       hd_now: '放假中', hd_off: '放假 {n} 天', hd_work: '{d} 上班', hd_todayOff: '今天放假（{name}）', hd_todayWork: '今天调休上班（{name}）', hd_none: '暂无已公布的假期安排',
       activity: '活跃热力图', d_activity: '过去一年每天的 Agent 用量，按 token 或请求数着色',
       ac_tokens: 'token', ac_requests: '请求', f_acMetric: '着色依据', ac_total: '共 {n} {u}', ac_days: '{n} 天活跃', ac_streak: '连续 {n} 天', ac_best: '最长连续 {n} 天',
@@ -940,11 +940,10 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-modal[data-wide] .wb-codefield{flex:1}
 .wb-port{flex:none;min-width:44px;text-align:right;font-weight:600;color:var(--dsw-alias-brand-primary)}
 .wb-stbig{font-size:22px;font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wb-stbig[data-state=done],.wb-hdhead[data-state=done],.wb-hdtoday[data-state=done]{color:var(--dsw-alias-state-success-primary)}
-.wb-stbig[data-state=waiting],.wb-hdhead[data-state=waiting],.wb-hdtoday[data-state=waiting]{color:var(--dsw-alias-state-warn-primary)}
+.wb-stbig[data-state=done],.wb-hdtoday[data-state=done]{color:var(--dsw-alias-state-success-primary)}
+.wb-stbig[data-state=waiting],.wb-hdtoday[data-state=waiting]{color:var(--dsw-alias-state-warn-primary)}
 .wb-stbig[data-state=blocked]{color:var(--dsw-alias-state-error-primary)}
 .wb-stbig[data-state=running]{color:var(--dsw-alias-brand-primary)}
-.wb-hdhead{flex:none;font-size:12px;color:var(--dsw-alias-label-secondary);padding:0 2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wb-activity{display:flex;flex-direction:column;gap:6px;height:100%;min-height:0}
 .wb-heatbox{flex:1;min-height:0;display:flex;align-items:center;justify-content:flex-end;overflow:hidden}
 .wb-heatwrap{display:grid;gap:4px}
@@ -4214,29 +4213,26 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           if (!v) return blank(res.error || '…');
           const today = dayKey(now);
           const periods = holidayPeriods(v.days).filter(p => p.end >= today);
+          if (!periods.length) return blank(t('hd_none'));
           const dateText = k => keyDate(k).toLocaleDateString(lang, {month: 'short', day: 'numeric'});
           const rangeText = p => (p.len > 1 ? `${dateText(p.start)}–${dateText(p.end)}` : keyDate(p.start).toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'}));
           const daysTo = p => Math.round((keyDate(p.start) - keyDate(today)) / 86400000);
-          const off = v.days.find(d => d.date === today && d.off);
-          const work = v.days.find(d => d.date === today && !d.off);
-          const todayLine = off ? fill(t('hd_todayOff'), {name: off.name}) : work ? fill(t('hd_todayWork'), {name: work.name}) : '';
-          const todayState = off ? 'done' : work ? 'waiting' : undefined;
-          const head = [now.toLocaleDateString(lang, {month: 'long', day: 'numeric', weekday: 'short'}), lang.startsWith('zh') ? lunar(now) : '', todayLine].filter(Boolean).join(' · ');
           const num = p => (daysTo(p) <= 0 ? [t('hd_now')] : [daysTo(p), h('small', {key: 'u'}, daysTo(p) === 1 ? t('dayUnit') : t('dayUnits'))]);
           const sub = p => [rangeText(p), fill(t('hd_off'), {n: p.len}), p.work.length ? fill(t('hd_work'), {d: p.work.map(dateText).join(lang.startsWith('zh') ? '、' : ', ')}) : ''].filter(Boolean).join(' · ');
-          if (!periods.length) return h('div', {className: 'wb-hero'}, h('small', null, head), h('span', {className: 'wb-muted'}, t('hd_none')));
           if (size === 's') {
             const p = periods[0];
+            const off = v.days.find(d => d.date === today && d.off);
+            const work = v.days.find(d => d.date === today && !d.off);
+            const todayLine = off ? fill(t('hd_todayOff'), {name: off.name}) : work ? fill(t('hd_todayWork'), {name: work.name}) : '';
+            const todayState = off ? 'done' : work ? 'waiting' : undefined;
             return h('div', {className: 'wb-hero'},
               h('small', {'data-state': todayState, className: 'wb-hdtoday'}, todayLine || p.name),
               h('span', {className: 'wb-big wb-num'}, ...num(p)),
               h('small', {title: sub(p)}, todayLine ? `${p.name} · ${rangeText(p)}` : rangeText(p)));
           }
-          return h(React.Fragment, null,
-            h('div', {className: 'wb-hdhead', 'data-state': todayState}, head),
-            h('div', {className: 'wb-rows'}, periods.slice(0, size === 'm' ? 2 : 12).map(p => h('div', {key: p.start, className: 'wb-row', title: sub(p)},
-              h('div', null, h('b', null, p.name), h('small', null, sub(p))),
-              h('span', {className: 'wb-big wb-num'}, ...num(p))))));
+          return h('div', {className: 'wb-rows'}, periods.slice(0, 12).map(p => h('div', {key: p.start, className: 'wb-row', title: sub(p)},
+            h('div', null, h('b', null, p.name), h('small', null, sub(p))),
+            h('span', {className: 'wb-big wb-num'}, ...num(p)))));
         }
         Holiday.workboard = {apiVersion: 1, sizes: ['m', 's', 't'], description: () => t('d_holiday')};
 

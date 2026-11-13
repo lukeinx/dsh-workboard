@@ -112,7 +112,7 @@ If you are an agent interacting with Workboard:
 | World clock | `m` `s` `w` `t` | Current time across multiple IANA time zones with local offset and day difference |
 | Weather | `m` `s` | Current conditions, today's high and low, air quality, and hourly forecast |
 | Countdown | `m` `s` `t` | Days until the weekend, month end, year end, and custom dates (`MM-DD` without a year repeats annually) |
-| China holidays | `m` `s` `t` | Next public holidays in mainland China with days off and make-up workdays, plus today's lunar date |
+| China holidays | `m` `s` `t` | Next public holidays in mainland China with days off and make-up workdays |
 | On this day | `t` `l` `m` `w` `s` | Historical events on today's date from Wikipedia and Baidu Baike, newest year first |
 | Time progress | `m` `s` `w` | Percentage of today, this week, this month, and this year elapsed |
 | Habits | `m` `l` `t` `w` | Check in for any day of the past week and track your current streak |
