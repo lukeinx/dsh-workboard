@@ -82,6 +82,7 @@ window.__ModuleLoader__.load({
       d_quote: '每日一句，点一下换一条，可换成自己的句子', d_countdown: '距周末、月底、年底和你设定的日子还有几天', d_worldclock: '多个时区的当前时间',
       d_focus: '番茄钟，结束时发系统通知', d_links: '常用网址一键打开', d_progress: '今天、本周、本月、今年已过去多少',
       f_quoteSource: '格言来源', qs_builtin: '内置', qs_hitokoto: '一言（hitokoto.cn）', qs_custom: '自定义',
+      f_hitokotoCat: '一言分类', hc_curated: '精选（文学 · 诗词 · 哲学）', hc_poetry: '诗词', hc_literature: '文学', hc_philosophy: '哲学', hc_all: '全部（含动画、网络等）',
       f_quotes: '自定义格言（来源为「自定义」时使用，每行一条：句子 — 作者）',
       f_events: '日子（每行一个，如 2026-12-25 圣诞节；只写 12-25 则每年重复）', f_builtinCountdown: '显示周末、月底、年底',
       weekend: '周末', monthEnd: '月底', yearEnd: '年底', dayUnit: '天', dayUnits: '天', isToday: '今天', addEvents: '添加日子',
@@ -271,6 +272,7 @@ window.__ModuleLoader__.load({
       d_quote: 'A daily quote; click for another, or use your own', d_countdown: 'Days until the weekend, month end, year end and your own dates', d_worldclock: 'Current time in several time zones',
       d_focus: 'Pomodoro timer with a system notification when it ends', d_links: 'Open the sites you use most', d_progress: 'How much of today, this week, month and year has passed',
       f_quoteSource: 'Quote source', qs_builtin: 'Built-in', qs_hitokoto: 'Hitokoto (hitokoto.cn, Chinese)', qs_custom: 'Your own',
+      f_hitokotoCat: 'Hitokoto category', hc_curated: 'Curated (literature, poetry, philosophy)', hc_poetry: 'Poetry', hc_literature: 'Literature', hc_philosophy: 'Philosophy', hc_all: 'All (incl. anime, internet)',
       f_quotes: 'Your own quotes, used when the source is Your own; one per line: text — author',
       f_events: 'Dates, one per line, e.g. 2026-12-25 Christmas; 12-25 alone repeats every year', f_builtinCountdown: 'Show weekend, month end and year end',
       weekend: 'Weekend', monthEnd: 'Month end', yearEnd: 'Year end', dayUnit: 'day', dayUnits: 'days', isToday: 'Today', addEvents: 'Add dates',
@@ -1524,6 +1526,7 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
 
         // 未选来源时沿用旧行为：填了自定义格言就用自定义。
         const QUOTE_SOURCES = ['builtin', 'hitokoto', 'custom'];
+        const HITOKOTO_CATS = ['curated', 'poetry', 'literature', 'philosophy', 'all'];
         const quoteSource = prefs => (QUOTE_SOURCES.includes(prefs.quoteSource) ? prefs.quoteSource : String(prefs.quotes ?? '').trim() ? 'custom' : 'builtin');
         // 自定义格言每行「句子 — 作者」，作者可省略；为空时用内置一组。
         const quoteAt = (prefs, index) => {
@@ -1540,7 +1543,8 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
         function useQuote(prefs, now, index, n) {
           const online = quoteSource(prefs) === 'hitokoto';
           const day = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
-          const res = useRemote('quote.get', online ? {day, n} : null, QUOTE_MS);
+          const cat = HITOKOTO_CATS.includes(prefs.hitokotoCat) ? prefs.hitokotoCat : 'curated';
+          const res = useRemote('quote.get', online ? {day, n, cat} : null, QUOTE_MS);
           const last = useRef(null);
           if (!online) return quoteAt(prefs, index);
           if (res.value) last.current = res.value;
@@ -1556,6 +1560,8 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
         const QUOTE_FIELDS = [
           {key: 'quoteSource', type: 'select', scope: 'global', default: () => quoteSource(prefsStore.getSnapshot().values), label: () => t('f_quoteSource'),
             options: QUOTE_SOURCES.map(v => ({value: v, label: () => t(`qs_${v}`)}))},
+          {key: 'hitokotoCat', type: 'select', scope: 'global', default: 'curated', label: () => t('f_hitokotoCat'),
+            options: HITOKOTO_CATS.map(v => ({value: v, label: () => t(`hc_${v}`)}))},
           {key: 'quotes', type: 'textarea', scope: 'global', label: () => t('f_quotes')},
         ];
 

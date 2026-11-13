@@ -522,14 +522,27 @@ assert.equal(trendCalls[0][2], 'https://weibo.com/');
 await assert.rejects(trendHandle({source: 'hn'}), /503/);
 await assert.rejects(trendHandle({source: '__proto__'}), /unknown source/);
 
-assert.deepEqual(parseHitokoto({hitokoto: ' 一句 ', from: '书', from_who: '某人'}), {text: '一句', by: '某人 《书》'});
+assert.deepEqual(parseHitokoto({hitokoto: ' 一句 ', from: '书', from_who: '某人'}), {text: '一句', by: '某人 《书》', who: '某人'});
 assert.equal(parseHitokoto({hitokoto: ''}), null);
 {
   let seq = 0;
-  const quotes = createQuotes({get: async () => ({hitokoto: `q${seq++}`, from: 'x'})});
+  const urls = [];
+  const quotes = createQuotes({get: async url => (urls.push(url), {hitokoto: `q${seq++}`, from: 'x', from_who: 'y'})});
   assert.deepEqual((await Promise.all([quotes.get({day: 'd1', n: 1}), quotes.get({day: 'd1', n: 0})])).map(q => q.text), ['q1', 'q0']);
   assert.equal((await quotes.get({day: 'd1', n: 1})).text, 'q1');
-  assert.equal((await quotes.get({day: 'd2', n: 0})).text, 'q2');
+  assert.match(urls[0], /&c=d&c=i&c=k&/);
+  assert.equal((await quotes.get({day: 'd1', n: 0, cat: 'poetry'})).text, 'q2');
+  assert.match(urls.at(-1), /max_length=60&c=i&_=/);
+  assert.equal((await quotes.get({day: 'd2', n: 0, cat: '__proto__'})).text, 'q3');
+  assert.match(urls.at(-1), /&c=d&c=i&c=k&/);
+}
+{
+  const replies = [{hitokoto: '无名'}, {hitokoto: '有名', from_who: '某人'}];
+  const quotes = createQuotes({get: async () => replies.shift()});
+  assert.equal((await quotes.get({day: 'd1', n: 0})).text, '有名');
+  const anon = createQuotes({get: async () => ({hitokoto: '无名'})});
+  assert.equal((await anon.get({day: 'd1', n: 0, cat: 'all'})).text, '无名');
+  assert.equal((await anon.get({day: 'd1', n: 1})).text, '无名');
 }
 
 // 自定义 widget：脚本语法检查、增改删、数据、错误回报、联网白名单，删除时清理看板。

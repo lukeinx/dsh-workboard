@@ -147,7 +147,7 @@ Note: Agent, Quick prompt, Attention, and Daily brief share the same default wor
 All external network requests are made and cached by the Host:
 
 - **Weather & city search**: [Open-Meteo](https://open-meteo.com), requested only after you set a city
-- **Quotes**: [Hitokoto](https://hitokoto.cn), requested only when selected as the quote source
+- **Quotes**: [Hitokoto](https://hitokoto.cn), requested only when selected as the quote source; defaults to the literature, poetry and philosophy categories
 - **Classical poetry**: uses the built-in classical anthology by default with no network access; requests [Jinrishici](https://www.jinrishici.com) (`v2.jinrishici.com`) only when Jinrishici is selected as the source
 - **WeRead**: fetches public category rankings from WeRead (`weread.qq.com`, unofficial, cached for 30 minutes); calls the official WeRead Agent Gateway (`i.weread.qq.com/api/agent/gateway`, cached for 5 minutes) only when a `WEREAD_API_KEY` is configured and you view the Shelf or Highlights tab
 - **Calendars & feeds**: the ICS and RSS / Atom URLs you configure (`rsshub://` routes expand against your [RSSHub](https://docs.rsshub.app) instance URL, or `rsshub.app` when left empty); the Feeds widget starts with [hnrss.org](https://hnrss.org) front page (ifanr and Ruan Yifeng's blog in Chinese), editable in its settings

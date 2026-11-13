@@ -147,7 +147,7 @@ dsh-workboard
 所有外部网络请求均由 Host 端发出并缓存：
 
 - **天气与城市搜索**：[Open-Meteo](https://open-meteo.com)，仅在设置城市后请求
-- **格言**：[一言](https://hitokoto.cn)，仅在格言来源设为「一言」时请求
+- **格言**：[一言](https://hitokoto.cn)，仅在格言来源设为「一言」时请求，默认只取文学、诗词、哲学分类
 - **诗词典籍**：默认使用内置传世名篇库，不联网；仅在来源设为「今日诗词」时请求 [今日诗词](https://www.jinrishici.com) 公开接口（`v2.jinrishici.com`）
 - **微信读书**：榜单读取微信读书公开分类接口（`weread.qq.com`，非官方，缓存 30 分钟）；仅在填入 `WEREAD_API_KEY`（或配置本机环境变量）并切换到「书架」或「划线」时请求微信读书官方 Agent 网关（`i.weread.qq.com/api/agent/gateway`，缓存 5 分钟）
 - **日历与订阅**：仅请求列表中的 ICS 与 RSS / Atom 地址（`rsshub://` 路由展开到所填的 [RSSHub](https://docs.rsshub.app) 实例，留空时回退 `rsshub.app`）；订阅 widget 默认预填爱范儿与阮一峰的网络日志（英文界面为 [hnrss.org](https://hnrss.org) 首页），可在设置中修改

@@ -842,7 +842,7 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
   const quotes = createQuotes(fetcher);
   const attention = services.attention ?? createAttention({agents, running: services.running, github: services.github, store});
   return {
-    'dsh-workboard/quote.get': p => quotes.get({day: p?.day, n: p?.n}),
+    'dsh-workboard/quote.get': p => quotes.get({day: p?.day, n: p?.n, cat: p?.cat}),
     'dsh-workboard/feed.get': p => feeds({urls: p?.urls, rsshub: p?.rsshub, limit: p?.limit}),
     'dsh-workboard/attention.get': p => attention({dayStart: p?.dayStart, github: p?.github !== false, todos: p?.todos !== false}),
     'dsh-workboard/agent.overview': () => (agents ? agents.overview() : {sessions: null, schedules: null}),
