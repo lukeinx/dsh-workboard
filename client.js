@@ -224,10 +224,6 @@ window.__ModuleLoader__.load({
       as_toSunrise: '距日出 {t}', as_toSunset: '距日落 {t}', as_afterSunset: '今日已日落',
       as_illum: '照明 {n}%', as_age: '月龄 {n} 天', as_toFull: '{n} 天后满月', as_toNew: '{n} 天后新月',
       mn_0: '新月', mn_1: '蛾眉月', mn_2: '上弦月', mn_3: '盈凸月', mn_4: '满月', mn_5: '亏凸月', mn_6: '下弦月', mn_7: '残月',
-      word: '每日一词', d_word: '高频实用、AI 工程与英语进阶词汇，带音标、双语释义、例句与朗读',
-      wd_next: '换一个', wd_speak: '朗读', f_wdBook: '词库',
-      wd_book_all: '综合（全部词库）', wd_book_core: '高频实用词汇', wd_book_ai: 'AI 与计算机工程', wd_book_general: '英语进阶（IELTS / GRE）',
-      wd_prompt: '讲解英语单词「{word}」（{meaning}）：包括词源记忆法、常见固定搭配、易混近义词辨析，并结合真实场景造 3 个地道例句。',
       poetry: '诗词典籍', d_poetry: '唐诗宋词、先秦诸子与诗经楚辞传世名篇，支持今日诗词推荐与全篇赏析',
       po_next: '换一首', f_poSource: '诗词来源', po_src_builtin: '内置传世名篇（离线可用）', po_src_jinrishici: '今日诗词（按时辰与天气在线推荐）',
       f_poCat: '内置选集', po_cat_all: '全部名篇', po_cat_shi: '唐诗宋诗', po_cat_ci: '宋词经典', po_cat_classic: '诸子与蒙学典籍', po_cat_shijing: '诗经与楚辞',
@@ -417,10 +413,6 @@ window.__ModuleLoader__.load({
       as_toSunrise: 'Sunrise in {t}', as_toSunset: 'Sunset in {t}', as_afterSunset: 'Sun has set',
       as_illum: '{n}% lit', as_age: 'Day {n}', as_toFull: 'Full in {n}d', as_toNew: 'New in {n}d',
       mn_0: 'New moon', mn_1: 'Waxing crescent', mn_2: 'First quarter', mn_3: 'Waxing gibbous', mn_4: 'Full moon', mn_5: 'Waning gibbous', mn_6: 'Last quarter', mn_7: 'Waning crescent',
-      word: 'Word of the day', d_word: 'High-frequency core, AI engineering and academic English vocabulary with phonetics, examples and speech',
-      wd_next: 'Next', wd_speak: 'Speak', f_wdBook: 'Wordbook',
-      wd_book_all: 'All wordbooks', wd_book_core: 'High-frequency core', wd_book_ai: 'AI & Software Engineering', wd_book_general: 'Academic & GRE / IELTS',
-      wd_prompt: 'Explain the word “{word}” ({meaning}): its etymology, common collocations, near-synonyms and 3 natural example sentences.',
       poetry: 'Classical poetry', d_poetry: 'Masterpieces of Tang & Song poetry, Pre-Qin classics and Shijing, with full text and commentary',
       po_next: 'Next poem', f_poSource: 'Source', po_src_builtin: 'Built-in anthology (offline)', po_src_jinrishici: 'Jinrishici (online daily recommendation)',
       f_poCat: 'Anthology', po_cat_all: 'All classics', po_cat_shi: 'Tang & Song poetry', po_cat_ci: 'Song lyrics (Ci)', po_cat_classic: 'Classical prose & philosophy', po_cat_shijing: 'Shijing & Chuci',
@@ -1101,14 +1093,6 @@ a.wb-otd-title:hover{color:var(--dsw-alias-brand-primary)}
 .wb-astro-bar{display:flex;flex-direction:column;gap:4px;min-width:0}
 .wb-astro-meta{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden}
 .wb-astro-bar .wb-pbar i{background:var(--dsw-alias-brand-primary);opacity:.85}
-.wb-word{display:flex;flex-direction:column;justify-content:space-between;gap:6px;height:100%;min-height:0}
-.wb-word-main{display:flex;flex-direction:column;gap:4px;min-height:0;overflow:auto;flex:1;justify-content:center}
-.wb-word-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;min-width:0}
-.wb-word-head b{font-size:24px;font-weight:600;letter-spacing:-.5px;line-height:1.15}
-.wb-word[data-size=s] .wb-word-head b{font-size:20px}
-.wb-word-head span{font-size:12px;color:var(--dsw-alias-label-secondary)}
-.wb-word-def{margin:0;font-size:13px;line-height:1.45;color:var(--dsw-alias-label-primary);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.wb-word-ex{margin:2px 0 0;font-size:12px;line-height:1.45;color:var(--dsw-alias-label-secondary);font-family:${SERIF};display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .wb-poem{display:flex;flex-direction:column;justify-content:space-between;gap:6px;height:100%;min-height:0}
 .wb-poem-main{display:flex;flex-direction:column;gap:4px;min-height:0;overflow:auto;flex:1;justify-content:center}
 .wb-poem[data-size=t] .wb-poem-main,.wb-poem[data-size=l] .wb-poem-main{justify-content:flex-start}
@@ -1120,7 +1104,6 @@ a.wb-otd-title:hover{color:var(--dsw-alias-brand-primary)}
 .wb-poem-lines p[data-hit]{color:var(--dsw-alias-brand-primary);font-weight:500}
 .wb-poem-note{margin:2px 0 0;font-size:12px;line-height:1.45;color:var(--dsw-alias-label-secondary);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .wb-poem[data-size=l] .wb-poem-note{-webkit-line-clamp:3}
-.wb-word[data-size=t] .wb-word-def,.wb-word[data-size=l] .wb-word-def,.wb-word[data-size=t] .wb-word-ex,.wb-word[data-size=l] .wb-word-ex{-webkit-line-clamp:4}
 .wb-podcover{width:32px;height:32px;border-radius:6px;flex:none;background:var(--dsw-alias-bg-layer-2);overflow:hidden;position:relative;display:grid;place-items:center}
 .wb-podcover img{width:100%;height:100%;object-fit:cover;display:block}
 .wb-podplay{width:24px;height:24px;border-radius:12px;flex:none;display:grid;place-items:center;background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
@@ -4855,172 +4838,6 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           settings: [{key: 'location', type: 'location', label: () => t('f_location')}],
         };
 
-        const WORDS = [
-          {w: 'idempotent', p: '/ˌaɪdɛmˈpoʊtənt/', pos: 'adj.', cat: 'ai', zh: '幂等的；多次执行与单次执行结果一致的', en: 'Denoting an operation that yields the same result whether run once or many times.', ex: 'HTTP PUT requests should be idempotent so network retries stay safe.', exZh: 'HTTP PUT 请求应当是幂等的，以便网络重试保持安全。'},
-          {w: 'heuristic', p: '/hjʊˈrɪstɪk/', pos: 'n. / adj.', cat: 'ai', zh: '启发式方法；经验法则的', en: 'A practical rule-of-thumb approach that finds good-enough solutions quickly.', ex: 'A* search uses an admissible heuristic to prune the search space.', exZh: 'A* 搜索利用可采纳的启发式函数剪枝搜索空间。'},
-          {w: 'ephemeral', p: '/ɪˈfɛmərəl/', pos: 'adj.', cat: 'ai', zh: '短暂的；临时的（如临时容器、临时端口）', en: 'Lasting for a very short time; transient.', ex: 'Sandboxed tasks run inside ephemeral containers that are wiped on exit.', exZh: '沙箱任务运行在退出即销毁的临时容器中。'},
-          {w: 'coalesce', p: '/ˌkoʊəˈlɛs/', pos: 'v.', cat: 'ai', zh: '合并；聚拢（请求、内存块或非空值）', en: 'Come together to form one mass or whole; merge multiple items into one.', ex: 'Inflight requests to the same URL are coalesced into a single fetch.', exZh: '同一地址的并发请求会被合并为一次网络拉取。'},
-          {w: 'backpressure', p: '/ˈbækˌprɛʃər/', pos: 'n.', cat: 'ai', zh: '背压；下游向上游反馈的限流信号', en: 'Resistance or force opposing the desired flow of data through a pipeline.', ex: 'Streams apply backpressure when the consumer is slower than the producer.', exZh: '当消费者慢于生产者时，流会施加背压。'},
-          {w: 'quorum', p: '/ˈkwɔːrəm/', pos: 'n.', cat: 'ai', zh: '法定多数；分布式共识所需的最小节点数', en: 'The minimum number of voting nodes required to validate a distributed operation.', ex: 'Raft requires a majority quorum before committing a log entry.', exZh: 'Raft 提交日志条目前需要达成多数派共识。'},
-          {w: 'deterministic', p: '/dɪˌtɜːrmɪˈnɪstɪk/', pos: 'adj.', cat: 'ai', zh: '确定性的；相同输入必得相同输出的', en: 'Producing the exact same output for a given input with no randomness.', ex: 'Setting temperature to zero makes token sampling nearly deterministic.', exZh: '将温度设为 0 会使 token 采样趋近于确定性。'},
-          {w: 'telemetry', p: '/təˈlɛmətri/', pos: 'n.', cat: 'ai', zh: '遥测；远端指标与运行状态采集', en: 'Automated collection and transmission of metrics, logs and traces from running systems.', ex: 'All data stays local on your machine with zero external telemetry.', exZh: '所有数据均保存在本机，不发送任何外部遥测。'},
-          {w: 'orchestrate', p: '/ˈɔːrkɪstreɪt/', pos: 'v.', cat: 'ai', zh: '编排；协调多服务或多智能体协作', en: 'Coordinate and direct multiple components, services or agents toward a goal.', ex: 'A lead agent orchestrates specialized worker subagents in parallel.', exZh: '主 Agent 并行编排多个专职子 Agent 协同工作。'},
-          {w: 'canonical', p: '/kəˈnɒnɪkəl/', pos: 'adj.', cat: 'ai', zh: '规范的；标准范式的；唯一真源的', en: 'Reduced to the simplest, standard, authoritative form.', ex: 'Paths are resolved to their canonical form before checking permissions.', exZh: '在检查权限前，路径会被解析为规范形式。'},
-          {w: 'monotonic', p: '/ˌmɒnəˈtɒnɪk/', pos: 'adj.', cat: 'ai', zh: '单调递增/递减的（如单调时钟）', en: 'Never decreasing or never increasing; moving in a single direction.', ex: 'Measure elapsed timeouts with a monotonic clock rather than wall time.', exZh: '用单调时钟而非挂钟时间来测量超时耗时。'},
-          {w: 'bottleneck', p: '/ˈbɒtlˌnɛk/', pos: 'n.', cat: 'ai', zh: '瓶颈；限制全链路吞吐的关键环节', en: 'A point of congestion that limits the throughput of an entire system.', ex: 'Memory bandwidth is the primary bottleneck during autoregressive decoding.', exZh: '显存带宽是自回归解码阶段的主要瓶颈。'},
-          {w: 'debounce', p: '/diːˈbaʊns/', pos: 'v.', cat: 'ai', zh: '防抖；连续触发停止后再执行一次', en: 'Delay execution until a burst of rapid events has paused for a set interval.', ex: 'Autosave debounces keystrokes by 500ms to avoid excessive disk writes.', exZh: '自动保存对按键进行 500 毫秒防抖，避免频繁写盘。'},
-          {w: 'invariant', p: '/ɪnˈvɛəriənt/', pos: 'n. / adj.', cat: 'ai', zh: '不变量；程序执行中始终成立的约束条件', en: 'A condition that can be relied upon to hold true before and after an operation.', ex: 'Property tests verify that tree invariants hold after random insertions.', exZh: '属性测试验证随机插入后树的不变量依然成立。'},
-          {w: 'amortize', p: '/ˈæmərtaɪz/', pos: 'v.', cat: 'ai', zh: '摊销；平摊高昂操作到多次调用中', en: 'Spread the cost of an expensive operation over a sequence of cheap ones.', ex: 'Doubling capacity gives dynamic arrays amortized O(1) append time.', exZh: '容量翻倍使动态数组获得均摊 O(1) 的追加时间。'},
-          {w: 'hermetic', p: '/hɜːrˈmɛtɪk/', pos: 'adj.', cat: 'ai', zh: '密封隔离的；不依赖宿主机外部状态的', en: 'Completely sealed and isolated from external environment differences.', ex: 'Hermetic builds pin every compiler and dependency hash for reproducibility.', exZh: '密封构建锁定所有编译器与依赖哈希以保证可复现性。'},
-          {w: 'serendipity', p: '/ˌsɛrənˈdɪpɪti/', pos: 'n.', cat: 'general', zh: '意外发现珍奇事物的机缘；不期而遇的美好', en: 'The occurrence of finding valuable or agreeable things by happy chance.', ex: 'Penicillin is a textbook example of scientific serendipity.', exZh: '青霉素是科学界意外机缘的经典范例。'},
-          {w: 'pragmatic', p: '/præɡˈmætɪk/', pos: 'adj.', cat: 'general', zh: '务实的；注重实效而非空谈理论的', en: 'Dealing with things sensibly and realistically in a way based on practical results.', ex: 'We took a pragmatic approach and shipped a simple SQLite store first.', exZh: '我们采取了务实的做法，先上线了简洁的 SQLite 存储。'},
-          {w: 'resilient', p: '/rɪˈzɪliənt/', pos: 'adj.', cat: 'general', zh: '有韧性的；能从故障或挫折中快速恢复的', en: 'Able to withstand or recover quickly from difficult conditions or failures.', ex: 'Stale-while-revalidate caching keeps the dashboard resilient to network blips.', exZh: '过期回退缓存让看板在网络抖动时依然保持韧性。'},
-          {w: 'meticulous', p: '/məˈtɪkjʊləs/', pos: 'adj.', cat: 'general', zh: '一丝不苟的；极度细致严谨的', en: 'Showing great attention to detail; very careful and precise.', ex: 'She kept meticulous notes on every benchmark run and regression.', exZh: '她对每次基准测试和回归结果都做了一丝不苟的记录。'},
-          {w: 'lucid', p: '/ˈluːsɪd/', pos: 'adj.', cat: 'general', zh: '清晰易懂的；条理分明的', en: 'Expressed clearly; easy to understand and logically coherent.', ex: 'Good documentation explains complex architecture in lucid prose.', exZh: '优秀的文档用清晰易懂的语言阐明复杂的架构。'},
-          {w: 'ubiquitous', p: '/juːˈbɪkwɪtəs/', pos: 'adj.', cat: 'general', zh: '无处不在的；随处可见的', en: 'Present, appearing or found everywhere at once.', ex: 'JSON has become the ubiquitous wire format for web APIs.', exZh: 'JSON 已成为 Web 接口无处不在的传输格式。'},
-          {w: 'paradigm', p: '/ˈpærədaɪm/', pos: 'n.', cat: 'general', zh: '范式；思维或工程的典型模式', en: 'A typical pattern, model or foundational framework of thought.', ex: 'Agentic workflows shift software from passive tools to autonomous collaborators.', exZh: 'Agent 工作流推动软件从被动工具转向自主协作的新范式。'},
-          {w: 'scrutinize', p: '/ˈskruːtɪnaɪz/', pos: 'v.', cat: 'general', zh: '仔细审视；严格核查', en: 'Examine or inspect closely and thoroughly.', ex: 'Always scrutinize third-party permissions before installing a plugin.', exZh: '安装插件前务必仔细审视其第三方权限声明。'},
-          {w: 'mitigate', p: '/ˈmɪtɪɡeɪt/', pos: 'v.', cat: 'general', zh: '缓解；减轻（风险、冲击或损失）', en: 'Make less severe, serious or painful; reduce risk or impact.', ex: 'Strict timeouts and byte caps mitigate the risk of slow upstream APIs.', exZh: '严格的超时与字节上限可减轻上游接口缓慢带来的风险。'},
-          {w: 'ambiguous', p: '/æmˈbɪɡjuəs/', pos: 'adj.', cat: 'general', zh: '模棱两可的；有歧义的', en: 'Open to more than one interpretation; not having one obvious meaning.', ex: 'When requirements are ambiguous, ask a concise clarifying question first.', exZh: '当需求有歧义时，先提一个简明的澄清问题。'},
-          {w: 'corroborate', p: '/kəˈrɒbəreɪt/', pos: 'v.', cat: 'general', zh: '证实；为（论点或发现）提供佐证', en: 'Confirm or give support to a statement, theory or finding with evidence.', ex: 'Production flamegraphs corroborated our hypothesis about lock contention.', exZh: '生产环境的火焰图证实了我们关于锁竞争的假设。'},
-          {w: 'succinct', p: '/səkˈsɪŋkt/', pos: 'adj.', cat: 'general', zh: '简明扼要的；言简意赅的', en: 'Briefly and clearly expressed, without wasted words.', ex: 'Lead with the conclusion and keep commit messages succinct.', exZh: '结论先行，并保持提交信息简明扼要。'},
-          {w: 'caveat', p: '/ˈkæviæt/', pos: 'n.', cat: 'general', zh: '注意事项；附加限制条件；警告', en: 'A warning or proviso of specific stipulations, conditions or limitations.', ex: 'One caveat is that unauthenticated requests are rate-limited to 60 per hour.', exZh: '一个需要注意的限制是未鉴权请求每小时限流 60 次。'},
-          {w: 'pivotal', p: '/ˈpɪvətl/', pos: 'adj.', cat: 'general', zh: '关键性的；中枢的；起决定性作用的', en: 'Of crucial importance in relation to the development or success of something.', ex: 'Clean data boundaries played a pivotal role in keeping the plugin maintainable.', exZh: '清晰的数据边界对保持插件的可维护性起到了关键作用。'},
-          {w: 'leverage', p: '/ˈlɛvərɪdʒ/', pos: 'v. / n.', cat: 'core', zh: '利用；借助已有资源发挥更大效能', en: 'Use something to maximum advantage; strategic power or influence.', ex: 'We can leverage the existing Host cache instead of fetching twice.', exZh: '我们可以直接复用现有的 Host 缓存，而不必重复请求。'},
-          {w: 'trade-off', p: '/ˈtreɪdˌɔːf/', pos: 'n.', cat: 'core', zh: '权衡；取舍；折中', en: 'A balance achieved between two desirable but incompatible features.', ex: 'Every caching layer is a trade-off between freshness and latency.', exZh: '每一层缓存都是在数据新鲜度与延迟之间做权衡。'},
-          {w: 'granularity', p: '/ˌɡrænjʊˈlærɪti/', pos: 'n.', cat: 'core', zh: '颗粒度；精细程度', en: 'The scale or level of detail present in a set of data or permissions.', ex: 'Token usage is tracked at per-day, per-model granularity.', exZh: 'Token 用量按每天、每个模型的颗粒度进行统计。'},
-          {w: 'prerequisite', p: '/ˌpriːˈrɛkwɪzɪt/', pos: 'n.', cat: 'core', zh: '前提条件；先决条件', en: 'A thing that is required as a prior condition for something else to happen.', ex: 'Passing the smoke suite is a prerequisite for merging to main.', exZh: '通过冒烟测试是合入主分支的前提条件。'},
-          {w: 'tentative', p: '/ˈtɛntətɪv/', pos: 'adj.', cat: 'core', zh: '初步的；暂定的；试探性的', en: 'Not certain or fixed; provisional.', ex: 'We have a tentative release date set for next Friday.', exZh: '我们把初步的发版日期暂定在下周五。'},
-          {w: 'retrospective', p: '/ˌrɛtrəˈspɛktɪv/', pos: 'n. / adj.', cat: 'core', zh: '复盘；回顾总结', en: 'A structured review of past events or a completed project to learn what worked.', ex: 'In the sprint retrospective we decided to automate release notes.', exZh: '在迭代复盘会上，我们决定将发版说明自动化。'},
-          {w: 'streamline', p: '/ˈstriːmlaɪn/', pos: 'v.', cat: 'core', zh: '精简；理顺流程以提高效率', en: 'Make an organization or system more efficient by employing faster or simpler working methods.', ex: 'One-click presets streamline the way you hand tasks to the agent.', exZh: '一键预设简化了将任务交给 Agent 的流程。'},
-          {w: 'escalate', p: '/ˈɛskəleɪt/', pos: 'v.', cat: 'core', zh: '升级上报；逐步加剧', en: 'Increase rapidly, or hand an unresolved issue to a higher level of attention.', ex: 'Blocked goals automatically escalate to the top of the Attention queue.', exZh: '受阻的目标会自动提级到「待处理」队列顶部。'},
-          {w: 'triage', p: '/triˈɑːʒ/', pos: 'v. / n.', cat: 'core', zh: '分流定级；按轻重缓急排优处理', en: 'Assign degrees of urgency to issues or tasks to decide the order of treatment.', ex: 'Spend ten minutes each morning to triage new issues and PRs.', exZh: '每天早上花十分钟对新 Issue 和 PR 做分流定级。'},
-          {w: 'deprecate', p: '/ˈdɛprəkeɪt/', pos: 'v.', cat: 'core', zh: '弃用；标记为过时且不再推荐使用', en: 'Declare that a feature or API is obsolete and scheduled for removal.', ex: 'Legacy storage keys are deprecated and migrated on first launch.', exZh: '旧版存储键已弃用，并会在首次启动时自动迁移。'},
-          {w: 'feasible', p: '/ˈfiːzəbl/', pos: 'adj.', cat: 'core', zh: '可行的；行得通的', en: 'Possible to do easily or conveniently; achievable in practice.', ex: 'A quick prototype proved that zero-dependency ICS parsing was feasible.', exZh: '快速原型验证了零依赖解析 ICS 是可行的。'},
-          {w: 'rationale', p: '/ˌræʃəˈnæl/', pos: 'n.', cat: 'core', zh: '根本原因；核心设计依据', en: 'A set of reasons or a logical basis for a course of action or decision.', ex: 'Document the rationale behind non-obvious architectural choices.', exZh: '把非直观架构决策背后的原因记录下来。'},
-          {w: 'momentum', p: '/moʊˈmɛntəm/', pos: 'n.', cat: 'core', zh: '势头；推进动力', en: 'The driving force gained by the development of a process or course of events.', ex: 'Shipping small, verified increments keeps team momentum high.', exZh: '持续交付经过验证的小步改动有助于保持团队推进势头。'},
-          {w: 'friction', p: '/ˈfrɪkʃən/', pos: 'n.', cat: 'core', zh: '阻力；使用或协作中的卡点', en: 'Effort or difficulty that slows down a user workflow or collaboration.', ex: 'Sensible defaults remove setup friction for first-time users.', exZh: '合理的默认值消除了新用户初次上手的阻力。'},
-          {w: 'threshold', p: '/ˈθrɛʃhoʊld/', pos: 'n.', cat: 'core', zh: '阈值；临界点；门槛', en: 'The magnitude or intensity that must be exceeded for a certain reaction to occur.', ex: 'An alert triggers when error rates cross the two-percent threshold.', exZh: '当错误率超过 2% 的阈值时会触发告警。'},
-          {w: 'fallback', p: '/ˈfɔːlbæk/', pos: 'n.', cat: 'core', zh: '兜底方案；降级回退策略', en: 'An alternative plan or resource that may be used in an emergency.', ex: 'When the primary API times out, the client uses cached data as a fallback.', exZh: '当主接口超时时，客户端会使用缓存数据作为兜底。'},
-          {w: 'benchmark', p: '/ˈbɛntʃmɑːrk/', pos: 'n. / v.', cat: 'core', zh: '基准测试；标杆参照', en: 'A standard or point of reference against which things may be compared.', ex: 'Always benchmark with realistic payloads before tuning performance.', exZh: '调优性能前务必使用真实负载进行基准测试。'},
-          {w: 'discrepancy', p: '/dɪˈskrɛpənsi/', pos: 'n.', cat: 'core', zh: '差异；出入；不一致之处', en: 'A lack of compatibility or similarity between two or more facts or figures.', ex: 'We audited the logs to explain the discrepancy in token counts.', exZh: '我们核查了日志以解释 token 统计上的出入。'},
-          {w: 'viable', p: '/ˈvaɪəbl/', pos: 'adj.', cat: 'core', zh: '可行的；能有效运作的', en: 'Capable of working successfully; practical and sustainable.', ex: 'Start with a minimum viable product and iterate from real feedback.', exZh: '从最小可行产品起步，并根据真实反馈持续迭代。'},
-          {w: 'proactive', p: '/ˌproʊˈæktɪv/', pos: 'adj.', cat: 'core', zh: '主动的；未雨绸缪的', en: 'Creating or controlling a situation by causing something to happen rather than responding after.', ex: 'Proactive health checks catch expiring certificates before outage.', exZh: '主动健康检查能在故障发生前捕获即将过期的证书。'},
-          {w: 'nuance', p: '/ˈnuːɑːns/', pos: 'n.', cat: 'core', zh: '细微差别；微妙之处', en: 'A subtle difference in or shade of meaning, expression or behavior.', ex: 'Good translations preserve the nuance of the original text.', exZh: '好的翻译能保留原文的细微语义差别。'},
-          {w: 'verbatim', p: '/vɜːrˈbeɪtɪm/', pos: 'adv. / adj.', cat: 'core', zh: '逐字逐句地；一字不差地', en: 'In exactly the same words as were used originally.', ex: 'Copy the error message verbatim when asking the agent to fix a widget.', exZh: '让 Agent 修复组件时，原样附上完整的报错信息。'},
-          {w: 'intermittent', p: '/ˌɪntərˈmɪtənt/', pos: 'adj.', cat: 'core', zh: '间歇性的；偶发的', en: 'Occurring at irregular intervals; not continuous or steady.', ex: 'Intermittent network timeouts are retried with exponential backoff.', exZh: '偶发的网络超时会通过指数退避策略进行重试。'},
-          {w: 'consolidate', p: '/kənˈsɒlɪdeɪt/', pos: 'v.', cat: 'core', zh: '整合；合并；巩固', en: 'Combine a number of things into a single more effective or coherent whole.', ex: 'We consolidated five status pages into a single overview card.', exZh: '我们将五个服务状态页整合成了一张概览卡片。'},
-          {w: 'articulate', p: '/ɑːrˈtɪkjʊleɪt/', pos: 'v. / adj.', cat: 'core', zh: '清晰阐明；表达流利的', en: 'Express an idea or feeling fluently, clearly and coherently.', ex: 'A clear spec articulates both the goal and the non-goals.', exZh: '一份清晰的规范会同时阐明目标与不做事项。'},
-          {w: 'accountable', p: '/əˈkaʊntəbl/', pos: 'adj.', cat: 'core', zh: '负责的；对结果承担责任的', en: 'Required or expected to justify actions or decisions; responsible.', ex: 'A human stays accountable for every production deployment.', exZh: '每次生产环境部署仍由人来承担最终责任。'},
-          {w: 'contingent', p: '/kənˈtɪndʒənt/', pos: 'adj.', cat: 'core', zh: '视情况而定的；以…为前提的', en: 'Subject to chance, or occurring only if certain circumstances are met.', ex: 'The rollout is contingent on passing the security review.', exZh: '能否上线取决于是否通过安全评审。'},
-          {w: 'override', p: '/ˌoʊvərˈraɪd/', pos: 'v. / n.', cat: 'core', zh: '覆盖；用显式设置替换默认行为', en: 'Use authority or an explicit setting to replace a default behavior.', ex: 'Per-card settings can override the workspace default directory.', exZh: '单张卡片的设置可以覆盖全局默认工作目录。'},
-          {w: 'rollout', p: '/ˈroʊlaʊt/', pos: 'n.', cat: 'core', zh: '上线发布；分阶段放量推广', en: 'The official launch or staged introduction of a new product or feature.', ex: 'A gradual rollout lets us monitor metrics before reaching all users.', exZh: '分阶段放量让我们在全量前监控各项核心指标。'},
-          {w: 'quota', p: '/ˈkwoʊtə/', pos: 'n.', cat: 'core', zh: '配额；限额', en: 'A fixed maximum or minimum share of a resource allocated to a user or task.', ex: 'Reading GitHub Atom feeds avoids consuming your REST API quota.', exZh: '读取 GitHub Atom 订阅源不会消耗你的 REST API 配额。'},
-          {w: 'stakeholder', p: '/ˈsteɪkˌhoʊldər/', pos: 'n.', cat: 'core', zh: '利益相关方；项目干系人', en: 'A person or group with an interest or concern in a project or product.', ex: 'Share a one-page summary so stakeholders can align quickly.', exZh: '分享一页纸摘要，方便各干系人快速对齐。'},
-          {w: 'holistic', p: '/hoʊˈlɪstɪk/', pos: 'adj.', cat: 'core', zh: '全局的；整体系统性的', en: 'Characterized by comprehension of the parts of something as intimately interconnected.', ex: 'A holistic dashboard combines sessions, calendar, git and system metrics.', exZh: '全局工作台将会话、日程、Git 与系统指标融为一体。'},
-          {w: 'milestone', p: '/ˈmaɪlstoʊn/', pos: 'n.', cat: 'core', zh: '里程碑；阶段性关键节点', en: 'A significant stage or event in the development of a project.', ex: 'Reaching fifty built-in widgets marks a major milestone for Workboard.', exZh: '内置组件达到 50 个是工作台的重要里程碑。'},
-          {w: 'onboarding', p: '/ˈɒnˌbɔːrdɪŋ/', pos: 'n.', cat: 'core', zh: '新手引导；初次上手体验', en: 'The action or process of integrating a new user or teammate into a system.', ex: 'Zero-config widgets make onboarding effortless on a fresh install.', exZh: '零配置组件让全新安装的初次上手毫不费力。'},
-          {w: 'bottleneck', p: '/ˈbɒtlˌnɛk/', pos: 'n.', cat: 'core', zh: '瓶颈；限制整体效率的关键卡点', en: 'A point of congestion that slows down an entire process or system.', ex: 'Code review was the main bottleneck before we added automated checks.', exZh: '在引入自动化检查前，代码评审曾是主要的效率瓶颈。'},
-          {w: 'alignment', p: '/əˈlaɪnmənt/', pos: 'n.', cat: 'core', zh: '对齐；目标与认知达成一致', en: 'Agreement or cooperation among people or systems toward a shared goal.', ex: 'A short design doc ensures alignment before anyone writes code.', exZh: '简短的设计文档能确保大家在写代码前先对齐认知。'},
-          {w: 'quantize', p: '/ˈkwɒntaɪz/', pos: 'v.', cat: 'ai', zh: '量化；将高精度权重压缩为低比特表示', en: 'Map continuous or high-precision values to a smaller set of discrete levels.', ex: 'Quantizing weights to 4-bit lets large models run on consumer laptops.', exZh: '将权重量化到 4 比特后，大模型也能在消费级笔记本上运行。'},
-          {w: 'speculative', p: '/ˈspɛkjʊlətɪv/', pos: 'adj.', cat: 'ai', zh: '推测式的；投机执行的（如投机解码）', en: 'Performed in advance based on a prediction before it is known whether it is needed.', ex: 'Speculative decoding drafts several tokens with a small model and verifies them in parallel.', exZh: '投机解码用小模型起草多个 token 并由大模型并行验证。'},
-          {w: 'prefill', p: '/ˈpriːfɪl/', pos: 'n. / v.', cat: 'ai', zh: '预填充；首 token 生成前的提示词并行计算阶段', en: 'The compute-bound phase that processes input prompt tokens in parallel before decoding.', ex: 'Prompt caching dramatically reduces prefill latency on long contexts.', exZh: '提示词缓存大幅降低了长上下文场景下的预填充延迟。'},
-          {w: 'hallucination', p: '/həˌluːsɪˈneɪʃən/', pos: 'n.', cat: 'ai', zh: '幻觉；模型生成看似合理但失实的内容', en: 'Plausible-sounding but factually incorrect output generated by a model.', ex: 'Grounding answers in retrieved source files reduces hallucination.', exZh: '基于检索到的源文件作答可有效减少模型幻觉。'},
-          {w: 'ablations', p: '/əˈbleɪʃənz/', pos: 'n.', cat: 'ai', zh: '消融实验；逐一移除组件以验证各自贡献', en: 'Controlled experiments that remove one component at a time to measure its impact.', ex: 'Ablation studies showed that reranking contributed most of the accuracy gain.', exZh: '消融实验表明，重排序贡献了绝大部分的准确率提升。'},
-          {w: 'perplexity', p: '/pərˈplɛksɪti/', pos: 'n.', cat: 'ai', zh: '困惑度；衡量语言模型预测不确定性的指标', en: 'A measurement of how well a probability model predicts a sample; lower is better.', ex: 'Validation perplexity dropped steadily throughout pretraining.', exZh: '验证集困惑度在预训练过程中稳步下降。'},
-          {w: 'concurrency', p: '/kənˈkʌrənsi/', pos: 'n.', cat: 'ai', zh: '并发；同时处理多个任务的能力', en: 'The ability of different parts of a program to be executed out-of-order or in partial overlap.', ex: 'Structured concurrency ensures child tasks are cancelled when the parent exits.', exZh: '结构化并发确保父任务退出时自动取消所有子任务。'},
-          {w: 'serialization', p: '/ˌsɪəriəlaɪˈzeɪʃən/', pos: 'n.', cat: 'ai', zh: '序列化；将内存对象编码为可传输或落盘的字节流', en: 'The process of translating a data structure into a format that can be stored or transmitted.', ex: 'Fast JSON serialization keeps RPC overhead under a millisecond.', exZh: '快速的 JSON 序列化将 RPC 开销控制在 1 毫秒以内。'},
-          {w: 'reentrant', p: '/riːˈɛntrənt/', pos: 'adj.', cat: 'ai', zh: '可重入的；执行中途被再次调用仍安全的', en: 'Able to be interrupted in the middle of execution and safely called again before completion.', ex: 'Signal handlers must call only async-signal-safe, reentrant functions.', exZh: '信号处理函数只能调用异步信号安全的可重入函数。'},
-          {w: 'zero-copy', p: '/ˈzɪəroʊˌkɒpi/', pos: 'adj.', cat: 'ai', zh: '零拷贝的；传输过程中避免冗余内存复制的', en: 'Describing operations in which the CPU does not copy data from one memory area to another.', ex: 'Shared memory rings enable zero-copy message passing between processes.', exZh: '共享内存环形缓冲区支持进程间的零拷贝消息传递。'},
-          {w: 'cognitive', p: '/ˈkɒɡnɪtɪv/', pos: 'adj.', cat: 'general', zh: '认知的；与思维理解过程相关的', en: 'Relating to the mental process of acquiring knowledge and understanding.', ex: 'Consistent layouts reduce cognitive load when scanning a busy board.', exZh: '一致的排版能降低浏览复杂看板时的认知负担。'},
-          {w: 'intrinsic', p: '/ɪnˈtrɪnzɪk/', pos: 'adj.', cat: 'general', zh: '内在的；固有的；本质上的', en: 'Belonging naturally; essential and built into the very nature of something.', ex: 'Curiosity is an intrinsic motivation for exploring open-source code.', exZh: '好奇心是探索开源代码的内在驱动力。'},
-          {w: 'empirical', p: '/ɪmˈpɪrɪkəl/', pos: 'adj.', cat: 'general', zh: '实证的；基于实验与实测观察的', en: 'Based on, concerned with, or verifiable by observation or experience rather than theory.', ex: 'Back every performance claim with empirical measurements.', exZh: '用实测数据支撑每一项性能结论。'},
-          {w: 'tenacious', p: '/təˈneɪʃəs/', pos: 'adj.', cat: 'general', zh: '坚韧不拔的；锲而不舍的', en: 'Tending to keep a firm hold of something; persistent and determined.', ex: 'Tenacious debugging uncovered a subtle timezone edge case.', exZh: '锲而不舍的排查终于定位到了一个隐蔽的时区边界问题。'},
-          {w: 'eloquent', p: '/ˈɛləkwənt/', pos: 'adj.', cat: 'general', zh: '富有表现力的；雄辩而有说服力的', en: 'Fluent or persuasive in speaking or writing; clearly expressive.', ex: 'A minimal interface can be more eloquent than pages of instructions.', exZh: '极简的界面往往比连篇累牍的说明更有表现力。'},
-          {w: 'salient', p: '/ˈseɪliənt/', pos: 'adj.', cat: 'general', zh: '最显著的；最核心突出的', en: 'Most noticeable, important or prominent.', ex: 'The daily brief highlights only the most salient items that need your action.', exZh: '每日简报只提炼最核心、最需要你处理的事项。'},
-          {w: 'transient', p: '/ˈtrænziənt/', pos: 'adj.', cat: 'general', zh: '瞬态的；短暂的；一过性的', en: 'Lasting only for a short time; impermanent.', ex: 'Retry logic masks transient DNS glitches from the user.', exZh: '重试机制向用户屏蔽了瞬态的 DNS 抖动。'},
-          {w: 'catalyst', p: '/ˈkætəlɪst/', pos: 'n.', cat: 'general', zh: '催化剂；促使变革加速发生的契机', en: 'A person or thing that precipitates an event or accelerates significant change.', ex: 'Open protocols acted as a catalyst for the agent ecosystem.', exZh: '开放协议成为了智能体生态爆发的催化剂。'},
-          {w: 'rigorous', p: '/ˈrɪɡərəs/', pos: 'adj.', cat: 'general', zh: '严密的；严谨透彻的', en: 'Extremely thorough, exhaustive or accurate.', ex: 'Rigorous input validation keeps sandboxed widgets safe.', exZh: '严密的输入校验保障了沙箱组件的安全。'},
-          {w: 'unprecedented', p: '/ʌnˈprɛsɪdɛntɪd/', pos: 'adj.', cat: 'general', zh: '史无前例的；空前的', en: 'Never done or known before; without previous example.', ex: 'Reasoning models unlocked unprecedented autonomy in coding tasks.', exZh: '推理模型在编程任务中解锁了前所未有的自主能力。'},
-        ];
-
-        const NOVELTY_VOICES = /Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Deranged|Eddy|Flo|Fred|Good News|Grandma|Grandpa|Hysterical|Jester|Junior|Kathy|Organ|Ralph|Reed|Rocko|Sandy|Shelley|Superstar|Trinoids|Whisper|Wobble|Zarvox/i;
-        function pickEnglishVoice(voices) {
-          const en = (voices || []).filter(v => /^en[-_]/i.test(v.lang) && !NOVELTY_VOICES.test(v.name));
-          return en.find(v => /Premium|Enhanced|Natural|Online/i.test(v.name) && /^en[-_]US/i.test(v.lang))
-            || en.find(v => /^(Samantha|Ava|Allison|Alex|Nicky|Tom|Victoria|Aaron|Google US English|Microsoft (Aria|Jenny|Guy|Zira))\b/i.test(v.name))
-            || en.find(v => /^(Daniel|Karen|Moira|Tessa|Google UK English)\b/i.test(v.name))
-            || en.find(v => /^en[-_]US/i.test(v.lang))
-            || en[0] || null;
-        }
-        function speakWord(word) {
-          try {
-            const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
-            if (typeof SpeechSynthesisUtterance !== 'function' || !synth) return;
-            const run = () => {
-              synth.cancel();
-              const u = new SpeechSynthesisUtterance(word);
-              const voice = pickEnglishVoice(synth.getVoices());
-              if (voice) u.voice = voice;
-              u.lang = voice?.lang || 'en-US';
-              u.rate = 0.92;
-              synth.speak(u);
-            };
-            if (synth.getVoices().length) run();
-            else synth.addEventListener('voiceschanged', run, {once: true});
-          } catch {}
-        }
-
-        function Word({size, config}) {
-          useLocale();
-          const ws = useWorkspace();
-          const now = useNow();
-          const [offset, setOffset] = useState(0);
-          const [error, setError] = useState('');
-          const book = ['core', 'ai', 'general'].includes(config?.book) ? config.book : 'all';
-          const pool = book === 'all' ? WORDS : WORDS.filter(x => x.cat === book);
-          const idx = ((dayOfYear(now) + offset) % pool.length + pool.length) % pool.length;
-          const it = pool[idx];
-          const zh = t('lang').startsWith('zh');
-          const def = zh ? it.zh : it.en;
-          const subDef = (size === 't' || size === 'l') ? (zh ? it.en : it.zh) : '';
-          const next = () => setOffset(n => n + 1);
-          const speak = e => {
-            e.stopPropagation();
-            speakWord(it.w);
-          };
-          const ask = e => {
-            e.stopPropagation();
-            launch(fill(t('wd_prompt'), {word: it.w, meaning: def}), ws.path, ws.id)
-              .then(() => setError(''), err => setError(String(err?.message || err)));
-          };
-          if (size === 's') {
-            return h('button', {type: 'button', className: 'wb-btn wb-word', 'data-size': 's', style: {textAlign: 'left', width: '100%'}, title: `${it.ex}\n${it.exZh}`, onClick: next},
-              h('div', {className: 'wb-word-main'},
-                h('div', {className: 'wb-word-head'}, h('b', null, it.w), h('span', null, it.pos)),
-                h('span', {className: 'wb-muted', style: {fontSize: '12px'}}, it.p),
-                h('p', {className: 'wb-word-def'}, def)));
-          }
-          return h('div', {className: 'wb-word', 'data-size': size},
-            h('div', {className: 'wb-word-main', title: `${it.ex}\n${it.exZh}`},
-              h('div', {className: 'wb-word-head'}, h('b', null, it.w), h('span', null, `${it.p} · ${it.pos}`)),
-              h('p', {className: 'wb-word-def'}, def),
-              subDef ? h('p', {className: 'wb-word-def wb-muted', style: {fontSize: '12px'}}, subDef) : null,
-              h('p', {className: 'wb-word-ex'}, it.ex),
-              (size === 't' || size === 'l') && zh ? h('p', {className: 'wb-word-ex', style: {fontFamily: 'inherit'}}, it.exZh) : null),
-            h('div', {className: 'wb-notefoot', style: {marginTop: 0}},
-              h('div', {className: 'wb-footact'},
-                h('button', {type: 'button', className: 'wb-btn', onClick: speak}, t('wd_speak')),
-                h('span', null, '·'),
-                h('button', {type: 'button', className: 'wb-btn', onClick: ask}, t('toAgent'))),
-              h('button', {type: 'button', className: 'wb-btn', onClick: next}, t('wd_next'))),
-            error ? h('div', {className: 'wb-calerr', title: error}, error) : null);
-        }
-        Word.workboard = {
-          apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], defaultSize: 'm', description: () => t('d_word'),
-          settings: [{key: 'book', type: 'select', default: 'all', label: () => t('f_wdBook'), options: ['all', 'core', 'ai', 'general'].map(v => ({value: v, label: () => t(`wd_book_${v}`)}))}],
-        };
-
         // 传世诗词与典籍名篇选集（源自 chinese-poetry 开源语料与公版古籍）。
         const POEMS = [
           {cat: 'shi', title: '春江花月夜', dynasty: '唐', author: '张若虚', quote: '春江潮水连海平，海上明月共潮生。', lines: ['春江潮水连海平，海上明月共潮生。', '滟滟随波千万里，何处春江无月明。', '江流宛转绕芳甸，月照花林皆似霰。', '空里流霜不觉飞，汀上白沙看不见。', '江天一色无纤尘，皎皎空中孤月轮。', '江畔何人初见月？江月何年初照人？', '人生代代无穷已，江月年年望相似。'], note: '以浩瀚江月起兴，融自然景物与宇宙人生哲思于一体，被誉为「孤篇压全唐」。', en: 'In spring the river rises level with the sea, and with the tide the bright moon rises too.'},
@@ -5374,12 +5191,12 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           ['workboard.attention', 'attention', Attention], ['workboard.brief', 'brief', Brief],
           ['workboard.ports', 'ports', Ports], ['workboard.status', 'status', Status], ['workboard.papers', 'papers', Papers], ['workboard.holiday', 'holiday', Holiday], ['workboard.activity', 'activity', Activity],
           ['workboard.apps', 'apps', Apps], ['workboard.models', 'models', Models], ['workboard.onthisday', 'onthisday', OnThisDay], ['workboard.wallpaper', 'wallpaper', Wallpaper],
-          ['workboard.leaderboard', 'leaderboard', Leaderboard], ['workboard.mcps', 'mcps', Mcps], ['workboard.word', 'word', Word],
+          ['workboard.leaderboard', 'leaderboard', Leaderboard], ['workboard.mcps', 'mcps', Mcps],
           ['workboard.astronomy', 'astronomy', Astronomy], ['workboard.packages', 'packages', Packages], ['workboard.releases', 'releases', Releases],
           ['workboard.poetry', 'poetry', Poetry], ['workboard.weread', 'weread', Weread], ['workboard.podcasts', 'podcasts', Podcasts],
         ];
         const BUILTIN_CATEGORY = {
-          daily: ['today', 'clock', 'worldclock', 'weather', 'astronomy', 'countdown', 'holiday', 'onthisday', 'word', 'poetry', 'progress', 'habits', 'photo', 'wallpaper', 'nowplaying'],
+          daily: ['today', 'clock', 'worldclock', 'weather', 'astronomy', 'countdown', 'holiday', 'onthisday', 'poetry', 'progress', 'habits', 'photo', 'wallpaper', 'nowplaying'],
           agent: ['attention', 'agents', 'running', 'brief', 'prompt', 'usage', 'activity', 'status', 'mcps', 'outputs', 'tasks', 'pinned'],
           news: ['trending', 'feed', 'weread', 'papers', 'models', 'leaderboard', 'videos', 'podcasts', 'market', 'quote'],
           tools: ['todo', 'note', 'calendar', 'focus', 'ambient', 'links', 'apps', 'git', 'github', 'releases', 'packages', 'system', 'files', 'clipboard', 'network', 'ports'],

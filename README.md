@@ -1,6 +1,6 @@
 # 工作台 Workboard
 
-**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 53 个 widget，开箱即用；不够用的，让 Agent 现做。**
+**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 52 个 widget，开箱即用；不够用的，让 Agent 现做。**
 
 [English](README.en.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
@@ -8,13 +8,13 @@
 
 ## 亮点
 
-### 内置 53 个 widget，开箱即用
+### 内置 52 个 widget，开箱即用
 
 覆盖四大场景，打开组件库即可搜索、预览并连续添加到看板：
 
 - **Agent 协作**：待确认与运行中会话、长程目标与后台作业、每日简报、Prompt 快启、Token 用量与费用估算、活跃热力图、服务状态、热门 MCP、产出物、定时任务、收藏会话
 - **效率与开发**：待办、速记、ICS 日历、专注番茄钟、白噪音、快捷链接、快捷应用、Git 工作区、GitHub（PR / Issue）、发版追踪、包下载量、系统状态、最近文件、剪贴板、网络测速、本机端口
-- **日常桌面**：今日横栏、时钟、世界时钟、天气、日出日落与月相、倒数日、节假日、历史上的今天、每日一词、诗词典籍、时间进度、习惯打卡、本机相框、每日壁纸、正在播放
+- **日常桌面**：今日横栏、时钟、世界时钟、天气、日出日落与月相、倒数日、节假日、历史上的今天、诗词典籍、时间进度、习惯打卡、本机相框、每日壁纸、正在播放
 - **资讯与行情**：多源热榜、RSS / Atom 订阅、微信读书、AI 论文、模型行情、大模型竞技场、视频订阅、播客、A 股 / 港股 / 美股 / 汇率 / 加密货币行情、每日格言
 
 绝大多数零配置即用；少数仅需填入城市、日历订阅链接或股票代码等个人信息。
@@ -75,7 +75,7 @@ dsh-workboard
 ## 参考
 
 <details>
-<summary><b>全部 53 个内置 widget</b></summary>
+<summary><b>全部 52 个内置 widget</b></summary>
 
 | Widget | 档位 | 说明 |
 |---|---|---|
@@ -118,7 +118,6 @@ dsh-workboard
 | 倒数日 | `m` `s` `t` | 距离周末、月底、年底及自定义日期的天数；不带年份（如 `12-25`）时按每年重复计算 |
 | 节假日 | `m` `s` `t` | 中国大陆接下来的法定节假日、放假天数与调休上班日 |
 | 历史上的今天 | `t` `l` `m` `w` `s` | 百度百科与维基百科记载的今日历史事件，按年份倒序排列 |
-| 每日一词 | `m` `s` `t` `l` `w` | 每天精选一个 AI 与软件工程核心概念，附双语释义、代码示例与 Agent 深入解读按钮，点击可切换词条 |
 | 诗词典籍 | `m` `t` `l` `s` `w` | 唐诗宋词、先秦诸子与诗经楚辞传世名篇，支持今日诗词推荐、全篇展开与一键交给 Agent 赏析 |
 | 时间进度 | `m` `s` `w` | 今日、本周、本月与本年已度过的百分比 |
 | 习惯打卡 | `m` `l` `t` `w` | 支持最近一周打卡与补卡，自动计算当前连续达成天数 |
@@ -180,7 +179,7 @@ dsh-workboard
 - **端口**：在 macOS 与 Linux 上调用 `lsof` 和 `ps` 列出监听中的 TCP 端口、工作目录与命令行；「停止」仅向仍在监听该端口的进程发送 `SIGTERM`，无需额外授权
 - **快捷应用**：在 macOS 上列出 `/Applications`、`/System/Applications`、`~/Applications` 及其 `Utilities` 子目录顶层的应用，用 `osascript`（JavaScript for Automation）读取 Finder 显示名与图标，用 `ps` 判断是否在运行；只用 `open -a` 打开上述目录内的应用，无需授权；在 Windows 上通过 PowerShell 读取「开始」菜单的应用列表（`shell:AppsFolder`，含商店应用），图标取自快捷方式指向的程序，用 `Get-Process` 判断是否在运行，只经 `explorer.exe` 打开列表内的应用；商店应用不显示图标与运行圆点
 - **白噪音**：在页面内用 Web Audio 合成，不读文件、不联网
-- **日出日落与月相 / 每日一词**：在页面内按所选城市经纬度（NOAA 太阳位置算法与朔望月周期）及内置开发者词库计算，不读文件、不联网（在日出日落与月相中搜索城市时复用天气 widget 的 Open-Meteo 城市搜索）
+- **日出日落与月相**：在页面内按所选城市经纬度计算（NOAA 太阳位置算法与朔望月周期），不读文件、不联网（搜索城市时复用天气 widget 的 Open-Meteo 城市搜索）
 - **最近文件**：仅列出目标文件夹顶层文件，不递归扫描
 - **剪贴板**：仅在卡片可见期间每 2 秒读取一次 `pbpaste`（macOS）或 `wl-paste` / `xclip`（Linux），历史仅保存在内存中，不落盘
 
@@ -237,7 +236,7 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 ```
 
 - `index.js`：Host 端 `/api/dsh-workboard/*` 路由、数据存储与 Agent 工具注册
-- `client.js`：侧栏入口、看板容器与 53 个内置 widget
+- `client.js`：侧栏入口、看板容器与 52 个内置 widget
 - `lib/`：各数据源请求、解析与系统采样模块
 - `skills/workboard-widget.md`：供 Agent 编写自定义 widget 的规范指南
 

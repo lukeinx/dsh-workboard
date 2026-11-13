@@ -88,7 +88,7 @@ export const BUILTIN_WIDGETS = [
   'workboard.nowplaying', 'workboard.ambient', 'workboard.videos', 'workboard.attention', 'workboard.brief',
   'workboard.ports', 'workboard.status', 'workboard.papers', 'workboard.holiday', 'workboard.activity', 'workboard.apps',
   'workboard.models', 'workboard.onthisday', 'workboard.wallpaper',
-  'workboard.leaderboard', 'workboard.mcps', 'workboard.word', 'workboard.astronomy', 'workboard.packages', 'workboard.releases',
+  'workboard.leaderboard', 'workboard.mcps', 'workboard.astronomy', 'workboard.packages', 'workboard.releases',
   'workboard.weread', 'workboard.poetry', 'workboard.podcasts',
 ];
 

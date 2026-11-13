@@ -1,6 +1,6 @@
 # Workboard
 
-**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 53 widgets out of the box — and your agent builds the rest.**
+**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 52 widgets out of the box — and your agent builds the rest.**
 
 [简体中文](README.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
@@ -8,13 +8,13 @@
 
 ## Highlights
 
-### 53 widgets, ready to use
+### 52 widgets, ready to use
 
 Open the widget gallery, search, and drop cards straight onto your board across four categories:
 
 - **Agent workflows**: active and waiting sessions, running goals and background jobs, daily briefs, quick prompts, token usage and cost estimates, activity heatmap, service status, popular MCP servers, deliverables, scheduled tasks, and pinned sessions
 - **Productivity & dev tools**: to-dos, scratch notes, ICS calendar, Pomodoro focus timer, ambient sound, quick links, installed apps, Git repos, GitHub PRs and issues, release tracker, package downloads, system monitor, recent files, clipboard history, network speed and latency, and local listening ports
-- **Daily essentials**: Today banner, clock, world clock, weather, sun & moon phases, countdowns, public holidays, on this day, daily dev concept, classical poetry, time progress, habit tracker, photo frame, daily wallpaper, and now playing
+- **Daily essentials**: Today banner, clock, world clock, weather, sun & moon phases, countdowns, public holidays, on this day, classical poetry, time progress, habit tracker, photo frame, daily wallpaper, and now playing
 - **News & markets**: multi-source trending lists, RSS / Atom feeds, WeRead, AI papers, OpenRouter models, LLM Arena leaderboard, video subscriptions, podcasts, stocks / forex / crypto markets, and daily quotes
 
 Most widgets work with zero configuration; a few only ask for essentials like your city, an ICS calendar URL, or ticker symbols.
@@ -75,7 +75,7 @@ If you are an agent interacting with Workboard:
 ## Reference
 
 <details>
-<summary><b>All 53 built-in widgets</b></summary>
+<summary><b>All 52 built-in widgets</b></summary>
 
 | Widget | Sizes | What it shows |
 |---|---|---|
@@ -118,7 +118,6 @@ If you are an agent interacting with Workboard:
 | Countdown | `m` `s` `t` | Days until the weekend, month end, year end, and custom dates (`MM-DD` without a year repeats annually) |
 | China holidays | `m` `s` `t` | Next public holidays in mainland China with days off and make-up workdays |
 | On this day | `t` `l` `m` `w` `s` | Historical events on today's date from Wikipedia and Baidu Baike, newest year first |
-| Daily word | `m` `s` `t` `l` `w` | One core AI or software engineering concept a day with bilingual explanation, code snippet, and one-click agent deep dive; click to cycle |
 | Classical poetry | `m` `t` `l` `s` `w` | Masterpieces of Tang & Song poetry, Pre-Qin classics, and Shijing, with full text, Jinrishici recommendations, and one-click agent commentary |
 | Time progress | `m` `s` `w` | Percentage of today, this week, this month, and this year elapsed |
 | Habits | `m` `l` `t` `w` | Check in for any day of the past week and track your current streak |
@@ -180,7 +179,7 @@ Widgets that only read local state:
 - **Ports**: runs `lsof` and `ps` on macOS and Linux to list listening TCP ports, their working folder, and command line; **Stop** sends `SIGTERM` only to a process that is still listening on that port, with no extra permission
 - **Apps**: on macOS, lists the top level of `/Applications`, `/System/Applications`, `~/Applications` and their `Utilities` folders, with Finder display names and icons via `osascript` (JavaScript for Automation), and running state via `ps`; it opens only apps found in those folders, with `open -a`, and needs no permission. On Windows, it reads the Start menu app list (`shell:AppsFolder`, including Store apps) through PowerShell, takes icons from each shortcut's target program, checks running state with `Get-Process`, and opens only apps from that list through `explorer.exe`; Store apps show no icon or running dot
 - **Ambient sound**: synthesized with Web Audio in the page, with no files or network
-- **Sun & moon / Daily word**: computed in the page from your selected city's coordinates (NOAA solar equations and synodic lunar cycle) and a built-in glossary of developer and AI concepts, with no files or network (city search in Sun & moon reuses the Weather widget's Open-Meteo geocoding)
+- **Sun & moon**: computed in the page from your selected city's coordinates (NOAA solar equations and synodic lunar cycle), with no files or network (city search reuses the Weather widget's Open-Meteo geocoding)
 - **Recent files**: lists only the top level of each configured folder
 - **Clipboard**: polls `pbpaste` (macOS) or `wl-paste` / `xclip` (Linux) every 2 seconds while the card is visible; history stays in memory only
 
@@ -237,7 +236,7 @@ npm run check   # syntax check, Host smoke test, and ICS parser tests
 ```
 
 - `index.js`: Host routes (`/api/dsh-workboard/*`), storage tables, and agent tools
-- `client.js`: sidebar entry, board container, and the 53 built-in widgets
+- `client.js`: sidebar entry, board container, and the 52 built-in widgets
 - `lib/`: data fetchers, parsers, and system probes
 - `skills/workboard-widget.md`: agent skill for building custom widgets
 
