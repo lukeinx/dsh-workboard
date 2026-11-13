@@ -3317,7 +3317,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
                 h('polyline', {points: pts.join(' ')}))) : null,
             size === 't' || size === 'l' ? h('div', {className: 'wb-notefoot'}, h('span', null, fill(t('s_uptime'), {t: duration(v.uptime * 1000)})), size === 't' && load ? h('span', null, fill(t('s_load'), {l: load})) : null) : null);
         }
-        System.workboard = {apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], description: () => t('d_system')};
+        System.workboard = {apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], defaultSize: 't', description: () => t('d_system')};
 
         // 上次展示的照片按文件夹记在偏好里，重新进入页面时未到间隔就继续显示同一张；every 为 0 表示只在点击时切换。
         const PHOTO_PREF = 'photoFrame';
@@ -3772,7 +3772,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
               h('button', {type: 'button', className: 'wb-btn', disabled: busy, onClick: refresh}, busy ? '…' : t('refresh'))));
         }
         Network.workboard = {
-          apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], description: () => t('d_network'),
+          apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], defaultSize: 't', description: () => t('d_network'),
           settings: [{key: 'targets', type: 'textarea', label: () => t('f_targets'), default: () => t('defaultTargets')}],
         };
 
