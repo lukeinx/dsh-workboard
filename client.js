@@ -63,6 +63,7 @@ window.__ModuleLoader__.load({
       defaultBoard: '默认', untitled: '未命名', newBoard: '看板 {n}', newBoardLabel: '新建看板', rename: '双击改名',
       edit: '编辑', doneEdit: '完成', addWidget: '添加 widget', added: '已添加', add: '添加', settings: '设置', save: '保存', cancel: '取消',
       saved: '已保存', cfg_personal: '个人', openSettings: '打开设置',
+      intro: '点这里编辑看板：添加 widget、拖动排序、调整尺寸', introOk: '知道了',
       searchWidget: '搜索 widget', cat_all: '全部', cat_daily: '日常', cat_agent: 'DeepSeek', cat_news: '资讯', cat_tools: '效率与工具', cat_plugin: '插件',
       deleteBoard: '删除看板', confirmDelete: '确认删除', size: '尺寸', drag: '拖动排序',
       size_bar: '横栏', size_s: '小 1×1', size_m: '中 2×1', size_t: '竖 1×2', size_l: '大 2×2', size_w: '通栏 4×1',
@@ -198,6 +199,7 @@ window.__ModuleLoader__.load({
       defaultBoard: 'Default', untitled: 'Untitled', newBoard: 'Board {n}', newBoardLabel: 'New board', rename: 'Double-click to rename',
       edit: 'Edit', doneEdit: 'Done', addWidget: 'Add widget', added: 'Added', add: 'Add', settings: 'Settings', save: 'Save', cancel: 'Cancel',
       saved: 'Saved', cfg_personal: 'Personal', openSettings: 'Open settings',
+      intro: 'Edit this board here: add widgets, drag to reorder, resize', introOk: 'Got it',
       searchWidget: 'Search widgets', cat_all: 'All', cat_daily: 'Daily', cat_agent: 'DeepSeek', cat_news: 'News', cat_tools: 'Productivity & tools', cat_plugin: 'Plugins',
       deleteBoard: 'Delete board', confirmDelete: 'Confirm delete', size: 'Size', drag: 'Drag to reorder',
       size_bar: 'Banner', size_s: 'Small 1×1', size_m: 'Medium 2×1', size_t: 'Tall 1×2', size_l: 'Large 2×2', size_w: 'Wide 4×1',
@@ -885,6 +887,12 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-card[data-banner]>.wb-hact{top:-10px;right:-10px}
 .wb-card[data-banner]>.wb-hact+.wb-hact{right:20px}
 .wb-card:hover>.wb-hact,.wb-card>.wb-hact:focus-visible{opacity:1}
+.wb-card[data-intro]>.wb-hedit{opacity:1;color:var(--dsw-alias-brand-primary);border-color:var(--dsw-alias-brand-primary)}
+.wb-introat{position:relative;display:flex}
+.wb-intro{position:absolute;z-index:10;top:calc(100% + 10px);right:0;width:max-content;max-width:260px;display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-brand-primary);box-shadow:0 8px 24px rgba(0,0,0,.18);color:var(--dsw-alias-label-primary);font-size:13px;line-height:1.5;cursor:default;animation:wb-intro .2s ease-out}
+.wb-intro::before{content:'';position:absolute;top:-6px;right:var(--ax,10px);width:10px;height:10px;background:inherit;border:solid var(--dsw-alias-brand-primary);border-width:1px 0 0 1px;transform:rotate(45deg)}
+.wb-intro .wb-action{height:26px;padding:0 10px;flex:none}
+@keyframes wb-intro{from{opacity:0;transform:translateY(-4px)}}
 .wb-card>.wb-hact:hover{color:var(--dsw-alias-brand-primary)}
 @media (hover:none){.wb-card>header .wb-hact,.wb-card>.wb-hact{opacity:.7}}
 .wb-gen{border-style:dashed;flex:none}
@@ -4201,9 +4209,17 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const fail = e => setError(String(e?.message || e));
           const pageRef = useRef(null);
           const restoring = useRef(false);
+          const [introClosed, setIntroClosed] = useState(false);
 
           useEffect(() => { void prefsStore.load(); }, []);
           useEffect(() => customs.start(), []);
+          // 引导只给首次安装的用户：首次读到空 prefs 时记为 pending，升级上来的老用户 prefs 非空、不会看到。
+          useEffect(() => {
+            if (prefsSnap.loaded && !Object.keys(prefsSnap.values).length) prefsStore.put({intro: 'pending'}).catch(() => {});
+          }, [prefsSnap.loaded]);
+          const introPending = prefsSnap.values.intro === 'pending' && !introClosed;
+          const closeIntro = () => { setIntroClosed(true); prefsStore.put({intro: 'done'}).catch(() => {}); };
+          useEffect(() => { if (editing && introPending) closeIntro(); }, [editing, introPending]);
           // widget 内容异步撑高页面：内容尺寸变化时重试，到位、用户操作或超时后停止。
           useEffect(() => {
             const el = pageRef.current;
@@ -4331,7 +4347,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const showTabs = editing || renaming || (boards?.length ?? 0) > 1;
           const bannerFirst = cells.length > 0 && byId.get(cells[0].id).banner;
           const headless = !showTabs && !shownError && bannerFirst;
-          const editButton = h('button', {key: 'edit', type: 'button', className: 'wb-btn wb-iconbtn', 'aria-label': t('edit'), title: t('edit'), onClick: () => setEditing(true)}, h(Icon.pencil));
+          const showIntro = introPending && board && !editing && !modal && !renaming;
+          const introTip = style => h('div', {className: 'wb-intro', role: 'status', style},
+            h('span', null, t('intro')),
+            h('button', {type: 'button', className: 'wb-action', onClick: closeIntro}, t('introOk')));
+          const editButton = h('span', {key: 'edit', className: 'wb-introat'},
+            h('button', {type: 'button', className: 'wb-btn wb-iconbtn', 'aria-label': t('edit'), title: t('edit'), onClick: () => setEditing(true)}, h(Icon.pencil)),
+            showIntro && !headless ? introTip() : null);
 
           const actions = editing
             ? [
@@ -4346,9 +4368,12 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             const size = w.sizes.includes(cell.size) ? cell.size : w.defaultSize;
             const [c, r] = SIZES[size];
             const openSettings = () => setModal({type: 'settings', id: cell.id});
+            const bannerEdit = headless && w.banner && cell === cells[0];
+            const introHere = bannerEdit && showIntro;
             return h('section', {
               key: cell.id, className: 'wb-card', 'aria-label': w.label(), 'data-widget': cell.id, 'data-c': c, style: {'--c': c, '--r': r},
               'data-banner': w.banner ? '' : undefined,
+              'data-intro': introHere ? '' : undefined,
               'data-dragging': drag?.id === cell.id ? '' : undefined,
               'data-drop': drag?.over === cell.id ? (drag.after ? 'after' : 'before') : undefined,
               draggable: editing,
@@ -4370,7 +4395,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
               w.settings.length ? h('button', {type: 'button', className: 'wb-btn', 'aria-label': t('settings'), title: t('settings'), onClick: openSettings}, h(Icon.gear)) : null,
               h('button', {type: 'button', className: 'wb-btn', 'aria-label': t('remove'), title: t('remove'), onClick: () => removeCell(cell.id)}, h(Icon.x))) : null,
             !editing && w.settings.length && !(w.title && !w.banner) ? h('button', {type: 'button', className: 'wb-btn wb-hact', 'aria-label': t('settings'), title: t('settings'), onClick: openSettings}, h(Icon.gear)) : null,
-            headless && w.banner && cell === cells[0] ? h('button', {type: 'button', className: 'wb-btn wb-hact', 'aria-label': t('edit'), title: t('edit'), onClick: () => setEditing(true)}, h(Icon.pencil)) : null,
+            bannerEdit ? h('button', {type: 'button', className: 'wb-btn wb-hact wb-hedit', 'aria-label': t('edit'), title: t('edit'), onClick: () => setEditing(true)}, h(Icon.pencil)) : null,
+            introHere ? introTip({top: 26, right: w.settings.length ? 20 : -10, '--ax': '8px'}) : null,
             w.title && !w.banner ? h('header', null, h('h3', null, w.label()),
               !editing && w.settings.length ? h('button', {type: 'button', className: 'wb-btn wb-hact', 'aria-label': t('settings'), title: t('settings'), onClick: openSettings}, h(Icon.gear)) : null,
               w.custom && !editing ? h('button', {type: 'button', className: 'wb-btn wb-hact', 'aria-label': t('cw_edit'), title: t('cw_edit'), onClick: () => setModal({type: 'agent', id: cell.id})}, h(Icon.sparkle)) : null) : null,
