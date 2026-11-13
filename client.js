@@ -188,6 +188,8 @@ window.__ModuleLoader__.load({
       f_mdVendors: '只看这些厂商（空格分隔，如 deepseek anthropic openai；留空看全部）',
       onthisday: '历史上的今天', d_onthisday: '百度百科与维基百科记载的今日历史事件',
       otd_ago: '{n} 年前', f_otdSource: '数据来源', otd_auto: '跟随界面语言（中文百度 / 英文维基）', otd_baidu: '百度百科', otd_wiki: '维基百科',
+      otd_all: '全部', otd_event: '大事', otd_people: '人物', otd_prev: '前一天', otd_next: '后一天', otd_nextItem: '换一条',
+      otd_prompt: '讲讲 {year} 年 {date} 的这件事：{title}\n{desc}\n用中文介绍它的前因后果、关键细节和历史影响。',
       wallpaper: '每日壁纸', d_wallpaper: 'Bing 每日壁纸与维基共享资源每日图片，点击切换最近 8 天',
       wp_open: '详情', f_wpSource: '来源', wp_bing: 'Bing 每日壁纸', wp_wikimedia: 'Wikimedia 每日图片', f_wpCaption: '显示标题与署名',
       holiday: '节假日', d_holiday: '中国大陆法定节假日与调休上班日',
@@ -335,6 +337,8 @@ window.__ModuleLoader__.load({
       f_mdVendors: 'Only these vendors, space-separated (e.g. deepseek anthropic openai); empty shows all',
       onthisday: 'On this day', d_onthisday: 'Historical events on today\'s date from Wikipedia and Baidu Baike',
       otd_ago: '{n}y ago', f_otdSource: 'Source', otd_auto: 'Match UI language (Wikipedia in EN, Baidu in ZH)', otd_baidu: 'Baidu Baike', otd_wiki: 'Wikipedia',
+      otd_all: 'All', otd_event: 'Events', otd_people: 'People', otd_prev: 'Previous day', otd_next: 'Next day', otd_nextItem: 'Next event',
+      otd_prompt: 'Tell me about this event on {date}, {year}: {title}\n{desc}\nExplain the background, key details and historical impact.',
       wallpaper: 'Daily wallpaper', d_wallpaper: 'Bing daily wallpaper and Wikimedia Picture of the Day; click to cycle the last 8 days',
       wp_open: 'Info', f_wpSource: 'Source', wp_bing: 'Bing daily wallpaper', wp_wikimedia: 'Wikimedia Picture of the Day', f_wpCaption: 'Show title and credit',
       holiday: 'China holidays', d_holiday: 'Public holidays and make-up workdays in mainland China',
@@ -961,6 +965,34 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-heat i[data-future]{background:none}
 .wb-heat i[data-day]:hover{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--dsw-alias-label-primary) 60%,transparent)}
 .wb-heat i[data-today]{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--dsw-alias-label-primary) 30%,transparent)}
+.wb-otd{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0}
+.wb-otd-bar{display:flex;align-items:center;justify-content:space-between;gap:6px;flex:none;min-height:24px}
+.wb-otd-nav{display:inline-flex;align-items:center;gap:2px;margin-left:auto}
+.wb-otd-nav .wb-iconbtn{width:22px;height:22px;border-radius:6px}
+.wb-otd-date{font-size:12px;color:var(--dsw-alias-label-secondary);padding:0 4px;height:22px;border-radius:6px;white-space:nowrap}
+.wb-otd-date[data-offset]{color:var(--dsw-alias-brand-primary);font-weight:500}
+.wb-otd-date:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
+.wb-otd-row{align-items:flex-start;gap:8px;padding:5px 4px}
+.wb-otd-yr{width:34px;flex:none;text-align:right;font-size:12px;font-weight:600;line-height:18px;color:var(--dsw-alias-label-secondary)}
+.wb-otd-row[data-top] .wb-otd-yr{color:var(--dsw-alias-brand-primary)}
+.wb-otd-dot{position:relative;width:7px;height:18px;flex:none;display:grid;place-items:center}
+.wb-otd-dot::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--dsw-alias-border-l2);z-index:1}
+.wb-otd-row[data-top] .wb-otd-dot::before{width:7px;height:7px;background:var(--dsw-alias-brand-primary)}
+.wb-otd-row:not(:last-child) .wb-otd-dot::after{content:'';position: absolute;top:12px;bottom:-16px;left:3px;width:1px;background:var(--dsw-alias-border-l1)}
+.wb-otd-row>div>b{white-space:normal;line-height:18px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.wb-otd-row>div>.wb-otd-sub{white-space:normal;line-height:1.45;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.wb-otd-row>time,.wb-otd-row>.wb-rowact{margin-top:1px}
+.wb-otd-card{display:flex;flex-direction:column;justify-content:center;gap:4px;height:100%;min-width:0;cursor:pointer}
+.wb-otd-top{display:flex;align-items:baseline;gap:6px;min-width:0}
+.wb-otd-top small{font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap}
+.wb-otd-big{font-size:24px;font-weight:600;letter-spacing:-.5px;line-height:1.1;color:var(--dsw-alias-brand-primary)}
+.wb-otd-title{font-weight:600;line-height:1.42;color:var(--dsw-alias-label-primary);text-decoration:none;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+a.wb-otd-title:hover{color:var(--dsw-alias-brand-primary)}
+.wb-otd-title[data-read]{font-weight:400;color:var(--dsw-alias-label-secondary)}
+.wb-otd-desc{margin:0;font-size:12px;line-height:1.45;color:var(--dsw-alias-label-secondary);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wb-otd-cols{cursor:pointer;gap:14px}
+.wb-otd-cols>div{justify-content:center;gap:3px}
+.wb-otd-cols .wb-otd-big{font-size:20px}
 .wb-list,.wb-events,.wb-rows,.wb-links,.wb-quotes,.wb-chips,.wb-table,.wb-vgrid,.wb-vlist{margin-right:-8px;padding-right:8px}
 .wb-card ::-webkit-scrollbar{width:4px;height:4px}
 .wb-card ::-webkit-scrollbar-track,.wb-card ::-webkit-scrollbar-corner{background:transparent}
@@ -4135,26 +4167,91 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
         function OnThisDay({size, config}) {
           useLocale();
           const now = useNow();
-          const day = dayKey(now);
+          const ws = useWorkspace();
+          const today = dayKey(now);
           const lang = t('lang');
           const source = String(config?.source || 'auto');
+          const [dayOffset, setDayOffset] = useState(0);
+          const [cat, setCat] = useState('all');
+          const [index, setIndex] = useState(0);
+          const [error, setError] = useState('');
+          const day = dayOffset ? shiftDay(today, dayOffset) : today;
+          useEffect(() => { setIndex(0); }, [day, source, cat]);
           const res = useRemote('onthisday.get', {source, lang, day}, DAILY_MS);
           const v = res.value;
           const read = useRead(v ? v.items.map(it => it.url).filter(Boolean) : []);
           const thisYear = now.getFullYear();
-          const items = v ? (size === 's' ? v.items.slice(0, 4) : v.items) : [];
+          const dateStr = keyDate(day).toLocaleDateString(lang, {month: 'short', day: 'numeric'});
+          const agoText = y => { const a = thisYear - y; return a > 0 ? fill(t('otd_ago'), {n: a}) : ''; };
+          const rank = it => (it.cover ? 4 : it.featured && it.type === 'event' ? 3 : it.featured ? 2 : it.type === 'event' ? 1 : 0);
+          const picked = v ? [...v.items].sort((a, b) => rank(b) - rank(a) || b.year - a.year) : [];
+
+          if (size === 's' || size === 'm') {
+            if (!v || !picked.length) return blank(res.error || '…');
+            const it = picked[index % picked.length];
+            const next = () => { if (picked.length > 1) setIndex(i => (i + 1) % picked.length); };
+            return h('div', {className: 'wb-otd-card', 'data-size': size, title: [it.title, it.desc, t('otd_nextItem')].filter(Boolean).join('\n'), onClick: next},
+              h('div', {className: 'wb-otd-top'},
+                h('span', {className: 'wb-otd-big wb-num'}, it.year),
+                agoText(it.year) ? h('small', {className: 'wb-num'}, agoText(it.year)) : null,
+                h('span', {className: 'wb-spacer'}),
+                picked.length > 1 ? h('small', {className: 'wb-num'}, `${(index % picked.length) + 1}/${picked.length}`) : null),
+              it.url
+                ? h('a', {className: 'wb-otd-title', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer', onClick: e => e.stopPropagation()}, it.title)
+                : h('b', {className: 'wb-otd-title'}, it.title),
+              size === 'm' && it.desc ? h('p', {className: 'wb-otd-desc'}, it.desc) : null);
+          }
+
+          if (size === 'w') {
+            if (!v || !picked.length) return blank(res.error || '…');
+            const n = Math.min(4, picked.length);
+            const cols = Array.from({length: n}, (_, k) => picked[(index + k) % picked.length]);
+            const next = () => { if (picked.length > n) setIndex(i => (i + n) % picked.length); };
+            return h('div', {className: 'wb-cols wb-otd-cols', title: t('otd_nextItem'), onClick: next}, cols.map((it, i) => h('div', {key: `${i}${it.year}`, title: [it.title, it.desc].filter(Boolean).join('\n')},
+              h('div', {className: 'wb-otd-top'},
+                h('span', {className: 'wb-otd-big wb-num'}, it.year),
+                agoText(it.year) ? h('small', {className: 'wb-num'}, agoText(it.year)) : null),
+              it.url
+                ? h('a', {className: 'wb-otd-title', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer', onClick: e => e.stopPropagation()}, it.title)
+                : h('b', {className: 'wb-otd-title'}, it.title),
+              it.desc ? h('small', null, it.desc) : null)));
+          }
+
+          const hasPeople = Boolean(v?.items.some(x => x.type === 'birth' || x.type === 'death'));
+          const activeCat = hasPeople ? cat : 'all';
+          const filtered = !v ? [] : activeCat === 'event' ? v.items.filter(x => x.type === 'event')
+            : activeCat === 'people' ? v.items.filter(x => x.type === 'birth' || x.type === 'death') : v.items;
+          const items = filtered.length ? filtered : (v?.items ?? []);
+          const ask = (e, it) => {
+            e.preventDefault();
+            e.stopPropagation();
+            launch(fill(t('otd_prompt'), {year: it.year, date: dateStr, title: it.title, desc: it.desc || ''}).trim(), ws.path, ws.id)
+              .then(() => setError(''), err => setError(String(err?.message || err)));
+          };
           const row = (it, i) => {
-            const ago = thisYear - it.year;
+            const ago = agoText(it.year);
+            const top = it.cover || it.featured ? '' : undefined;
             const body = [
-              h('span', {key: 'y', className: 'wb-rank wb-num'}, it.year),
-              h('div', {key: 'b'}, h('b', null, it.title), size === 'l' && it.desc ? h('small', null, it.desc) : null),
-              size === 's' || size === 't' || ago <= 0 ? null : h('span', {key: 'a', className: 'wb-num'}, fill(t('otd_ago'), {n: ago})),
+              h('span', {key: 'y', className: 'wb-otd-yr wb-num'}, it.year),
+              h('i', {key: 'd', className: 'wb-otd-dot'}),
+              h('div', {key: 'b'}, h('b', null, it.title), size === 'l' && it.desc ? h('small', {className: 'wb-otd-sub'}, it.desc) : null),
+              size === 'l' ? h('button', {key: 'act', type: 'button', className: 'wb-btn wb-rowact', onClick: e => ask(e, it)}, t('toAgent')) : null,
+              size === 'l' && ago ? h('time', {key: 'a', className: 'wb-num'}, ago) : null,
             ];
             return it.url
-              ? h('a', {key: `${i}${it.year}`, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer', title: [it.title, it.desc].filter(Boolean).join('\n')}, body)
-              : h('div', {key: `${i}${it.year}`, className: 'wb-row', title: [it.title, it.desc].filter(Boolean).join('\n')}, body);
+              ? h('a', {key: `${i}${it.year}`, className: 'wb-row wb-rowbtn wb-otd-row', 'data-top': top, ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer', title: [it.title, it.desc].filter(Boolean).join('\n')}, body)
+              : h('div', {key: `${i}${it.year}`, className: 'wb-row wb-otd-row', 'data-top': top, title: [it.title, it.desc].filter(Boolean).join('\n')}, body);
           };
-          return h('div', {className: 'wb-rows'}, v ? items.map(row) : blank(res.error || '…'));
+          return h('div', {className: 'wb-otd'},
+            h('div', {className: 'wb-otd-bar'},
+              hasPeople ? h('div', {className: 'wb-seg', role: 'tablist'},
+                ['all', 'event', 'people'].map(k => h('button', {key: k, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': k === activeCat, onClick: () => setCat(k)}, t(`otd_${k}`)))) : null,
+              h('div', {className: 'wb-otd-nav'},
+                h('button', {type: 'button', className: 'wb-btn wb-iconbtn', 'aria-label': t('otd_prev'), title: t('otd_prev'), onClick: () => setDayOffset(d => d - 1)}, h(Icon.left)),
+                h('button', {type: 'button', className: 'wb-btn wb-otd-date wb-num', 'data-offset': dayOffset ? '' : undefined, onClick: () => setDayOffset(0)}, dateStr),
+                h('button', {type: 'button', className: 'wb-btn wb-iconbtn', 'aria-label': t('otd_next'), title: t('otd_next'), onClick: () => setDayOffset(d => d + 1)}, h(Icon.right)))),
+            h('div', {className: 'wb-rows wb-otd-tl'}, v ? items.map(row) : blank(res.error || '…')),
+            error ? h('div', {className: 'wb-calerr', title: error}, error) : null);
         }
         OnThisDay.workboard = {
           apiVersion: 1, sizes: ['t', 'l', 'm', 'w', 's'], defaultSize: 't', description: () => t('d_onthisday'),
