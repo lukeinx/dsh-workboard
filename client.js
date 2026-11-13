@@ -654,7 +654,10 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-link:hover{background:var(--dsw-alias-bg-layer-2)}
 .wb-link i{width:32px;height:32px;border-radius:8px;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);box-sizing:border-box;display:grid;place-items:center;font-style:normal;font-weight:600;color:var(--dsw-alias-label-secondary)}
 .wb-link span{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.wb-apps .wb-link i{position:relative;width:36px;height:36px}
+.wb-apps{grid-template-columns:repeat(auto-fill,minmax(72px,1fr))}
+.wb-apps .wb-link{padding:8px 2px 6px;justify-content:flex-start}
+.wb-apps .wb-link span{font-size:11px;line-height:14px;min-height:28px;white-space:normal;text-align:center;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+.wb-apps .wb-link i{position:relative;width:36px;height:36px;flex:none}
 .wb-apps .wb-link i[data-img]{background:none;border:0}
 .wb-apps .wb-link img{width:100%;height:100%;display:block}
 .wb-apps .wb-link[data-running] i::after{content:'';position:absolute;left:50%;bottom:-5px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--dsw-alias-label-secondary)}
@@ -2084,6 +2087,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           settings: [{key: 'links', type: 'textarea', label: () => t('f_links'), placeholder: 'GitHub https://github.com'}],
         };
 
+        // 卡片上省掉厂商前缀（Microsoft Word → Word），完整名称放在 title 里。
+        const appShort = name => name.replace(/^(Microsoft|Google|Adobe|Tencent)\s+(?=\S)/, '');
+
         // 选中的应用存在全局偏好里，各看板共用一份。
         function Apps() {
           useLocale();
@@ -2136,7 +2142,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
                 return h('button', {key: a.path, type: 'button', className: 'wb-btn wb-link', disabled: a.missing, title: a.missing ? `${a.name} · ${t('ap_missing')}` : a.name,
                   'data-running': a.running ? '' : undefined, 'data-busy': busy === a.path ? '' : undefined, onClick: () => launch(a)},
                   h('i', {'data-img': src ? '' : undefined}, src ? h('img', {src, alt: '', draggable: false}) : ([...a.name][0] ?? '?').toUpperCase()),
-                  h('span', null, a.name));
+                  h('span', null, appShort(a.name)));
               }),
               h('button', {type: 'button', className: 'wb-btn wb-link', 'data-add': '', title: t('ap_add'), onClick: () => setPicking(true)}, h('i', null, h(Icon.plus)), h('span', null, t('edit')))),
             error ? h('div', {className: 'wb-calerr', title: error}, error) : null);
