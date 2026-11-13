@@ -879,6 +879,7 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-heat i[data-level="3"]{background:#30a14e}
 .wb-heat i[data-level="4"]{background:#216e39}
 .wb-heat i[data-future]{background:none}
+.wb-heat i[data-day]:hover{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--dsw-alias-label-primary) 60%,transparent)}
 .wb-heat i[data-today]{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--dsw-alias-label-primary) 30%,transparent)}
 `;
 
@@ -3987,6 +3988,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const res = useRemote('usage.get', {days: AC_MAX_WEEKS * 7 + 6}, USAGE_MS);
           const ref = useRef(null);
           const [box, setBox] = useState({w: 0, h: 0});
+          const [hover, setHover] = useState(null);
           useEffect(() => {
             const el = ref.current;
             if (!el || typeof ResizeObserver !== 'function') return undefined;
@@ -4025,17 +4027,19 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           let run = 0;
           for (const x of values) { run = x > 0 ? run + 1 : 0; best = Math.max(best, run); }
           const unit = metric === 'tokens' ? t('ac_tokens') : t('ac_requests');
-          const grid = h('div', {className: 'wb-heat', style: {gridTemplateRows: `repeat(7, ${cell}px)`, gridAutoColumns: `${cell}px`, gap: `${AC_GAP}px`}},
+          const grid = h('div', {className: 'wb-heat', style: {gridTemplateRows: `repeat(7, ${cell}px)`, gridAutoColumns: `${cell}px`, gap: `${AC_GAP}px`},
+            onMouseOver: e => setHover(e.target.dataset?.day ?? null), onMouseLeave: () => setHover(null)},
             box.w ? cells.map(d => {
               if (d > today) return h('i', {key: d, 'data-future': ''});
               const x = byDay.get(d);
-              return h('i', {key: d, 'data-level': level(x?.[metric] ?? 0), 'data-today': d === today ? '' : undefined,
-                title: fill(t('u_day'), {d: keyDate(d).toLocaleDateString(lang, {year: 'numeric', month: 'short', day: 'numeric', weekday: 'short'}), t: compact(x?.tokens ?? 0), r: x?.requests ?? 0})});
+              return h('i', {key: d, 'data-day': d, 'data-level': level(x?.[metric] ?? 0), 'data-today': d === today ? '' : undefined});
             }) : null);
+          const hx = hover ? byDay.get(hover) : null;
+          const tip = hover ? fill(t('u_day'), {d: keyDate(hover).toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'}), t: compact(hx?.tokens ?? 0), r: hx?.requests ?? 0}) : '';
           const stats = [fill(t('ac_total'), {n: compact(total), u: unit}), fill(t('ac_days'), {n: active}), streak ? fill(t('ac_streak'), {n: streak}) : '', size === 'm' ? '' : fill(t('ac_best'), {n: best})].filter(Boolean);
           return h('div', {className: 'wb-activity'},
             h('div', {className: 'wb-heatbox', ref}, grid),
-            h('div', {className: 'wb-notefoot wb-num', style: {marginTop: 0}}, h('span', null, stats.join(' · '))));
+            h('div', {className: 'wb-notefoot wb-num', style: {marginTop: 0}}, h('span', null, tip || stats.join(' · '))));
         }
         Activity.workboard = {
           apiVersion: 1, sizes: ['w', 'l', 'm'], description: () => t('d_activity'),
