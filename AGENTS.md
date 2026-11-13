@@ -7,7 +7,7 @@
 
 ## 新增 / 删除内置 widget 时同步文档
 
-`README.md` 与 `README.zh.md` 成对修改，只动下列位置；「亮点 / Highlights」各小节的正文与场景列表、截图、快速开始、写给 AI Agent 等主体内容不改。
+`README.md`（中文，GitHub 默认展示）与 `README.en.md` 成对修改，只动下列位置；「亮点 / Highlights」各小节的正文与场景列表、截图、快速开始、写给 AI Agent 等主体内容不改。
 
 1. **数量**：以 `client.js` 的 `builtins` 数组长度为准，替换全部出现处——每份 README 的顶部加粗标语、亮点首个小节标题、参考里的 widget 列表 `<summary>`、开发里的 `client.js` 说明，以及 `package.json` 的 `description`。改完用 grep 旧数字确认无残留。
 2. **widget 列表**（参考 → 全部 N 个内置 widget）：按 `BUILTIN_CATEGORY` 放进对应分组，组内顺序与该数组一致；名称用 locale 里的显示名；档位列按 manifest `sizes` 原顺序写；说明列一句话，风格对齐相邻行。若与其他 widget 共享设置或偏好，补到表后的「注」。

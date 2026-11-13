@@ -1,177 +1,177 @@
-# Workboard
+# 工作台 Workboard
 
-**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 42 widgets out of the box — and your agent builds the rest.**
+**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 42 个 widget，开箱即用；不够用的，让 Agent 现做。**
 
-[简体中文](README.zh.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
+[English](README.en.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
-![Workboard in light and dark themes](docs/images/hero-en.png)
+![工作台浅色与深色主题](docs/images/hero-zh.png)
 
-## Highlights
+## 亮点
 
-### 42 widgets, ready to use
+### 内置 42 个 widget，开箱即用
 
-Open the widget gallery, search, and drop cards straight onto your board across four categories:
+覆盖四大场景，打开组件库即可搜索、预览并连续添加到看板：
 
-- **Agent workflows**: active and waiting sessions, running goals and background jobs, quick prompts, inbox, token usage and cost estimates, deliverables, scheduled tasks, and pinned sessions
-- **Productivity & dev tools**: to-dos, scratch notes, ICS calendar, Pomodoro focus timer, ambient sound, quick links, Git repos, GitHub PRs and issues, system monitor, network speed and latency, clipboard history, and recent files
-- **Daily essentials**: Today banner, clock, world clock, weather, countdowns, time progress, habit tracker, photo frame, and now playing
-- **News & markets**: multi-source trending lists, RSS / Atom feeds, video subscriptions, stocks / forex / crypto markets, and daily quotes
+- **Agent 协作**：待确认与运行中会话、长程目标与后台作业、Prompt 快启、收集箱、Token 用量与费用估算、产出物、定时任务、收藏会话
+- **效率与开发**：待办、速记、ICS 日历、专注番茄钟、白噪音、快捷链接、Git 工作区、GitHub（PR / Issue）、系统状态、网络测速、剪贴板、最近文件
+- **日常桌面**：今日横栏、时钟、世界时钟、天气、倒数日、时间进度、习惯打卡、本机相框、正在播放
+- **资讯与行情**：多源热榜、RSS / Atom 订阅、视频订阅、A 股 / 港股 / 美股 / 汇率 / 加密货币行情、每日格言
 
-Most widgets work with zero configuration; a few only ask for essentials like your city, an ICS calendar URL, or ticker symbols.
+绝大多数零配置即用；少数仅需填入城市、日历订阅链接或股票代码等个人信息。
 
-![Widget gallery](docs/images/gallery-en.png)
+![组件库](docs/images/gallery-zh.png)
 
-### Your agent builds the rest
+### 不够用的，让 Agent 现做
 
-Describe the card you want in a sentence and click **Hand to agent**. The agent writes the widget and places it directly onto your open board. Click the sparkle button on any custom card to ask for changes, or **Ask agent to fix** to hand runtime errors back to the agent.
+用一句话描述想要的卡片，点击 **交给 Agent**，写好后自动放上当前看板。后续点卡片上的星光按钮即可让 Agent 微调；若运行报错，点 **让 Agent 修复** 即可把错误交回给它处理。
 
-Custom widgets run inside an isolated sandbox with no access to the host page, cookies, or undeclared network endpoints — they can only fetch URL prefixes explicitly declared by the widget.
+自定义 widget 运行在独立沙箱内，无法访问宿主页面、Cookie 或未授权网络，只能通过 Host 请求该卡片显式声明的接口地址。
 
-![Generate a widget with the agent](docs/images/generate-en.png)
+![用 Agent 生成 widget](docs/images/generate-zh.png)
 
-### Built for agent workflows
+### 专为 Agent 工作流打造
 
-Monitor sessions waiting for your approval, active goals and background jobs, token usage, deliverables, and scheduled tasks on a single board. Going the other way, your agent can read and update your to-dos, notes, inbox, and custom widgets from any conversation using built-in tools.
+一块看板集中呈现需要你确认的会话、进行中的长程目标与后台作业、Token 用量、交付产出物和定时任务。反过来，Agent 也能在任意对话中通过内置工具直接读写你的待办、速记、收集箱与自定义卡片。
 
-![Agent widgets](docs/images/agent-en.png)
+![Agent 类 widget](docs/images/agent-zh.png)
 
-### Modular, adaptive, minimal
+### 模块化、自适应、克制
 
-Cards snap to a four-column grid across six sizes. Drag to rearrange, resize on the fly, and organize widgets across tabbed boards. The layout reflows smoothly to narrow windows and follows the Harness light and dark themes. Each card does one job with zero visual clutter.
+卡片吸附在四列网格上，提供六种尺寸档位，支持拖拽排布、自由缩放，并可按主题拆分到多个标签页看板。布局随窗口宽度自动重排，明暗主题跟随 Harness 切换。每张卡片只聚焦一件事，不设多余装饰。
 
-<img src="docs/images/narrow-en.png" alt="Narrow window in dark theme" width="480">
+<img src="docs/images/narrow-zh.png" alt="窄窗口与深色主题" width="480">
 
-### Local and private
+### 数据留在本机，隐私可控
 
-All boards and personal data stay in your local Harness profile. Every external network request is proxied and cached by the Host — the browser page never connects to third-party services directly.
+所有看板与个人数据均保存在本机 Harness profile 中。外部网络请求统一由 Host 端发出并缓存，前端页面不直连任何第三方服务。
 
-## Quick start
+## 快速开始
 
-In Harness, open **Plugins** → **Add plugin**, enter the package name, and install:
+在 Harness 打开 **插件** → **添加插件**，输入包名并安装：
 
 ```
 dsh-workboard
 ```
 
-Or just tell your agent "install the plugin dsh-workboard". From the command line: `dsh plugin --profile web add dsh-workboard`.
+也可以直接对 Agent 说「安装插件 dsh-workboard」。命令行用户：`dsh plugin --profile web add dsh-workboard`。
 
-Then open **Workboard** from the sidebar. The default board comes preset with common widgets such as Today, To-do, Trending, Outputs, Clipboard, Calendar, and System. Click **Edit** → **Add widget** to browse the gallery or ask the agent to build a custom card.
+安装后在左侧边栏打开 **工作台**。初始看板预置了今日、待办、热榜、产出物、剪贴板、日历、系统状态等常用组件；点击右上角 **编辑** → **添加 widget** 即可添加更多组件，或让 Agent 生成新卡片。
 
-## For AI agents
+## 写给 AI Agent
 
-If you are an agent interacting with Workboard:
+如果你是在操作工作台的 Agent：
 
-- **Install**: call `plugin_manager install_bundle` with `target` set to `dsh-workboard`, or to this repository's absolute path when installing from source (local directories are linked rather than copied).
-- **Built-in tools**:
-  - `workboard_todos`: `list` · `add` · `complete` · `reopen` · `remove`
-  - `workboard_note`: `read` · `append` · `replace`
-  - `workboard_inbox`: `list` · `add` · `remove` · `clear`
-  - `workboard_widget`: `list` · `get` · `create` · `update` · `set_data` · `remove`
-  - `workboard_context`: read-only; one call returns what needs the user, calendar, weather, to-dos, habits, inbox, note, sessions, running work, scheduled tasks, outputs, usage, Git, and GitHub; pass `sections` to read only some
-  - `workboard_brief`: `read` · `write` (the daily brief, in Markdown)
-- **Build a custom widget**: load the `workboard-widget` skill ([`skills/workboard-widget.md`](skills/workboard-widget.md)) before calling `workboard_widget`. It documents card sizes, the `window.workboard` bridge API, sandbox rules, and theme tokens.
-- **Limits & live sync**: up to 50 custom widgets, each with up to 200 KB of HTML and 200 KB of JSON data. The UI polls every 5 seconds, so your changes appear without reloading the page.
-- **Storage**: `~/.dsh/storages/dsh_workboard.json`.
+- **安装**：调用 `plugin_manager install_bundle`，`target` 填 `dsh-workboard`；从源码安装时填本仓库绝对路径（以软链接挂载，不复制文件）。
+- **内置工具**：
+  - `workboard_todos`：`list` · `add` · `complete` · `reopen` · `remove`
+  - `workboard_note`：`read` · `append` · `replace`
+  - `workboard_inbox`：`list` · `add` · `remove` · `clear`
+  - `workboard_widget`：`list` · `get` · `create` · `update` · `set_data` · `remove`
+  - `workboard_context`：只读，一次读取待处理、日程、天气、待办、习惯、收集箱、速记、会话、运行中、定时任务、产出物、用量、Git 与 GitHub，可用 `sections` 只取部分
+  - `workboard_brief`：`read` · `write`（每日简报，Markdown）
+- **构建自定义 widget**：调用 `workboard_widget` 前先加载 `workboard-widget` skill（[`skills/workboard-widget.md`](skills/workboard-widget.md)），内含尺寸规范、`window.workboard` API、沙箱约束与主题变量。
+- **配额与同步**：最多 50 个自定义 widget，单个 widget 的 HTML 与数据各不超过 200 KB。前端每 5 秒轮询一次，修改无需刷新页面即可生效。
+- **存储路径**：`~/.dsh/storages/dsh_workboard.json`。
 
-## Reference
+## 参考
 
 <details>
-<summary><b>All 42 built-in widgets</b></summary>
+<summary><b>全部 42 个内置 widget</b></summary>
 
-| Widget | Sizes | What it shows |
+| Widget | 档位 | 说明 |
 |---|---|---|
-| **DeepSeek (Agent workflows)** | | |
-| Attention | `l` `t` `m` `w` | One queue, by urgency, of sessions waiting for you, blocked goals, failed background jobs, PRs to review, carried-over to-dos, and the inbox; jump to the session, complete the to-do, or hand off to the agent |
-| Agent | `t` `l` `m` `w` | Sessions waiting for your input first, followed by running and recent sessions, upcoming scheduled tasks, and a new-session button |
-| Running | `t` `l` `m` `w` | Active goals and background jobs across sessions; jump to the session or stop a job |
-| Daily brief | `l` `t` `w` `m` | A brief of your day that the agent writes from the dashboard; generate it any time or every day on a schedule |
-| Quick prompt | `m` `w` `l` `t` `s` | Type a prompt or pick a preset to launch a new session right away in the chosen workspace |
-| Inbox | `t` `l` `m` `w` | Quick capture for links and thoughts; hand everything to the agent to triage with one click |
-| Usage | `l` `t` `m` `w` `s` | Token counts, request totals, cache hit rate, and per-model breakdown from local session logs, plus cost estimates when prices are set |
-| Activity | `w` `l` `m` | A year of daily agent usage as a heatmap, shaded by tokens or requests, with active days and streaks |
-| Service status | `t` `l` `m` `s` `w` | Status of DeepSeek, Claude, OpenAI, GitHub, npm, or any Statuspage you add; services with incidents float to the top |
-| Outputs | `t` `l` `m` `w` | Deliverables presented by the agent, newest first; open, reveal in Finder, or jump to the source session |
-| Scheduled tasks | `t` `l` `m` `w` | All scheduled tasks with recurrence and next run time; run now, pause, resume, or delete |
-| Pinned sessions | `t` `l` `m` `w` | Your pinned sessions with a preview of each session's latest message |
-| **Productivity & tools** | | |
-| To-do | `l` `m` `t` | Open items on top, completed items collapsed; unfinished items from earlier days are badged as carried over |
-| Notes | `l` `t` `m` `s` | Autosaving scratchpad; turn the current line into a to-do with one click |
-| Calendar | `t` `l` `s` `m` | Month grid and selected day's schedule from one or more ICS subscriptions, including recurring events |
-| Focus | `m` `s` | Pomodoro timer that keeps running across boards and panels, sends a system notification when done, and tracks today's completed sessions |
-| Ambient sound | `m` `s` `w` `t` | Rain, waves, wind, fire, and pink / brown noise synthesized in the page; mix several, keeps playing across boards and panels, and can start with Focus |
-| Links | `m` `s` `w` `t` `l` | One `name URL` per line (`http`, `https`, and `mailto` only) |
-| Apps | `m` `s` `w` `t` `l` | Pick installed apps from a searchable list and open them in one click; running apps get a dot (macOS and Windows) |
-| Git repos | `t` `l` `m` `w` | Current branch, uncommitted changes, ahead / behind counts, and branches whose upstream is gone; defaults to your Harness workspaces |
-| GitHub | `t` `l` `m` `w` | PRs awaiting your review, your open PRs, and issues assigned to you via your signed-in `gh` CLI |
-| System | `m` `s` `t` `l` `w` | CPU, memory, disk, battery, and a 5-minute CPU load sparkline |
-| Recent files | `t` `l` `m` `w` | Newest files in `~/Downloads`, `~/Desktop`, or custom folders; open, reveal, or hand a file to the agent |
-| Clipboard | `t` `l` `m` `w` | Text copied while the panel is open; copy again or send to the agent with a preset like Translate |
-| Network | `m` `s` `t` `l` `w` | Live download / upload throughput, local and public IP, system proxy status, and latency to configured hosts |
-| Ports | `t` `l` `m` `w` | TCP ports listening on this machine and the dev servers behind them, with project folder; open in the browser, reveal the folder, or stop the process (apps and system processes hidden by default) |
-| **Daily** | | |
-| Today | `bar` | Time, greeting, date, ISO week, current weather, and a daily quote (built-in, Hitokoto, or custom; click for another) |
-| Clock | `m` `s` | Current time, greeting, date, and year progress |
-| World clock | `m` `s` `w` `t` | Current time across multiple IANA time zones with local offset and day difference |
-| Weather | `m` `s` | Current conditions, today's high and low, air quality, and hourly forecast |
-| Countdown | `m` `s` `t` | Days until the weekend, month end, year end, and custom dates (`MM-DD` without a year repeats annually) |
-| China holidays | `m` `s` `t` | Next public holidays in mainland China with days off and make-up workdays, plus today's lunar date |
-| Time progress | `m` `s` `w` | Percentage of today, this week, this month, and this year elapsed |
-| Habits | `m` `l` `t` `w` | Check in for any day of the past week and track your current streak |
-| Photo frame | `m` `s` `t` `l` `w` | Cycles through photos from a local folder (`~/Pictures` by default) |
-| Now playing | `m` `s` `w` `t` | Track, artwork, and progress of whatever macOS reports as now playing (Music, Spotify, QQ Music, browsers…), with play / pause and skip |
-| **News & markets** | | |
-| Trending | `l` `t` `m` `w` | Tabbed hot lists from Weibo, Zhihu, 36Kr, sspai, Hacker News, GitHub Trending, Product Hunt, and Reddit (Bilibili and V2EX optional) |
-| Feeds | `t` `l` `m` `w` | Multiple RSS / Atom feeds merged chronologically; visited items dim automatically |
-| AI papers | `l` `t` `m` `w` | Hugging Face daily papers ranked by upvotes and trending models; hand a paper to the agent to explain |
-| Videos | `l` `t` `m` `w` | Latest uploads from YouTube channels (link, `UC…` ID, or `@handle`), Bilibili creators (space link or UID), and RSS feeds with images, with thumbnails |
-| Markets | `t` `m` `s` `l` `w` | Forex (`USD/CNY`), China / HK / US equities (`sh600519`, `hk00700`, `usAAPL`), and crypto (`BTC`, `cg:<id>`) |
-| Quote | `m` `w` `s` | A daily quote (click for another), sharing its source setting with the Today banner |
+| **DeepSeek（Agent 协作）** | | |
+| 待处理 | `l` `t` `m` `w` | 等你确认的会话、卡住的目标、失败的后台作业、待 Review 的 PR、结转待办与收集箱按紧急程度排成一列，可直接跳转会话、完成待办或交给 Agent |
+| Agent | `t` `l` `m` `w` | 等你确认的会话置顶，其次为运行中和最近会话；展示即将触发的定时任务，支持一键新开会话 |
+| 运行中 | `t` `l` `m` `w` | 汇总各会话的长程目标（Goals）与后台作业（Jobs），可直接跳转会话或停止作业 |
+| 每日简报 | `l` `t` `w` `m` | Agent 汇总工作台数据写成的今日简报；可随时生成，也可开启每天定时生成 |
+| Prompt 快启 | `m` `w` `l` `t` `s` | 输入提示词或点击预设，直接在指定工作区新开会话并发送 |
+| 收集箱 | `t` `l` `m` `w` | 随手记下的想法与链接，一键交给 Agent 归类整理 |
+| 用量 | `l` `t` `m` `w` `s` | 从本机会话日志统计 Token、请求数、缓存命中率及各模型占比；填入单价后可估算花费 |
+| 活跃热力图 | `w` `l` `m` | 过去一年每天的 Agent 用量热力图，按 token 或请求数着色，附活跃天数与连续天数 |
+| 服务状态 | `t` `l` `m` `s` `w` | DeepSeek、Claude、OpenAI、GitHub、npm 及任意 Statuspage 状态页，有故障的服务置顶 |
+| 产出物 | `t` `l` `m` `w` | 按时间倒序展示 Agent 交付的文件；支持直接打开、在 Finder 中定位或跳回原会话 |
+| 定时任务 | `t` `l` `m` `w` | 查看所有定时任务的执行周期与下次触发时间；支持立即运行、暂停、恢复与删除 |
+| 收藏会话 | `t` `l` `m` `w` | 固定常用会话并展示最新一条消息预览 |
+| **效率与工具** | | |
+| 待办 | `l` `m` `t` | 未完成项置顶、已完成项折叠；跨天未完成项自动标记「结转」 |
+| 速记 | `l` `t` `m` `s` | 自动保存的随手记，光标所在行可一键转为待办 |
+| 日历 | `t` `l` `s` `m` | 月视图与当日日程列表，支持订阅多个 ICS 地址并展开重复规则 |
+| 专注 | `m` `s` | 番茄钟，切换看板或离开面板不中断，到点发送系统通知并统计今日专注次数 |
+| 白噪音 | `m` `s` `w` `t` | 在页面内合成雨声、海浪、风声、篝火与粉噪 / 棕噪，可叠加；切换看板或离开面板不中断，可在专注时自动播放 |
+| 快捷链接 | `m` `s` `w` `t` `l` | 每行一条「名称 网址」，仅允许 `http`、`https` 与 `mailto` |
+| 快捷应用 | `m` `s` `w` `t` `l` | 从可搜索的本机应用列表中挑选常用 App，一键打开；正在运行的带圆点（支持 macOS 与 Windows） |
+| Git 工作区 | `t` `l` `m` `w` | 展示各仓库当前分支、未提交改动、领先 / 落后提交数及上游已删除分支；默认读取 Harness 工作区 |
+| GitHub | `t` `l` `m` `w` | 复用本机已登录的 `gh` CLI，展示待你 Review 的 PR、你发起的 PR 以及指派给你的 Issue |
+| 系统状态 | `m` `s` `t` `l` `w` | 实时查看 CPU、内存、磁盘、电池状态及最近 5 分钟 CPU 负载曲线 |
+| 最近文件 | `t` `l` `m` `w` | 列出 `~/Downloads`、`~/Desktop` 或指定文件夹的最新文件；支持打开、定位或直接发给 Agent |
+| 剪贴板 | `t` `l` `m` `w` | 记录面板打开期间复制过的文本；支持一键重复制，或套用「翻译」等预设发给 Agent |
+| 网络 | `m` `s` `t` `l` `w` | 实时上下行速率、本机与公网 IP、系统代理状态，以及到指定站点的连接延迟 |
+| 端口 | `t` `l` `m` `w` | 本机正在监听的 TCP 端口与对应的开发服务、项目目录；可在浏览器打开、定位目录或停止进程（默认隐藏 App 与系统进程） |
+| **日常** | | |
+| 今日 | 横栏 | 时间、问候语、日期、ISO 周数、当前天气与每日格言（支持内置、一言或自定义，点击切换） |
+| 时钟 | `m` `s` | 当前时间、问候语、日期与年度进度条 |
+| 世界时钟 | `m` `s` `w` `t` | 对照多个 IANA 时区的当前时间、与本地时差及跨日状态 |
+| 天气 | `m` `s` | 当前天气、今日高低温、空气质量（AQI）及未来数小时预报 |
+| 倒数日 | `m` `s` `t` | 距离周末、月底、年底及自定义日期的天数；不带年份（如 `12-25`）时按每年重复计算 |
+| 节假日 | `m` `s` `t` | 中国大陆接下来的法定节假日、放假天数与调休上班日，附今日农历 |
+| 时间进度 | `m` `s` `w` | 今日、本周、本月与本年已度过的百分比 |
+| 习惯打卡 | `m` `l` `t` `w` | 支持最近一周打卡与补卡，自动计算当前连续达成天数 |
+| 相框 | `m` `s` `t` `l` `w` | 轮播本机文件夹（默认 `~/Pictures`）中的照片 |
+| 正在播放 | `m` `s` `w` `t` | macOS 系统「正在播放」的曲目、封面与进度（「音乐」、Spotify、QQ 音乐、浏览器等），可播放 / 暂停和切歌 |
+| **资讯与行情** | | |
+| 热榜 | `l` `t` `m` `w` | 多信源分标签聚合：微博、知乎、36 氪、少数派、Hacker News、GitHub Trending、Product Hunt、Reddit（可选 B 站、V2EX） |
+| 订阅 | `t` `l` `m` `w` | 聚合多个 RSS / Atom 订阅源并按时间混排，已读条目自动变灰 |
+| AI 论文 | `l` `t` `m` `w` | Hugging Face 每日论文（按点赞排序）与热门模型，论文可一键交给 Agent 解读 |
+| 视频订阅 | `l` `t` `m` `w` | B 站 UP 主（空间链接或 UID）、YouTube 频道（链接、`UC…` ID 或 `@handle`）与带封面的 RSS 的最新视频，带封面 |
+| 行情 | `t` `m` `s` `l` `w` | 支持汇率（`USD/CNY`）、A 股 / 港股 / 美股（`sh600519`、`hk00700`、`usAAPL`）与加密货币（`BTC`、`cg:<id>`） |
+| 格言 | `m` `w` `s` | 每日一句，点击换一条，信源与今日横栏共享 |
 
-Note: Agent, Quick prompt, Inbox, Attention, and Daily brief share the same default workspace selection; PRs in Attention reuse the GitHub widget's query and cache. Shared preferences (your name, week start day, city, temperature unit, and quote source) can also be configured under **Settings → Workboard**. New built-in widgets added in future updates appear in the gallery without altering existing boards.
-
-</details>
-
-<details>
-<summary><b>Network requests and local reads</b></summary>
-
-All external network requests are made and cached by the Host:
-
-- **Weather & city search**: [Open-Meteo](https://open-meteo.com), requested only after you set a city
-- **Quotes**: [Hitokoto](https://hitokoto.cn), requested only when selected as the quote source
-- **Calendars & feeds**: the ICS and RSS / Atom URLs you configure; the Feeds widget starts with [hnrss.org](https://hnrss.org) front page (ifanr and Ruan Yifeng's blog in Chinese), editable in its settings
-- **Markets**: Tencent Finance (`qt.gtimg.cn`) for equities, [open.er-api.com](https://open.er-api.com) for exchange rates, and [CoinGecko](https://www.coingecko.com) for crypto
-- **GitHub**: uses your local `gh` CLI and its existing sign-in
-- **Trending**: public web endpoints for Weibo, Zhihu, 36Kr, sspai, Bilibili, and V2EX (unofficial and may break if a site changes), the [HN Algolia API](https://hn.algolia.com/api), the GitHub Trending page, and official Product Hunt and Reddit feeds; cached for 10 minutes
-- **Videos**: YouTube channel RSS feeds (channel pages only to resolve an `@handle`), Bilibili's public creator archive endpoint (unofficial, rate-limited at times), and thumbnails proxied as data URLs; cached for 15 minutes
-- **Network**: public IP from [ipinfo.io](https://ipinfo.io) (falling back to [ip.sb](https://ip.sb)) and host latency via `curl`, respecting the system proxy when set; tests Google, GitHub, and Cloudflare by default (Baidu, GitHub, and Google in Chinese)
-- **Service status**: each configured page's Statuspage `/api/v2/summary.json`; the DeepSeek status page (hosted on Flashcat) has no public API, so its embedded page data is parsed (unofficial, may break if the page changes); defaults to DeepSeek, Claude, OpenAI, GitHub, and npm; cached for 2 minutes
-- **AI papers**: the [Hugging Face](https://huggingface.co) daily papers and models APIs, falling back to the [hf-mirror.com](https://hf-mirror.com) mirror when huggingface.co is unreachable; cached for 30 minutes
-- **China holidays**: [holiday-cn](https://github.com/NateScarlet/holiday-cn) data for this year and next via jsDelivr, falling back to GitHub raw; cached for 12 hours
-- **Custom widgets**: limited to the `http(s)` URL prefixes declared in each widget's `fetch` allowlist; cached for 30 seconds
-
-Widgets that only read local state:
-
-- **Usage, Activity & Outputs**: read local session logs under `~/.dsh/sessions`
-- **Attention**: combines Harness session, goal, and background job state with your local to-dos and inbox; with GitHub on, it calls the local `gh` CLI (sharing the GitHub widget's 5-minute cache)
-- **Daily brief**: written by the agent in a new session after it reads the local data above through `workboard_context`; turning on **Every day** creates one daily Harness scheduled task, and turning it off deletes it
-- **Git repos**: runs `git status` locally, and only runs `git fetch` when you click Fetch
-- **System**: uses `vm_stat` and `pmset` on macOS
-- **Photo frame**: uses `sips` on macOS to generate thumbnails cached in the system temp directory
-- **Now playing**: reads the system now-playing session through the bundled [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter) (`vendor/`, BSD-3-Clause), which runs under `/usr/bin/perl` and needs no permission; if that fails it falls back to asking Music or Spotify via `osascript` when already running, for which macOS asks once for Automation permission
-- **Ports**: runs `lsof` and `ps` on macOS and Linux to list listening TCP ports, their working folder, and command line; **Stop** sends `SIGTERM` only to a process that is still listening on that port, with no extra permission
-- **Apps**: on macOS, lists the top level of `/Applications`, `/System/Applications`, `~/Applications` and their `Utilities` folders, with Finder display names and icons via `osascript` (JavaScript for Automation), and running state via `ps`; it opens only apps found in those folders, with `open -a`, and needs no permission. On Windows, it reads the Start menu app list (`shell:AppsFolder`, including Store apps) through PowerShell, takes icons from each shortcut's target program, checks running state with `Get-Process`, and opens only apps from that list through `explorer.exe`; Store apps show no icon or running dot
-- **Ambient sound**: synthesized with Web Audio in the page, with no files or network
-- **Recent files**: lists only the top level of each configured folder
-- **Clipboard**: polls `pbpaste` (macOS) or `wl-paste` / `xclip` (Linux) every 2 seconds while the card is visible; history stays in memory only
-
-Data from earlier package names (`@lukeinx/dsh-desk` or `dsh-bento`) is migrated automatically on first launch while leaving the original files untouched.
+注：Agent、Prompt 快启、收集箱、待处理与每日简报共用同一个默认工作区选择；待处理里的 PR 复用 GitHub widget 的查询与缓存。多个组件共用的偏好（称呼、每周起始日、城市、温度单位、格言来源）也可在「设置 → 工作台」中统一修改。版本升级新增的内置 widget 仅加入组件库，不会改动已有看板。
 
 </details>
 
 <details>
-<summary><b>Write a widget in another bundle</b></summary>
+<summary><b>网络请求与本机读取说明</b></summary>
 
-Another bundle can register a React component into the `workboard.widget` slot from its `client.js`. Attach the widget manifest to the component's static `workboard` property; the slot registration itself only needs `id`, `order`, and `label`:
+所有外部网络请求均由 Host 端发出并缓存：
+
+- **天气与城市搜索**：[Open-Meteo](https://open-meteo.com)，仅在设置城市后请求
+- **格言**：[一言](https://hitokoto.cn)，仅在格言来源设为「一言」时请求
+- **日历与订阅**：仅请求列表中的 ICS 与 RSS / Atom 地址；订阅 widget 默认预填爱范儿与阮一峰的网络日志（英文界面为 [hnrss.org](https://hnrss.org) 首页），可在设置中修改
+- **行情**：股票走腾讯行情接口（`qt.gtimg.cn`），汇率走 [open.er-api.com](https://open.er-api.com)，加密货币走 [CoinGecko](https://www.coingecko.com)
+- **GitHub**：调用本机 `gh` CLI，复用其已有登录态
+- **热榜**：微博、知乎、36 氪、少数派、B 站、V2EX 使用各站公开网页接口（非官方，站点改版可能失效）；Hacker News 使用 [HN Algolia API](https://hn.algolia.com/api)；GitHub 读取 Trending 页面；Product Hunt 与 Reddit 读取官方订阅源；结果缓存 10 分钟
+- **视频订阅**：YouTube 频道 RSS（仅在解析 `@handle` 时请求频道页）、B 站 UP 主投稿公开接口（非官方，偶尔限频），封面由 Host 代理成 data URL；缓存 15 分钟
+- **网络**：公网 IP 查询使用 [ipinfo.io](https://ipinfo.io)（失败时回退至 [ip.sb](https://ip.sb)），站点延迟通过 `curl` 测算（配置了系统代理时自动走代理），默认测百度、GitHub 与 Google（英文界面为 Google、GitHub 与 Cloudflare）
+- **服务状态**：请求各状态页的 Statuspage 接口 `/api/v2/summary.json`；DeepSeek 状态页托管在 Flashcat，没有公开接口，改为解析页面内嵌数据（非官方，页面改版可能失效）；默认 DeepSeek、Claude、OpenAI、GitHub 与 npm；缓存 2 分钟
+- **AI 论文**：[Hugging Face](https://huggingface.co) 每日论文与模型接口，huggingface.co 不通时改走 [hf-mirror.com](https://hf-mirror.com) 镜像；缓存 30 分钟
+- **节假日**：经 jsDelivr 读取 [holiday-cn](https://github.com/NateScarlet/holiday-cn) 今明两年的数据，失败时回退至 GitHub raw；缓存 12 小时
+- **自定义 widget**：仅可请求各自在 `fetch` 字段声明的 `http(s)` 地址前缀，Host 缓存 30 秒
+
+仅读取本机数据的组件：
+
+- **用量 / 活跃热力图 / 产出物**：读取 `~/.dsh/sessions` 下的会话日志
+- **待处理**：汇总 Harness 的会话、目标与后台作业状态，以及本地待办与收集箱；开启 GitHub 时调用本机 `gh` CLI（与 GitHub widget 共用 5 分钟缓存）
+- **每日简报**：由 Agent 在新会话里调用 `workboard_context` 读取上述本机数据后写入；开启「每天自动生成」时在 Harness 定时任务里新建一个每日任务，关闭即删除
+- **Git 工作区**：默认仅执行 `git status`，点击「获取远端」时才执行 `git fetch`
+- **系统状态**：在 macOS 上调用 `vm_stat` 与 `pmset`
+- **相框**：在 macOS 上用 `sips` 生成缩略图并缓存在系统临时目录
+- **正在播放**：通过内置的 [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter)（`vendor/`，BSD-3-Clause）读取系统「正在播放」，它由 `/usr/bin/perl` 运行，无需授权；此路不通时退回用 `osascript` 查询已在运行的「音乐」或 Spotify，首次使用时 macOS 会请求自动化权限
+- **端口**：在 macOS 与 Linux 上调用 `lsof` 和 `ps` 列出监听中的 TCP 端口、工作目录与命令行；「停止」仅向仍在监听该端口的进程发送 `SIGTERM`，无需额外授权
+- **快捷应用**：在 macOS 上列出 `/Applications`、`/System/Applications`、`~/Applications` 及其 `Utilities` 子目录顶层的应用，用 `osascript`（JavaScript for Automation）读取 Finder 显示名与图标，用 `ps` 判断是否在运行；只用 `open -a` 打开上述目录内的应用，无需授权；在 Windows 上通过 PowerShell 读取「开始」菜单的应用列表（`shell:AppsFolder`，含商店应用），图标取自快捷方式指向的程序，用 `Get-Process` 判断是否在运行，只经 `explorer.exe` 打开列表内的应用；商店应用不显示图标与运行圆点
+- **白噪音**：在页面内用 Web Audio 合成，不读文件、不联网
+- **最近文件**：仅列出目标文件夹顶层文件，不递归扫描
+- **剪贴板**：仅在卡片可见期间每 2 秒读取一次 `pbpaste`（macOS）或 `wl-paste` / `xclip`（Linux），历史仅保存在内存中，不落盘
+
+首次启动时会自动迁移早期版本（`@lukeinx/dsh-desk` 或 `dsh-bento`）的数据，原文件保留不动。
+
+</details>
+
+<details>
+<summary><b>在外部 bundle 中扩展 widget</b></summary>
+
+其他插件 bundle 可在 `client.js` 中将 React 组件注册到 `workboard.widget` slot。widget 元信息（manifest）挂在组件的静态属性 `workboard` 上，slot 注册参数仅需保留 `id`、`order` 和 `label`：
 
 ```js
 function Hello({size, config}) {
@@ -184,69 +184,69 @@ ctx.effect(() => ctx.slots.inject('workboard.widget', () => ctx.slots.register({
 }, Hello)), 'hello widget');
 ```
 
-See [`examples/hello-widget`](examples/hello-widget) for a complete bundle. A newly installed external widget is automatically placed once on the currently open board; other boards can add it from the gallery.
+完整示例见 [`examples/hello-widget`](examples/hello-widget)。新安装的第三方 widget 会在首次加载时自动加入当前打开的看板一次，其余看板可在组件库中手动添加。
 
-| Size | Columns × rows | Description |
+| 档位 | 网格（列 × 行） | 形态 |
 |---|---|---|
-| `bar` | 4 × ½ | Frameless banner |
-| `s` | 1 × 1 | Small |
-| `m` | 2 × 1 | Medium |
-| `t` | 1 × 2 | Tall |
-| `l` | 2 × 2 | Large |
-| `w` | 4 × 1 | Wide |
+| `bar` | 4 × ½ | 无框横栏 |
+| `s` | 1 × 1 | 小卡 |
+| `m` | 2 × 1 | 中卡 |
+| `t` | 1 × 2 | 竖卡 |
+| `l` | 2 × 2 | 大卡 |
+| `w` | 4 × 1 | 通栏 |
 
-Manifest fields:
+Manifest 字段说明：
 
-- `sizes`: allowed size keys; `defaultSize` must be one of them and defaults to the first entry.
-- `title: false`: hides the card header; `banner: true`: renders without a card frame.
-- `description`: summary shown in the widget gallery.
-- `category`: gallery section — `daily` (Daily), `agent` (DeepSeek), `news` (News), or `tools` (Productivity & tools). Any other value appears under Plugins.
-- `settings`: fields for the card settings dialog: `{key, type, label, default?, options?, placeholder?}`, where `type` is `text`, `textarea`, `select` (with `options: [{value, label}]`), or `toggle`. Labels may be strings or functions returning a string.
+- `sizes`：支持的尺寸档位数组；`defaultSize` 须包含在其中，默认取第一项。
+- `title: false`：隐藏卡片标题栏；`banner: true`：无边框渲染。
+- `description`：组件库中展示的简介。
+- `category`：组件库分组，可选 `daily`（日常）、`agent`（DeepSeek）、`news`（资讯）、`tools`（效率与工具），其他值归入「插件」。
+- `settings`：卡片设置项数组 `{key, type, label, default?, options?, placeholder?}`，`type` 支持 `text`、`textarea`、`select`（需配 `options: [{value, label}]`）与 `toggle`。`label` 支持字符串或返回字符串的函数。
 
-The component receives `{size, config, editing, openSettings}` as props.
+组件渲染时会收到 `{size, config, editing, openSettings}` 属性。
 
 </details>
 
-## Development
+## 开发
 
-To run from source, clone the repository and enter its absolute path in **Add plugin** (local directories are linked rather than copied).
+从源码运行：克隆仓库后，在 **添加插件** 中填入本地目录的绝对路径（以软链接挂载，不复制文件）。
 
 ```sh
 git clone https://github.com/lukeinx/dsh-workboard.git ~/dsh-workboard
-npm run check   # syntax check, Host smoke test, and ICS parser tests
+npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 ```
 
-- `index.js`: Host routes (`/api/dsh-workboard/*`), storage tables, and agent tools
-- `client.js`: sidebar entry, board container, and the 42 built-in widgets
-- `lib/`: data fetchers, parsers, and system probes
-- `skills/workboard-widget.md`: agent skill for building custom widgets
+- `index.js`：Host 端 `/api/dsh-workboard/*` 路由、数据存储与 Agent 工具注册
+- `client.js`：侧栏入口、看板容器与 42 个内置 widget
+- `lib/`：各数据源请求、解析与系统采样模块
+- `skills/workboard-widget.md`：供 Agent 编写自定义 widget 的规范指南
 
-## Acknowledgments
+## 致谢
 
-Workboard builds on the following projects and services. Feed and trending content belongs to its respective publishers.
+工作台基于以下开源项目与公共服务构建。订阅源与热榜内容归各发布者所有。
 
-| Project or service | Used for | License or terms |
+| 项目 / 服务 | 用途 | 许可 / 条款 |
 |---|---|---|
-| [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) | Plugin host, theme tokens, and React runtime | MIT |
-| [React](https://react.dev) | Widget rendering, provided by Harness | MIT |
-| [Feather Icons](https://feathericons.com) | Selected icon paths adapted from Feather | MIT |
-| [Open-Meteo](https://open-meteo.com) | Weather, air quality, and city search | Data under CC BY 4.0 |
-| [Hitokoto](https://hitokoto.cn) | Optional Chinese quotes | Public API |
-| [ExchangeRate-API](https://www.exchangerate-api.com) (`open.er-api.com`) | Foreign exchange rates | Free open access (attribution required) |
-| [CoinGecko](https://www.coingecko.com) | Cryptocurrency prices | Public API (attribution required) |
-| Tencent Finance (`qt.gtimg.cn`) | China, Hong Kong, and US stock quotes | Unofficial endpoint |
-| [HN Algolia API](https://hn.algolia.com/api), [hnrss.org](https://hnrss.org) | Hacker News hot list and default English feed | Public API and feeds |
-| Weibo, Zhihu, 36Kr, sspai, Bilibili, V2EX, GitHub Trending, Product Hunt, Reddit | Trending lists | Public pages, feeds, and unofficial endpoints |
-| YouTube, Bilibili | Video subscriptions and thumbnails | Public channel feeds and unofficial endpoints |
-| [ifanr](https://www.ifanr.com), [Ruan Yifeng's blog](https://www.ruanyifeng.com/blog/) | Default Chinese RSS feeds | Publishers' RSS feeds |
-| [GitHub CLI](https://cli.github.com) | GitHub widget data | MIT |
-| [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter) | System now-playing info, bundled in `vendor/` | BSD-3-Clause |
-| [ipinfo.io](https://ipinfo.io), [ip.sb](https://ip.sb) | Public IP lookup in the Network widget | Public API |
-| Statuspage status pages of DeepSeek, Claude, OpenAI, GitHub, npm | Service status | Public status APIs; the DeepSeek page is parsed (unofficial) |
-| [Hugging Face](https://huggingface.co), [hf-mirror.com](https://hf-mirror.com) | Daily papers and trending models | Public API and community mirror |
-| [holiday-cn](https://github.com/NateScarlet/holiday-cn) | China public holidays and make-up workdays, via [jsDelivr](https://www.jsdelivr.com) | MIT |
-| Classical texts (Laozi, Confucius, Xunzi, and others) | Built-in quotes | Public domain |
+| [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) | 插件宿主、主题变量与 React 运行时 | MIT |
+| [React](https://react.dev) | 组件渲染（由 Harness 提供） | MIT |
+| [Feather Icons](https://feathericons.com) | 部分图标路径改编自该项目 | MIT |
+| [Open-Meteo](https://open-meteo.com) | 天气、空气质量与城市搜索 | CC BY 4.0 |
+| [一言](https://hitokoto.cn) | 可选中文格言接口 | 公开 API |
+| [ExchangeRate-API](https://www.exchangerate-api.com)（`open.er-api.com`） | 汇率数据 | 免费开放接口（需署名） |
+| [CoinGecko](https://www.coingecko.com) | 加密货币行情 | 公开 API（需署名） |
+| 腾讯财经行情（`qt.gtimg.cn`） | A 股、港股、美股实时行情 | 非官方接口 |
+| [HN Algolia API](https://hn.algolia.com/api)、[hnrss.org](https://hnrss.org) | Hacker News 热榜与默认英文订阅源 | 公开 API 与订阅源 |
+| 微博、知乎、36 氪、少数派、B 站、V2EX、GitHub Trending、Product Hunt、Reddit | 多源热榜 | 公开页面、订阅源与非官方接口 |
+| YouTube、B 站 | 视频订阅与封面 | 公开频道订阅源与非官方接口 |
+| [爱范儿](https://www.ifanr.com)、[阮一峰的网络日志](https://www.ruanyifeng.com/blog/) | 默认中文 RSS 订阅源 | 发布者 RSS |
+| [GitHub CLI](https://cli.github.com) | GitHub widget 数据源 | MIT |
+| [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter) | 读取系统「正在播放」，内置于 `vendor/` | BSD-3-Clause |
+| [ipinfo.io](https://ipinfo.io)、[ip.sb](https://ip.sb) | 网络 widget 公网 IP 查询 | 公开 API |
+| DeepSeek、Claude、OpenAI、GitHub、npm 的状态页 | 服务状态 | 公开状态接口；DeepSeek 为页面解析（非官方接口） |
+| [Hugging Face](https://huggingface.co)、[hf-mirror.com](https://hf-mirror.com) | 每日论文与热门模型 | 公开 API 与社区镜像 |
+| [holiday-cn](https://github.com/NateScarlet/holiday-cn) | 中国法定节假日与调休数据，经 [jsDelivr](https://www.jsdelivr.com) 分发 | MIT |
+| 经典文献（老子、孔子、荀子等） | 内置格言库 | 公有领域 |
 
-## License
+## 许可
 
 [MIT](LICENSE)
