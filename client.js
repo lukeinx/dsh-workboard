@@ -39,6 +39,7 @@ window.__ModuleLoader__.load({
     const STATUS_MS = 2 * 60_000;
     const PAPERS_MS = 30 * 60_000;
     const MODELS_MS = 30 * 60_000;
+    const DAILY_MS = 60 * 60_000;
     const HOLIDAY_MS = 6 * 3600_000;
     const MAX_PINNED = 20;
     const MAX_APPS = 32;
@@ -186,6 +187,12 @@ window.__ModuleLoader__.load({
       models: '模型行情', d_models: 'OpenRouter 本周热门与最新上架的模型，附价格与上下文长度',
       md_top: '热门', md_new: '最新', md_free: '免费', md_price: '输入 ${i} · 输出 ${o}（美元 / 百万 token）', md_ctx: '{n} 上下文', md_none: '没有匹配的模型',
       f_mdVendors: '只看这些厂商（空格分隔，如 deepseek anthropic openai；留空看全部）',
+      onthisday: '历史上的今天', d_onthisday: '百度百科与维基百科记载的今日历史事件',
+      otd_ago: '{n} 年前', f_otdSource: '数据来源', otd_auto: '跟随界面语言（中文百度 / 英文维基）', otd_baidu: '百度百科', otd_wiki: '维基百科',
+      wiki: '每日维基', d_wiki: '维基百科今日特色条目与最热阅读榜',
+      wk_featured: '特色条目', wk_mostread: '热门阅读', wk_views: '{n} 次阅读', f_wkLang: '语言', wk_auto: '跟随界面语言',
+      wallpaper: '每日壁纸', d_wallpaper: 'Bing 每日壁纸与维基共享资源每日图片，点击切换最近 8 天',
+      wp_open: '详情', f_wpSource: '来源', wp_bing: 'Bing 每日壁纸', wp_wikimedia: 'Wikimedia 每日图片', f_wpCaption: '显示标题与署名',
       holiday: '节假日', d_holiday: '中国大陆法定节假日、调休上班日与农历',
       hd_now: '放假中', hd_off: '放假 {n} 天', hd_work: '{d} 上班', hd_todayOff: '今天放假（{name}）', hd_todayWork: '今天调休上班（{name}）', hd_none: '暂无已公布的假期安排',
       activity: '活跃热力图', d_activity: '过去一年每天的 Agent 用量，按 token 或请求数着色',
@@ -330,6 +337,12 @@ window.__ModuleLoader__.load({
       models: 'Models', d_models: 'Trending and newest models on OpenRouter, with prices and context length',
       md_top: 'Trending', md_new: 'Newest', md_free: 'Free', md_price: 'Input ${i} · output ${o} (USD per million tokens)', md_ctx: '{n} context', md_none: 'No matching models',
       f_mdVendors: 'Only these vendors, space-separated (e.g. deepseek anthropic openai); empty shows all',
+      onthisday: 'On this day', d_onthisday: 'Historical events on today\'s date from Wikipedia and Baidu Baike',
+      otd_ago: '{n}y ago', f_otdSource: 'Source', otd_auto: 'Match UI language (Wikipedia in EN, Baidu in ZH)', otd_baidu: 'Baidu Baike', otd_wiki: 'Wikipedia',
+      wiki: 'Daily Wikipedia', d_wiki: 'Wikipedia\'s featured article of the day and most-read articles',
+      wk_featured: 'Featured', wk_mostread: 'Most read', wk_views: '{n} views', f_wkLang: 'Language', wk_auto: 'Match UI language',
+      wallpaper: 'Daily wallpaper', d_wallpaper: 'Bing daily wallpaper and Wikimedia Picture of the Day; click to cycle the last 8 days',
+      wp_open: 'Info', f_wpSource: 'Source', wp_bing: 'Bing daily wallpaper', wp_wikimedia: 'Wikimedia Picture of the Day', f_wpCaption: 'Show title and credit',
       holiday: 'China holidays', d_holiday: 'Public holidays and make-up workdays in mainland China',
       hd_now: 'On break', hd_off: '{n} days off', hd_work: 'work on {d}', hd_todayOff: 'Day off today ({name})', hd_todayWork: 'Make-up workday today ({name})', hd_none: 'No holidays announced yet',
       activity: 'Activity', d_activity: 'Daily agent usage over the past year, shaded by tokens or requests',
@@ -711,6 +724,12 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-photo{flex:1;margin:-16px;min-height:0;position:relative;cursor:pointer;background:var(--dsw-alias-bg-layer-2)}
 .wb-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .wb-photo-msg{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:8px;height:100%;color:var(--dsw-alias-label-secondary)}
+.wb-wall-cap{position:absolute;inset:auto 0 0 0;padding:20px 12px 10px;background:linear-gradient(transparent,rgba(0,0,0,.62));color:#fff;display:flex;align-items:flex-end;justify-content:space-between;gap:8px;font-size:12px;line-height:1.35}
+.wb-wall-cap div{min-width:0;display:flex;flex-direction:column;gap:2px}
+.wb-wall-cap b,.wb-wall-cap small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wb-wall-cap small{color:rgba(255,255,255,.78);font-size:11px}
+.wb-wall-cap a{color:#fff;opacity:.85;flex:none;text-decoration:none;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.16)}
+.wb-wall-cap a:hover{opacity:1;background:rgba(255,255,255,.26)}
 .wb-quotes{display:grid;grid-template-columns:minmax(0,1fr) max-content max-content;align-content:start;gap:8px 12px;min-height:0;overflow:auto}
 .wb-quotes[data-size=w]{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);align-content:center;height:100%}
 .wb-quote{display:contents}
@@ -4108,6 +4127,93 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           settings: [{key: 'vendors', type: 'text', label: () => t('f_mdVendors'), placeholder: 'deepseek anthropic openai'}],
         };
 
+        function OnThisDay({size, config}) {
+          useLocale();
+          const now = useNow();
+          const day = dayKey(now);
+          const lang = t('lang');
+          const source = String(config?.source || 'auto');
+          const res = useRemote('onthisday.get', {source, lang, day}, DAILY_MS);
+          const v = res.value;
+          const read = useRead(v ? v.items.map(it => it.url).filter(Boolean) : []);
+          const thisYear = now.getFullYear();
+          const items = v ? (size === 's' ? v.items.slice(0, 4) : v.items) : [];
+          const row = (it, i) => {
+            const ago = thisYear - it.year;
+            const body = [
+              h('span', {key: 'y', className: 'wb-rank wb-num'}, it.year),
+              h('div', {key: 'b'}, h('b', null, it.title), size === 'l' && it.desc ? h('small', null, it.desc) : null),
+              size === 's' || size === 't' || ago <= 0 ? null : h('span', {key: 'a', className: 'wb-num'}, fill(t('otd_ago'), {n: ago})),
+            ];
+            return it.url
+              ? h('a', {key: `${i}${it.year}`, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer', title: [it.title, it.desc].filter(Boolean).join('\n')}, body)
+              : h('div', {key: `${i}${it.year}`, className: 'wb-row', title: [it.title, it.desc].filter(Boolean).join('\n')}, body);
+          };
+          return h('div', {className: 'wb-rows'}, v ? items.map(row) : blank(res.error || '…'));
+        }
+        OnThisDay.workboard = {
+          apiVersion: 1, sizes: ['t', 'l', 'm', 'w', 's'], defaultSize: 't', description: () => t('d_onthisday'),
+          settings: [{key: 'source', type: 'select', default: 'auto', label: () => t('f_otdSource'), options: ['auto', 'baidu', 'wiki'].map(v => ({value: v, label: () => t(`otd_${v}`)}))}],
+        };
+
+        function Wiki({size, config}) {
+          useLocale();
+          const now = useNow();
+          const day = dayKey(now);
+          const uiLang = t('lang');
+          const lang = !config?.lang || config.lang === 'auto' ? uiLang : String(config.lang);
+          const [kind, setKind] = useState('featured');
+          const res = useRemote('wiki.get', {lang, day}, DAILY_MS);
+          const v = res.value;
+          const urls = v ? [v.featured?.url, ...v.mostread.map(x => x.url)].filter(Boolean) : [];
+          const read = useRead(urls);
+          const compact = new Intl.NumberFormat(uiLang, {notation: 'compact', maximumFractionDigits: 1});
+          const active = v && !v.featured && kind === 'featured' ? 'mostread' : kind;
+          const featView = f => (f ? h('div', {className: 'wb-rows'},
+            h(f.url ? 'a' : 'div', {className: 'wb-row wb-rowbtn', ...(f.url ? {...readProps(read, f.url), href: f.url, target: '_blank', rel: 'noopener noreferrer'} : {}), title: f.title},
+              h('div', null, h('b', null, f.title), f.desc ? h('small', null, f.desc) : null)),
+            f.summary ? h('div', {className: 'wb-brief-body', style: {fontSize: '12.5px', lineHeight: 1.55, color: 'var(--dsw-alias-label-secondary)', padding: '2px 4px'}}, f.summary) : null) : blank('—'));
+          const row = (it, i) => h('a', {key: `${i}${it.url}`, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer',
+            title: [it.title, it.summary || it.desc].filter(Boolean).join('\n')},
+            h('span', {className: 'wb-rank wb-num', 'data-top': i < 3 ? '' : undefined}, i + 1),
+            h('div', null, h('b', null, it.title), size === 'm' || !(size === 'l' ? it.summary || it.desc : it.desc) ? null : h('small', null, size === 'l' ? it.summary || it.desc : it.desc)),
+            size === 't' || !it.views ? null : h('span', {className: 'wb-num', title: fill(t('wk_views'), {n: it.views})}, compact.format(it.views)));
+          return h('div', {className: 'wb-trend'},
+            h('div', {className: 'wb-seg', role: 'tablist'}, ['featured', 'mostread'].map(k => h('button', {key: k, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': k === active, onClick: () => setKind(k)}, t(`wk_${k}`)))),
+            v ? (active === 'featured' ? featView(v.featured) : h('div', {className: 'wb-rows'}, v.mostread.map(row))) : blank(res.error || '…'));
+        }
+        Wiki.workboard = {
+          apiVersion: 1, sizes: ['l', 't', 'm', 'w'], defaultSize: 'l', description: () => t('d_wiki'),
+          settings: [{key: 'lang', type: 'select', default: 'auto', label: () => t('f_wkLang'), options: [{value: 'auto', label: () => t('wk_auto')}, {value: 'zh', label: '中文'}, {value: 'en', label: 'English'}]}],
+        };
+
+        function Wallpaper({size, config}) {
+          useLocale();
+          const now = useNow();
+          const day = dayKey(now);
+          const lang = t('lang');
+          const source = config?.source === 'wikimedia' ? 'wikimedia' : 'bing';
+          const showCap = config?.caption !== false;
+          const [index, setIndex] = useState(0);
+          useEffect(() => { setIndex(0); }, [source]);
+          const res = useRemote('wallpaper.get', {source, index, lang, day}, DAILY_MS);
+          const v = res.value;
+          if (!v) return h('div', {className: 'wb-blank'}, res.error || '…');
+          const next = () => { if (v.count > 1) setIndex(i => (i + 1) % v.count); };
+          return h('div', {className: 'wb-photo', title: [v.title, v.credit].filter(Boolean).join('\n'), onClick: next},
+            h('img', {src: v.src, alt: v.title, draggable: false}),
+            showCap ? h('div', {className: 'wb-wall-cap'},
+              h('div', null, h('b', null, v.title), size === 's' || !v.credit ? null : h('small', null, v.credit)),
+              v.pageUrl ? h('a', {href: v.pageUrl, target: '_blank', rel: 'noopener noreferrer', onClick: e => e.stopPropagation()}, t('wp_open')) : null) : null);
+        }
+        Wallpaper.workboard = {
+          apiVersion: 1, sizes: ['l', 'm', 's', 't', 'w'], defaultSize: 'l', title: false, description: () => t('d_wallpaper'),
+          settings: [
+            {key: 'source', type: 'select', default: 'bing', label: () => t('f_wpSource'), options: [{value: 'bing', label: () => t('wp_bing')}, {value: 'wikimedia', label: () => t('wp_wikimedia')}]},
+            {key: 'caption', type: 'toggle', default: true, label: () => t('f_wpCaption')},
+          ],
+        };
+
         // 连续、同名的放假日合成一个假期；同名的上班日即该假期的调休。
         function holidayPeriods(days) {
           const periods = [];
@@ -4254,10 +4360,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           ['workboard.nowplaying', 'nowplaying', NowPlaying], ['workboard.ambient', 'ambient', Ambient], ['workboard.videos', 'videos', Videos],
           ['workboard.attention', 'attention', Attention], ['workboard.brief', 'brief', Brief],
           ['workboard.ports', 'ports', Ports], ['workboard.status', 'status', Status], ['workboard.papers', 'papers', Papers], ['workboard.holiday', 'holiday', Holiday], ['workboard.activity', 'activity', Activity],
-          ['workboard.apps', 'apps', Apps], ['workboard.models', 'models', Models],
+          ['workboard.apps', 'apps', Apps], ['workboard.models', 'models', Models], ['workboard.onthisday', 'onthisday', OnThisDay], ['workboard.wiki', 'wiki', Wiki], ['workboard.wallpaper', 'wallpaper', Wallpaper],
         ];
         const BUILTIN_CATEGORY = {
-          daily: ['today', 'clock', 'worldclock', 'weather', 'countdown', 'holiday', 'progress', 'habits', 'photo', 'nowplaying'],
+          daily: ['today', 'clock', 'worldclock', 'weather', 'countdown', 'holiday', 'onthisday', 'wiki', 'progress', 'habits', 'photo', 'wallpaper', 'nowplaying'],
           agent: ['attention', 'agents', 'running', 'brief', 'prompt', 'usage', 'activity', 'status', 'outputs', 'tasks', 'pinned'],
           news: ['trending', 'feed', 'papers', 'models', 'videos', 'market', 'quote'],
           tools: ['todo', 'note', 'calendar', 'focus', 'ambient', 'links', 'apps', 'git', 'github', 'system', 'files', 'clipboard', 'network', 'ports'],

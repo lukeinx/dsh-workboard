@@ -30,6 +30,7 @@ import {createApps} from './lib/apps.js';
 import {createStatus} from './lib/status.js';
 import {createPapers} from './lib/papers.js';
 import {createModels} from './lib/models.js';
+import {createDaily} from './lib/daily.js';
 import {createHolidays} from './lib/holiday.js';
 import {CONTEXT_SECTIONS, createContext} from './lib/context.js';
 import {stat} from 'node:fs/promises';
@@ -79,7 +80,7 @@ export const BUILTIN_WIDGETS = [
   'workboard.outputs', 'workboard.schedules', 'workboard.pinned', 'workboard.files', 'workboard.clipboard', 'workboard.network',
   'workboard.nowplaying', 'workboard.ambient', 'workboard.videos', 'workboard.attention', 'workboard.brief',
   'workboard.ports', 'workboard.status', 'workboard.papers', 'workboard.holiday', 'workboard.activity', 'workboard.apps',
-  'workboard.models',
+  'workboard.models', 'workboard.onthisday', 'workboard.wiki', 'workboard.wallpaper',
 ];
 
 export function defaultBoard(id) {
@@ -1013,6 +1014,18 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       if (!services.models) throw new UserError('unavailable', 'models are not available');
       return services.models.list({kind: String(p?.kind ?? ''), vendors: String(p?.vendors ?? '')});
     },
+    'dsh-workboard/onthisday.get': async p => {
+      if (!services.daily) throw new UserError('unavailable', 'on-this-day is not available');
+      return services.daily.onThisDay({source: String(p?.source ?? 'auto'), lang: String(p?.lang ?? ''), day: p?.day});
+    },
+    'dsh-workboard/wiki.get': async p => {
+      if (!services.daily) throw new UserError('unavailable', 'wiki feed is not available');
+      return services.daily.wiki({lang: String(p?.lang ?? ''), day: p?.day});
+    },
+    'dsh-workboard/wallpaper.get': async p => {
+      if (!services.daily) throw new UserError('unavailable', 'wallpaper is not available');
+      return services.daily.wallpaper({source: String(p?.source ?? 'bing'), index: p?.index, lang: String(p?.lang ?? ''), day: p?.day});
+    },
     'dsh-workboard/holiday.get': async p => {
       if (!services.holidays) throw new UserError('unavailable', 'holidays are not available');
       return services.holidays.list({year: p?.year});
@@ -1283,6 +1296,7 @@ export function apply(ctx) {
     status: createStatus(fetcher),
     papers: createPapers(fetcher),
     models: createModels(fetcher),
+    daily: createDaily(fetcher),
     holidays: createHolidays(fetcher),
   };
   const handlers = createHandlers(store, fetcher, createAgentWatch(ctx), createLauncher(ctx), services);
