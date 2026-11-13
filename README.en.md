@@ -1,6 +1,6 @@
 # Workboard
 
-**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 50 widgets out of the box — and your agent builds the rest.**
+**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 52 widgets out of the box — and your agent builds the rest.**
 
 [简体中文](README.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
@@ -8,7 +8,7 @@
 
 ## Highlights
 
-### 50 widgets, ready to use
+### 52 widgets, ready to use
 
 Open the widget gallery, search, and drop cards straight onto your board across four categories:
 
@@ -75,7 +75,7 @@ If you are an agent interacting with Workboard:
 ## Reference
 
 <details>
-<summary><b>All 50 built-in widgets</b></summary>
+<summary><b>All 52 built-in widgets</b></summary>
 
 | Widget | Sizes | What it shows |
 |---|---|---|
@@ -119,6 +119,7 @@ If you are an agent interacting with Workboard:
 | China holidays | `m` `s` `t` | Next public holidays in mainland China with days off and make-up workdays |
 | On this day | `t` `l` `m` `w` `s` | Historical events on today's date from Wikipedia and Baidu Baike, newest year first |
 | Daily word | `m` `s` `t` `l` `w` | One core AI or software engineering concept a day with bilingual explanation, code snippet, and one-click agent deep dive; click to cycle |
+| Classical poetry | `m` `t` `l` `s` `w` | Masterpieces of Tang & Song poetry, Pre-Qin classics, and Shijing, with full text, Jinrishici recommendations, and one-click agent commentary |
 | Time progress | `m` `s` `w` | Percentage of today, this week, this month, and this year elapsed |
 | Habits | `m` `l` `t` `w` | Check in for any day of the past week and track your current streak |
 | Photo frame | `l` `m` `s` `t` `w` | Cycles through photos from a local folder (`~/Pictures` by default), every 1 minute to 1 day or only on click |
@@ -127,6 +128,7 @@ If you are an agent interacting with Workboard:
 | **News & markets** | | |
 | Trending | `l` `t` `m` `w` | Tabbed hot lists from Weibo, Zhihu, 36Kr, sspai, Hacker News, GitHub Trending, Product Hunt, and Reddit (Bilibili and V2EX optional) |
 | Feeds | `t` `l` `m` `w` | Multiple RSS / Atom feeds merged chronologically, with `rsshub://` route shorthand and custom instance URL; visited items dim automatically |
+| WeRead | `l` `t` `m` `w` | WeRead rising, trending, new, and top book charts; add a `WEREAD_API_KEY` for your bookshelf, reading time, and highlights, with one-click agent summaries |
 | AI papers | `l` `t` `m` `w` | Hugging Face daily papers, latest arXiv preprints by category, and trending Spaces; hand a paper to the agent to explain |
 | Models | `l` `t` `m` `w` | Trending and newest models on OpenRouter with input / output prices and context length, filterable by vendor |
 | LLM Arena | `l` `t` `m` `w` | LMArena blind-test leaderboards (Text, WebDev, Agent, Vision, Search), filterable by open-weight license and vendor |
@@ -145,6 +147,8 @@ All external network requests are made and cached by the Host:
 
 - **Weather & city search**: [Open-Meteo](https://open-meteo.com), requested only after you set a city
 - **Quotes**: [Hitokoto](https://hitokoto.cn), requested only when selected as the quote source
+- **Classical poetry**: uses the built-in classical anthology by default with no network access; requests [Jinrishici](https://www.jinrishici.com) (`v2.jinrishici.com`) only when Jinrishici is selected as the source
+- **WeRead**: fetches public category rankings from WeRead (`weread.qq.com`, unofficial, cached for 30 minutes); calls the official WeRead Agent Gateway (`i.weread.qq.com/api/agent/gateway`, cached for 5 minutes) only when a `WEREAD_API_KEY` is configured and you view the Shelf or Highlights tab
 - **Calendars & feeds**: the ICS and RSS / Atom URLs you configure (`rsshub://` routes expand against your [RSSHub](https://docs.rsshub.app) instance URL, or `rsshub.app` when left empty); the Feeds widget starts with [hnrss.org](https://hnrss.org) front page (ifanr and Ruan Yifeng's blog in Chinese), editable in its settings
 - **Markets**: Tencent Finance (`qt.gtimg.cn`) for equities, [open.er-api.com](https://open.er-api.com) for exchange rates, and [CoinGecko](https://www.coingecko.com) for crypto
 - **GitHub**: uses your local `gh` CLI and its existing sign-in
@@ -231,7 +235,7 @@ npm run check   # syntax check, Host smoke test, and ICS parser tests
 ```
 
 - `index.js`: Host routes (`/api/dsh-workboard/*`), storage tables, and agent tools
-- `client.js`: sidebar entry, board container, and the 50 built-in widgets
+- `client.js`: sidebar entry, board container, and the 52 built-in widgets
 - `lib/`: data fetchers, parsers, and system probes
 - `skills/workboard-widget.md`: agent skill for building custom widgets
 
@@ -267,6 +271,8 @@ Workboard builds on the following projects and services. Feed and trending conte
 | Baidu Baike (`baike.baidu.com`) | Chinese On this day events | Unofficial endpoint |
 | Microsoft Bing (`www.bing.com`) | Bing daily wallpaper | Unofficial endpoint (photo copyright belongs to the respective photographers) |
 | [RSSHub](https://docs.rsshub.app) | Optional `rsshub://` feed route protocol | MIT (served by user-hosted instances) |
+| [chinese-poetry](https://github.com/chinese-poetry/chinese-poetry), [Jinrishici](https://www.jinrishici.com) | Classical poetry anthology corpus and optional online poetry API | MIT & public API |
+| [WeRead](https://weread.qq.com), [OpenWeRead](https://github.com/Ceelog/OpenWeRead) | WeRead public book charts and official Agent Gateway protocol | Unofficial chart endpoint, official gateway & MIT |
 | Classical texts (Laozi, Confucius, Xunzi, and others) | Built-in quotes | Public domain |
 
 ## License

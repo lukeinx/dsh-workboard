@@ -45,6 +45,8 @@ window.__ModuleLoader__.load({
     const MCPS_MS = 30 * 60_000;
     const RELEASES_MS = 15 * 60_000;
     const PACKAGES_MS = 30 * 60_000;
+    const WEREAD_MS = 15 * 60_000;
+    const POETRY_MS = 60 * 60_000;
     const MAX_PINNED = 20;
     const MAX_APPS = 32;
     // 尺寸档位：[列, 行]，行单位 80px；「横栏」半高，其余行数成对。
@@ -225,6 +227,17 @@ window.__ModuleLoader__.load({
       wd_next: '换一个', wd_speak: '朗读', f_wdBook: '词库',
       wd_book_all: '综合（全部词库）', wd_book_core: '高频实用词汇', wd_book_ai: 'AI 与计算机工程', wd_book_general: '英语进阶（IELTS / GRE）',
       wd_prompt: '讲解英语单词「{word}」（{meaning}）：包括词源记忆法、常见固定搭配、易混近义词辨析，并结合真实场景造 3 个地道例句。',
+      poetry: '诗词典籍', d_poetry: '唐诗宋词、先秦诸子与诗经楚辞传世名篇，支持今日诗词推荐与全篇赏析',
+      po_next: '换一首', f_poSource: '诗词来源', po_src_builtin: '内置传世名篇（离线可用）', po_src_jinrishici: '今日诗词（按时辰与天气在线推荐）',
+      f_poCat: '内置选集', po_cat_all: '全部名篇', po_cat_shi: '唐诗宋诗', po_cat_ci: '宋词经典', po_cat_classic: '诸子与蒙学典籍', po_cat_shijing: '诗经与楚辞',
+      po_prompt: '赏析〔{dynasty}〕{author}《{title}》：\n{lines}\n请讲解创作背景、核心意象与字句精妙之处，并谈谈它在当下的启示。',
+      weread: '微信读书', d_weread: '微信读书飙升、热搜、新书与总榜；填入 API Key 后可查看个人书架、阅读时长与划线笔记',
+      wr_shelf: '书架', wr_notes: '划线', wr_rising: '飙升', wr_hot_search: '热搜', wr_newbook: '新书', wr_all: '总榜',
+      wr_reading: '在读', wr_finished: '读完', wr_readers: '{n} 人在读', wr_noteCount: '{n} 条笔记', wr_none: '暂无书籍或笔记',
+      wr_stats: '本周阅读 {t} · {d} 天 · 书架 {b} 本', wr_statsBooks: '书架共 {b} 本', wr_notesFoot: '{b} 本书 · 共 {n} 条笔记与划线',
+      f_wrKey: '微信读书 API Key（可选，在 weread.qq.com/r/weread-skills 扫码获取 wrk-…，解锁个人书架与划线）',
+      wr_bookPrompt: '解读《{title}》（{author}）：\n{intro}\n请提炼这本书的核心论点、结构脉络、优缺点与适合人群，并给出延伸阅读建议。',
+      wr_notePrompt: '结合《{title}》（{author}）中的这段划线笔记：\n「{text}」\n请解读这段话的深层含义、上下文背景，并结合实际给出延伸思考。',
     };
     const en = {
       lang: 'en-US', title: 'Workboard', loadFailed: 'Failed to load', empty: 'No widgets on this board yet',
@@ -399,6 +412,17 @@ window.__ModuleLoader__.load({
       wd_next: 'Next', wd_speak: 'Speak', f_wdBook: 'Wordbook',
       wd_book_all: 'All wordbooks', wd_book_core: 'High-frequency core', wd_book_ai: 'AI & Software Engineering', wd_book_general: 'Academic & GRE / IELTS',
       wd_prompt: 'Explain the word “{word}” ({meaning}): its etymology, common collocations, near-synonyms and 3 natural example sentences.',
+      poetry: 'Classical poetry', d_poetry: 'Masterpieces of Tang & Song poetry, Pre-Qin classics and Shijing, with full text and commentary',
+      po_next: 'Next poem', f_poSource: 'Source', po_src_builtin: 'Built-in anthology (offline)', po_src_jinrishici: 'Jinrishici (online daily recommendation)',
+      f_poCat: 'Anthology', po_cat_all: 'All classics', po_cat_shi: 'Tang & Song poetry', po_cat_ci: 'Song lyrics (Ci)', po_cat_classic: 'Classical prose & philosophy', po_cat_shijing: 'Shijing & Chuci',
+      po_prompt: 'Interpret “{title}” by {author} ({dynasty}):\n{lines}\nExplain its historical context, central imagery and philosophical meaning in English.',
+      weread: 'WeRead', d_weread: 'WeRead rising, hot, new and top book charts; add a WEREAD_API_KEY for your bookshelf and highlights',
+      wr_shelf: 'Shelf', wr_notes: 'Highlights', wr_rising: 'Rising', wr_hot_search: 'Trending', wr_newbook: 'New', wr_all: 'Top',
+      wr_reading: 'Reading', wr_finished: 'Finished', wr_readers: '{n} reading', wr_noteCount: '{n} notes', wr_none: 'No books or highlights',
+      wr_stats: '{t} this week · {d}d · {b} on shelf', wr_statsBooks: '{b} on shelf', wr_notesFoot: '{b} books · {n} highlights & notes',
+      f_wrKey: 'WeRead API Key (optional, wrk-… from weread.qq.com/r/weread-skills to unlock your shelf and highlights)',
+      wr_bookPrompt: 'Summarize the book “{title}” by {author}:\n{intro}\nOutline its core arguments, structure, strengths and who should read it.',
+      wr_notePrompt: 'Reflect on this highlight from “{title}” ({author}):\n“{text}”\nExplain its context, deeper meaning and practical takeaways.',
     };
 
     // 公共领域的经典短句，按日期轮换。
@@ -1068,6 +1092,17 @@ a.wb-otd-title:hover{color:var(--dsw-alias-brand-primary)}
 .wb-word-head span{font-size:12px;color:var(--dsw-alias-label-secondary)}
 .wb-word-def{margin:0;font-size:13px;line-height:1.45;color:var(--dsw-alias-label-primary);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .wb-word-ex{margin:2px 0 0;font-size:12px;line-height:1.45;color:var(--dsw-alias-label-secondary);font-family:${SERIF};display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wb-poem{display:flex;flex-direction:column;justify-content:space-between;gap:6px;height:100%;min-height:0}
+.wb-poem-main{display:flex;flex-direction:column;gap:4px;min-height:0;overflow:auto;flex:1;justify-content:center}
+.wb-poem[data-size=t] .wb-poem-main,.wb-poem[data-size=l] .wb-poem-main{justify-content:flex-start}
+.wb-poem-quote{margin:0;font-size:16px;line-height:1.55;font-weight:500;font-family:${SERIF};color:var(--dsw-alias-label-primary);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.wb-poem[data-size=s] .wb-poem-quote{font-size:14px;-webkit-line-clamp:4}
+.wb-poem-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.wb-poem-lines{display:flex;flex-direction:column;gap:3px;font-family:${SERIF};font-size:13.5px;line-height:1.65;color:var(--dsw-alias-label-primary);margin-top:2px}
+.wb-poem-lines p{margin:0}
+.wb-poem-lines p[data-hit]{color:var(--dsw-alias-brand-primary);font-weight:500}
+.wb-poem-note{margin:2px 0 0;font-size:12px;line-height:1.45;color:var(--dsw-alias-label-secondary);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wb-poem[data-size=l] .wb-poem-note{-webkit-line-clamp:3}
 .wb-word[data-size=t] .wb-word-def,.wb-word[data-size=l] .wb-word-def,.wb-word[data-size=t] .wb-word-ex,.wb-word[data-size=l] .wb-word-ex{-webkit-line-clamp:4}
 .wb-list,.wb-events,.wb-rows,.wb-links,.wb-quotes,.wb-chips,.wb-table,.wb-vgrid,.wb-vlist{margin-right:-8px;padding-right:8px}
 .wb-card ::-webkit-scrollbar{width:4px;height:4px}
@@ -4958,6 +4993,161 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           settings: [{key: 'book', type: 'select', default: 'all', label: () => t('f_wdBook'), options: ['all', 'core', 'ai', 'general'].map(v => ({value: v, label: () => t(`wd_book_${v}`)}))}],
         };
 
+        // 传世诗词与典籍名篇选集（源自 chinese-poetry 开源语料与公版古籍）。
+        const POEMS = [
+          {cat: 'shi', title: '春江花月夜', dynasty: '唐', author: '张若虚', quote: '春江潮水连海平，海上明月共潮生。', lines: ['春江潮水连海平，海上明月共潮生。', '滟滟随波千万里，何处春江无月明。', '江流宛转绕芳甸，月照花林皆似霰。', '空里流霜不觉飞，汀上白沙看不见。', '江天一色无纤尘，皎皎空中孤月轮。', '江畔何人初见月？江月何年初照人？', '人生代代无穷已，江月年年望相似。'], note: '以浩瀚江月起兴，融自然景物与宇宙人生哲思于一体，被誉为「孤篇压全唐」。', en: 'In spring the river rises level with the sea, and with the tide the bright moon rises too.'},
+          {cat: 'shi', title: '将进酒', dynasty: '唐', author: '李白', quote: '天生我材必有用，千金散尽还复来。', lines: ['君不见黄河之水天上来，奔流到海不复回。', '君不见高堂明镜悲白发，朝如青丝暮成雪。', '人生得意须尽欢，莫使金樽空对月。', '天生我材必有用，千金散尽还复来。', '烹羊宰牛且为乐，会须一饮三百杯。'], note: '在时光流逝的感喟中迸发出豪迈旷达的自信，气势如黄河奔涌。', en: 'Heaven has made us talents; we are not made in vain. A thousand gold coins spent will come back again.'},
+          {cat: 'shi', title: '登高', dynasty: '唐', author: '杜甫', quote: '无边落木萧萧下，不尽长江滚滚来。', lines: ['风急天高猿啸哀，渚清沙白鸟飞回。', '无边落木萧萧下，不尽长江滚滚来。', '万里悲秋常作客，百年多病独登台。', '艰难苦恨繁霜鬓，潦倒新停浊酒杯。'], note: '八句皆对，气象雄浑苍凉，被推为古今七言律诗之冠。', en: 'The boundless forest sheds its leaves with a rustling sound; the endless Yangtze rolls its waves on and on.'},
+          {cat: 'shi', title: '山居秋暝', dynasty: '唐', author: '王维', quote: '明月松间照，清泉石上流。', lines: ['空山新斧后，天气晚来秋。', '明月松间照，清泉石上流。', '竹喧归浣女，莲动下渔舟。', '随意春芳歇，王孙自可留。'], note: '诗中有画，以动衬静，绘出雨后秋山澄澈空灵的意境。', en: 'Among the pines the bright moon shines; over the stones the crystal stream flows.'},
+          {cat: 'shi', title: '酬乐天扬州初逢席上见赠', dynasty: '唐', author: '刘禹锡', quote: '沉舟侧畔千帆过，病树前头万木春。', lines: ['巴山楚水凄凉地，二十三年弃置身。', '怀旧空吟闻笛赋，到乡翻似烂柯人。', '沉舟侧畔千帆过，病树前头万木春。', '今日听君歌一曲，暂凭杯酒长精神。'], note: '二十三年贬谪归来而不消沉，在新陈代谢的天道中见豁达胸襟。', en: 'Past the sunken boat a thousand sails race by; before the withered tree ten thousand saplings spring to life.'},
+          {cat: 'shi', title: '终南别业', dynasty: '唐', author: '王维', quote: '行到水穷处，坐看云起时。', lines: ['中岁颇好道，晚家南山陲。', '兴来每独往，胜事空自知。', '行到水穷处，坐看云起时。', '偶然值林叟，谈笑无还期。'], note: '随遇而安、绝处逢生，水尽云起之间尽显从容自在。', en: 'I walk to where the waters end, and sit to watch when clouds arise.'},
+          {cat: 'shi', title: '和子由渑池怀旧', dynasty: '宋', author: '苏轼', quote: '人生到处知何似，应似飞鸿踏雪泥。', lines: ['人生到处知何似，应似飞鸿踏雪泥。', '泥上偶然留指爪，鸿飞那复计东西。', '老僧已死成新塔，坏壁无由见旧题。', '往日崎岖还记否，路长人困蹇驴嘶。'], note: '以「雪泥鸿爪」喻人生际遇之偶然，超然物外又饱含兄弟温情。', en: 'What does human life resemble wherever it goes? Like a wild goose stepping on snow-covered mud.'},
+          {cat: 'shi', title: '题西林壁', dynasty: '宋', author: '苏轼', quote: '不识庐山真面目，只缘身在此山中。', lines: ['横看成岭侧成峰，远近高低各不同。', '不识庐山真面目，只缘身在此山中。'], note: '借庐山千姿百态说明当局者迷、跳出固有视角方见全貌的哲理。', en: 'I cannot tell the true face of Mount Lu, only because I am standing within the mountain myself.'},
+          {cat: 'shi', title: '观书有感', dynasty: '宋', author: '朱熹', quote: '问渠那得清如许？为有源头活水来。', lines: ['半亩方塘一鉴开，天光云影共徘徊。', '问渠那得清如许？为有源头活水来。'], note: '以方塘清澈喻心智澄明，唯有不断汲取新知方能保持思想常新。', en: 'Ask the pond how it stays so clear: because living water keeps flowing from its source.'},
+          {cat: 'ci', title: '定风波·莫听穿林打叶声', dynasty: '宋', author: '苏轼', quote: '竹杖芒鞋轻胜马，谁怕？一蓑烟雨任平生。', lines: ['莫听穿林打叶声，何妨吟啸且徐行。', '竹杖芒鞋轻胜马，谁怕？一蓑烟雨任平生。', '料峭春风吹酒醒，微冷，山头斜照却相迎。', '回首向来萧瑟处，归去，也无风雨也无晴。'], note: '黄州贬所途中遇雨所作，于人生风雨中泰然徐行，臻于「无风雨也无晴」之境。', en: 'With a bamboo staff and straw sandals lighter than a horse, who is afraid? A straw cloak in misty rain is enough for a lifetime.'},
+          {cat: 'ci', title: '水调歌头·明月几时有', dynasty: '宋', author: '苏轼', quote: '人有悲欢离合，月有阴晴圆缺，此事古难全。', lines: ['明月几时有？把酒问青天。不知天上宫阙，今夕是何年。', '我欲乘风归去，又恐琼楼玉宇，高处不胜寒。起舞弄清影，何似在人间。', '转朱阁，低绮户，照无眠。不应有恨，何事长向别时圆？', '人有悲欢离合，月有阴晴圆缺，此事古难全。但愿人长久，千里共婵娟。'], note: '由天上回到人间，以月之盈亏宽解人生聚散，化作千古中秋祝愿。', en: 'People have sorrow, joy, parting and reunion; the moon is dim, bright, waxing and waning. May we live long and share the moon across a thousand miles.'},
+          {cat: 'ci', title: '青玉案·元夕', dynasty: '宋', author: '辛弃疾', quote: '众里寻他千百度。蓦然回首，那人却在，灯火阑珊处。', lines: ['东风夜放花千树。更吹落、星如雨。宝马雕车香满路。', '凤箫声动，玉壶光转，一夜鱼龙舞。', '蛾儿雪柳黄金缕。笑语盈盈暗香去。', '众里寻他千百度。蓦然回首，那人却在，灯火阑珊处。'], note: '以元宵满城繁华反衬灯火零落处的孤高身影，王国维列为治学成大事业之第三境界。', en: 'I searched for her in the crowd a thousand times; suddenly turning back, there she was, where the lantern light was dim.'},
+          {cat: 'ci', title: '临江仙·滚滚长江东逝水', dynasty: '明', author: '杨慎', quote: '古今多少事，都付笑谈中。', lines: ['滚滚长江东逝水，浪花淘尽英雄。是非成败转头空。', '青山依旧在，几度夕阳红。', '白发渔樵江渚上，惯看秋月春风。', '一壶浊酒喜相逢。古今多少事，都付笑谈中。'], note: '阅尽历史兴替后的苍凉与通透，英雄成败终归江水青山。', en: 'Wave after wave the Yangtze rolls east, washing heroes away. All the deeds of past and present are given over to a laugh and a chat.'},
+          {cat: 'ci', title: '浣溪沙·一曲新词酒一杯', dynasty: '宋', author: '晏殊', quote: '无可奈何花落去，似曾相识燕归来。', lines: ['一曲新词酒一杯，去年天气旧亭台。夕阳西下几时回？', '无可奈何花落去，似曾相识燕归来。小园香径独徘徊。'], note: '于自然界的往复消长中体味光阴流转，工整自然，音韵婉转。', en: 'Helplessly I watch the blossoms fall away; yet the returning swallows seem familiar to my eyes.'},
+          {cat: 'ci', title: '蝶恋花·伫倚危楼风细细', dynasty: '宋', author: '柳永', quote: '衣带渐宽终不悔，为伊消得人憔悴。', lines: ['伫倚危楼风细细，望极春愁，黯黯生天际。', '草色烟光残照里，无言谁会凭阑意。', '拟把疏狂图一醉，对酒当歌，强乐还无味。', '衣带渐宽终不悔，为伊消得人憔悴。'], note: '写出百折不回的执着笃定，王国维借以形容治学求索之第二境界。', en: 'Though my sash grows looser day by day I have no regret; for her sake it is worth growing worn and wan.'},
+          {cat: 'classic', title: '论语·子罕', dynasty: '先秦', author: '孔子', quote: '逝者如斯夫，不舍昼夜。', lines: ['子在川上曰：「逝者如斯夫！不舍昼夜。」', '子曰：「岁寒，然后知松柏之后凋也。」', '子曰：「知者不惑，仁者不忧，勇者不惧。」'], note: '孔子临水叹时，勉励人珍惜光阴、自强不息；于岁寒严冬中守持风骨。', en: 'Standing by a stream, the Master said: “It passes on just like this, never ceasing day or night!”'},
+          {cat: 'classic', title: '庄子·知北游', dynasty: '先秦', author: '庄周', quote: '天地有大美而不言，四时有明法而不议，万物有成理而不说。', lines: ['天地有大美而不言，四时有明法而不议，万物有成理而不说。', '圣人者，原天地之美而达万物之理。'], note: '天地大道在静默中运行不息，洞察万物本原便无需繁辞巧辩。', en: 'Heaven and earth possess great beauty yet do not speak; the four seasons follow clear laws yet do not argue; all things have their principles yet do not explain.'},
+          {cat: 'classic', title: '道德经·第八章', dynasty: '先秦', author: '老子', quote: '上善若水。水善利万物而不争。', lines: ['上善若水。水善利万物而不争，处众人之所恶，故几于道。', '居善地，心善渊，与善仁，言善信，政善治，事善能，动善时。', '夫唯不争，故无尤。'], note: '以水之柔韧、谦下、润物无声喻至高品格，不争而莫能与之争。', en: 'The highest good is like water: water benefits all things and does not contend.'},
+          {cat: 'classic', title: '大学·经一章', dynasty: '先秦', author: '曾子', quote: '知止而后有定，定而后能静，静而后能安，安而后能虑，虑而后能得。', lines: ['大学之道，在明明德，在亲民，在止于至善。', '知止而后有定，定而后能静，静而后能安，安而后能虑，虑而后能得。', '物有本末，事有终始，知所先后，则近道矣。'], note: '先明目标与边界，方能内心笃定、思虑周密，分清本末先后。', en: 'Knowing where to stop brings steadiness; steadiness brings calm; calm brings peace; peace enables deliberation; deliberation attains the goal.'},
+          {cat: 'classic', title: '岳阳楼记', dynasty: '宋', author: '范仲淹', quote: '不以物喜，不以己悲。', lines: ['嗟夫！予尝求古仁人之心，或异二者之为，何哉？', '不以物喜，不以己悲。居庙堂之高则忧其民，处江湖之远则忧其君。', '是进亦忧，退亦忧。然则何时而乐耶？', '其必曰：「先天下之忧而忧，后天下之乐而乐」乎！'], note: '超越外物顺逆与个人得失，将胸怀系于苍生天下。', en: 'Neither elated by external gains nor saddened by personal losses.'},
+          {cat: 'classic', title: '菜根谭', dynasty: '明', author: '洪应明', quote: '宠辱不惊，闲看庭前花开花落；去留无意，漫随天外云卷云舒。', lines: ['宠辱不惊，闲看庭前花开花落；', '去留无意，漫随天外云卷云舒。', '风来疏竹，风过而竹不留声；雁度寒潭，雁去而潭不留影。故君子事来而心始现，事去而心随空。'], note: '事来则应、事去则静，在繁忙世务中守住内心的从容与定力。', en: 'Unmoved by favor or disgrace, leisurely watch blossoms open and fall; unattached to staying or leaving, follow the clouds furling and unfurling across the sky.'},
+          {cat: 'shijing', title: '诗经·秦风·蒹葭', dynasty: '先秦', author: '佚名', quote: '蒹葭苍苍，白露为霜。所谓伊人，在水一方。', lines: ['蒹葭苍苍，白露为霜。所谓伊人，在水一方。', '溯洄从之，道虽且长。溯游从之，宛在水中央。', '蒹葭凄凄，白露未晞。所谓伊人，在水之湄。'], note: '秋水芦苇、烟波浩渺，写尽对美好理想的追寻与可望不可即的空灵。', en: 'The reeds and rushes are苍苍 green, the white dew turns to frost. The one of whom I speak is on the other side of the water.'},
+          {cat: 'shijing', title: '诗经·小雅·采薇', dynasty: '先秦', author: '佚名', quote: '昔我往矣，杨柳依依。今我来思，雨雪霏霏。', lines: ['昔我往矣，杨柳依依。今我来思，雨雪霏霏。', '行道迟迟，载渴载饥。我心伤悲，莫知我哀！'], note: '以春日杨柳与冬日风雪今昔对照，短短十六字道尽岁月沧桑与归途悲欢。', en: 'Long ago when I set out, the willows were green and gentle; now as I return, snow and sleet fall thick and fast.'},
+          {cat: 'shijing', title: '楚辞·离骚', dynasty: '先秦', author: '屈原', quote: '路漫漫其修远兮，吾将上下而求索。', lines: ['亦余心之所善兮，虽九死其犹未悔。', '民生各有所乐兮，余独好修以为常。', '路漫漫其修远兮，吾将上下而求索。'], note: '虽前路遥远艰险，仍秉持赤诚初心、百折不挠地探索真理与理想。', en: 'The road ahead is long and far-stretching; I shall search high and low without cease.'},
+        ];
+
+        const POEM_CATS = ['all', 'shi', 'ci', 'classic', 'shijing'];
+        function Poetry({size, config}) {
+          useLocale();
+          const ws = useWorkspace();
+          const now = useNow();
+          const today = dayKey(now);
+          const [offset, setOffset] = useState(0);
+          const [error, setError] = useState('');
+          const source = config?.source === 'jinrishici' ? 'jinrishici' : 'builtin';
+          const cat = POEM_CATS.includes(config?.cat) ? config.cat : 'all';
+          const res = useRemote(source === 'jinrishici' ? 'poetry.get' : null, {day: today, n: offset}, POETRY_MS);
+          const pool = cat === 'all' ? POEMS : POEMS.filter(p => p.cat === cat);
+          const idx = ((dayOfYear(now) + offset) % pool.length + pool.length) % pool.length;
+          const fallback = pool[idx];
+          const it = source === 'jinrishici' && res.value?.quote ? res.value : fallback;
+          const zh = t('lang').startsWith('zh');
+          const cite = [it.dynasty ? `〔${it.dynasty}〕` : '', it.author, it.title ? `《${it.title}》` : ''].filter(Boolean).join('');
+          const note = !zh && it.en ? it.en : (it.note || '');
+          const next = () => setOffset(n => n + 1);
+          const ask = e => {
+            e.stopPropagation();
+            launch(fill(t('po_prompt'), {dynasty: it.dynasty || '', author: it.author || '', title: it.title || '', lines: (it.lines ?? [it.quote]).join('\n')}).trim(), ws.path, ws.id)
+              .then(() => setError(''), err => setError(String(err?.message || err)));
+          };
+          if (size === 's') {
+            return h('button', {type: 'button', className: 'wb-btn wb-poem', 'data-size': 's', style: {textAlign: 'left', width: '100%'}, title: [...(it.lines ?? []), note].filter(Boolean).join('\n'), onClick: next},
+              h('div', {className: 'wb-poem-main'},
+                h('p', {className: 'wb-poem-quote'}, it.quote),
+                h('span', {className: 'wb-poem-meta'}, cite)));
+          }
+          const showFull = (size === 't' || size === 'l') && Array.isArray(it.lines) && it.lines.length > 1;
+          return h('div', {className: 'wb-poem', 'data-size': size},
+            h('div', {className: 'wb-poem-main', title: [...(it.lines ?? []), note].filter(Boolean).join('\n')},
+              h('div', {className: 'wb-poem-meta'},
+                h('b', {style: {color: 'var(--dsw-alias-label-primary)'}}, it.title ? `《${it.title}》` : ''),
+                h('span', null, [it.dynasty, it.author].filter(Boolean).join(' · ')),
+                ...(Array.isArray(it.tags) ? it.tags.slice(0, 2).map(tag => h('span', {key: tag, className: 'wb-tag'}, tag)) : [])),
+              showFull
+                ? h('div', {className: 'wb-poem-lines'}, it.lines.map((line, i) => h('p', {key: i, 'data-hit': line.includes(it.quote) || it.quote.includes(line) ? '' : undefined}, line)))
+                : h('p', {className: 'wb-poem-quote'}, it.quote),
+              note ? h('p', {className: 'wb-poem-note'}, note) : null),
+            h('div', {className: 'wb-notefoot', style: {marginTop: 0}},
+              h('button', {type: 'button', className: 'wb-btn', onClick: ask}, t('toAgent')),
+              h('button', {type: 'button', className: 'wb-btn', onClick: next}, t('po_next'))),
+            error ? h('div', {className: 'wb-calerr', title: error}, error) : null);
+        }
+        Poetry.workboard = {
+          apiVersion: 1, sizes: ['m', 't', 'l', 's', 'w'], defaultSize: 'm', description: () => t('d_poetry'),
+          settings: [
+            {key: 'source', type: 'select', default: 'builtin', label: () => t('f_poSource'), options: ['builtin', 'jinrishici'].map(v => ({value: v, label: () => t(`po_src_${v}`)}))},
+            {key: 'cat', type: 'select', default: 'all', label: () => t('f_poCat'), options: POEM_CATS.map(v => ({value: v, label: () => t(`po_cat_${v}`)}))},
+          ],
+        };
+
+        const WR_PUB_KINDS = ['rising', 'hot_search', 'newbook', 'all'];
+        const WR_ALL_KINDS = ['shelf', 'notes', ...WR_PUB_KINDS];
+        function Weread({size, config}) {
+          useLocale();
+          const ws = useWorkspace();
+          const apiKey = String(config?.apiKey ?? '').trim();
+          const [picked, setPicked] = useState('');
+          const [envKey, setEnvKey] = useState(false);
+          const [error, setError] = useState('');
+          const hasKey = Boolean(apiKey || envKey);
+          const kinds = hasKey ? WR_ALL_KINDS : WR_PUB_KINDS;
+          const kind = kinds.includes(picked) ? picked : (hasKey ? 'shelf' : 'rising');
+          const res = useRemote('weread.get', {kind, apiKey}, WEREAD_MS);
+          useEffect(() => { if (res.value?.hasKey != null) setEnvKey(Boolean(res.value.hasKey)); }, [res.value?.hasKey]);
+          const v = res.value?.kind === kind ? res.value : null;
+          const read = useRead(v ? v.items.map(it => it.url).filter(Boolean) : []);
+          const lang = t('lang');
+          const compactNum = new Intl.NumberFormat(lang, {notation: 'compact', maximumFractionDigits: 1});
+          const ask = (e, it) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const prompt = kind === 'notes' && it.text
+              ? fill(t('wr_notePrompt'), {title: it.title, author: it.author || '', text: it.text})
+              : fill(t('wr_bookPrompt'), {title: it.title, author: it.author || '', intro: it.intro || it.category || ''});
+            launch(prompt.trim(), ws.path, ws.id)
+              .then(() => setError(''), err => setError(String(err?.message || err)));
+          };
+          const meta = it => {
+            if (kind === 'shelf') return [it.author, it.category, it.finished ? t('wr_finished') : t('wr_reading')].filter(Boolean).join(' · ');
+            if (kind === 'notes') {
+              if (it.text) return [`《${it.title}》`, it.chapter || it.author].filter(Boolean).join(' · ');
+              return [it.author, it.noteCount ? fill(t('wr_noteCount'), {n: it.noteCount}) : ''].filter(Boolean).join(' · ');
+            }
+            return [it.author, it.category, (size === 'l' || size === 'w') && it.intro ? it.intro : (it.readers ? fill(t('wr_readers'), {n: compactNum.format(it.readers)}) : '')].filter(Boolean).join(' · ');
+          };
+          const right = it => {
+            if (size === 't') return null;
+            if (kind === 'shelf') return it.updatedAt ? h('time', {className: 'wb-num'}, new Date(it.updatedAt).toLocaleDateString(lang, {month: 'short', day: 'numeric'})) : null;
+            if (kind === 'notes') return it.createdAt ? h('time', {className: 'wb-num'}, new Date(it.createdAt).toLocaleDateString(lang, {month: 'short', day: 'numeric'})) : null;
+            return it.rating ? h('span', {className: 'wb-num'}, `${it.rating}%`) : null;
+          };
+          const row = (it, i) => {
+            const titleText = kind === 'notes' && it.text ? it.text : it.title;
+            const desc = meta(it);
+            const isRank = WR_PUB_KINDS.includes(kind);
+            return h('a', {key: it.id, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer',
+              title: [it.title, it.author, it.text || it.intro || desc].filter(Boolean).join('\n')},
+              isRank ? h('span', {className: 'wb-rank wb-num', 'data-top': i < 3 ? '' : undefined}, i + 1) : null,
+              h('div', null, h('b', null, titleText), size === 'm' || !desc ? null : h('small', null, desc)),
+              size === 'm' ? null : h('button', {type: 'button', className: 'wb-btn wb-rowact', onClick: e => ask(e, it)}, t('toAgent')),
+              right(it));
+          };
+          const foot = () => {
+            if (kind === 'shelf' && v?.stats) {
+              const {totalSeconds, readDays, totalBooks} = v.stats;
+              if (totalSeconds > 0) return fill(t('wr_stats'), {t: fmtSpan(totalSeconds / 60), d: readDays || 1, b: totalBooks});
+              if (totalBooks > 0) return fill(t('wr_statsBooks'), {b: totalBooks});
+            }
+            if (kind === 'notes' && v?.totalNotes > 0) return fill(t('wr_notesFoot'), {b: v.totalBooks, n: v.totalNotes});
+            return '';
+          };
+          const footText = foot();
+          return h('div', {className: 'wb-trend'},
+            h('div', {className: 'wb-seg', role: 'tablist'}, kinds.map(k => h('button', {key: k, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': k === kind, onClick: () => setPicked(k)}, t(`wr_${k}`)))),
+            h('div', {className: 'wb-rows'}, v ? (v.items.length ? v.items.map(row) : blank(t('wr_none'))) : blank(res.error || '…')),
+            footText ? h('div', {className: 'wb-foot-note wb-num'}, footText) : null,
+            error ? h('div', {className: 'wb-calerr', title: error}, error) : null);
+        }
+        Weread.workboard = {
+          apiVersion: 1, sizes: ['l', 't', 'm', 'w'], defaultSize: 'l', description: () => t('d_weread'),
+          settings: [{key: 'apiKey', type: 'text', label: () => t('f_wrKey'), placeholder: 'wrk-…'}],
+        };
+
         const builtins = [
           ['workboard.today', 'today', Today], ['workboard.todo', 'todo', Todo], ['workboard.note', 'note', Note], ['workboard.calendar', 'calendar', Calendar],
           ['workboard.weather', 'weather', Weather], ['workboard.clock', 'clock', Clock], ['workboard.quote', 'quote', Quote], ['workboard.countdown', 'countdown', Countdown],
@@ -4974,11 +5164,12 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           ['workboard.apps', 'apps', Apps], ['workboard.models', 'models', Models], ['workboard.onthisday', 'onthisday', OnThisDay], ['workboard.wallpaper', 'wallpaper', Wallpaper],
           ['workboard.leaderboard', 'leaderboard', Leaderboard], ['workboard.mcps', 'mcps', Mcps], ['workboard.word', 'word', Word],
           ['workboard.astronomy', 'astronomy', Astronomy], ['workboard.packages', 'packages', Packages], ['workboard.releases', 'releases', Releases],
+          ['workboard.poetry', 'poetry', Poetry], ['workboard.weread', 'weread', Weread],
         ];
         const BUILTIN_CATEGORY = {
-          daily: ['today', 'clock', 'worldclock', 'weather', 'astronomy', 'countdown', 'holiday', 'onthisday', 'word', 'progress', 'habits', 'photo', 'wallpaper', 'nowplaying'],
+          daily: ['today', 'clock', 'worldclock', 'weather', 'astronomy', 'countdown', 'holiday', 'onthisday', 'word', 'poetry', 'progress', 'habits', 'photo', 'wallpaper', 'nowplaying'],
           agent: ['attention', 'agents', 'running', 'brief', 'prompt', 'usage', 'activity', 'status', 'mcps', 'outputs', 'tasks', 'pinned'],
-          news: ['trending', 'feed', 'papers', 'models', 'leaderboard', 'videos', 'market', 'quote'],
+          news: ['trending', 'feed', 'weread', 'papers', 'models', 'leaderboard', 'videos', 'market', 'quote'],
           tools: ['todo', 'note', 'calendar', 'focus', 'ambient', 'links', 'apps', 'git', 'github', 'releases', 'packages', 'system', 'files', 'clipboard', 'network', 'ports'],
         };
         for (const [category, keys] of Object.entries(BUILTIN_CATEGORY)) {

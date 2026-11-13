@@ -1,6 +1,6 @@
 # 工作台 Workboard
 
-**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 50 个 widget，开箱即用；不够用的，让 Agent 现做。**
+**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 52 个 widget，开箱即用；不够用的，让 Agent 现做。**
 
 [English](README.en.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
@@ -8,7 +8,7 @@
 
 ## 亮点
 
-### 内置 50 个 widget，开箱即用
+### 内置 52 个 widget，开箱即用
 
 覆盖四大场景，打开组件库即可搜索、预览并连续添加到看板：
 
@@ -75,7 +75,7 @@ dsh-workboard
 ## 参考
 
 <details>
-<summary><b>全部 50 个内置 widget</b></summary>
+<summary><b>全部 52 个内置 widget</b></summary>
 
 | Widget | 档位 | 说明 |
 |---|---|---|
@@ -119,6 +119,7 @@ dsh-workboard
 | 节假日 | `m` `s` `t` | 中国大陆接下来的法定节假日、放假天数与调休上班日 |
 | 历史上的今天 | `t` `l` `m` `w` `s` | 百度百科与维基百科记载的今日历史事件，按年份倒序排列 |
 | 每日一词 | `m` `s` `t` `l` `w` | 每天精选一个 AI 与软件工程核心概念，附双语释义、代码示例与 Agent 深入解读按钮，点击可切换词条 |
+| 诗词典籍 | `m` `t` `l` `s` `w` | 唐诗宋词、先秦诸子与诗经楚辞传世名篇，支持今日诗词推荐、全篇展开与一键交给 Agent 赏析 |
 | 时间进度 | `m` `s` `w` | 今日、本周、本月与本年已度过的百分比 |
 | 习惯打卡 | `m` `l` `t` `w` | 支持最近一周打卡与补卡，自动计算当前连续达成天数 |
 | 相框 | `l` `m` `s` `t` `w` | 轮播本机文件夹（默认 `~/Pictures`）中的照片，切换间隔可选 1 分钟到 1 天或只在点击时切换 |
@@ -127,6 +128,7 @@ dsh-workboard
 | **资讯与行情** | | |
 | 热榜 | `l` `t` `m` `w` | 多信源分标签聚合：微博、知乎、36 氪、少数派、Hacker News、GitHub Trending、Product Hunt、Reddit（可选 B 站、V2EX） |
 | 订阅 | `t` `l` `m` `w` | 聚合多个 RSS / Atom 订阅源并按时间混排，支持 `rsshub://` 路由简写与自建实例，已读条目自动变灰 |
+| 微信读书 | `l` `t` `m` `w` | 微信读书飙升、热搜、新书与总榜；填入 API Key 后可查看个人书架、阅读时长与划线笔记，支持一键交给 Agent 解读 |
 | AI 论文 | `l` `t` `m` `w` | Hugging Face 每日论文、arXiv 分类最新论文与热门 Spaces，论文可一键交给 Agent 解读 |
 | 模型行情 | `l` `t` `m` `w` | OpenRouter 本周热门与最新上架的模型，附输入 / 输出单价与上下文长度，可按厂商筛选 |
 | 大模型竞技场 | `l` `t` `m` `w` | LMArena 盲测排行榜（文本、WebDev、Agent、视觉、搜索），支持仅看开源模型与按厂商筛选 |
@@ -145,6 +147,8 @@ dsh-workboard
 
 - **天气与城市搜索**：[Open-Meteo](https://open-meteo.com)，仅在设置城市后请求
 - **格言**：[一言](https://hitokoto.cn)，仅在格言来源设为「一言」时请求
+- **诗词典籍**：默认使用内置传世名篇库，不联网；仅在来源设为「今日诗词」时请求 [今日诗词](https://www.jinrishici.com) 公开接口（`v2.jinrishici.com`）
+- **微信读书**：榜单读取微信读书公开分类接口（`weread.qq.com`，非官方，缓存 30 分钟）；仅在填入 `WEREAD_API_KEY`（或配置本机环境变量）并切换到「书架」或「划线」时请求微信读书官方 Agent 网关（`i.weread.qq.com/api/agent/gateway`，缓存 5 分钟）
 - **日历与订阅**：仅请求列表中的 ICS 与 RSS / Atom 地址（`rsshub://` 路由展开到所填的 [RSSHub](https://docs.rsshub.app) 实例，留空时回退 `rsshub.app`）；订阅 widget 默认预填爱范儿与阮一峰的网络日志（英文界面为 [hnrss.org](https://hnrss.org) 首页），可在设置中修改
 - **行情**：股票走腾讯行情接口（`qt.gtimg.cn`），汇率走 [open.er-api.com](https://open.er-api.com)，加密货币走 [CoinGecko](https://www.coingecko.com)
 - **GitHub**：调用本机 `gh` CLI，复用其已有登录态
@@ -231,7 +235,7 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 ```
 
 - `index.js`：Host 端 `/api/dsh-workboard/*` 路由、数据存储与 Agent 工具注册
-- `client.js`：侧栏入口、看板容器与 50 个内置 widget
+- `client.js`：侧栏入口、看板容器与 52 个内置 widget
 - `lib/`：各数据源请求、解析与系统采样模块
 - `skills/workboard-widget.md`：供 Agent 编写自定义 widget 的规范指南
 
@@ -267,6 +271,8 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 | 百度百科（`baike.baidu.com`） | 中文历史上的今天 | 非官方接口 |
 | Microsoft Bing（`www.bing.com`） | Bing 每日壁纸 | 非官方接口（图片版权归原摄影师与版权方） |
 | [RSSHub](https://docs.rsshub.app) | 可选的 `rsshub://` 订阅路由协议 | MIT（由用户自建实例提供服务） |
+| [chinese-poetry](https://github.com/chinese-poetry/chinese-poetry)、[今日诗词](https://www.jinrishici.com) | 诗词典籍选集语料与可选在线诗词接口 | MIT 与公开 API |
+| [微信读书](https://weread.qq.com)、[OpenWeRead](https://github.com/Ceelog/OpenWeRead) | 微信读书公开榜单与官方 Agent 网关协议 | 非官方榜单接口、官方网关与 MIT |
 | 经典文献（老子、孔子、荀子等） | 内置格言库 | 公有领域 |
 
 ## 许可

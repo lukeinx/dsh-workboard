@@ -39,6 +39,8 @@ import {createLeaderboard, filterLeaderboard, parseLeaderboard} from '../lib/lea
 import {createMcps, parseGithubMcps, parseNpmMcps, parseRegistryMcps} from '../lib/mcps.js';
 import {createReleases, parseReleaseAtom, parseReleaseSpecs} from '../lib/releases.js';
 import {createPackages, parsePackageSpecs, summarizeRange} from '../lib/packages.js';
+import {createWeread, parseNotebooks, parseRankBooks, parseShelf} from '../lib/weread.js';
+import {createPoetry, parseJinrishici} from '../lib/poetry.js';
 
 const routes = new Map();
 const tools = new Map();
@@ -1247,6 +1249,80 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
     ['crates', '1.40.0', 700, 3000, null, undefined],
     ['unknown', undefined, undefined, undefined, undefined, 'unknown package'],
   ]);
+}
+
+// 微信读书：公开榜单解析、个人书架与阅读时长、划线笔记本解析及网关调用。
+{
+  const rankBody = {books: [
+    {readingCount: 2500, bookInfo: {bookId: '3300045871', title: '三体', author: '刘慈欣', category: '科幻-硬科幻', newRating: 930, intro: '地球往事三部曲', deepLink: 'https://weread.qq.com/book-detail?v=1'}},
+  ]};
+  assert.deepEqual(parseRankBooks(rankBody), [
+    {id: '3300045871', title: '三体', author: '刘慈欣', category: '科幻-硬科幻', rating: 93, readers: 2500, intro: '地球往事三部曲', url: 'https://weread.qq.com/book-detail?v=1'},
+  ]);
+  const shelfBody = {
+    books: [{bookId: 'b1', title: '乡土中国', author: '费孝通', category: '社会学', finishReading: 1, isTop: 1, readUpdateTime: 100}],
+    albums: [{albumInfo: {albumId: 'a1', name: '资治通鉴讲读', authorName: '主播', finishStatus: '更新中', finish: 0, updateTime: 200}, albumInfoExtra: {isTop: 0}}],
+    mp: {id: 'mp'},
+  };
+  const parsedShelf = parseShelf(shelfBody, {totalReadTime: 7200, readDays: 5});
+  assert.deepEqual(parsedShelf.stats, {totalBooks: 3, totalSeconds: 7200, readDays: 5});
+  assert.deepEqual(parsedShelf.items.map(x => [x.id, x.title, x.finished, x.isAlbum]), [
+    ['b1', '乡土中国', true, false],
+    ['album:a1', '资治通鉴讲读', false, true],
+  ]);
+  const nbBody = {totalBookCount: 1, totalNoteCount: 3, books: [{bookId: 'b1', book: {title: '乡土中国', author: '费孝通'}, noteCount: 2, reviewCount: 1, bookmarkCount: 0, sort: 50}]};
+  const bmBody = {book: {bookId: 'b1', title: '乡土中国', author: '费孝通'}, chapters: [{chapterUid: 1, title: '乡土本色'}], updated: [{bookmarkId: 'm1', bookId: 'b1', chapterUid: 1, markText: '从基层上看去，中国社会是乡土性的。', createTime: 60}]};
+  const parsedNotes = parseNotebooks(nbBody, [bmBody]);
+  assert.deepEqual([parsedNotes.totalBooks, parsedNotes.totalNotes, parsedNotes.items[0].chapter, parsedNotes.items[0].text], [1, 3, '乡土本色', '从基层上看去，中国社会是乡土性的。']);
+
+  const wr = createWeread({get: async (url, opts) => {
+    if (url.includes('bookListInCategory')) return rankBody;
+    const req = JSON.parse(opts.body);
+    assert.equal(opts.headers.authorization, 'Bearer wrk-test');
+    if (req.api_name === '/shelf/sync') return shelfBody;
+    if (req.api_name === '/readdata/detail') return {totalReadTime: 3600, readDays: 3};
+    if (req.api_name === '/user/notebooks') return nbBody;
+    if (req.api_name === '/book/bookmarklist') return bmBody;
+    return {errcode: -1, errmsg: 'unknown'};
+  }}, {env: {WEREAD_API_KEY: 'wrk-test'}});
+  const wrH = createHandlers(createStore({}), undefined, null, null, {weread: wr});
+  const rk = await wrH['dsh-workboard/weread.get']({kind: 'rising'});
+  assert.equal(rk.hasKey, true);
+  assert.equal(rk.items[0].title, '三体');
+  const sh = await wrH['dsh-workboard/weread.get']({kind: 'shelf'});
+  assert.equal(sh.stats.totalBooks, 3);
+  const nt = await wrH['dsh-workboard/weread.get']({kind: 'notes'});
+  assert.equal(nt.items[0].text, '从基层上看去，中国社会是乡土性的。');
+  await assert.rejects(createWeread({get: async () => rankBody}, {env: {}}).list({kind: 'shelf'}), /WEREAD_API_KEY/);
+}
+
+// 诗词典籍：今日诗词解析与按天缓存补取。
+{
+  const body = {
+    status: 'success',
+    data: {
+      content: '细雨鱼儿出，微风燕子斜。',
+      matchTags: ['小雨', '微风'],
+      origin: {title: '水槛遣心二首', dynasty: '唐代', author: '杜甫', content: ['澄江平少岸，幽树晚多花。', '细雨鱼儿出，微风燕子斜。'], translate: ['江水澄澈几乎与岸齐平。']},
+    },
+  };
+  assert.deepEqual(parseJinrishici(body), {
+    quote: '细雨鱼儿出，微风燕子斜。',
+    title: '水槛遣心二首',
+    dynasty: '唐',
+    author: '杜甫',
+    lines: ['澄江平少岸，幽树晚多花。', '细雨鱼儿出，微风燕子斜。'],
+    note: '江水澄澈几乎与岸齐平。',
+    tags: ['小雨', '微风'],
+  });
+  let calls = 0;
+  const po = createPoetry({get: async () => { calls++; return body; }});
+  const poH = createHandlers(createStore({}), undefined, null, null, {poetry: po});
+  assert.equal((await poH['dsh-workboard/poetry.get']({day: '2026-11-13', n: 0})).quote, '细雨鱼儿出，微风燕子斜。');
+  assert.equal((await poH['dsh-workboard/poetry.get']({day: '2026-11-13', n: 0})).quote, '细雨鱼儿出，微风燕子斜。');
+  assert.equal(calls, 1);
+  await poH['dsh-workboard/poetry.get']({day: '2026-11-13', n: 1});
+  assert.equal(calls, 2);
 }
 
 console.log('smoke ok');

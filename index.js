@@ -36,6 +36,8 @@ import {createLeaderboard} from './lib/leaderboard.js';
 import {createMcps} from './lib/mcps.js';
 import {createReleases} from './lib/releases.js';
 import {createPackages} from './lib/packages.js';
+import {createWeread} from './lib/weread.js';
+import {createPoetry} from './lib/poetry.js';
 import {CONTEXT_SECTIONS, createContext} from './lib/context.js';
 import {stat} from 'node:fs/promises';
 import {isAbsolute, join} from 'node:path';
@@ -86,6 +88,7 @@ export const BUILTIN_WIDGETS = [
   'workboard.ports', 'workboard.status', 'workboard.papers', 'workboard.holiday', 'workboard.activity', 'workboard.apps',
   'workboard.models', 'workboard.onthisday', 'workboard.wallpaper',
   'workboard.leaderboard', 'workboard.mcps', 'workboard.word', 'workboard.astronomy', 'workboard.packages', 'workboard.releases',
+  'workboard.weread', 'workboard.poetry',
 ];
 
 export function defaultBoard(id) {
@@ -1044,6 +1047,14 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       if (!services.packages) throw new UserError('unavailable', 'package stats are not available');
       return services.packages.list({packages: String(p?.packages ?? '')});
     },
+    'dsh-workboard/weread.get': async p => {
+      if (!services.weread) throw new UserError('unavailable', 'WeRead is not available');
+      return services.weread.list({kind: String(p?.kind || 'rising'), apiKey: String(p?.apiKey ?? '')});
+    },
+    'dsh-workboard/poetry.get': async p => {
+      if (!services.poetry) throw new UserError('unavailable', 'poetry is not available');
+      return services.poetry.get({day: p?.day, n: p?.n});
+    },
     'dsh-workboard/read.check': p => store.readOf(p?.urls),
     'dsh-workboard/read.mark': p => store.markRead(p?.urls, p?.read !== false),
     'dsh-workboard/habit.list': () => store.listHabits(),
@@ -1316,6 +1327,8 @@ export function apply(ctx) {
     mcps: createMcps(fetcher),
     releases: createReleases(fetcher),
     packages: createPackages(fetcher),
+    weread: createWeread(fetcher),
+    poetry: createPoetry(fetcher),
   };
   const handlers = createHandlers(store, fetcher, createAgentWatch(ctx), createLauncher(ctx), services);
   const context = createContext({store, call: (method, payload) => handlers[`dsh-workboard/${method}`](payload)});
