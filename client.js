@@ -221,9 +221,9 @@ window.__ModuleLoader__.load({
       as_toSunrise: '距日出 {t}', as_toSunset: '距日落 {t}', as_afterSunset: '今日已日落',
       as_illum: '照明 {n}%', as_age: '月龄 {n} 天', as_toFull: '{n} 天后满月', as_toNew: '{n} 天后新月',
       mn_0: '新月', mn_1: '蛾眉月', mn_2: '上弦月', mn_3: '盈凸月', mn_4: '满月', mn_5: '亏凸月', mn_6: '下弦月', mn_7: '残月',
-      word: '每日一词', d_word: 'AI 工程术语与英语进阶高频词汇，带音标、双语释义、例句与朗读',
+      word: '每日一词', d_word: '高频实用、AI 工程与英语进阶词汇，带音标、双语释义、例句与朗读',
       wd_next: '换一个', wd_speak: '朗读', f_wdBook: '词库',
-      wd_book_all: '综合（AI 工程 + 进阶英语）', wd_book_ai: 'AI 与计算机工程', wd_book_general: '英语进阶（IELTS / GRE）',
+      wd_book_all: '综合（全部词库）', wd_book_core: '高频实用词汇', wd_book_ai: 'AI 与计算机工程', wd_book_general: '英语进阶（IELTS / GRE）',
       wd_prompt: '讲解英语单词「{word}」（{meaning}）：包括词源记忆法、常见固定搭配、易混近义词辨析，并结合真实场景造 3 个地道例句。',
     };
     const en = {
@@ -395,9 +395,9 @@ window.__ModuleLoader__.load({
       as_toSunrise: 'Sunrise in {t}', as_toSunset: 'Sunset in {t}', as_afterSunset: 'Sun has set',
       as_illum: '{n}% lit', as_age: 'Day {n}', as_toFull: 'Full in {n}d', as_toNew: 'New in {n}d',
       mn_0: 'New moon', mn_1: 'Waxing crescent', mn_2: 'First quarter', mn_3: 'Waxing gibbous', mn_4: 'Full moon', mn_5: 'Waning gibbous', mn_6: 'Last quarter', mn_7: 'Waning crescent',
-      word: 'Word of the day', d_word: 'Daily AI engineering and advanced English vocabulary with phonetics, definitions, examples and speech',
+      word: 'Word of the day', d_word: 'High-frequency core, AI engineering and academic English vocabulary with phonetics, examples and speech',
       wd_next: 'Next', wd_speak: 'Speak', f_wdBook: 'Wordbook',
-      wd_book_all: 'All (AI & Tech + Academic)', wd_book_ai: 'AI & Software Engineering', wd_book_general: 'Academic & GRE / IELTS',
+      wd_book_all: 'All wordbooks', wd_book_core: 'High-frequency core', wd_book_ai: 'AI & Software Engineering', wd_book_general: 'Academic & GRE / IELTS',
       wd_prompt: 'Explain the word “{word}” ({meaning}): its etymology, common collocations, near-synonyms and 3 natural example sentences.',
     };
 
@@ -4823,7 +4823,90 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           {w: 'succinct', p: '/səkˈsɪŋkt/', pos: 'adj.', cat: 'general', zh: '简明扼要的；言简意赅的', en: 'Briefly and clearly expressed, without wasted words.', ex: 'Lead with the conclusion and keep commit messages succinct.', exZh: '结论先行，并保持提交信息简明扼要。'},
           {w: 'caveat', p: '/ˈkæviæt/', pos: 'n.', cat: 'general', zh: '注意事项；附加限制条件；警告', en: 'A warning or proviso of specific stipulations, conditions or limitations.', ex: 'One caveat is that unauthenticated requests are rate-limited to 60 per hour.', exZh: '一个需要注意的限制是未鉴权请求每小时限流 60 次。'},
           {w: 'pivotal', p: '/ˈpɪvətl/', pos: 'adj.', cat: 'general', zh: '关键性的；中枢的；起决定性作用的', en: 'Of crucial importance in relation to the development or success of something.', ex: 'Clean data boundaries played a pivotal role in keeping the plugin maintainable.', exZh: '清晰的数据边界对保持插件的可维护性起到了关键作用。'},
+          {w: 'leverage', p: '/ˈlɛvərɪdʒ/', pos: 'v. / n.', cat: 'core', zh: '利用；借助已有资源发挥更大效能', en: 'Use something to maximum advantage; strategic power or influence.', ex: 'We can leverage the existing Host cache instead of fetching twice.', exZh: '我们可以直接复用现有的 Host 缓存，而不必重复请求。'},
+          {w: 'trade-off', p: '/ˈtreɪdˌɔːf/', pos: 'n.', cat: 'core', zh: '权衡；取舍；折中', en: 'A balance achieved between two desirable but incompatible features.', ex: 'Every caching layer is a trade-off between freshness and latency.', exZh: '每一层缓存都是在数据新鲜度与延迟之间做权衡。'},
+          {w: 'granularity', p: '/ˌɡrænjʊˈlærɪti/', pos: 'n.', cat: 'core', zh: '颗粒度；精细程度', en: 'The scale or level of detail present in a set of data or permissions.', ex: 'Token usage is tracked at per-day, per-model granularity.', exZh: 'Token 用量按每天、每个模型的颗粒度进行统计。'},
+          {w: 'prerequisite', p: '/ˌpriːˈrɛkwɪzɪt/', pos: 'n.', cat: 'core', zh: '前提条件；先决条件', en: 'A thing that is required as a prior condition for something else to happen.', ex: 'Passing the smoke suite is a prerequisite for merging to main.', exZh: '通过冒烟测试是合入主分支的前提条件。'},
+          {w: 'tentative', p: '/ˈtɛntətɪv/', pos: 'adj.', cat: 'core', zh: '初步的；暂定的；试探性的', en: 'Not certain or fixed; provisional.', ex: 'We have a tentative release date set for next Friday.', exZh: '我们把初步的发版日期暂定在下周五。'},
+          {w: 'retrospective', p: '/ˌrɛtrəˈspɛktɪv/', pos: 'n. / adj.', cat: 'core', zh: '复盘；回顾总结', en: 'A structured review of past events or a completed project to learn what worked.', ex: 'In the sprint retrospective we decided to automate release notes.', exZh: '在迭代复盘会上，我们决定将发版说明自动化。'},
+          {w: 'streamline', p: '/ˈstriːmlaɪn/', pos: 'v.', cat: 'core', zh: '精简；理顺流程以提高效率', en: 'Make an organization or system more efficient by employing faster or simpler working methods.', ex: 'One-click presets streamline the way you hand tasks to the agent.', exZh: '一键预设简化了将任务交给 Agent 的流程。'},
+          {w: 'escalate', p: '/ˈɛskəleɪt/', pos: 'v.', cat: 'core', zh: '升级上报；逐步加剧', en: 'Increase rapidly, or hand an unresolved issue to a higher level of attention.', ex: 'Blocked goals automatically escalate to the top of the Attention queue.', exZh: '受阻的目标会自动提级到「待处理」队列顶部。'},
+          {w: 'triage', p: '/triˈɑːʒ/', pos: 'v. / n.', cat: 'core', zh: '分流定级；按轻重缓急排优处理', en: 'Assign degrees of urgency to issues or tasks to decide the order of treatment.', ex: 'Spend ten minutes each morning to triage new issues and PRs.', exZh: '每天早上花十分钟对新 Issue 和 PR 做分流定级。'},
+          {w: 'deprecate', p: '/ˈdɛprəkeɪt/', pos: 'v.', cat: 'core', zh: '弃用；标记为过时且不再推荐使用', en: 'Declare that a feature or API is obsolete and scheduled for removal.', ex: 'Legacy storage keys are deprecated and migrated on first launch.', exZh: '旧版存储键已弃用，并会在首次启动时自动迁移。'},
+          {w: 'feasible', p: '/ˈfiːzəbl/', pos: 'adj.', cat: 'core', zh: '可行的；行得通的', en: 'Possible to do easily or conveniently; achievable in practice.', ex: 'A quick prototype proved that zero-dependency ICS parsing was feasible.', exZh: '快速原型验证了零依赖解析 ICS 是可行的。'},
+          {w: 'rationale', p: '/ˌræʃəˈnæl/', pos: 'n.', cat: 'core', zh: '根本原因；核心设计依据', en: 'A set of reasons or a logical basis for a course of action or decision.', ex: 'Document the rationale behind non-obvious architectural choices.', exZh: '把非直观架构决策背后的原因记录下来。'},
+          {w: 'momentum', p: '/moʊˈmɛntəm/', pos: 'n.', cat: 'core', zh: '势头；推进动力', en: 'The driving force gained by the development of a process or course of events.', ex: 'Shipping small, verified increments keeps team momentum high.', exZh: '持续交付经过验证的小步改动有助于保持团队推进势头。'},
+          {w: 'friction', p: '/ˈfrɪkʃən/', pos: 'n.', cat: 'core', zh: '阻力；使用或协作中的卡点', en: 'Effort or difficulty that slows down a user workflow or collaboration.', ex: 'Sensible defaults remove setup friction for first-time users.', exZh: '合理的默认值消除了新用户初次上手的阻力。'},
+          {w: 'threshold', p: '/ˈθrɛʃhoʊld/', pos: 'n.', cat: 'core', zh: '阈值；临界点；门槛', en: 'The magnitude or intensity that must be exceeded for a certain reaction to occur.', ex: 'An alert triggers when error rates cross the two-percent threshold.', exZh: '当错误率超过 2% 的阈值时会触发告警。'},
+          {w: 'fallback', p: '/ˈfɔːlbæk/', pos: 'n.', cat: 'core', zh: '兜底方案；降级回退策略', en: 'An alternative plan or resource that may be used in an emergency.', ex: 'When the primary API times out, the client uses cached data as a fallback.', exZh: '当主接口超时时，客户端会使用缓存数据作为兜底。'},
+          {w: 'benchmark', p: '/ˈbɛntʃmɑːrk/', pos: 'n. / v.', cat: 'core', zh: '基准测试；标杆参照', en: 'A standard or point of reference against which things may be compared.', ex: 'Always benchmark with realistic payloads before tuning performance.', exZh: '调优性能前务必使用真实负载进行基准测试。'},
+          {w: 'discrepancy', p: '/dɪˈskrɛpənsi/', pos: 'n.', cat: 'core', zh: '差异；出入；不一致之处', en: 'A lack of compatibility or similarity between two or more facts or figures.', ex: 'We audited the logs to explain the discrepancy in token counts.', exZh: '我们核查了日志以解释 token 统计上的出入。'},
+          {w: 'viable', p: '/ˈvaɪəbl/', pos: 'adj.', cat: 'core', zh: '可行的；能有效运作的', en: 'Capable of working successfully; practical and sustainable.', ex: 'Start with a minimum viable product and iterate from real feedback.', exZh: '从最小可行产品起步，并根据真实反馈持续迭代。'},
+          {w: 'proactive', p: '/ˌproʊˈæktɪv/', pos: 'adj.', cat: 'core', zh: '主动的；未雨绸缪的', en: 'Creating or controlling a situation by causing something to happen rather than responding after.', ex: 'Proactive health checks catch expiring certificates before outage.', exZh: '主动健康检查能在故障发生前捕获即将过期的证书。'},
+          {w: 'nuance', p: '/ˈnuːɑːns/', pos: 'n.', cat: 'core', zh: '细微差别；微妙之处', en: 'A subtle difference in or shade of meaning, expression or behavior.', ex: 'Good translations preserve the nuance of the original text.', exZh: '好的翻译能保留原文的细微语义差别。'},
+          {w: 'verbatim', p: '/vɜːrˈbeɪtɪm/', pos: 'adv. / adj.', cat: 'core', zh: '逐字逐句地；一字不差地', en: 'In exactly the same words as were used originally.', ex: 'Copy the error message verbatim when asking the agent to fix a widget.', exZh: '让 Agent 修复组件时，原样附上完整的报错信息。'},
+          {w: 'intermittent', p: '/ˌɪntərˈmɪtənt/', pos: 'adj.', cat: 'core', zh: '间歇性的；偶发的', en: 'Occurring at irregular intervals; not continuous or steady.', ex: 'Intermittent network timeouts are retried with exponential backoff.', exZh: '偶发的网络超时会通过指数退避策略进行重试。'},
+          {w: 'consolidate', p: '/kənˈsɒlɪdeɪt/', pos: 'v.', cat: 'core', zh: '整合；合并；巩固', en: 'Combine a number of things into a single more effective or coherent whole.', ex: 'We consolidated five status pages into a single overview card.', exZh: '我们将五个服务状态页整合成了一张概览卡片。'},
+          {w: 'articulate', p: '/ɑːrˈtɪkjʊleɪt/', pos: 'v. / adj.', cat: 'core', zh: '清晰阐明；表达流利的', en: 'Express an idea or feeling fluently, clearly and coherently.', ex: 'A clear spec articulates both the goal and the non-goals.', exZh: '一份清晰的规范会同时阐明目标与不做事项。'},
+          {w: 'accountable', p: '/əˈkaʊntəbl/', pos: 'adj.', cat: 'core', zh: '负责的；对结果承担责任的', en: 'Required or expected to justify actions or decisions; responsible.', ex: 'A human stays accountable for every production deployment.', exZh: '每次生产环境部署仍由人来承担最终责任。'},
+          {w: 'contingent', p: '/kənˈtɪndʒənt/', pos: 'adj.', cat: 'core', zh: '视情况而定的；以…为前提的', en: 'Subject to chance, or occurring only if certain circumstances are met.', ex: 'The rollout is contingent on passing the security review.', exZh: '能否上线取决于是否通过安全评审。'},
+          {w: 'override', p: '/ˌoʊvərˈraɪd/', pos: 'v. / n.', cat: 'core', zh: '覆盖；用显式设置替换默认行为', en: 'Use authority or an explicit setting to replace a default behavior.', ex: 'Per-card settings can override the workspace default directory.', exZh: '单张卡片的设置可以覆盖全局默认工作目录。'},
+          {w: 'rollout', p: '/ˈroʊlaʊt/', pos: 'n.', cat: 'core', zh: '上线发布；分阶段放量推广', en: 'The official launch or staged introduction of a new product or feature.', ex: 'A gradual rollout lets us monitor metrics before reaching all users.', exZh: '分阶段放量让我们在全量前监控各项核心指标。'},
+          {w: 'quota', p: '/ˈkwoʊtə/', pos: 'n.', cat: 'core', zh: '配额；限额', en: 'A fixed maximum or minimum share of a resource allocated to a user or task.', ex: 'Reading GitHub Atom feeds avoids consuming your REST API quota.', exZh: '读取 GitHub Atom 订阅源不会消耗你的 REST API 配额。'},
+          {w: 'stakeholder', p: '/ˈsteɪkˌhoʊldər/', pos: 'n.', cat: 'core', zh: '利益相关方；项目干系人', en: 'A person or group with an interest or concern in a project or product.', ex: 'Share a one-page summary so stakeholders can align quickly.', exZh: '分享一页纸摘要，方便各干系人快速对齐。'},
+          {w: 'holistic', p: '/hoʊˈlɪstɪk/', pos: 'adj.', cat: 'core', zh: '全局的；整体系统性的', en: 'Characterized by comprehension of the parts of something as intimately interconnected.', ex: 'A holistic dashboard combines sessions, calendar, git and system metrics.', exZh: '全局工作台将会话、日程、Git 与系统指标融为一体。'},
+          {w: 'milestone', p: '/ˈmaɪlstoʊn/', pos: 'n.', cat: 'core', zh: '里程碑；阶段性关键节点', en: 'A significant stage or event in the development of a project.', ex: 'Reaching fifty built-in widgets marks a major milestone for Workboard.', exZh: '内置组件达到 50 个是工作台的重要里程碑。'},
+          {w: 'onboarding', p: '/ˈɒnˌbɔːrdɪŋ/', pos: 'n.', cat: 'core', zh: '新手引导；初次上手体验', en: 'The action or process of integrating a new user or teammate into a system.', ex: 'Zero-config widgets make onboarding effortless on a fresh install.', exZh: '零配置组件让全新安装的初次上手毫不费力。'},
+          {w: 'bottleneck', p: '/ˈbɒtlˌnɛk/', pos: 'n.', cat: 'core', zh: '瓶颈；限制整体效率的关键卡点', en: 'A point of congestion that slows down an entire process or system.', ex: 'Code review was the main bottleneck before we added automated checks.', exZh: '在引入自动化检查前，代码评审曾是主要的效率瓶颈。'},
+          {w: 'alignment', p: '/əˈlaɪnmənt/', pos: 'n.', cat: 'core', zh: '对齐；目标与认知达成一致', en: 'Agreement or cooperation among people or systems toward a shared goal.', ex: 'A short design doc ensures alignment before anyone writes code.', exZh: '简短的设计文档能确保大家在写代码前先对齐认知。'},
+          {w: 'quantize', p: '/ˈkwɒntaɪz/', pos: 'v.', cat: 'ai', zh: '量化；将高精度权重压缩为低比特表示', en: 'Map continuous or high-precision values to a smaller set of discrete levels.', ex: 'Quantizing weights to 4-bit lets large models run on consumer laptops.', exZh: '将权重量化到 4 比特后，大模型也能在消费级笔记本上运行。'},
+          {w: 'speculative', p: '/ˈspɛkjʊlətɪv/', pos: 'adj.', cat: 'ai', zh: '推测式的；投机执行的（如投机解码）', en: 'Performed in advance based on a prediction before it is known whether it is needed.', ex: 'Speculative decoding drafts several tokens with a small model and verifies them in parallel.', exZh: '投机解码用小模型起草多个 token 并由大模型并行验证。'},
+          {w: 'prefill', p: '/ˈpriːfɪl/', pos: 'n. / v.', cat: 'ai', zh: '预填充；首 token 生成前的提示词并行计算阶段', en: 'The compute-bound phase that processes input prompt tokens in parallel before decoding.', ex: 'Prompt caching dramatically reduces prefill latency on long contexts.', exZh: '提示词缓存大幅降低了长上下文场景下的预填充延迟。'},
+          {w: 'hallucination', p: '/həˌluːsɪˈneɪʃən/', pos: 'n.', cat: 'ai', zh: '幻觉；模型生成看似合理但失实的内容', en: 'Plausible-sounding but factually incorrect output generated by a model.', ex: 'Grounding answers in retrieved source files reduces hallucination.', exZh: '基于检索到的源文件作答可有效减少模型幻觉。'},
+          {w: 'ablations', p: '/əˈbleɪʃənz/', pos: 'n.', cat: 'ai', zh: '消融实验；逐一移除组件以验证各自贡献', en: 'Controlled experiments that remove one component at a time to measure its impact.', ex: 'Ablation studies showed that reranking contributed most of the accuracy gain.', exZh: '消融实验表明，重排序贡献了绝大部分的准确率提升。'},
+          {w: 'perplexity', p: '/pərˈplɛksɪti/', pos: 'n.', cat: 'ai', zh: '困惑度；衡量语言模型预测不确定性的指标', en: 'A measurement of how well a probability model predicts a sample; lower is better.', ex: 'Validation perplexity dropped steadily throughout pretraining.', exZh: '验证集困惑度在预训练过程中稳步下降。'},
+          {w: 'concurrency', p: '/kənˈkʌrənsi/', pos: 'n.', cat: 'ai', zh: '并发；同时处理多个任务的能力', en: 'The ability of different parts of a program to be executed out-of-order or in partial overlap.', ex: 'Structured concurrency ensures child tasks are cancelled when the parent exits.', exZh: '结构化并发确保父任务退出时自动取消所有子任务。'},
+          {w: 'serialization', p: '/ˌsɪəriəlaɪˈzeɪʃən/', pos: 'n.', cat: 'ai', zh: '序列化；将内存对象编码为可传输或落盘的字节流', en: 'The process of translating a data structure into a format that can be stored or transmitted.', ex: 'Fast JSON serialization keeps RPC overhead under a millisecond.', exZh: '快速的 JSON 序列化将 RPC 开销控制在 1 毫秒以内。'},
+          {w: 'reentrant', p: '/riːˈɛntrənt/', pos: 'adj.', cat: 'ai', zh: '可重入的；执行中途被再次调用仍安全的', en: 'Able to be interrupted in the middle of execution and safely called again before completion.', ex: 'Signal handlers must call only async-signal-safe, reentrant functions.', exZh: '信号处理函数只能调用异步信号安全的可重入函数。'},
+          {w: 'zero-copy', p: '/ˈzɪəroʊˌkɒpi/', pos: 'adj.', cat: 'ai', zh: '零拷贝的；传输过程中避免冗余内存复制的', en: 'Describing operations in which the CPU does not copy data from one memory area to another.', ex: 'Shared memory rings enable zero-copy message passing between processes.', exZh: '共享内存环形缓冲区支持进程间的零拷贝消息传递。'},
+          {w: 'cognitive', p: '/ˈkɒɡnɪtɪv/', pos: 'adj.', cat: 'general', zh: '认知的；与思维理解过程相关的', en: 'Relating to the mental process of acquiring knowledge and understanding.', ex: 'Consistent layouts reduce cognitive load when scanning a busy board.', exZh: '一致的排版能降低浏览复杂看板时的认知负担。'},
+          {w: 'intrinsic', p: '/ɪnˈtrɪnzɪk/', pos: 'adj.', cat: 'general', zh: '内在的；固有的；本质上的', en: 'Belonging naturally; essential and built into the very nature of something.', ex: 'Curiosity is an intrinsic motivation for exploring open-source code.', exZh: '好奇心是探索开源代码的内在驱动力。'},
+          {w: 'empirical', p: '/ɪmˈpɪrɪkəl/', pos: 'adj.', cat: 'general', zh: '实证的；基于实验与实测观察的', en: 'Based on, concerned with, or verifiable by observation or experience rather than theory.', ex: 'Back every performance claim with empirical measurements.', exZh: '用实测数据支撑每一项性能结论。'},
+          {w: 'tenacious', p: '/təˈneɪʃəs/', pos: 'adj.', cat: 'general', zh: '坚韧不拔的；锲而不舍的', en: 'Tending to keep a firm hold of something; persistent and determined.', ex: 'Tenacious debugging uncovered a subtle timezone edge case.', exZh: '锲而不舍的排查终于定位到了一个隐蔽的时区边界问题。'},
+          {w: 'eloquent', p: '/ˈɛləkwənt/', pos: 'adj.', cat: 'general', zh: '富有表现力的；雄辩而有说服力的', en: 'Fluent or persuasive in speaking or writing; clearly expressive.', ex: 'A minimal interface can be more eloquent than pages of instructions.', exZh: '极简的界面往往比连篇累牍的说明更有表现力。'},
+          {w: 'salient', p: '/ˈseɪliənt/', pos: 'adj.', cat: 'general', zh: '最显著的；最核心突出的', en: 'Most noticeable, important or prominent.', ex: 'The daily brief highlights only the most salient items that need your action.', exZh: '每日简报只提炼最核心、最需要你处理的事项。'},
+          {w: 'transient', p: '/ˈtrænziənt/', pos: 'adj.', cat: 'general', zh: '瞬态的；短暂的；一过性的', en: 'Lasting only for a short time; impermanent.', ex: 'Retry logic masks transient DNS glitches from the user.', exZh: '重试机制向用户屏蔽了瞬态的 DNS 抖动。'},
+          {w: 'catalyst', p: '/ˈkætəlɪst/', pos: 'n.', cat: 'general', zh: '催化剂；促使变革加速发生的契机', en: 'A person or thing that precipitates an event or accelerates significant change.', ex: 'Open protocols acted as a catalyst for the agent ecosystem.', exZh: '开放协议成为了智能体生态爆发的催化剂。'},
+          {w: 'rigorous', p: '/ˈrɪɡərəs/', pos: 'adj.', cat: 'general', zh: '严密的；严谨透彻的', en: 'Extremely thorough, exhaustive or accurate.', ex: 'Rigorous input validation keeps sandboxed widgets safe.', exZh: '严密的输入校验保障了沙箱组件的安全。'},
+          {w: 'unprecedented', p: '/ʌnˈprɛsɪdɛntɪd/', pos: 'adj.', cat: 'general', zh: '史无前例的；空前的', en: 'Never done or known before; without previous example.', ex: 'Reasoning models unlocked unprecedented autonomy in coding tasks.', exZh: '推理模型在编程任务中解锁了前所未有的自主能力。'},
         ];
+
+        const NOVELTY_VOICES = /Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Deranged|Eddy|Flo|Fred|Good News|Grandma|Grandpa|Hysterical|Jester|Junior|Kathy|Organ|Ralph|Reed|Rocko|Sandy|Shelley|Superstar|Trinoids|Whisper|Wobble|Zarvox/i;
+        function pickEnglishVoice(voices) {
+          const en = (voices || []).filter(v => /^en[-_]/i.test(v.lang) && !NOVELTY_VOICES.test(v.name));
+          return en.find(v => /Premium|Enhanced|Natural|Online/i.test(v.name) && /^en[-_]US/i.test(v.lang))
+            || en.find(v => /^(Samantha|Ava|Allison|Alex|Nicky|Tom|Victoria|Aaron|Google US English|Microsoft (Aria|Jenny|Guy|Zira))\b/i.test(v.name))
+            || en.find(v => /^(Daniel|Karen|Moira|Tessa|Google UK English)\b/i.test(v.name))
+            || en.find(v => /^en[-_]US/i.test(v.lang))
+            || en[0] || null;
+        }
+        function speakWord(word) {
+          try {
+            const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
+            if (typeof SpeechSynthesisUtterance !== 'function' || !synth) return;
+            const run = () => {
+              synth.cancel();
+              const u = new SpeechSynthesisUtterance(word);
+              const voice = pickEnglishVoice(synth.getVoices());
+              if (voice) u.voice = voice;
+              u.lang = voice?.lang || 'en-US';
+              u.rate = 0.92;
+              synth.speak(u);
+            };
+            if (synth.getVoices().length) run();
+            else synth.addEventListener('voiceschanged', run, {once: true});
+          } catch {}
+        }
 
         function Word({size, config}) {
           useLocale();
@@ -4831,7 +4914,7 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           const now = useNow();
           const [offset, setOffset] = useState(0);
           const [error, setError] = useState('');
-          const book = config?.book === 'ai' || config?.book === 'general' ? config.book : 'all';
+          const book = ['core', 'ai', 'general'].includes(config?.book) ? config.book : 'all';
           const pool = book === 'all' ? WORDS : WORDS.filter(x => x.cat === book);
           const idx = ((dayOfYear(now) + offset) % pool.length + pool.length) % pool.length;
           const it = pool[idx];
@@ -4841,14 +4924,7 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           const next = () => setOffset(n => n + 1);
           const speak = e => {
             e.stopPropagation();
-            try {
-              if (typeof SpeechSynthesisUtterance === 'function' && window.speechSynthesis) {
-                window.speechSynthesis.cancel();
-                const u = new SpeechSynthesisUtterance(it.w);
-                u.lang = 'en-US';
-                window.speechSynthesis.speak(u);
-              }
-            } catch {}
+            speakWord(it.w);
           };
           const ask = e => {
             e.stopPropagation();
@@ -4879,7 +4955,7 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
         }
         Word.workboard = {
           apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], defaultSize: 'm', description: () => t('d_word'),
-          settings: [{key: 'book', type: 'select', default: 'all', label: () => t('f_wdBook'), options: ['all', 'ai', 'general'].map(v => ({value: v, label: () => t(`wd_book_${v}`)}))}],
+          settings: [{key: 'book', type: 'select', default: 'all', label: () => t('f_wdBook'), options: ['all', 'core', 'ai', 'general'].map(v => ({value: v, label: () => t(`wd_book_${v}`)}))}],
         };
 
         const builtins = [
