@@ -31,6 +31,7 @@ import {createPorts, isAppProcess, parseCwd, parseLsof, parsePs} from '../lib/po
 import {bilingual, createStatus, parseFlashcat, parseSources, parseSummary} from '../lib/status.js';
 import {createPapers, parseModels, parsePapers} from '../lib/papers.js';
 import {createHolidays} from '../lib/holiday.js';
+import {createApps, parseRunning} from '../lib/apps.js';
 
 const routes = new Map();
 const tools = new Map();
@@ -1030,6 +1031,39 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   assert.ok(hdUrls.some(u => u.startsWith('https://raw.githubusercontent.com/NateScarlet/holiday-cn/master/2026.json')));
   await assert.rejects(hd.list({year: 2030}), /404/);
   await assert.rejects(hd.list({year: 'x'}), /invalid year/);
+
+  assert.deepEqual([...parseRunning('/Applications/A.app/Contents/MacOS/A\n/usr/sbin/x\n/Applications/B C.app/Contents/Frameworks/H.app/Contents/MacOS/H\n')], ['/Applications/A.app', '/Applications/B C.app/Contents/Frameworks/H.app']);
+  const appRoot = mkdtempSync(join(tmpdir(), 'wb-apps-'));
+  const appDir = join(appRoot, 'Applications');
+  for (const n of ['Foo.app', 'Bar.app', 'notes.txt']) mkdirSync(join(appDir, n), {recursive: true});
+  const appCalls = [];
+  const apps = createApps({os: 'darwin', dirs: [appDir, join(appRoot, 'missing')], extra: [], cacheDir: join(appRoot, 'icons'), run: async (cmd, args) => {
+    appCalls.push([cmd, ...args]);
+    if (cmd === 'osascript' && args[3].includes('AppKit')) {
+      for (let i = 5; i + 1 < args.length; i += 2) writeFileSync(join(args[4], `${args[i + 1]}.png`), 'png');
+      return Buffer.from('');
+    }
+    if (cmd === 'osascript') return Buffer.from(JSON.stringify(args.slice(4).map(p => (p.endsWith('Foo.app') ? '福' : ''))));
+    if (cmd === 'ps') return Buffer.from(`${join(appDir, 'Bar.app')}/Contents/MacOS/Bar\n`);
+    return Buffer.from('');
+  }});
+  const al = await apps.list();
+  assert.deepEqual(al.items.map(a => a.name).sort(), ['Bar', '福']);
+  const ag = await apps.get({paths: [join(appDir, 'Bar.app'), join(appDir, 'Gone.app'), join(appDir, 'Bar.app')]});
+  assert.deepEqual(ag.items.map(a => [a.name, Boolean(a.running), Boolean(a.missing)]), [['Bar', true, false], ['Gone', false, true]]);
+  const ai = await apps.icons({paths: [join(appDir, 'Foo.app'), '/etc/passwd']});
+  assert.deepEqual(Object.keys(ai), [join(appDir, 'Foo.app')]);
+  assert.ok(ai[join(appDir, 'Foo.app')].startsWith('data:image/png;base64,'));
+  const before = appCalls.length;
+  await apps.icons({paths: [join(appDir, 'Foo.app')]});
+  assert.equal(appCalls.length, before);
+  await assert.rejects(apps.launch({path: '/bin/sh'}), e => e.code === 'not-found');
+  assert.deepEqual(await apps.launch({path: join(appDir, 'Foo.app')}), {launched: true});
+  assert.deepEqual(appCalls.at(-1), ['open', '-a', join(appDir, 'Foo.app')]);
+  assert.deepEqual(await createApps({os: 'linux', run: async () => '' }).list(), {supported: false, items: []});
+  const ah = createHandlers(createStore({}), undefined, null, null, {apps});
+  await assert.rejects(ah['dsh-workboard/apps.launch']({path: '/bin/sh'}), e => e.code === 'not-found');
+  rmSync(appRoot, {recursive: true, force: true});
 }
 
 console.log('smoke ok');

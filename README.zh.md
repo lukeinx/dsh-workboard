@@ -1,6 +1,6 @@
 # 工作台 Workboard
 
-**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 41 个 widget，开箱即用；不够用的，让 Agent 现做。**
+**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 42 个 widget，开箱即用；不够用的，让 Agent 现做。**
 
 [English](README.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
@@ -8,7 +8,7 @@
 
 ## 亮点
 
-### 内置 41 个 widget，开箱即用
+### 内置 42 个 widget，开箱即用
 
 覆盖四大场景，打开组件库即可搜索、预览并连续添加到看板：
 
@@ -76,7 +76,7 @@ dsh-workboard
 ## 参考
 
 <details>
-<summary><b>全部 41 个内置 widget</b></summary>
+<summary><b>全部 42 个内置 widget</b></summary>
 
 | Widget | 档位 | 说明 |
 |---|---|---|
@@ -100,6 +100,7 @@ dsh-workboard
 | 专注 | `m` `s` | 番茄钟，切换看板或离开面板不中断，到点发送系统通知并统计今日专注次数 |
 | 白噪音 | `m` `s` `w` `t` | 在页面内合成雨声、海浪、风声、篝火与粉噪 / 棕噪，可叠加；切换看板或离开面板不中断，可在专注时自动播放 |
 | 快捷链接 | `m` `s` `w` `t` `l` | 每行一条「名称 网址」，仅允许 `http`、`https` 与 `mailto` |
+| 快捷应用 | `m` `s` `w` `t` `l` | 从可搜索的本机应用列表中挑选常用 App，一键打开；正在运行的带圆点（仅 macOS） |
 | Git 工作区 | `t` `l` `m` `w` | 展示各仓库当前分支、未提交改动、领先 / 落后提交数及上游已删除分支；默认读取 Harness 工作区 |
 | GitHub | `t` `l` `m` `w` | 复用本机已登录的 `gh` CLI，展示待你 Review 的 PR、你发起的 PR 以及指派给你的 Issue |
 | 系统状态 | `m` `s` `t` `l` `w` | 实时查看 CPU、内存、磁盘、电池状态及最近 5 分钟 CPU 负载曲线 |
@@ -158,6 +159,7 @@ dsh-workboard
 - **相框**：在 macOS 上用 `sips` 生成缩略图并缓存在系统临时目录
 - **正在播放**：通过内置的 [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter)（`vendor/`，BSD-3-Clause）读取系统「正在播放」，它由 `/usr/bin/perl` 运行，无需授权；此路不通时退回用 `osascript` 查询已在运行的「音乐」或 Spotify，首次使用时 macOS 会请求自动化权限
 - **端口**：在 macOS 与 Linux 上调用 `lsof` 和 `ps` 列出监听中的 TCP 端口、工作目录与命令行；「停止」仅向仍在监听该端口的进程发送 `SIGTERM`，无需额外授权
+- **快捷应用**：在 macOS 上列出 `/Applications`、`/System/Applications`、`~/Applications` 及其 `Utilities` 子目录顶层的应用，用 `osascript`（JavaScript for Automation）读取 Finder 显示名与图标，用 `ps` 判断是否在运行；只用 `open -a` 打开上述目录内的应用，无需授权
 - **白噪音**：在页面内用 Web Audio 合成，不读文件、不联网
 - **最近文件**：仅列出目标文件夹顶层文件，不递归扫描
 - **剪贴板**：仅在卡片可见期间每 2 秒读取一次 `pbpaste`（macOS）或 `wl-paste` / `xclip`（Linux），历史仅保存在内存中，不落盘
@@ -215,7 +217,7 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 ```
 
 - `index.js`：Host 端 `/api/dsh-workboard/*` 路由、数据存储与 Agent 工具注册
-- `client.js`：侧栏入口、看板容器与 41 个内置 widget
+- `client.js`：侧栏入口、看板容器与 42 个内置 widget
 - `lib/`：各数据源请求、解析与系统采样模块
 - `skills/workboard-widget.md`：供 Agent 编写自定义 widget 的规范指南
 

@@ -33,10 +33,14 @@ window.__ModuleLoader__.load({
     const NOWPLAYING_MS = 3000;
     const VIDEO_MS = 15 * 60_000;
     const PORTS_MS = 5000;
+    const APPS_MS = 10_000;
+    const APP_ICONS_MS = 3600_000;
+    const APP_LIST_MS = 60_000;
     const STATUS_MS = 2 * 60_000;
     const PAPERS_MS = 30 * 60_000;
     const HOLIDAY_MS = 6 * 3600_000;
     const MAX_PINNED = 20;
+    const MAX_APPS = 32;
     // 尺寸档位：[列, 行]，行单位 80px；「横栏」半高，其余行数成对。
     const SIZES = {bar: [4, 1], s: [1, 2], m: [2, 2], t: [1, 4], l: [2, 4], w: [4, 2]};
     // 组件库分类；未声明或不在表内的归入 plugin。
@@ -163,6 +167,8 @@ window.__ModuleLoader__.load({
       ports: '端口', d_ports: '本机正在监听的端口和开发服务器，可在浏览器打开、定位目录或停止进程',
       pt_none: '没有开发服务在监听端口', pt_unsupported: '当前系统不支持', pt_lsof: '需要 lsof', pt_stop: '停止', pt_confirm: '确认停止',
       pt_lan: '局域网可访问', pt_count: '{n} 个端口', pt_hidden: '另有 {n} 个 App 端口', f_ptApps: '显示 App 与系统进程',
+      apps: '快捷应用', d_apps: '常用的本机应用一键打开，正在运行的带圆点',
+      ap_add: '添加应用', ap_search: '搜索应用', ap_none: '没有匹配的应用', ap_count: '已选 {n} 个', ap_missing: '已卸载', ap_unsupported: '仅支持 macOS',
       status: '服务状态', d_status: 'DeepSeek、Claude、OpenAI、GitHub 等服务的状态页，有故障时标出',
       st_empty: '在设置里添加状态页', st_none: '运行正常', st_maintenance: '维护中', st_minor: '部分降级', st_major: '部分中断', st_critical: '严重中断',
       st_all: '全部正常', st_issues: '{n} 个服务异常', st_error: '无法读取',
@@ -297,6 +303,8 @@ window.__ModuleLoader__.load({
       ports: 'Ports', d_ports: 'Ports listening on this machine and the dev servers behind them; open, reveal the folder or stop the process',
       pt_none: 'No dev server is listening', pt_unsupported: 'Not supported on this system', pt_lsof: 'Needs lsof', pt_stop: 'Stop', pt_confirm: 'Confirm',
       pt_lan: 'Reachable on LAN', pt_count: '{n} port(s)', pt_hidden: '{n} app port(s) hidden', f_ptApps: 'Show apps and system processes',
+      apps: 'Apps', d_apps: 'Open the Mac apps you use most; running ones get a dot',
+      ap_add: 'Add apps', ap_search: 'Search apps', ap_none: 'No matching apps', ap_count: '{n} selected', ap_missing: 'Not installed', ap_unsupported: 'macOS only',
       status: 'Service status', d_status: 'Status pages of DeepSeek, Claude, OpenAI, GitHub and more, flagged when something is down',
       st_empty: 'Add status pages in settings', st_none: 'Operational', st_maintenance: 'Maintenance', st_minor: 'Degraded', st_major: 'Partial outage', st_critical: 'Major outage',
       st_all: 'All operational', st_issues: '{n} service(s) with issues', st_error: 'Unavailable',
@@ -646,6 +654,14 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-link:hover{background:var(--dsw-alias-bg-layer-2)}
 .wb-link i{width:32px;height:32px;border-radius:8px;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);box-sizing:border-box;display:grid;place-items:center;font-style:normal;font-weight:600;color:var(--dsw-alias-label-secondary)}
 .wb-link span{font-size:12px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wb-apps .wb-link i{position:relative;width:36px;height:36px}
+.wb-apps .wb-link i[data-img]{background:none;border:0}
+.wb-apps .wb-link img{width:100%;height:100%;display:block}
+.wb-apps .wb-link[data-running] i::after{content:'';position:absolute;left:50%;bottom:-5px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--dsw-alias-label-secondary)}
+.wb-apps .wb-link[data-busy] i{opacity:.5}
+.wb-apps .wb-link:disabled{opacity:.4;cursor:default}
+.wb-apps .wb-link[data-add]{color:var(--dsw-alias-label-secondary)}
+.wb-apps .wb-link[data-add] i{background:none;border-style:dashed}
 
 .wb-prog{display:grid;grid-template-columns:max-content minmax(0,1fr) max-content;align-content:center;align-items:center;gap:10px;height:100%;font-size:12px;color:var(--dsw-alias-label-secondary)}
 .wb-prog[data-size=s]{gap:6px 8px}
@@ -2067,6 +2083,65 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           apiVersion: 1, sizes: ['m', 's', 'w', 't', 'l'], description: () => t('d_links'),
           settings: [{key: 'links', type: 'textarea', label: () => t('f_links'), placeholder: 'GitHub https://github.com'}],
         };
+
+        // 选中的应用存在全局偏好里，各看板共用一份。
+        function Apps() {
+          useLocale();
+          const prefs = usePrefs();
+          const paths = Array.isArray(prefs.launcherApps) ? prefs.launcherApps.map(String) : [];
+          const [picking, setPicking] = useState(false);
+          const [query, setQuery] = useState('');
+          const [busy, setBusy] = useState('');
+          const [error, setError] = useState('');
+          const res = useRemote('apps.get', paths.length ? {paths} : null, APPS_MS);
+          const icons = useRemote('apps.icons', paths.length ? {paths} : null, APP_ICONS_MS);
+          const all = useRemote('apps.list', picking ? {} : null, APP_LIST_MS);
+          if (res.value?.supported === false || all.value?.supported === false) return blank(t('ap_unsupported'));
+          const save = list => { void prefsStore.put({launcherApps: list.slice(0, MAX_APPS)}); };
+          const fail = e => setError(String(e?.message || e));
+          if (picking) {
+            const q = query.trim().toLowerCase();
+            const installed = all.value?.items ?? [];
+            const known = new Set(installed.map(a => a.path));
+            const lang = t('lang');
+            const items = [
+              ...paths.filter(p => !known.has(p)).map(p => ({path: p, name: baseName(p).replace(/\.app$/i, ''), missing: true})),
+              ...[...installed].sort((a, b) => a.name.localeCompare(b.name, lang)),
+            ].filter(a => !q || `${a.name} ${baseName(a.path)}`.toLowerCase().includes(q));
+            const full = paths.length >= MAX_APPS;
+            return h(React.Fragment, null,
+              h('input', {className: 'wb-input wb-search', autoFocus: true, value: query, placeholder: t('ap_search'), onChange: e => setQuery(e.target.value)}),
+              h('div', {className: 'wb-rows'},
+                !all.value ? blank(all.error || '…') : items.length ? items.slice(0, 200).map(a => {
+                  const on = paths.includes(a.path);
+                  return h('button', {key: a.path, type: 'button', className: 'wb-btn wb-row wb-rowbtn', 'aria-pressed': on, 'data-dim': a.missing ? '' : undefined, disabled: !on && full, title: a.path,
+                    onClick: () => save(on ? paths.filter(p => p !== a.path) : [...paths, a.path])},
+                    on ? h(Icon.check) : h(Icon.plus),
+                    h('div', null, h('b', null, a.name), h('small', null, a.missing ? t('ap_missing') : parentName(a.path))));
+                }) : blank(t('ap_none'))),
+              h('div', {className: 'wb-notefoot'}, h('span', null, fill(t('ap_count'), {n: paths.length})),
+                h('button', {type: 'button', className: 'wb-btn', onClick: () => { setPicking(false); setQuery(''); }}, t('doneEdit'))));
+          }
+          if (!paths.length) return h('div', {className: 'wb-hero'}, h('button', {type: 'button', className: 'wb-btn wb-cta', style: {alignSelf: 'flex-start'}, onClick: () => setPicking(true)}, t('ap_add')));
+          const v = res.value;
+          if (!v) return blank(res.error || '…');
+          const launch = a => {
+            setBusy(a.path);
+            call('apps.launch', {path: a.path}).then(() => { setError(''); setTimeout(res.reload, 1000); }, fail).finally(() => setBusy(''));
+          };
+          return h(React.Fragment, null,
+            h('div', {className: 'wb-links wb-apps'},
+              v.items.map(a => {
+                const src = icons.value?.[a.path];
+                return h('button', {key: a.path, type: 'button', className: 'wb-btn wb-link', disabled: a.missing, title: a.missing ? `${a.name} · ${t('ap_missing')}` : a.name,
+                  'data-running': a.running ? '' : undefined, 'data-busy': busy === a.path ? '' : undefined, onClick: () => launch(a)},
+                  h('i', {'data-img': src ? '' : undefined}, src ? h('img', {src, alt: '', draggable: false}) : ([...a.name][0] ?? '?').toUpperCase()),
+                  h('span', null, a.name));
+              }),
+              h('button', {type: 'button', className: 'wb-btn wb-link', 'data-add': '', title: t('ap_add'), onClick: () => setPicking(true)}, h('i', null, h(Icon.plus)), h('span', null, t('edit')))),
+            error ? h('div', {className: 'wb-calerr', title: error}, error) : null);
+        }
+        Apps.workboard = {apiVersion: 1, sizes: ['m', 's', 'w', 't', 'l'], description: () => t('d_apps')};
 
         function Progress({size}) {
           useLocale();
@@ -4080,12 +4155,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           ['workboard.nowplaying', 'nowplaying', NowPlaying], ['workboard.ambient', 'ambient', Ambient], ['workboard.videos', 'videos', Videos],
           ['workboard.attention', 'attention', Attention], ['workboard.brief', 'brief', Brief],
           ['workboard.ports', 'ports', Ports], ['workboard.status', 'status', Status], ['workboard.papers', 'papers', Papers], ['workboard.holiday', 'holiday', Holiday], ['workboard.activity', 'activity', Activity],
+          ['workboard.apps', 'apps', Apps],
         ];
         const BUILTIN_CATEGORY = {
           daily: ['today', 'clock', 'worldclock', 'weather', 'countdown', 'holiday', 'progress', 'habits', 'photo', 'nowplaying'],
           agent: ['attention', 'agents', 'running', 'brief', 'prompt', 'inbox', 'usage', 'activity', 'status', 'outputs', 'tasks', 'pinned'],
           news: ['trending', 'feed', 'papers', 'videos', 'market', 'quote'],
-          tools: ['todo', 'note', 'calendar', 'focus', 'ambient', 'links', 'git', 'github', 'system', 'files', 'clipboard', 'network', 'ports'],
+          tools: ['todo', 'note', 'calendar', 'focus', 'ambient', 'links', 'apps', 'git', 'github', 'system', 'files', 'clipboard', 'network', 'ports'],
         };
         for (const [category, keys] of Object.entries(BUILTIN_CATEGORY)) {
           for (const key of keys) {

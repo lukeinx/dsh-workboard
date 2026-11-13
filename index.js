@@ -26,6 +26,7 @@ import {createClipboard} from './lib/clipboard.js';
 import {createNetwork} from './lib/network.js';
 import {createAttention} from './lib/attention.js';
 import {createPorts} from './lib/ports.js';
+import {createApps} from './lib/apps.js';
 import {createStatus} from './lib/status.js';
 import {createPapers} from './lib/papers.js';
 import {createHolidays} from './lib/holiday.js';
@@ -78,7 +79,7 @@ export const BUILTIN_WIDGETS = [
   'workboard.prompt', 'workboard.inbox', 'workboard.usage', 'workboard.running', 'workboard.git', 'workboard.github', 'workboard.system', 'workboard.photo', 'workboard.market', 'workboard.trending',
   'workboard.outputs', 'workboard.schedules', 'workboard.pinned', 'workboard.files', 'workboard.clipboard', 'workboard.network',
   'workboard.nowplaying', 'workboard.ambient', 'workboard.videos', 'workboard.attention', 'workboard.brief',
-  'workboard.ports', 'workboard.status', 'workboard.papers', 'workboard.holiday', 'workboard.activity',
+  'workboard.ports', 'workboard.status', 'workboard.papers', 'workboard.holiday', 'workboard.activity', 'workboard.apps',
 ];
 
 export function defaultBoard(id) {
@@ -996,6 +997,26 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
         throw new UserError(error?.code === 'not-found' ? 'not-found' : error?.code === 'EPERM' ? 'denied' : 'failed', String(error?.message || error));
       }
     },
+    'dsh-workboard/apps.list': async () => {
+      if (!services.apps) throw new UserError('unavailable', 'local apps are not available');
+      return services.apps.list();
+    },
+    'dsh-workboard/apps.get': async p => {
+      if (!services.apps) throw new UserError('unavailable', 'local apps are not available');
+      return services.apps.get({paths: p?.paths});
+    },
+    'dsh-workboard/apps.icons': async p => {
+      if (!services.apps) throw new UserError('unavailable', 'local apps are not available');
+      return services.apps.icons({paths: p?.paths});
+    },
+    'dsh-workboard/apps.launch': async p => {
+      if (!services.apps) throw new UserError('unavailable', 'local apps are not available');
+      try {
+        return await services.apps.launch({path: p?.path});
+      } catch (error) {
+        throw new UserError(['not-found', 'unavailable'].includes(error?.code) ? error.code : 'failed', String(error?.message || error));
+      }
+    },
     'dsh-workboard/status.get': async p => {
       if (!services.status) throw new UserError('unavailable', 'service status is not available');
       return services.status.list({sources: String(p?.sources ?? ''), lang: String(p?.lang ?? '')});
@@ -1298,6 +1319,7 @@ export function apply(ctx) {
     clipboard: createClipboard({run}),
     network: createNetwork({run}),
     ports: createPorts({run}),
+    apps: createApps({run, cacheDir: join(tmpdir(), 'dsh-workboard-appicons')}),
     status: createStatus(fetcher),
     papers: createPapers(fetcher),
     holidays: createHolidays(fetcher),
