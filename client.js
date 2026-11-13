@@ -97,6 +97,9 @@ window.__ModuleLoader__.load({
       trending: '热榜', d_trending: '微博、知乎、36 氪、Hacker News、GitHub 等国内外热榜', tr_none: '在设置里选择信源',
       tr_weibo: '微博', tr_zhihu: '知乎', tr_36kr: '36 氪', tr_sspai: '少数派', tr_bilibili: 'B 站', tr_v2ex: 'V2EX',
       tr_hn: 'Hacker News', tr_github: 'GitHub', tr_producthunt: 'Product Hunt', tr_reddit: 'Reddit',
+      f_ghSince: 'GitHub 时间段', gh_daily: '今日', gh_weekly: '本周', gh_monthly: '本月', f_ghLang: 'GitHub 语言（如 typescript、python；留空看全部）',
+      f_hubType: '自定义聚合服务', hub_none: '不使用', hub_dailyhot: 'DailyHotApi', hub_newsnow: 'NewsNow',
+      f_hubUrl: '聚合实例地址', f_hubSources: '聚合信源（每行一个：源ID 显示名，如 juejin 掘金）',
       d_photo: '轮播本机文件夹里的照片，点击换下一张', f_photoDir: '照片文件夹', f_shuffle: '随机顺序', f_every: '切换间隔', every_m: '{n} 分钟', every_h: '{n} 小时', every_d: '{n} 天', every_off: '不自动切换',
       ph_empty: '这个文件夹里没有照片', ph_pick: '选择文件夹',
       d_system: '本机 CPU、内存、磁盘和电池', s_cpu: 'CPU', s_mem: '内存', s_disk: '磁盘', s_battery: '电池', s_cores: '{n} 核 · 负载 {l}', s_free: '剩余 {n}',
@@ -237,6 +240,9 @@ window.__ModuleLoader__.load({
       trending: 'Trending', d_trending: 'Hot lists from Hacker News, GitHub, Reddit, Weibo, Zhihu and more', tr_none: 'Choose sources in settings',
       tr_weibo: 'Weibo', tr_zhihu: 'Zhihu', tr_36kr: '36Kr', tr_sspai: 'sspai', tr_bilibili: 'Bilibili', tr_v2ex: 'V2EX',
       tr_hn: 'Hacker News', tr_github: 'GitHub', tr_producthunt: 'Product Hunt', tr_reddit: 'Reddit',
+      f_ghSince: 'GitHub range', gh_daily: 'Today', gh_weekly: 'This week', gh_monthly: 'This month', f_ghLang: 'GitHub language (e.g. typescript, python; empty for all)',
+      f_hubType: 'Custom aggregator', hub_none: 'Off', hub_dailyhot: 'DailyHotApi', hub_newsnow: 'NewsNow',
+      f_hubUrl: 'Aggregator URL', f_hubSources: 'Aggregator sources, one per line: id label (e.g. juejin Juejin)',
       d_photo: 'Cycles through photos in a local folder; click for the next one', f_photoDir: 'Photo folder', f_shuffle: 'Shuffle', f_every: 'Change every', every_m: '{n} min', every_h: '{n} h', every_d: '{n} day', every_off: 'Never',
       ph_empty: 'No photos in this folder', ph_pick: 'Choose folder',
       d_system: 'CPU, memory, disk and battery of this machine', s_cpu: 'CPU', s_mem: 'Memory', s_disk: 'Disk', s_battery: 'Battery', s_cores: '{n} cores · load {l}', s_free: '{n} free',
@@ -3437,20 +3443,32 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         const TR_OFF = new Set(['bilibili', 'v2ex']);
         const trSources = () => (t('lang').startsWith('zh') ? [...TR_CN, ...TR_INTL] : [...TR_INTL, ...TR_CN]);
         const trKey = id => `src_${id}`;
+        const parseHubSources = text => String(text ?? '').split('\n').map(l => {
+          const m = /^([\w.-]{1,40})(?:\s+(.+))?$/.exec(l.trim());
+          return m ? {id: `hub:${m[1]}`, label: (m[2] || m[1]).trim()} : null;
+        }).filter(Boolean).slice(0, 12);
 
         function Trending({size, config, openSettings}) {
           useLocale();
-          const enabled = trSources().filter(id => config?.[trKey(id)] ?? !TR_OFF.has(id));
+          const hubType = config?.hub === 'dailyhot' || config?.hub === 'newsnow' ? config.hub : '';
+          const hubUrl = String(config?.hubUrl ?? '').trim();
+          const hubs = hubType && hubUrl ? parseHubSources(config?.hubSources) : [];
+          const hubLabels = Object.fromEntries(hubs.map(x => [x.id, x.label]));
+          const enabled = [...trSources().filter(id => config?.[trKey(id)] ?? !TR_OFF.has(id)), ...hubs.map(x => x.id)];
           const [picked, setPicked] = useState(null);
           const source = enabled.includes(picked) ? picked : enabled[0];
-          const res = useRemote('trending.get', source ? {source} : null, TRENDING_MS);
+          const payload = !source ? null : source === 'github'
+            ? {source, since: String(config?.ghSince || 'daily'), lang: String(config?.ghLang ?? '').trim()}
+            : source.startsWith('hub:') ? {source, hub: hubType, hubUrl} : {source};
+          const res = useRemote('trending.get', payload, TRENDING_MS);
           const v = source && res.value?.source === source ? res.value : null;
           const read = useRead(v ? v.items.map(it => it.url).filter(Boolean) : []);
           if (!source) return h('div', {className: 'wb-photo-msg'}, h('button', {type: 'button', className: 'wb-btn wb-cta', onClick: openSettings}, t('tr_none')));
           const compact = new Intl.NumberFormat(t('lang'), {notation: 'compact', maximumFractionDigits: 1});
           const hot = n => (n == null ? '' : `${v.metric === 'stars' ? '+' : ''}${compact.format(n)}`);
+          const labelOf = id => hubLabels[id] ?? t(`tr_${id}`);
           return h('div', {className: 'wb-trend'},
-            enabled.length > 1 ? h('div', {className: 'wb-seg', role: 'tablist'}, enabled.map(id => h('button', {key: id, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': id === source, onClick: () => setPicked(id)}, t(`tr_${id}`)))) : null,
+            enabled.length > 1 ? h('div', {className: 'wb-seg', role: 'tablist'}, enabled.map(id => h('button', {key: id, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': id === source, onClick: () => setPicked(id)}, labelOf(id)))) : null,
             h('div', {className: 'wb-rows'},
               v ? v.items.map((it, i) => h('a', {key: `${i}${it.url}`, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer', title: [it.title, it.meta].filter(Boolean).join('\n')},
                 h('span', {className: 'wb-rank wb-num', 'data-top': i < 3 ? '' : undefined}, i + 1),
@@ -3461,7 +3479,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         }
         Trending.workboard = {
           apiVersion: 1, sizes: ['l', 't', 'm', 'w'], defaultSize: 'l', description: () => t('d_trending'),
-          settings: [...TR_CN, ...TR_INTL].map(id => ({key: trKey(id), type: 'toggle', default: !TR_OFF.has(id), label: () => t(`tr_${id}`)})),
+          settings: [
+            ...[...TR_CN, ...TR_INTL].map(id => ({key: trKey(id), type: 'toggle', default: !TR_OFF.has(id), label: () => t(`tr_${id}`)})),
+            {key: 'ghSince', type: 'select', default: 'daily', label: () => t('f_ghSince'), options: ['daily', 'weekly', 'monthly'].map(v => ({value: v, label: () => t(`gh_${v}`)}))},
+            {key: 'ghLang', type: 'text', label: () => t('f_ghLang'), placeholder: 'typescript'},
+            {key: 'hub', type: 'select', default: '', label: () => t('f_hubType'), options: [{value: '', label: () => t('hub_none')}, {value: 'dailyhot', label: () => t('hub_dailyhot')}, {value: 'newsnow', label: () => t('hub_newsnow')}]},
+            {key: 'hubUrl', type: 'text', label: () => t('f_hubUrl'), placeholder: 'https://hot.example.com'},
+            {key: 'hubSources', type: 'textarea', label: () => t('f_hubSources'), placeholder: 'juejin 掘金\nithome IT之家\nlinuxdo Linux.do'},
+          ],
         };
 
         const blank = text => h('div', {className: 'wb-blank'}, text);

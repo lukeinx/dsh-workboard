@@ -15,7 +15,7 @@ import {createSystemCalendar, parseOutput as parseSysCal} from '../lib/syscal.js
 import {createSystem, parsePmset, parseVmStat, parseMeminfo} from '../lib/system.js';
 import {createPhotos, findPhotos} from '../lib/photo.js';
 import {createMarket, parseSymbol} from '../lib/market.js';
-import {createTrending, parseGithubTrending, parseZhihuHeat} from '../lib/trending.js';
+import {createTrending, githubTrendingUrl, hubUrl, parseGithubTrending, parseHub, parseZhihuHeat} from '../lib/trending.js';
 import {createFetcher} from '../lib/http.js';
 import {createUsage, zstdFrames} from '../lib/usage.js';
 import {createQuotes, parseHitokoto} from '../lib/quote.js';
@@ -510,6 +510,13 @@ assert.deepEqual(trendCalls.map(c => c[1]), ['GET', 'POST']);
 assert.equal(trendCalls[0][2], 'https://weibo.com/');
 await assert.rejects(trendHandle({source: 'hn'}), /503/);
 await assert.rejects(trendHandle({source: '__proto__'}), /unknown source/);
+assert.equal(githubTrendingUrl({since: 'weekly', lang: 'C++'}), 'https://github.com/trending/c%2B%2B?since=weekly');
+assert.equal(githubTrendingUrl({since: 'bad', lang: '../x'}), 'https://github.com/trending');
+assert.equal(hubUrl('dailyhot', 'https://hot.example.com/api/', 'juejin'), 'https://hot.example.com/api/juejin');
+assert.equal(hubUrl('newsnow', 'https://news.example.com/', 'ithome'), 'https://news.example.com/api/s?id=ithome');
+assert.deepEqual(parseHub('dailyhot', {data: [{title: ' A ', url: 'https://a.example', hot: '12', author: 'u'}]}), [{title: 'A', url: 'https://a.example', hot: 12, meta: 'u'}]);
+assert.deepEqual(parseHub('newsnow', {items: [{title: 'B', url: 'https://b.example', extra: {info: '3m'}}]}), [{title: 'B', url: 'https://b.example', hot: null, meta: '3m'}]);
+await assert.rejects(trendHandle({source: 'hub:../x', hub: 'dailyhot', hubUrl: 'https://hot.example.com'}), /invalid source id/);
 
 assert.deepEqual(parseHitokoto({hitokoto: ' 一句 ', from: '书', from_who: '某人'}), {text: '一句', by: '某人 《书》'});
 assert.equal(parseHitokoto({hitokoto: ''}), null);
