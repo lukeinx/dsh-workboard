@@ -768,22 +768,24 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-inrow:hover .wb-del{display:grid}
 .wb-inrow:hover small{display:none}
 .wb-usage{display:flex;flex-direction:column;gap:10px;height:100%;min-height:0}
-.wb-usage[data-size=m],.wb-usage[data-size=w]{flex-direction:row;align-items:stretch;gap:16px}
+.wb-usage[data-size=m],.wb-usage[data-size=w]{flex-direction:row;align-items:stretch;gap:24px}
+.wb-utop{display:flex;gap:24px;flex:none;min-width:0}
+.wb-usage[data-size=t] .wb-bars{flex:none;height:36px;min-height:0}
 .wb-usage .wb-hero{flex:none;justify-content:flex-start;height:auto}
 .wb-usage[data-size=m] .wb-hero,.wb-usage[data-size=w] .wb-hero,.wb-usage[data-size=s] .wb-hero{justify-content:center}
-.wb-bars{flex:1;min-width:0;min-height:48px;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:3px;align-items:end}
-.wb-bars>span{display:flex;align-items:flex-end;height:100%;min-height:0}
-.wb-bars i{display:block;width:100%;min-height:2px;border-radius:3px 3px 1px 1px;background:var(--dsw-alias-label-secondary);opacity:.35}
+.wb-bars{flex:1;min-width:0;min-height:48px;display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:2px;align-items:end}
+.wb-bars>span{display:flex;align-items:flex-end;justify-content:center;height:100%;min-height:0}
+.wb-bars i{display:block;width:100%;max-width:12px;min-height:2px;border-radius:3px 3px 1px 1px;background:var(--dsw-alias-label-secondary);opacity:.35}
 .wb-bars>span[data-today] i{background:var(--dsw-alias-brand-primary);opacity:1}
 .wb-seg{display:flex;gap:2px;flex:none}
 .wb-seg button{height:24px;padding:0 8px;border-radius:6px;font-size:12px;color:var(--dsw-alias-label-secondary)}
 .wb-seg button[aria-pressed=true]{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
-.wb-table{display:grid;grid-template-columns:minmax(0,1fr) max-content max-content;gap:4px 12px;font-size:12px;overflow:auto;min-height:0;align-content:start}
+.wb-table{display:grid;grid-template-columns:minmax(0,1fr) max-content max-content;grid-auto-rows:max-content;gap:6px 12px;font-size:12px;line-height:18px;overflow:auto;flex:1;min-height:0;align-content:start}
 .wb-table>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wb-table>span:not(:nth-child(3n+1)){text-align:right}
 .wb-table>.wb-th{color:var(--dsw-alias-label-secondary)}
 .wb-table small{color:var(--dsw-alias-label-secondary);margin-left:6px}
-.wb-foot-note{font-size:11px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-foot-note{flex:none;font-size:11px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wb-rowact{display:none;flex:none;height:24px;padding:0 8px;border-radius:6px;font-size:12px;color:var(--dsw-alias-brand-primary);align-self:center}
 .wb-rowact:hover{background:var(--dsw-alias-bg-layer-1)}
 .wb-row:hover .wb-rowact{display:block}
@@ -2937,7 +2939,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           }, {requests: 0, reported: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: 0});
           const today = sum(v.rows.filter(r => r.day === v.today));
           const yesterday = sum(v.rows.filter(r => r.day === shiftDay(v.today, -1)));
-          const days = size === 'm' || size === 't' ? 7 : 14;
+          const days = size === 'w' ? 30 : 14;
           const series = Array.from({length: days}, (_, i) => {
             const day = shiftDay(v.today, i - days + 1);
             const rows = v.rows.filter(r => r.day === day);
@@ -2954,7 +2956,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             h('small', null, t('u_today')),
             h('span', {className: 'wb-big wb-num'}, compact(tokensOf(today))),
             h('small', {className: 'wb-num'}, size === 's' ? meta[0] : meta.join(' · ')),
-            size === 's' || size === 'm' ? null : h('small', {className: 'wb-num'}, fill(t('u_vs'), {n: compact(tokensOf(yesterday))})));
+            size === 's' || size === 'm' || size === 't' ? null : h('small', {className: 'wb-num'}, fill(t('u_vs'), {n: compact(tokensOf(yesterday))})));
           if (size === 's') return h('div', {className: 'wb-usage', 'data-size': size}, hero);
           if (size === 'm' || size === 'w') return h('div', {className: 'wb-usage', 'data-size': size}, hero, bars);
           const from = shiftDay(v.today, 1 - range);
@@ -2968,7 +2970,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const silentReq = table.reduce((a, m) => a + m.requests - m.reported, 0);
           const silentBy = [...new Set(table.filter(m => m.requests > m.reported).map(m => m.provider || m.model))].join(', ');
           return h('div', {className: 'wb-usage', 'data-size': size},
-            hero, bars,
+            size === 'l' ? h('div', {className: 'wb-utop'}, hero, bars) : h(React.Fragment, null, hero, bars),
             h('div', {className: 'wb-seg'}, [1, 7, 30].map(n => h('button', {key: n, type: 'button', className: 'wb-btn', 'aria-pressed': range === n, onClick: () => setRange(n)}, t(`u_range_${n}`)))),
             table.length ? h('div', {className: 'wb-table wb-num'},
               h('span', {className: 'wb-th'}, t('u_model')), h('span', {className: 'wb-th'}, t('u_req')), h('span', {className: 'wb-th'}, t('u_tok')),
