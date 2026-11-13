@@ -5,6 +5,15 @@
 - 已安装的插件以软链接指向本仓库（`~/.dsh/profiles/desktop/node_modules/dsh-workboard`），改 `client.js` 后刷新 DSH 页面即可验证；改 `index.js` / `lib/` 需重载插件。
 - 提交前跑 `npm run check`。
 
+## 改用户当前的看板数据
+
+没有建 / 改看板的 Agent 工具；`/api/dsh-workboard/*` 需要登录凭证，curl 返回 401。看板存在 `~/.dsh/storages/dsh_workboard.json` 的 `tables.boards`（顺序在 `tables.prefs.boards.order`），JSON 后端只在打开时读盘，插件运行时直接改文件会在十几秒内被内存状态覆盖。按下面顺序做：
+
+1. 备份：`cp -p` 到 `~/.dsh/backup-workboard-reset-YYYYMMDD/dsh_workboard.before-<用途>-HHMMSS.json`。
+2. 停用插件：`plugin_manager` `{action: 'set_bundle', target: 'dsh-workboard', enabled: false}`，让 store 关闭并落盘。
+3. 重新读文件后再改：新看板 id 用 `b` + base36 时间戳，结构同 `defaultBoard()`（`apiVersion`、`id`、`title`、`widgets`、`known`），`known` 填全部内置 id；把 id 追加到 `prefs.boards.order`。
+4. 启用插件：`set_bundle` 同参数 `enabled: true`，再读文件确认改动仍在，提醒用户刷新页面。
+
 ## 新增 / 删除内置 widget 时同步文档
 
 `README.md`（中文，GitHub 默认展示）与 `README.en.md` 成对修改，只动下列位置；「亮点 / Highlights」各小节的正文与场景列表、截图、快速开始、写给 AI Agent 等主体内容不改。
