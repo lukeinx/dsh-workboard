@@ -424,9 +424,13 @@ window.__ModuleLoader__.load({
 
     const onBrand = prop => `${prop}:#fff;${prop}:oklch(from var(--dsw-alias-brand-primary) clamp(0,(.65 - l)*1000,1) 0 0)`;
 
+    // Chromium 只认 ui-serif 才能命中 New York；宋体放在西文衬线之后，避免英文落入宋体拉丁字形。
+    const SERIF = 'ui-serif,"New York",Georgia,"Songti SC","STSong",serif';
+
     const CSS = `
 .wb-page{height:100%;overflow:auto;background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font-size:13px}
 .wb-inner{max-width:1120px;margin:0 auto;padding:0 24px 32px;box-sizing:border-box}
+.wb-inner[data-headless]{padding-top:24px}
 .wb-error{color:var(--dsw-alias-state-error-primary);font-size:12px;margin-bottom:8px}
 .wb-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:80px;grid-auto-flow:row dense;gap:16px}
 .wb-card{grid-column:span var(--c);grid-row:span var(--r);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:12px;padding:16px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;box-sizing:border-box}
@@ -444,14 +448,16 @@ window.__ModuleLoader__.load({
 .wb-today .wb-tclock{display:grid;grid-template-columns:auto auto;grid-template-areas:"time greet" "time date";column-gap:14px;align-items:center}
 .wb-today .wb-time{grid-area:time;font-size:44px;font-weight:600;letter-spacing:-1px;line-height:1}
 .wb-today .wb-greet{grid-area:greet;align-self:end;font-size:15px;font-weight:600}
-.wb-today .wb-date{grid-area:date;align-self:start;color:var(--dsw-alias-label-secondary)}
-.wb-sep{width:1px;align-self:stretch;margin:14px 0;background:var(--dsw-alias-border-l1)}
-.wb-tquote{flex:1!important;min-width:0;text-align:left;display:flex;flex-wrap:wrap;align-items:baseline;align-content:center;column-gap:10px}
-.wb-tquote .wb-qtext{flex:0 1 auto;min-width:0}
-.wb-tquote .wb-qtext{margin:0;font-size:15px;line-height:1.5;font-family:"New York","Songti SC",Georgia,serif;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.wb-tquote[data-len=short] .wb-qtext{font-size:18px;line-height:1.4}
-.wb-tquote[data-len=long] .wb-qtext{font-size:13px;line-height:1.45;-webkit-line-clamp:3}
-.wb-tquote cite{flex:none;white-space:nowrap;font-style:normal;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.wb-today .wb-date{grid-area:date;align-self:start;color:var(--dsw-alias-label-secondary);white-space:nowrap}
+.wb-colon{display:inline-block;transform:translateY(-.075em)}
+.wb-sep{width:1px;height:28px;background:var(--dsw-alias-border-l1)}
+.wb-today .wb-tquote{flex:0 1 auto;margin-left:auto;margin-right:-10px;min-width:0;position:relative;text-align:left;padding:6px 10px 6px 24px;border-radius:10px;transition:background .15s}
+.wb-tquote:hover{background:var(--dsw-alias-bg-layer-2)}
+.wb-tquote::before{content:'\\201C';position:absolute;left:6px;top:4px;font:28px/1 ${SERIF};color:var(--dsw-alias-label-secondary);opacity:.35}
+.wb-tquote .wb-qtext{margin:0;font-size:14.5px;line-height:1.5;font-family:${SERIF};display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.wb-tquote[data-len=short] .wb-qtext{font-size:15.5px}
+.wb-tquote[data-len=long] .wb-qtext{font-size:13.5px;line-height:1.45;-webkit-line-clamp:3}
+.wb-tquote cite{display:inline-block;margin-left:8px;white-space:nowrap;font-style:normal;font-size:12px;color:var(--dsw-alias-label-secondary)}
 
 .wb-clock{display:flex;flex-direction:column;justify-content:center;height:100%}
 .wb-clock .wb-time{font-size:44px;font-weight:600;letter-spacing:-1px;line-height:1.1;margin:4px 0 6px}
@@ -582,9 +588,16 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-wxhours{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px;margin-top:auto;text-align:center;font-size:12px;color:var(--dsw-alias-label-secondary)}
 .wb-wxhours>div{display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.25}
 .wb-wxhours b{font-weight:500;color:var(--dsw-alias-label-primary)}
-.wb-wxmini{display:flex;align-items:center;gap:10px;line-height:1.5}
+.wb-wxmini{display:flex;align-items:center;gap:12px;line-height:1.5}
+.wb-wxmini>span{display:flex;align-items:center;gap:6px}
 .wb-wxmini svg{color:var(--dsw-alias-label-secondary)}
 .wb-wxmini .wb-wxt{font-size:24px;letter-spacing:-.5px}
+.wb-wxmini .wb-aqi{margin-left:6px;line-height:18px;display:inline-block}
+.wb-wxmini .wb-aqi[data-level=ok]{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-secondary)}
+.wb-wxskel{display:flex;align-items:center;gap:12px;opacity:.6}
+.wb-wxskel i{display:block;border-radius:6px;background:var(--dsw-alias-bg-layer-2)}
+.wb-tcity{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 12px;border:1px dashed var(--dsw-alias-border-l2);border-radius:14px;color:var(--dsw-alias-label-secondary)}
+.wb-tcity:hover{border-color:var(--dsw-alias-brand-primary);color:var(--dsw-alias-brand-primary)}
 .wb-aqi{font-size:11px;padding:0 6px;border-radius:5px;white-space:nowrap;background:color-mix(in srgb,var(--dsw-alias-state-success-primary) 14%,transparent);color:var(--dsw-alias-state-success-primary)}
 .wb-aqi[data-level=warn]{background:color-mix(in srgb,var(--dsw-alias-state-warn-primary) 14%,transparent);color:var(--dsw-alias-state-warn-primary)}
 .wb-aqi[data-level=bad]{background:color-mix(in srgb,var(--dsw-alias-state-error-primary) 12%,transparent);color:var(--dsw-alias-state-error-primary)}
@@ -635,7 +648,7 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-cols .wb-big{font-size:28px;font-weight:600;letter-spacing:-.5px;line-height:1.1}
 
 .wb-qcard{display:flex;flex-direction:column;justify-content:center;gap:8px;width:100%;height:100%;text-align:left;min-height:0}
-.wb-qcard .wb-qtext{margin:0;font-size:16px;line-height:1.55;font-family:"New York","Songti SC",Georgia,serif;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.wb-qcard .wb-qtext{margin:0;font-size:16px;line-height:1.55;font-family:${SERIF};display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .wb-qcard[data-size=s] .wb-qtext{font-size:14px;-webkit-line-clamp:4}
 .wb-qcard[data-size=w] .wb-qtext{font-size:18px;-webkit-line-clamp:2}
 .wb-qcard cite{font-style:normal;font-size:12px;color:var(--dsw-alias-label-secondary)}
@@ -854,7 +867,7 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-vthumb img,.wb-vtile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .wb-vthumb i{position:absolute;right:4px;bottom:4px;padding:0 4px;border-radius:4px;background:rgba(0,0,0,.72);color:#fff;font-size:10px;line-height:16px;font-style:normal}
 
-@media (max-width:900px){.wb-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wb-card[data-c="4"]{grid-column:span 2}.wb-today .wb-tquote,.wb-today .wb-qsep{display:none}}
+@media (max-width:900px){.wb-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wb-card[data-c="4"]{grid-column:span 2}.wb-today .wb-tquote{display:none}}
 @media (max-width:600px){.wb-grid{grid-template-columns:minmax(0,1fr)}.wb-card{grid-column:auto!important}}
 .wb-cw{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;margin:0 -4px -4px}
 .wb-cwframe{flex:1;width:100%;min-height:0;border:0;display:block;background:transparent}
@@ -865,7 +878,8 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-card:hover>header .wb-hact,.wb-card>header .wb-hact:focus-visible{opacity:1}
 .wb-card>header .wb-hact:hover{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-brand-primary)}
 .wb-card>.wb-hact{position:absolute;top:8px;right:8px;z-index:2;opacity:0;width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);color:var(--dsw-alias-label-secondary)}
-.wb-card[data-banner]>.wb-hact{top:50%;right:0;transform:translateY(-50%)}
+.wb-card[data-banner]>.wb-hact{top:-10px;right:-10px}
+.wb-card[data-banner]>.wb-hact+.wb-hact{right:20px}
 .wb-card:hover>.wb-hact,.wb-card>.wb-hact:focus-visible{opacity:1}
 .wb-card>.wb-hact:hover{color:var(--dsw-alias-brand-primary)}
 @media (hover:none){.wb-card>header .wb-hact,.wb-card>.wb-hact{opacity:.7}}
@@ -1087,6 +1101,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
       left: () => svg(14, 'M15 6l-6 6 6 6'),
       right: () => svg(14, 'M9 6l6 6-6 6'),
       folder: () => svg(13, 'M3.5 7.5A2 2 0 0 1 5.5 5.5h3.6l2 2h7.4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z', 1.8),
+      pin: () => svg(13, ['M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z', {tag: 'circle', attrs: {cx: 12, cy: 10, r: 2.3}}], 1.8),
       pencil: () => svg(14, 'M4 20h4L18.5 9.5a2.83 2.83 0 0 0-4-4L4 16v4zM13.5 6.5l4 4'),
       sparkle: () => svg(14, ['M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z', 'M19 16l.8 2.2L22 19l-2.2.8L19 22l-.8-2.2L16 19l2.2-.8z'], 1.6),
       code: () => svg(14, 'M8 7l-5 5 5 5M16 7l5 5-5 5'),
@@ -1124,7 +1139,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
 
     function aqiLevel(aqi) {
       const i = aqi <= 50 ? 0 : aqi <= 100 ? 1 : aqi <= 150 ? 2 : aqi <= 200 ? 3 : aqi <= 300 ? 4 : 5;
-      return {key: `aqi${i}`, level: i === 0 ? 'ok' : i <= 2 ? 'warn' : 'bad'};
+      return {key: `aqi${i}`, index: i, level: i === 0 ? 'ok' : i <= 2 ? 'warn' : 'bad'};
     }
 
     function PanelIcon({size = 20}) {
@@ -1352,27 +1367,33 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const q = useQuote(prefs, now, dayOfYear(now) + offset, offset * 2);
           const w = wx.value;
           let weather = null;
-          if (showWeather && !wx.loc) weather = h('button', {type: 'button', className: 'wb-btn wb-cta', onClick: openSettings}, t('setCity'));
+          if (showWeather && !wx.loc) weather = h('button', {type: 'button', className: 'wb-btn wb-tcity', onClick: openSettings}, h(Icon.pin), t('setCity'));
           else if (showWeather && w) {
             const aqi = w.aqi != null ? aqiLevel(w.aqi) : null;
+            const feels = Number.isFinite(w.current.feels) ? ` · ${fill(t('feels'), {n: Math.round(w.current.feels)})}` : '';
             weather = h('div', {className: 'wb-wxmini'},
-              h(WxIcon, {code: w.current.code, isDay: w.current.isDay, size: 28}),
-              h('span', {className: 'wb-wxt wb-num'}, deg(w.current.temp)),
+              h('span', null,
+                h(WxIcon, {code: w.current.code, isDay: w.current.isDay, size: 26}),
+                h('span', {className: 'wb-wxt wb-num'}, deg(w.current.temp))),
               h('div', null,
-                h('div', null, `${wx.loc.name} · ${t(wxKind(w.current.code, w.current.isDay)[1])}`),
-                h('div', {className: 'wb-muted wb-num'}, `${deg(w.today.lo)} / ${deg(w.today.hi)}`, aqi ? ` · AQI ${w.aqi} ${t(aqi.key)}` : '')));
+                h('div', null, `${wx.loc.name} · ${t(wxKind(w.current.code, w.current.isDay)[1])}`,
+                  aqi ? h('span', {className: 'wb-aqi wb-num', 'data-level': aqi.index <= 1 ? 'ok' : aqi.index === 2 ? 'warn' : 'bad', title: `AQI ${w.aqi}`}, aqi.index <= 1 ? t(aqi.key) : `${t(aqi.key)} ${w.aqi}`) : null),
+                h('div', {className: 'wb-muted wb-num'}, `${deg(w.today.lo)} / ${deg(w.today.hi)}${feels}`)));
+          } else if (showWeather && wx.pending) {
+            weather = h('div', {className: 'wb-wxskel', 'aria-hidden': true},
+              h('i', {style: {width: 58, height: 26}}),
+              h('div', {style: {display: 'grid', gap: 8}}, h('i', {style: {width: 110, height: 10}}), h('i', {style: {width: 84, height: 10}})));
           }
+          const zh = lang.startsWith('zh');
           return h('div', {className: 'wb-today'},
             h('div', {className: 'wb-tclock'},
-              h('span', {className: 'wb-time wb-num'}, `${pad(now.getHours())}:${pad(now.getMinutes())}`),
+              h('span', {className: 'wb-time wb-num'}, pad(now.getHours()), h('span', {className: 'wb-colon'}, ':'), pad(now.getMinutes())),
               h('span', {className: 'wb-greet'}, greet(prefs, now.getHours())),
-              h('span', {className: 'wb-date'}, `${now.toLocaleDateString(lang, {month: 'long', day: 'numeric'})} · ${now.toLocaleDateString(lang, {weekday: 'long'})}`)),
+              h('span', {className: 'wb-date'}, [now.toLocaleDateString(lang, {month: 'long', day: 'numeric'}), now.toLocaleDateString(lang, {weekday: 'long'}), zh ? lunar(now) : ''].filter(Boolean).join(' · '))),
             weather ? h('span', {className: 'wb-sep'}) : null,
             weather,
-            showQuote ? h('span', {className: 'wb-sep wb-qsep'}) : null,
-            showQuote ? h('button', {type: 'button', className: 'wb-btn wb-tquote', 'data-len': quoteLen(q.text), title: t('nextQuote'), onClick: () => setOffset(o => o + 1)},
-              h('span', {className: 'wb-qtext'}, q.text),
-              q.by ? h('cite', null, `— ${q.by}`) : null) : null);
+            showQuote && q.text ? h('button', {type: 'button', className: 'wb-btn wb-tquote', 'data-len': quoteLen(q.text), title: t('nextQuote'), onClick: () => setOffset(o => o + 1)},
+              h('span', {className: 'wb-qtext'}, q.text, q.by ? h('cite', null, `— ${q.by}`) : null)) : null);
         }
         Today.workboard = {
           apiVersion: 1, sizes: ['bar'], banner: true, description: () => t('d_today'),
@@ -4294,6 +4315,9 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
                 onClick: () => switchTo(b.id), onDoubleClick: () => { switchTo(b.id); setRenaming(true); }}, boardTitle(b)))),
             h('button', {type: 'button', className: 'wb-btn wb-iconbtn wb-newboard', 'aria-label': t('newBoardLabel'), title: t('newBoardLabel'), onClick: createBoard}, h(Icon.plus)));
           const showTabs = editing || renaming || (boards?.length ?? 0) > 1;
+          const bannerFirst = cells.length > 0 && byId.get(cells[0].id).banner;
+          const headless = !showTabs && !shownError && bannerFirst;
+          const editButton = h('button', {key: 'edit', type: 'button', className: 'wb-btn wb-iconbtn', 'aria-label': t('edit'), title: t('edit'), onClick: () => setEditing(true)}, h(Icon.pencil));
 
           const actions = editing
             ? [
@@ -4301,7 +4325,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
               h('button', {key: 'add', type: 'button', className: 'wb-action', onClick: () => setModal({type: 'gallery'})}, h(Icon.plus), t('addWidget')),
               h('button', {key: 'done', type: 'button', className: 'wb-action', 'data-primary': '', onClick: () => { setEditing(false); setConfirmDelete(false); }}, t('doneEdit')),
             ]
-            : [h('button', {key: 'edit', type: 'button', className: 'wb-btn wb-iconbtn', 'aria-label': t('edit'), title: t('edit'), onClick: () => setEditing(true)}, h(Icon.pencil))];
+            : [editButton];
 
           const card = cell => {
             const w = byId.get(cell.id);
@@ -4332,6 +4356,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
               w.settings.length ? h('button', {type: 'button', className: 'wb-btn', 'aria-label': t('settings'), title: t('settings'), onClick: openSettings}, h(Icon.gear)) : null,
               h('button', {type: 'button', className: 'wb-btn', 'aria-label': t('remove'), title: t('remove'), onClick: () => removeCell(cell.id)}, h(Icon.x))) : null,
             !editing && w.settings.length && !(w.title && !w.banner) ? h('button', {type: 'button', className: 'wb-btn wb-hact', 'aria-label': t('settings'), title: t('settings'), onClick: openSettings}, h(Icon.gear)) : null,
+            headless && w.banner && cell === cells[0] ? h('button', {type: 'button', className: 'wb-btn wb-hact', 'aria-label': t('edit'), title: t('edit'), onClick: () => setEditing(true)}, h(Icon.pencil)) : null,
             w.title && !w.banner ? h('header', null, h('h3', null, w.label()),
               !editing && w.settings.length ? h('button', {type: 'button', className: 'wb-btn wb-hact', 'aria-label': t('settings'), title: t('settings'), onClick: openSettings}, h(Icon.gear)) : null,
               w.custom && !editing ? h('button', {type: 'button', className: 'wb-btn wb-hact', 'aria-label': t('cw_edit'), title: t('cw_edit'), onClick: () => setModal({type: 'agent', id: cell.id})}, h(Icon.sparkle)) : null) : null,
@@ -4339,8 +4364,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           };
 
           return h('div', {className: 'wb-page'},
-            h('div', {className: 'wb-inner'},
-              h('div', {className: 'wb-head', 'data-editing': editing ? '' : undefined}, showTabs ? tabs : null, h('span', {className: 'wb-spacer'}), ...actions),
+            h('div', {className: 'wb-inner', 'data-headless': headless ? '' : undefined},
+              headless ? null : h('div', {className: 'wb-head', 'data-editing': editing ? '' : undefined}, showTabs ? tabs : null, h('span', {className: 'wb-spacer'}), ...actions),
               shownError ? h('div', {className: 'wb-error', role: 'alert'}, shownError) : null,
               board && cells.length === 0 && !editing ? h('div', {className: 'wb-empty'},
                 h('div', {className: 'wb-emptyacts'},
