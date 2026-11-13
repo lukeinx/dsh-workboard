@@ -5022,7 +5022,7 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
             loadPodThumb(url).then(s => { if (alive) setSrc(s); }, () => {});
             return () => { alive = false; };
           }, [url]);
-          return h('div', {className: 'wb-podcover'}, src ? h('img', {src, alt: '', draggable: false}) : null);
+          return h('i', {className: 'wb-podcover'}, src ? h('img', {src, alt: '', draggable: false}) : null);
         }
 
         // 模块级跨平台播客播放器：切换看板或面板时不中断。
@@ -5085,7 +5085,7 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           const [picked, setPicked] = useState('episodes');
           const [error, setError] = useState('');
           const tab = POD_TABS.includes(picked) ? picked : 'episodes';
-          const sources = String(config?.sources ?? t('defaultPodcasts'));
+          const sources = String(config?.sources || t('defaultPodcasts'));
           const zh = t('lang').startsWith('zh');
           const region = config?.region === 'cn' || config?.region === 'us' ? config.region : (zh ? 'cn' : 'us');
           const res = useRemote('podcasts.list', {sources, region}, PODCASTS_MS);
@@ -5129,7 +5129,7 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
               size === 'm' ? null : h('button', {type: 'button', className: 'wb-btn wb-rowact', onClick: e => askEp(e, it)}, t('toAgent')),
               it.audio ? h('button', {type: 'button', className: 'wb-btn wb-podplay', 'data-active': active && playSnap.playing ? '' : undefined,
                 title: active && playSnap.playing ? t('pod_pause') : t('pod_play'), onClick: e => playClick(e, it)},
-                active && playSnap.playing ? h(Icon.pause) : h(Icon.play)) : null);
+                fillIcon(12, active && playSnap.playing ? MEDIA.pause : MEDIA.play)) : null);
           };
 
           const topRow = it => {
@@ -5150,7 +5150,7 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           const pct = cur && playSnap.duration > 0 ? Math.min(100, Math.round((playSnap.currentTime / playSnap.duration) * 100)) : 0;
           const playerBar = cur ? h('div', {className: 'wb-podbar wb-num'},
             h('button', {type: 'button', className: 'wb-btn wb-podplay', 'data-active': playSnap.playing ? '' : undefined, onClick: () => podPlayer.toggle(cur)},
-              playSnap.playing ? h(Icon.pause) : h(Icon.play)),
+              fillIcon(12, playSnap.playing ? MEDIA.pause : MEDIA.play)),
             h('div', {className: 'wb-podbar-main'},
               h('div', {className: 'wb-podbar-top'},
                 h('b', {title: `${cur.podcast} · ${cur.title}`}, cur.title),
