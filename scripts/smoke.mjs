@@ -1025,15 +1025,15 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
 {
   const body = {data: [
     {id: 'deepseek/deepseek-v4', name: 'DeepSeek: DeepSeek V4', created: 100, context_length: 1048576, pricing: {prompt: '0.0000003', completion: '0.0000012', input_cache_read: '0.00000001'}},
-    {id: 'anthropic/claude-opus-5.5', name: 'Anthropic: Claude Opus 5.5', created: 300, pricing: {prompt: '0.000004', completion: '0.00002', input_cache_write: '0.000005'}},
+    {id: 'anthropic/claude-opus-5.5', name: 'Anthropic: Claude Opus 5.5', created: 300, context_length: 1050000, pricing: {prompt: '0.000004', completion: '0.00002', input_cache_write: '0.000005'}},
     {id: 'anthropic/claude-opus-5.5:free', name: 'free variant', created: 400, pricing: {prompt: '0', completion: '0'}},
-    {id: 'openrouter/auto', name: 'Auto Router', created: 200, pricing: {prompt: '-1', completion: '-1'}},
+    {id: 'openrouter/auto', name: 'Auto Router', created: 200, context_length: 262144, pricing: {prompt: '-1', completion: '-1'}},
     {id: 'bad id', name: 'Bad'},
   ]};
   const urls = [];
   const md = createModels({get: async url => { urls.push(url); return body; }});
   const top = await createHandlers(createStore({}), undefined, null, null, {models: md})['dsh-workboard/models.get']({kind: 'top'});
-  assert.deepEqual(top.items.map(m => [m.id, m.name, m.input, m.output]), [['deepseek/deepseek-v4', 'DeepSeek V4', 0.3, 1.2], ['anthropic/claude-opus-5.5', 'Claude Opus 5.5', 4, 20], ['openrouter/auto', 'Auto Router', null, null]]);
+  assert.deepEqual(top.items.map(m => [m.id, m.name, m.context, m.input, m.output]), [['deepseek/deepseek-v4', 'DeepSeek V4', 1_000_000, 0.3, 1.2], ['anthropic/claude-opus-5.5', 'Claude Opus 5.5', 1_000_000, 4, 20], ['openrouter/auto', 'Auto Router', 256_000, null, null]]);
   assert.deepEqual((await md.list({kind: 'new'})).items.map(m => m.id), ['anthropic/claude-opus-5.5', 'openrouter/auto', 'deepseek/deepseek-v4']);
   assert.deepEqual((await md.list({kind: 'new', vendors: 'DeepSeek, x'})).items.map(m => m.id), ['deepseek/deepseek-v4']);
   const {prices} = await md.list({kind: 'prices'});

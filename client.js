@@ -4106,6 +4106,7 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
         };
 
         const usd = v => (v >= 100 ? v.toFixed(0) : v >= 1 ? v.toFixed(2).replace(/\.?0+$/, '') : String(Number(v.toPrecision(2))));
+        const ctxText = n => (n >= 1e6 ? `${Math.round(n / 1e6)}M` : n >= 1e3 ? `${Math.round(n % 1000 ? n / 1024 : n / 1e3)}K` : String(Math.round(n)));
         function Models({size, config}) {
           useLocale();
           const [kind, setKind] = useState('top');
@@ -4113,11 +4114,10 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           const v = res.value?.kind === kind ? res.value : null;
           const read = useRead(v ? v.items.map(it => it.url) : []);
           const lang = t('lang');
-          const compact = new Intl.NumberFormat(lang, {notation: 'compact', maximumFractionDigits: 1});
           const priced = it => it.input != null && it.output != null;
           const price = it => (it.free ? t('md_free') : priced(it) ? `$${usd(it.input)} / $${usd(it.output)}` : '—');
           const meta = it => [kind === 'new' && it.created ? new Date(it.created).toLocaleDateString(lang, {month: 'short', day: 'numeric'}) : '', it.vendor,
-            it.context ? fill(t('md_ctx'), {n: compact.format(it.context)}) : ''].filter(Boolean).join(' · ');
+            it.context ? fill(t('md_ctx'), {n: ctxText(it.context)}) : ''].filter(Boolean).join(' · ');
           const row = (it, i) => h('a', {key: it.id, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer',
             title: [it.id, meta(it), priced(it) && !it.free ? fill(t('md_price'), {i: usd(it.input), o: usd(it.output)}) : ''].filter(Boolean).join('\n')},
             h('span', {className: 'wb-rank wb-num', 'data-top': kind === 'top' && i < 3 ? '' : undefined}, i + 1),
