@@ -27,6 +27,10 @@ import {createVideos, parseSource, parseYoutubeFeed, parseBiliArchives, parseCha
 import {parseFeed} from '../lib/feed.js';
 import {createAttention} from '../lib/attention.js';
 import {createContext, localIso, streakOf} from '../lib/context.js';
+import {createPorts, isAppProcess, parseCwd, parseLsof, parsePs} from '../lib/ports.js';
+import {bilingual, createStatus, parseFlashcat, parseSources, parseSummary} from '../lib/status.js';
+import {createPapers, parseModels, parsePapers} from '../lib/papers.js';
+import {createHolidays} from '../lib/holiday.js';
 
 const routes = new Map();
 const tools = new Map();
@@ -928,6 +932,104 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   assert.ok(urls.filter(u => u.startsWith('https://www.youtube.com/@')).length === 1, 'handle resolved once');
   const vh = createHandlers(createStore({}), vf, null, null, {videos: vids});
   assert.equal((await vh['dsh-workboard/video.list']({sources: '@chan'})).items.length, 1);
+}
+
+// 端口：同一进程同一端口的 v4 / v6 合并，标出 App 进程和局域网可达；只能停止仍在列表里的进程。
+{
+  const lsofOut = 'p100\ncnode\nu501\nf20\nPTCP\nn127.0.0.1:5173\nTST=LISTEN\nf21\nPTCP\nn[::1]:5173\np200\ncControlCe\nu501\nf11\nPTCP\nn*:7000\n';
+  assert.deepEqual(parseLsof(lsofOut).map(r => [r.pid, r.port, r.command, r.addresses]), [[100, 5173, 'node', ['127.0.0.1', '::1']], [200, 7000, 'ControlCe', ['*']]]);
+  assert.deepEqual([...parseCwd('p100\nfcwd\nn/Users/x/app\n')], [[100, '/Users/x/app']]);
+  assert.deepEqual([...parsePs('  100 node vite --port 5173\n')], [[100, 'node vite --port 5173']]);
+  assert.equal(isAppProcess('/System/Library/CoreServices/ControlCenter.app/Contents/MacOS/ControlCenter'), true);
+  assert.equal(isAppProcess('/opt/homebrew/bin/node server.js'), false);
+  const killed = [];
+  const calls = [];
+  const ports = createPorts({os: 'darwin', kill: (pid, sig) => killed.push([pid, sig]), run: async (cmd, args, opts) => {
+    calls.push([cmd, args[0], opts?.partial]);
+    if (cmd === 'ps') return Buffer.from('100 node vite\n200 /System/Library/CoreServices/ControlCenter.app/Contents/MacOS/ControlCenter\n');
+    if (args.includes('cwd')) return Buffer.from('p100\nfcwd\nn/Users/x/app\np200\nfcwd\nn/\n');
+    return Buffer.from(lsofOut);
+  }});
+  const pv = await ports.list();
+  assert.deepEqual(pv.items.map(r => [r.port, r.public, r.app, r.cwd, r.command]), [[5173, false, false, '/Users/x/app', 'node vite'], [7000, true, true, '/', '/System/Library/CoreServices/ControlCenter.app/Contents/MacOS/ControlCenter']]);
+  assert.ok(calls.every(c => c[2] === true), 'lsof and ps keep partial output');
+  await ports.list();
+  assert.equal(calls.length, 3, 'cached within TTL');
+  await assert.rejects(ports.stop({pid: 100, port: 9999}), /no process/);
+  assert.deepEqual(await ports.stop({pid: 100, port: 5173}), {stopped: true, pid: 100});
+  assert.deepEqual(killed, [[100, 'SIGTERM']]);
+  assert.deepEqual(await createPorts({os: 'win32', run: async () => Buffer.alloc(0)}).list(), {supported: false, items: []});
+  const missing = createPorts({os: 'linux', run: async () => { throw Object.assign(new Error('spawn lsof ENOENT'), {code: 'not-found'}); }});
+  assert.equal((await missing.list()).missing, 'lsof');
+  const ph = createHandlers(createStore({}), undefined, null, null, {ports});
+  assert.equal((await ph['dsh-workboard/ports.list']({})).items.length, 2);
+  await assert.rejects(ph['dsh-workboard/ports.stop']({pid: 1, port: 1}), e => e.code === 'not-found');
+}
+
+// 服务状态：Statuspage summary 与 Flashcat 页面内嵌数据统一成同一形状，单个来源失败只影响自己。
+{
+  assert.deepEqual(parseSources('Claude https://status.claude.com/history\nhttps://www.githubstatus.com\nDeepSeek https://status.deepseek.com\nnot a url'),
+    [{name: 'Claude', page: 'https://status.claude.com', kind: 'statuspage'}, {name: 'githubstatus.com', page: 'https://www.githubstatus.com', kind: 'statuspage'}, {name: 'DeepSeek', page: 'https://status.deepseek.com', kind: 'flashcat'}]);
+  const summary = {status: {indicator: 'minor', description: 'Partially Degraded Service'},
+    components: [{id: 'g', name: 'Group', status: 'degraded_performance', group: true}, {id: 'a', name: 'API', status: 'partial_outage', group_id: 'g'}, {id: 'b', name: 'Web', status: 'operational'}],
+    incidents: [{name: 'Elevated errors', status: 'investigating', impact: 'major', shortlink: 'https://stspg.io/x', updated_at: '2026-11-13T01:00:00Z'}, {name: 'Old', status: 'resolved', impact: 'minor'}],
+    scheduled_maintenances: [{name: 'DB upgrade', status: 'in_progress', impact: 'maintenance'}, {name: 'Later', status: 'scheduled', impact: 'maintenance'}]};
+  const ps = parseSummary(summary);
+  assert.equal(ps.level, 'minor');
+  assert.deepEqual(ps.components, [{name: 'API', status: 'major'}]);
+  assert.deepEqual(ps.incidents.map(i => [i.title, i.status, i.url]), [['Elevated errors', 'major', 'https://stspg.io/x'], ['DB upgrade', 'maintenance', '']]);
+  assert.throws(() => parseSummary({}), /Statuspage/);
+  assert.equal(bilingual('对话服务(Chat Service)', 'zh-CN'), '对话服务');
+  assert.equal(bilingual('对话服务(Chat Service)', 'en'), 'Chat Service');
+  assert.equal(bilingual('API (beta)', 'zh-CN'), 'API (beta)');
+  const flight = (data) => {
+    const line = `3a:${JSON.stringify(['$', '$L40', null, {pageId: 1, initialData: data}])}\n`;
+    return `<script>self.__next_f.push([1,${JSON.stringify('1:I[1,[],"x"]\n')}])</script><script>self.__next_f.push([1,${JSON.stringify(line)}])</script>`;
+  };
+  const page = {components: [{component_id: 'c1', name: '对话服务(Chat Service)'}, {component_id: 'c2', name: 'API服务(API Service)'}]};
+  assert.deepEqual(parseFlashcat(flight({page, active_changes: []}), 'zh-CN'), {level: 'none', description: '', components: [], incidents: []});
+  const down = parseFlashcat(flight({page, active_changes: [{type: 'incident', title: '网页不可用(Web Unavailable)', start_at_seconds: 100, components: [{component_id: 'c1', status: 'partial_outage'}, {component_id: 'c2', status: 'degraded'}]}]}), 'en');
+  assert.deepEqual(down.components, [{name: 'Chat Service', status: 'major'}, {name: 'API Service', status: 'minor'}]);
+  assert.deepEqual([down.level, down.incidents[0].title, down.incidents[0].at], ['major', 'Web Unavailable', 100_000]);
+  assert.throws(() => parseFlashcat('<html></html>', 'en'), /not found/);
+  const statusUrls = [];
+  const st = createStatus({get: async url => {
+    statusUrls.push(url);
+    if (url.startsWith('https://status.deepseek.com')) return flight({page, active_changes: []});
+    if (url.includes('claude')) return summary;
+    throw new Error('HTTP 503');
+  }});
+  const sl = await createHandlers(createStore({}), undefined, null, null, {status: st})['dsh-workboard/status.get']({sources: 'DeepSeek https://status.deepseek.com\nClaude https://status.claude.com\nDown https://status.down.example', lang: 'zh-CN'});
+  assert.deepEqual(sl.items.map(x => [x.name, x.level, x.error]), [['DeepSeek', 'none', undefined], ['Claude', 'minor', undefined], ['Down', undefined, 'HTTP 503']]);
+  assert.deepEqual(statusUrls.sort(), ['https://status.claude.com/api/v2/summary.json', 'https://status.deepseek.com/', 'https://status.down.example/api/v2/summary.json']);
+}
+
+// AI 论文：按赞排序，去掉非法 id；官方域名失败时改走镜像，链接仍指向 huggingface.co。
+{
+  const raw = [{paper: {id: '2611.01234', title: 'Low', upvotes: 1, summary: 'long  summary', ai_keywords: ['a', 'b']}}, {paper: {id: '2611.05678', title: 'High', upvotes: 9, ai_summary: 'short', githubRepo: 'https://github.com/x/y', githubStars: 3}}, {paper: {id: '../x', title: 'Bad'}}];
+  assert.deepEqual(parsePapers(raw).map(p => [p.id, p.votes, p.summary, p.github, p.url]), [['2611.05678', 9, 'short', 'https://github.com/x/y', 'https://huggingface.co/papers/2611.05678'], ['2611.01234', 1, 'long summary', '', 'https://huggingface.co/papers/2611.01234']]);
+  assert.deepEqual(parseModels([{id: 'org/model', likes: 5, downloads: 7, trendingScore: 2, pipeline_tag: 'text-generation'}, {id: 'bad id'}]).map(m => [m.id, m.url, m.task]), [['org/model', 'https://huggingface.co/org/model', 'text-generation']]);
+  const hfUrls = [];
+  const pp = createPapers({get: async url => { hfUrls.push(url); if (url.startsWith('https://huggingface.co')) throw new Error('timeout'); return raw; }});
+  const pl = await createHandlers(createStore({}), undefined, null, null, {papers: pp})['dsh-workboard/papers.get']({kind: 'papers'});
+  assert.deepEqual([pl.via, pl.items.length, hfUrls.length], ['hf-mirror.com', 2, 2]);
+  await assert.rejects(pp.list({kind: '__proto__'}), /unknown list/);
+}
+
+// 节假日：今年加明年，jsDelivr 失败时走 GitHub raw；明年未公布只返回今年，今年缺失则报错。
+{
+  const hdUrls = [];
+  const hd = createHolidays({get: async url => {
+    hdUrls.push(url);
+    if (url.includes('jsdelivr') && url.endsWith('2026.json')) throw new Error('HTTP 503');
+    if (url.endsWith('2026.json')) return {year: 2026, days: [{name: '国庆节', date: '2026-10-01', isOffDay: true}, {name: '国庆节', date: '2026-09-27', isOffDay: false}, {name: 'x', date: 'bad'}]};
+    throw new Error('HTTP 404');
+  }});
+  const hv = await createHandlers(createStore({}), undefined, null, null, {holidays: hd})['dsh-workboard/holiday.get']({year: 2026});
+  assert.deepEqual(hv, {years: [2026], days: [{date: '2026-09-27', name: '国庆节', off: false}, {date: '2026-10-01', name: '国庆节', off: true}]});
+  assert.ok(hdUrls.some(u => u.startsWith('https://raw.githubusercontent.com/NateScarlet/holiday-cn/master/2026.json')));
+  await assert.rejects(hd.list({year: 2030}), /404/);
+  await assert.rejects(hd.list({year: 'x'}), /invalid year/);
 }
 
 console.log('smoke ok');

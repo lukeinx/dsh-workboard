@@ -1,6 +1,6 @@
 # 工作台 Workboard
 
-**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 36 个 widget，开箱即用；不够用的，让 Agent 现做。**
+**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 41 个 widget，开箱即用；不够用的，让 Agent 现做。**
 
 [English](README.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
@@ -8,7 +8,7 @@
 
 ## 亮点
 
-### 内置 36 个 widget，开箱即用
+### 内置 41 个 widget，开箱即用
 
 覆盖四大场景，打开组件库即可搜索、预览并连续添加到看板：
 
@@ -76,7 +76,7 @@ dsh-workboard
 ## 参考
 
 <details>
-<summary><b>全部 36 个内置 widget</b></summary>
+<summary><b>全部 41 个内置 widget</b></summary>
 
 | Widget | 档位 | 说明 |
 |---|---|---|
@@ -88,6 +88,8 @@ dsh-workboard
 | Prompt 快启 | `m` `w` `l` `t` `s` | 输入提示词或点击预设，直接在指定工作区新开会话并发送 |
 | 收集箱 | `t` `l` `m` `w` | 随手记下的想法与链接，一键交给 Agent 归类整理 |
 | 用量 | `l` `t` `m` `w` `s` | 从本机会话日志统计 Token、请求数、缓存命中率及各模型占比；填入单价后可估算花费 |
+| 活跃热力图 | `w` `l` `m` | 过去一年每天的 Agent 用量热力图，按 token 或请求数着色，附活跃天数与连续天数 |
+| 服务状态 | `t` `l` `m` `s` `w` | DeepSeek、Claude、OpenAI、GitHub、npm 及任意 Statuspage 状态页，有故障的服务置顶 |
 | 产出物 | `t` `l` `m` `w` | 按时间倒序展示 Agent 交付的文件；支持直接打开、在 Finder 中定位或跳回原会话 |
 | 定时任务 | `t` `l` `m` `w` | 查看所有定时任务的执行周期与下次触发时间；支持立即运行、暂停、恢复与删除 |
 | 收藏会话 | `t` `l` `m` `w` | 固定常用会话并展示最新一条消息预览 |
@@ -104,12 +106,14 @@ dsh-workboard
 | 最近文件 | `t` `l` `m` `w` | 列出 `~/Downloads`、`~/Desktop` 或指定文件夹的最新文件；支持打开、定位或直接发给 Agent |
 | 剪贴板 | `t` `l` `m` `w` | 记录面板打开期间复制过的文本；支持一键重复制，或套用「翻译」等预设发给 Agent |
 | 网络 | `m` `s` `t` `l` `w` | 实时上下行速率、本机与公网 IP、系统代理状态，以及到指定站点的连接延迟 |
+| 端口 | `t` `l` `m` `w` | 本机正在监听的 TCP 端口与对应的开发服务、项目目录；可在浏览器打开、定位目录或停止进程（默认隐藏 App 与系统进程） |
 | **日常** | | |
 | 今日 | 横栏 | 时间、问候语、日期、ISO 周数、当前天气与每日格言（支持内置、一言或自定义，点击切换） |
 | 时钟 | `m` `s` | 当前时间、问候语、日期与年度进度条 |
 | 世界时钟 | `m` `s` `w` `t` | 对照多个 IANA 时区的当前时间、与本地时差及跨日状态 |
 | 天气 | `m` `s` | 当前天气、今日高低温、空气质量（AQI）及未来数小时预报 |
 | 倒数日 | `m` `s` `t` | 距离周末、月底、年底及自定义日期的天数；不带年份（如 `12-25`）时按每年重复计算 |
+| 节假日 | `m` `s` `t` | 中国大陆接下来的法定节假日、放假天数与调休上班日，附今日农历 |
 | 时间进度 | `m` `s` `w` | 今日、本周、本月与本年已度过的百分比 |
 | 习惯打卡 | `m` `l` `t` `w` | 支持最近一周打卡与补卡，自动计算当前连续达成天数 |
 | 相框 | `m` `s` `t` `l` `w` | 轮播本机文件夹（默认 `~/Pictures`）中的照片 |
@@ -117,6 +121,7 @@ dsh-workboard
 | **资讯与行情** | | |
 | 热榜 | `l` `t` `m` `w` | 多信源分标签聚合：微博、知乎、36 氪、少数派、Hacker News、GitHub Trending、Product Hunt、Reddit（可选 B 站、V2EX） |
 | 订阅 | `t` `l` `m` `w` | 聚合多个 RSS / Atom 订阅源并按时间混排，已读条目自动变灰 |
+| AI 论文 | `l` `t` `m` `w` | Hugging Face 每日论文（按点赞排序）与热门模型，论文可一键交给 Agent 解读 |
 | 视频订阅 | `l` `t` `m` `w` | B 站 UP 主（空间链接或 UID）、YouTube 频道（链接、`UC…` ID 或 `@handle`）与带封面的 RSS 的最新视频，带封面 |
 | 行情 | `t` `m` `s` `l` `w` | 支持汇率（`USD/CNY`）、A 股 / 港股 / 美股（`sh600519`、`hk00700`、`usAAPL`）与加密货币（`BTC`、`cg:<id>`） |
 | 格言 | `m` `w` `s` | 每日一句，点击换一条，信源与今日横栏共享 |
@@ -138,17 +143,21 @@ dsh-workboard
 - **热榜**：微博、知乎、36 氪、少数派、B 站、V2EX 使用各站公开网页接口（非官方，站点改版可能失效）；Hacker News 使用 [HN Algolia API](https://hn.algolia.com/api)；GitHub 读取 Trending 页面；Product Hunt 与 Reddit 读取官方订阅源；结果缓存 10 分钟
 - **视频订阅**：YouTube 频道 RSS（仅在解析 `@handle` 时请求频道页）、B 站 UP 主投稿公开接口（非官方，偶尔限频），封面由 Host 代理成 data URL；缓存 15 分钟
 - **网络**：公网 IP 查询使用 [ipinfo.io](https://ipinfo.io)（失败时回退至 [ip.sb](https://ip.sb)），站点延迟通过 `curl` 测算（配置了系统代理时自动走代理），默认测百度、GitHub 与 Google（英文界面为 Google、GitHub 与 Cloudflare）
+- **服务状态**：请求各状态页的 Statuspage 接口 `/api/v2/summary.json`；DeepSeek 状态页托管在 Flashcat，没有公开接口，改为解析页面内嵌数据（非官方，页面改版可能失效）；默认 DeepSeek、Claude、OpenAI、GitHub 与 npm；缓存 2 分钟
+- **AI 论文**：[Hugging Face](https://huggingface.co) 每日论文与模型接口，huggingface.co 不通时改走 [hf-mirror.com](https://hf-mirror.com) 镜像；缓存 30 分钟
+- **节假日**：经 jsDelivr 读取 [holiday-cn](https://github.com/NateScarlet/holiday-cn) 今明两年的数据，失败时回退至 GitHub raw；缓存 12 小时
 - **自定义 widget**：仅可请求各自在 `fetch` 字段声明的 `http(s)` 地址前缀，Host 缓存 30 秒
 
 仅读取本机数据的组件：
 
-- **用量 / 产出物**：读取 `~/.dsh/sessions` 下的会话日志
+- **用量 / 活跃热力图 / 产出物**：读取 `~/.dsh/sessions` 下的会话日志
 - **待处理**：汇总 Harness 的会话、目标与后台作业状态，以及本地待办与收集箱；开启 GitHub 时调用本机 `gh` CLI（与 GitHub widget 共用 5 分钟缓存）
 - **每日简报**：由 Agent 在新会话里调用 `workboard_context` 读取上述本机数据后写入；开启「每天自动生成」时在 Harness 定时任务里新建一个每日任务，关闭即删除
 - **Git 工作区**：默认仅执行 `git status`，点击「获取远端」时才执行 `git fetch`
 - **系统状态**：在 macOS 上调用 `vm_stat` 与 `pmset`
 - **相框**：在 macOS 上用 `sips` 生成缩略图并缓存在系统临时目录
 - **正在播放**：通过内置的 [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter)（`vendor/`，BSD-3-Clause）读取系统「正在播放」，它由 `/usr/bin/perl` 运行，无需授权；此路不通时退回用 `osascript` 查询已在运行的「音乐」或 Spotify，首次使用时 macOS 会请求自动化权限
+- **端口**：在 macOS 与 Linux 上调用 `lsof` 和 `ps` 列出监听中的 TCP 端口、工作目录与命令行；「停止」仅向仍在监听该端口的进程发送 `SIGTERM`，无需额外授权
 - **白噪音**：在页面内用 Web Audio 合成，不读文件、不联网
 - **最近文件**：仅列出目标文件夹顶层文件，不递归扫描
 - **剪贴板**：仅在卡片可见期间每 2 秒读取一次 `pbpaste`（macOS）或 `wl-paste` / `xclip`（Linux），历史仅保存在内存中，不落盘
@@ -206,7 +215,7 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 ```
 
 - `index.js`：Host 端 `/api/dsh-workboard/*` 路由、数据存储与 Agent 工具注册
-- `client.js`：侧栏入口、看板容器与 36 个内置 widget
+- `client.js`：侧栏入口、看板容器与 41 个内置 widget
 - `lib/`：各数据源请求、解析与系统采样模块
 - `skills/workboard-widget.md`：供 Agent 编写自定义 widget 的规范指南
 
@@ -231,6 +240,9 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 | [GitHub CLI](https://cli.github.com) | GitHub widget 数据源 | MIT |
 | [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter) | 读取系统「正在播放」，内置于 `vendor/` | BSD-3-Clause |
 | [ipinfo.io](https://ipinfo.io)、[ip.sb](https://ip.sb) | 网络 widget 公网 IP 查询 | 公开 API |
+| DeepSeek、Claude、OpenAI、GitHub、npm 的状态页 | 服务状态 | 公开状态接口；DeepSeek 为页面解析（非官方接口） |
+| [Hugging Face](https://huggingface.co)、[hf-mirror.com](https://hf-mirror.com) | 每日论文与热门模型 | 公开 API 与社区镜像 |
+| [holiday-cn](https://github.com/NateScarlet/holiday-cn) | 中国法定节假日与调休数据，经 [jsDelivr](https://www.jsdelivr.com) 分发 | MIT |
 | 经典文献（老子、孔子、荀子等） | 内置格言库 | 公有领域 |
 
 ## 许可

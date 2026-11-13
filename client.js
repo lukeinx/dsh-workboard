@@ -32,6 +32,10 @@ window.__ModuleLoader__.load({
     const NET_MS = 2000;
     const NOWPLAYING_MS = 3000;
     const VIDEO_MS = 15 * 60_000;
+    const PORTS_MS = 5000;
+    const STATUS_MS = 2 * 60_000;
+    const PAPERS_MS = 30 * 60_000;
+    const HOLIDAY_MS = 6 * 3600_000;
     const MAX_PINNED = 20;
     // 尺寸档位：[列, 行]，行单位 80px；「横栏」半高，其余行数成对。
     const SIZES = {bar: [4, 1], s: [1, 2], m: [2, 2], t: [1, 4], l: [2, 4], w: [4, 2]};
@@ -156,6 +160,21 @@ window.__ModuleLoader__.load({
       videos: '视频订阅', d_videos: 'B 站 UP 主、YouTube 频道的最新视频，带封面',
       f_videoSources: '订阅（每行一个：B 站空间链接或 UID、YouTube 频道链接或 @handle、带封面的 RSS；后面可加名称）',
       defaultVideos: 'https://space.bilibili.com/946974 影视飓风\nhttps://space.bilibili.com/163637592 何同学', vd_error: '{n} 个订阅加载失败', vd_views: '{n} 次播放',
+      ports: '端口', d_ports: '本机正在监听的端口和开发服务器，可在浏览器打开、定位目录或停止进程',
+      pt_none: '没有开发服务在监听端口', pt_unsupported: '当前系统不支持', pt_lsof: '需要 lsof', pt_stop: '停止', pt_confirm: '确认停止',
+      pt_lan: '局域网可访问', pt_count: '{n} 个端口', pt_hidden: '另有 {n} 个 App 端口', f_ptApps: '显示 App 与系统进程',
+      status: '服务状态', d_status: 'DeepSeek、Claude、OpenAI、GitHub 等服务的状态页，有故障时标出',
+      st_empty: '在设置里添加状态页', st_none: '运行正常', st_maintenance: '维护中', st_minor: '部分降级', st_major: '部分中断', st_critical: '严重中断',
+      st_all: '全部正常', st_issues: '{n} 个服务异常', st_error: '无法读取',
+      f_statusSources: '状态页（每行一个：名称 地址；支持 Statuspage 与 DeepSeek 状态页）',
+      defaultStatus: 'DeepSeek https://status.deepseek.com\nClaude https://status.claude.com\nOpenAI https://status.openai.com\nGitHub https://www.githubstatus.com\nnpm https://status.npmjs.org',
+      papers: 'AI 论文', d_papers: 'Hugging Face 每日论文与热门模型，论文可交给 Agent 解读',
+      pp_papers: '论文', pp_models: '模型', pp_votes: '{n} 人点赞', pp_likes: '{n} 人喜欢', pp_downloads: '{n} 下载', f_ppModels: '显示热门模型',
+      pp_prompt: '读一下这篇论文：{title}\n{url}\n用中文讲清楚它要解决的问题、核心方法、主要结果和局限，最后说说可能的应用场景。',
+      holiday: '节假日', d_holiday: '中国大陆法定节假日、调休上班日与农历',
+      hd_now: '放假中', hd_off: '放假 {n} 天', hd_work: '{d} 上班', hd_todayOff: '今天放假（{name}）', hd_todayWork: '今天调休上班（{name}）', hd_none: '暂无已公布的假期安排',
+      activity: '活跃热力图', d_activity: '过去一年每天的 Agent 用量，按 token 或请求数着色',
+      ac_tokens: 'token', ac_requests: '请求', f_acMetric: '着色依据', ac_total: '共 {n} {u}', ac_days: '{n} 天活跃', ac_streak: '连续 {n} 天', ac_best: '最长连续 {n} 天',
     };
     const en = {
       lang: 'en-US', title: 'Workboard', loadFailed: 'Failed to load', empty: 'No widgets on this board yet',
@@ -275,6 +294,21 @@ window.__ModuleLoader__.load({
       videos: 'Videos', d_videos: 'Latest uploads from YouTube channels and Bilibili creators, with thumbnails',
       f_videoSources: 'Sources, one per line: YouTube channel link or @handle, Bilibili space link or UID, or an RSS feed with images; a name may follow',
       defaultVideos: '@mkbhd\n@veritasium', vd_error: '{n} source(s) failed to load', vd_views: '{n} views',
+      ports: 'Ports', d_ports: 'Ports listening on this machine and the dev servers behind them; open, reveal the folder or stop the process',
+      pt_none: 'No dev server is listening', pt_unsupported: 'Not supported on this system', pt_lsof: 'Needs lsof', pt_stop: 'Stop', pt_confirm: 'Confirm',
+      pt_lan: 'Reachable on LAN', pt_count: '{n} port(s)', pt_hidden: '{n} app port(s) hidden', f_ptApps: 'Show apps and system processes',
+      status: 'Service status', d_status: 'Status pages of DeepSeek, Claude, OpenAI, GitHub and more, flagged when something is down',
+      st_empty: 'Add status pages in settings', st_none: 'Operational', st_maintenance: 'Maintenance', st_minor: 'Degraded', st_major: 'Partial outage', st_critical: 'Major outage',
+      st_all: 'All operational', st_issues: '{n} service(s) with issues', st_error: 'Unavailable',
+      f_statusSources: 'Status pages, one per line: name URL (Statuspage or the DeepSeek status page)',
+      defaultStatus: 'DeepSeek https://status.deepseek.com\nClaude https://status.claude.com\nOpenAI https://status.openai.com\nGitHub https://www.githubstatus.com\nnpm https://status.npmjs.org',
+      papers: 'AI papers', d_papers: 'Hugging Face daily papers and trending models; hand a paper to the agent to explain',
+      pp_papers: 'Papers', pp_models: 'Models', pp_votes: '{n} upvotes', pp_likes: '{n} likes', pp_downloads: '{n} downloads', f_ppModels: 'Show trending models',
+      pp_prompt: 'Read this paper: {title}\n{url}\nExplain the problem it tackles, the core method, the main results and the limitations, then suggest where it could be applied.',
+      holiday: 'China holidays', d_holiday: 'Public holidays and make-up workdays in mainland China',
+      hd_now: 'On break', hd_off: '{n} days off', hd_work: 'work on {d}', hd_todayOff: 'Day off today ({name})', hd_todayWork: 'Make-up workday today ({name})', hd_none: 'No holidays announced yet',
+      activity: 'Activity', d_activity: 'Daily agent usage over the past year, shaded by tokens or requests',
+      ac_tokens: 'tokens', ac_requests: 'requests', f_acMetric: 'Shade by', ac_total: '{n} {u}', ac_days: '{n} active days', ac_streak: '{n}-day streak', ac_best: 'best {n} days',
     };
 
     // 公共领域的经典短句，按日期轮换。
@@ -829,6 +863,23 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-cwmeta{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none}
 .wb-modal[data-wide] .wb-field{flex:none}
 .wb-modal[data-wide] .wb-codefield{flex:1}
+.wb-port{flex:none;min-width:44px;text-align:right;font-weight:600;color:var(--dsw-alias-brand-primary)}
+.wb-stbig{font-size:22px;font-weight:600;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-stbig[data-state=done],.wb-hdhead[data-state=done],.wb-hdtoday[data-state=done]{color:var(--dsw-alias-state-success-primary)}
+.wb-stbig[data-state=waiting],.wb-hdhead[data-state=waiting],.wb-hdtoday[data-state=waiting]{color:var(--dsw-alias-state-warn-primary)}
+.wb-stbig[data-state=blocked]{color:var(--dsw-alias-state-error-primary)}
+.wb-stbig[data-state=running]{color:var(--dsw-alias-brand-primary)}
+.wb-hdhead{flex:none;font-size:12px;color:var(--dsw-alias-label-secondary);padding:0 2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-activity{display:flex;flex-direction:column;gap:6px;height:100%;min-height:0}
+.wb-heatbox{flex:1;min-height:0;display:flex;align-items:center;justify-content:flex-end;overflow:hidden}
+.wb-heat{display:grid;grid-auto-flow:column}
+.wb-heat i{border-radius:2px;background:var(--dsw-alias-bg-layer-2)}
+.wb-heat i[data-level="1"]{background:color-mix(in srgb,var(--dsw-alias-brand-primary) 30%,transparent)}
+.wb-heat i[data-level="2"]{background:color-mix(in srgb,var(--dsw-alias-brand-primary) 52%,transparent)}
+.wb-heat i[data-level="3"]{background:color-mix(in srgb,var(--dsw-alias-brand-primary) 76%,transparent)}
+.wb-heat i[data-level="4"]{background:var(--dsw-alias-brand-primary)}
+.wb-heat i[data-future]{background:none}
+.wb-heat i[data-today]{outline:1px solid var(--dsw-alias-label-secondary);outline-offset:1px}
 `;
 
     const pad = n => String(n).padStart(2, '0');
@@ -3751,6 +3802,246 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           settings: [{key: 'sources', type: 'textarea', label: () => t('f_videoSources'), default: () => t('defaultVideos')}],
         };
 
+        const PORT_ARM_MS = 3000;
+        function Ports({size, config}) {
+          useLocale();
+          const res = useRemote('ports.list', {}, PORTS_MS);
+          const [armed, setArmed] = useState('');
+          const [busy, setBusy] = useState(false);
+          const [error, setError] = useState('');
+          useEffect(() => {
+            if (!armed) return undefined;
+            const id = setTimeout(() => setArmed(''), PORT_ARM_MS);
+            return () => clearTimeout(id);
+          }, [armed]);
+          const v = res.value;
+          if (!v) return blank(res.error || '…');
+          if (!v.supported) return blank(t('pt_unsupported'));
+          if (v.missing) return blank(t('pt_lsof'));
+          const fail = e => setError(String(e?.message || e));
+          const items = v.items.filter(x => config?.apps === true || !x.app);
+          const hidden = v.items.length - items.length;
+          const stop = x => {
+            const key = `${x.pid}:${x.port}`;
+            if (armed !== key) { setArmed(key); return; }
+            setArmed('');
+            call('ports.stop', {pid: x.pid, port: x.port}).then(() => { setError(''); res.reload(); }, fail);
+          };
+          const refresh = () => {
+            setBusy(true);
+            call('ports.list', {fresh: true}).then(() => res.reload(), fail).finally(() => setBusy(false));
+          };
+          const row = x => {
+            const key = `${x.pid}:${x.port}`;
+            const project = x.cwd && x.cwd !== '/' ? baseName(x.cwd) : '';
+            const sub = [project ? x.name : '', size === 'm' ? '' : `pid ${x.pid}`, x.public ? t('pt_lan') : ''].filter(Boolean);
+            return h('div', {key, className: 'wb-row wb-rowbtn', title: [x.command, x.cwd, x.addresses.join(', ')].filter(Boolean).join('\n'), style: {cursor: 'pointer'},
+              onClick: () => window.open(`http://localhost:${x.port}`, '_blank', 'noopener,noreferrer')},
+              h('span', {className: 'wb-port wb-num'}, x.port),
+              h('div', null, h('b', null, project || x.name), sub.length ? h('small', null, sub.join(' · ')) : null),
+              project && size !== 'm' ? rowact(t('o_reveal'), () => { openFile(x.cwd, true).catch(fail); }) : null,
+              rowact(armed === key ? t('pt_confirm') : t('pt_stop'), () => stop(x), {danger: true, armed: armed === key}));
+          };
+          return h(React.Fragment, null,
+            h('div', {className: 'wb-rows'}, items.length ? items.map(row) : blank(t('pt_none'))),
+            error ? h('div', {className: 'wb-calerr', title: error}, error) : null,
+            size === 'm' ? null : h('div', {className: 'wb-notefoot'},
+              h('span', null, [items.length ? fill(t('pt_count'), {n: items.length}) : '', hidden ? fill(t('pt_hidden'), {n: hidden}) : ''].filter(Boolean).join(' · ')),
+              h('button', {type: 'button', className: 'wb-btn', disabled: busy, onClick: refresh}, busy ? '…' : t('refresh'))));
+        }
+        Ports.workboard = {
+          apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_ports'),
+          settings: [{key: 'apps', type: 'toggle', default: false, label: () => t('f_ptApps')}],
+        };
+
+        const ST_ORDER = ['critical', 'major', 'minor', 'maintenance', 'none'];
+        const ST_STATE = {none: 'done', maintenance: 'running', minor: 'waiting', major: 'blocked', critical: 'blocked'};
+        function Status({size, config}) {
+          useLocale();
+          const sources = String(config?.sources ?? t('defaultStatus'));
+          const res = useRemote('status.get', {sources, lang: t('lang')}, STATUS_MS);
+          const v = res.value;
+          if (!v) return blank(res.error || '…');
+          if (!v.items.length) return blank(t('st_empty'));
+          const rank = x => (x.error ? ST_ORDER.length : ST_ORDER.indexOf(x.level));
+          const items = [...v.items].sort((a, b) => rank(a) - rank(b));
+          const issues = items.filter(x => !x.error && x.level !== 'none');
+          const detail = x => (x.error ? [t('st_error')] : [t(`st_${x.level}`), x.incidents[0]?.title || x.components.map(c => c.name).join(', ')]).filter(Boolean).join(' · ');
+          const summary = issues.length ? fill(t('st_issues'), {n: issues.length}) : items.every(x => x.error) ? t('st_error') : t('st_all');
+          if (size === 's') {
+            return h('div', {className: 'wb-hero'},
+              h('small', null, t('status')),
+              h('span', {className: 'wb-stbig', 'data-state': issues.length ? ST_STATE[issues[0].level] : 'done'}, summary),
+              h('small', {title: issues.map(x => `${x.name}: ${detail(x)}`).join('\n')}, issues.map(x => x.name).join(', ')));
+          }
+          const row = x => {
+            const state = x.error ? undefined : ST_STATE[x.level];
+            const lines = x.error ? [x.error] : [...x.incidents.map(i => i.title), ...x.components.map(c => `${c.name}: ${t(`st_${c.status}`)}`)];
+            return h('a', {key: x.url + x.name, className: 'wb-row wb-rowbtn', 'data-state': state === 'blocked' ? 'blocked' : state === 'waiting' ? 'waiting' : undefined,
+              href: x.url, target: '_blank', rel: 'noopener noreferrer', title: [x.description, ...lines].filter(Boolean).join('\n')},
+              h('span', {className: 'wb-dot', 'data-state': state}),
+              h('div', null, h('b', null, x.name), h('small', null, detail(x))));
+          };
+          return h(React.Fragment, null,
+            h('div', {className: 'wb-rows'}, items.map(row)),
+            size === 'm' ? null : h('div', {className: 'wb-notefoot'}, h('span', null, summary)));
+        }
+        Status.workboard = {
+          apiVersion: 1, sizes: ['t', 'l', 'm', 's', 'w'], description: () => t('d_status'),
+          settings: [{key: 'sources', type: 'textarea', label: () => t('f_statusSources'), default: () => t('defaultStatus')}],
+        };
+
+        function Papers({size, config}) {
+          useLocale();
+          const ws = useWorkspace();
+          const kinds = config?.models === false ? ['papers'] : ['papers', 'models'];
+          const [picked, setPicked] = useState('papers');
+          const [error, setError] = useState('');
+          const kind = kinds.includes(picked) ? picked : kinds[0];
+          const res = useRemote('papers.get', {kind}, PAPERS_MS);
+          const v = res.value?.kind === kind ? res.value : null;
+          const read = useRead(v ? v.items.map(it => it.url) : []);
+          const compact = new Intl.NumberFormat(t('lang'), {notation: 'compact', maximumFractionDigits: 1});
+          const ask = (e, it) => {
+            e.preventDefault();
+            e.stopPropagation();
+            launch(fill(t('pp_prompt'), {url: it.url, title: it.title}), ws.path, ws.id).then(() => setError(''), err => setError(String(err?.message || err)));
+          };
+          const meta = it => (kind === 'papers'
+            ? [size === 'l' ? it.summary : it.keywords.join(', ')].filter(Boolean)
+            : [it.task, fill(t('pp_downloads'), {n: compact.format(it.downloads)})].filter(Boolean)).join(' · ');
+          const row = (it, i) => h('a', {key: it.id, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer',
+            title: [it.title, kind === 'papers' ? it.summary : meta(it)].filter(Boolean).join('\n')},
+            h('span', {className: 'wb-rank wb-num', 'data-top': i < 3 ? '' : undefined}, i + 1),
+            h('div', null, h('b', null, it.title), size === 'm' || !meta(it) ? null : h('small', null, meta(it))),
+            kind === 'papers' && size !== 'm' ? h('button', {type: 'button', className: 'wb-btn wb-rowact', onClick: e => ask(e, it)}, t('toAgent')) : null,
+            size === 't' ? null : h('span', {className: 'wb-num', title: kind === 'papers' ? fill(t('pp_votes'), {n: it.votes}) : fill(t('pp_likes'), {n: it.likes})},
+              `▲ ${compact.format(kind === 'papers' ? it.votes : it.likes)}`));
+          return h('div', {className: 'wb-trend'},
+            kinds.length > 1 ? h('div', {className: 'wb-seg', role: 'tablist'}, kinds.map(k => h('button', {key: k, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': k === kind, onClick: () => setPicked(k)}, t(`pp_${k}`)))) : null,
+            h('div', {className: 'wb-rows'}, v ? v.items.map(row) : blank(res.error || '…')),
+            error ? h('div', {className: 'wb-calerr', title: error}, error) : null);
+        }
+        Papers.workboard = {
+          apiVersion: 1, sizes: ['l', 't', 'm', 'w'], defaultSize: 'l', description: () => t('d_papers'),
+          settings: [{key: 'models', type: 'toggle', default: true, label: () => t('f_ppModels')}],
+        };
+
+        // 连续、同名的放假日合成一个假期；同名的上班日即该假期的调休。
+        function holidayPeriods(days) {
+          const periods = [];
+          for (const d of days) {
+            if (!d.off) continue;
+            const last = periods.at(-1);
+            if (last && last.name === d.name && shiftDay(last.end, 1) === d.date) last.end = d.date;
+            else periods.push({name: d.name, start: d.date, end: d.date});
+          }
+          for (const p of periods) {
+            p.len = Math.round((keyDate(p.end) - keyDate(p.start)) / 86400000) + 1;
+            p.work = days.filter(d => !d.off && d.name === p.name && Math.abs(keyDate(d.date) - keyDate(p.start)) < 40 * 86400000).map(d => d.date);
+          }
+          return periods;
+        }
+
+        function Holiday({size}) {
+          useLocale();
+          const now = useNow();
+          const lang = t('lang');
+          const res = useRemote('holiday.get', {year: now.getFullYear()}, HOLIDAY_MS);
+          const v = res.value;
+          if (!v) return blank(res.error || '…');
+          const today = dayKey(now);
+          const periods = holidayPeriods(v.days).filter(p => p.end >= today);
+          const dateText = k => keyDate(k).toLocaleDateString(lang, {month: 'short', day: 'numeric'});
+          const rangeText = p => (p.len > 1 ? `${dateText(p.start)}–${dateText(p.end)}` : keyDate(p.start).toLocaleDateString(lang, {month: 'short', day: 'numeric', weekday: 'short'}));
+          const daysTo = p => Math.round((keyDate(p.start) - keyDate(today)) / 86400000);
+          const off = v.days.find(d => d.date === today && d.off);
+          const work = v.days.find(d => d.date === today && !d.off);
+          const todayLine = off ? fill(t('hd_todayOff'), {name: off.name}) : work ? fill(t('hd_todayWork'), {name: work.name}) : '';
+          const todayState = off ? 'done' : work ? 'waiting' : undefined;
+          const head = [now.toLocaleDateString(lang, {month: 'long', day: 'numeric', weekday: 'short'}), lang.startsWith('zh') ? lunar(now) : '', todayLine].filter(Boolean).join(' · ');
+          const num = p => (daysTo(p) <= 0 ? [t('hd_now')] : [daysTo(p), h('small', {key: 'u'}, daysTo(p) === 1 ? t('dayUnit') : t('dayUnits'))]);
+          const sub = p => [rangeText(p), fill(t('hd_off'), {n: p.len}), p.work.length ? fill(t('hd_work'), {d: p.work.map(dateText).join(lang.startsWith('zh') ? '、' : ', ')}) : ''].filter(Boolean).join(' · ');
+          if (!periods.length) return h('div', {className: 'wb-hero'}, h('small', null, head), h('span', {className: 'wb-muted'}, t('hd_none')));
+          if (size === 's') {
+            const p = periods[0];
+            return h('div', {className: 'wb-hero'},
+              h('small', {'data-state': todayState, className: 'wb-hdtoday'}, todayLine || p.name),
+              h('span', {className: 'wb-big wb-num'}, ...num(p)),
+              h('small', {title: sub(p)}, todayLine ? `${p.name} · ${rangeText(p)}` : rangeText(p)));
+          }
+          return h(React.Fragment, null,
+            h('div', {className: 'wb-hdhead', 'data-state': todayState}, head),
+            h('div', {className: 'wb-rows'}, periods.slice(0, size === 'm' ? 2 : 12).map(p => h('div', {key: p.start, className: 'wb-row', title: sub(p)},
+              h('div', null, h('b', null, p.name), h('small', null, sub(p))),
+              h('span', {className: 'wb-big wb-num'}, ...num(p))))));
+        }
+        Holiday.workboard = {apiVersion: 1, sizes: ['m', 's', 't'], description: () => t('d_holiday')};
+
+        const AC_GAP = 3;
+        const AC_MAX_WEEKS = 53;
+        function Activity({size, config}) {
+          useLocale();
+          const now = useNow();
+          const prefs = usePrefs();
+          const res = useRemote('usage.get', {days: AC_MAX_WEEKS * 7 + 6}, USAGE_MS);
+          const ref = useRef(null);
+          const [box, setBox] = useState({w: 0, h: 0});
+          useEffect(() => {
+            const el = ref.current;
+            if (!el || typeof ResizeObserver !== 'function') return undefined;
+            const ro = new ResizeObserver(([e]) => setBox({w: Math.floor(e.contentRect.width), h: Math.floor(e.contentRect.height)}));
+            ro.observe(el);
+            return () => ro.disconnect();
+          }, [Boolean(res.value)]);
+          const v = res.value;
+          if (!v) return blank(res.error || '…');
+          const metric = config?.metric === 'requests' ? 'requests' : 'tokens';
+          const byDay = new Map();
+          for (const r of v.rows) {
+            const acc = byDay.get(r.day) ?? {tokens: 0, requests: 0};
+            acc.tokens += tokensOf(r);
+            acc.requests += r.requests;
+            byDay.set(r.day, acc);
+          }
+          const cell = Math.max(6, Math.min(14, Math.floor((box.h - AC_GAP * 6) / 7)));
+          const weeks = Math.max(1, Math.min(AC_MAX_WEEKS, Math.floor((box.w + AC_GAP) / (cell + AC_GAP))));
+          const weekStart = Number(prefs.weekStart ?? (t('lang').startsWith('zh') ? '1' : '0'));
+          const today = v.today;
+          const back = (keyDate(today).getDay() - weekStart + 7) % 7;
+          const first = shiftDay(today, -back - (weeks - 1) * 7);
+          const cells = Array.from({length: weeks * 7}, (_, i) => shiftDay(first, i));
+          const values = cells.filter(d => d <= today).map(d => byDay.get(d)?.[metric] ?? 0);
+          const sorted = values.filter(x => x > 0).sort((a, b) => a - b);
+          const cut = q => sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * q))] ?? 0;
+          const steps = [cut(0.25), cut(0.5), cut(0.75)];
+          const level = x => (x <= 0 ? 0 : 1 + steps.filter(s => x > s).length);
+          const lang = t('lang');
+          const total = values.reduce((a, x) => a + x, 0);
+          const active = sorted.length;
+          let streak = 0;
+          for (let d = byDay.get(today)?.[metric] ? today : shiftDay(today, -1); (byDay.get(d)?.[metric] ?? 0) > 0; d = shiftDay(d, -1)) streak++;
+          let best = 0;
+          let run = 0;
+          for (const x of values) { run = x > 0 ? run + 1 : 0; best = Math.max(best, run); }
+          const unit = metric === 'tokens' ? t('ac_tokens') : t('ac_requests');
+          const grid = h('div', {className: 'wb-heat', style: {gridTemplateRows: `repeat(7, ${cell}px)`, gridAutoColumns: `${cell}px`, gap: `${AC_GAP}px`}},
+            box.w ? cells.map(d => {
+              if (d > today) return h('i', {key: d, 'data-future': ''});
+              const x = byDay.get(d);
+              return h('i', {key: d, 'data-level': level(x?.[metric] ?? 0), 'data-today': d === today ? '' : undefined,
+                title: fill(t('u_day'), {d: keyDate(d).toLocaleDateString(lang, {year: 'numeric', month: 'short', day: 'numeric', weekday: 'short'}), t: compact(x?.tokens ?? 0), r: x?.requests ?? 0})});
+            }) : null);
+          const stats = [fill(t('ac_total'), {n: compact(total), u: unit}), fill(t('ac_days'), {n: active}), streak ? fill(t('ac_streak'), {n: streak}) : '', size === 'm' ? '' : fill(t('ac_best'), {n: best})].filter(Boolean);
+          return h('div', {className: 'wb-activity'},
+            h('div', {className: 'wb-heatbox', ref}, grid),
+            h('div', {className: 'wb-notefoot wb-num', style: {marginTop: 0}}, h('span', null, stats.join(' · '))));
+        }
+        Activity.workboard = {
+          apiVersion: 1, sizes: ['w', 'l', 'm'], description: () => t('d_activity'),
+          settings: [{key: 'metric', type: 'select', default: 'tokens', label: () => t('f_acMetric'), options: [{value: 'tokens', label: () => t('ac_tokens')}, {value: 'requests', label: () => t('ac_requests')}]}],
+        };
+
         const builtins = [
           ['workboard.today', 'today', Today], ['workboard.todo', 'todo', Todo], ['workboard.note', 'note', Note], ['workboard.calendar', 'calendar', Calendar],
           ['workboard.weather', 'weather', Weather], ['workboard.clock', 'clock', Clock], ['workboard.quote', 'quote', Quote], ['workboard.countdown', 'countdown', Countdown],
@@ -3763,12 +4054,13 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           ['workboard.files', 'files', Files], ['workboard.clipboard', 'clipboard', Clipboard], ['workboard.network', 'network', Network],
           ['workboard.nowplaying', 'nowplaying', NowPlaying], ['workboard.ambient', 'ambient', Ambient], ['workboard.videos', 'videos', Videos],
           ['workboard.attention', 'attention', Attention], ['workboard.brief', 'brief', Brief],
+          ['workboard.ports', 'ports', Ports], ['workboard.status', 'status', Status], ['workboard.papers', 'papers', Papers], ['workboard.holiday', 'holiday', Holiday], ['workboard.activity', 'activity', Activity],
         ];
         const BUILTIN_CATEGORY = {
-          daily: ['today', 'clock', 'worldclock', 'weather', 'countdown', 'progress', 'habits', 'photo', 'nowplaying'],
-          agent: ['attention', 'agents', 'running', 'brief', 'prompt', 'inbox', 'usage', 'outputs', 'tasks', 'pinned'],
-          news: ['trending', 'feed', 'videos', 'market', 'quote'],
-          tools: ['todo', 'note', 'calendar', 'focus', 'ambient', 'links', 'git', 'github', 'system', 'files', 'clipboard', 'network'],
+          daily: ['today', 'clock', 'worldclock', 'weather', 'countdown', 'holiday', 'progress', 'habits', 'photo', 'nowplaying'],
+          agent: ['attention', 'agents', 'running', 'brief', 'prompt', 'inbox', 'usage', 'activity', 'status', 'outputs', 'tasks', 'pinned'],
+          news: ['trending', 'feed', 'papers', 'videos', 'market', 'quote'],
+          tools: ['todo', 'note', 'calendar', 'focus', 'ambient', 'links', 'git', 'github', 'system', 'files', 'clipboard', 'network', 'ports'],
         };
         for (const [category, keys] of Object.entries(BUILTIN_CATEGORY)) {
           for (const key of keys) {

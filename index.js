@@ -25,6 +25,10 @@ import {createRecentFiles, isRisky} from './lib/files.js';
 import {createClipboard} from './lib/clipboard.js';
 import {createNetwork} from './lib/network.js';
 import {createAttention} from './lib/attention.js';
+import {createPorts} from './lib/ports.js';
+import {createStatus} from './lib/status.js';
+import {createPapers} from './lib/papers.js';
+import {createHolidays} from './lib/holiday.js';
 import {CONTEXT_SECTIONS, createContext} from './lib/context.js';
 import {stat} from 'node:fs/promises';
 import {isAbsolute, join} from 'node:path';
@@ -74,6 +78,7 @@ export const BUILTIN_WIDGETS = [
   'workboard.prompt', 'workboard.inbox', 'workboard.usage', 'workboard.running', 'workboard.git', 'workboard.github', 'workboard.system', 'workboard.photo', 'workboard.market', 'workboard.trending',
   'workboard.outputs', 'workboard.schedules', 'workboard.pinned', 'workboard.files', 'workboard.clipboard', 'workboard.network',
   'workboard.nowplaying', 'workboard.ambient', 'workboard.videos', 'workboard.attention', 'workboard.brief',
+  'workboard.ports', 'workboard.status', 'workboard.papers', 'workboard.holiday', 'workboard.activity',
 ];
 
 export function defaultBoard(id) {
@@ -979,6 +984,30 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       if (!services.network) throw new UserError('unavailable', 'network status is not available');
       return services.network.get({targets: String(p?.targets ?? ''), fresh: p?.fresh === true});
     },
+    'dsh-workboard/ports.list': async p => {
+      if (!services.ports) throw new UserError('unavailable', 'listening ports are not available');
+      return services.ports.list({fresh: p?.fresh === true});
+    },
+    'dsh-workboard/ports.stop': async p => {
+      if (!services.ports) throw new UserError('unavailable', 'listening ports are not available');
+      try {
+        return await services.ports.stop({pid: p?.pid, port: p?.port});
+      } catch (error) {
+        throw new UserError(error?.code === 'not-found' ? 'not-found' : error?.code === 'EPERM' ? 'denied' : 'failed', String(error?.message || error));
+      }
+    },
+    'dsh-workboard/status.get': async p => {
+      if (!services.status) throw new UserError('unavailable', 'service status is not available');
+      return services.status.list({sources: String(p?.sources ?? ''), lang: String(p?.lang ?? '')});
+    },
+    'dsh-workboard/papers.get': async p => {
+      if (!services.papers) throw new UserError('unavailable', 'papers are not available');
+      return services.papers.list({kind: String(p?.kind ?? '')});
+    },
+    'dsh-workboard/holiday.get': async p => {
+      if (!services.holidays) throw new UserError('unavailable', 'holidays are not available');
+      return services.holidays.list({year: p?.year});
+    },
     'dsh-workboard/inbox.list': () => store.listInbox(),
     'dsh-workboard/inbox.add': p => store.addInbox(p?.text),
     'dsh-workboard/inbox.remove': p => store.removeInbox(p?.id),
@@ -1268,6 +1297,10 @@ export function apply(ctx) {
     open: createOpener(ctx, run),
     clipboard: createClipboard({run}),
     network: createNetwork({run}),
+    ports: createPorts({run}),
+    status: createStatus(fetcher),
+    papers: createPapers(fetcher),
+    holidays: createHolidays(fetcher),
   };
   const handlers = createHandlers(store, fetcher, createAgentWatch(ctx), createLauncher(ctx), services);
   const context = createContext({store, call: (method, payload) => handlers[`dsh-workboard/${method}`](payload)});
