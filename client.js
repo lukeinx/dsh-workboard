@@ -430,7 +430,6 @@ window.__ModuleLoader__.load({
     const CSS = `
 .wb-page{height:100%;overflow:auto;background:var(--dsw-alias-bg-base);color:var(--dsw-alias-label-primary);font-size:13px}
 .wb-inner{max-width:1120px;margin:0 auto;padding:0 24px 32px;box-sizing:border-box}
-.wb-inner[data-headless]{padding-top:24px}
 .wb-error{color:var(--dsw-alias-state-error-primary);font-size:12px;margin-bottom:8px}
 .wb-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:80px;grid-auto-flow:row dense;gap:16px}
 .wb-card{grid-column:span var(--c);grid-row:span var(--r);background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:12px;padding:16px;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden;box-sizing:border-box}
@@ -509,7 +508,7 @@ window.__ModuleLoader__.load({
 .wb-pbox .wb-wsel{position:absolute;right:6px;bottom:6px}
 .wb-pbox[data-ws] textarea{padding-right:30px}
 
-.wb-head{display:flex;align-items:center;gap:8px;padding:20px 0 16px;flex-wrap:wrap}
+.wb-head{display:flex;align-items:center;gap:8px;padding:20px 0 16px;flex-wrap:wrap;min-height:30px}
 .wb-head[data-editing]{position:sticky;top:0;z-index:5;background:var(--dsw-alias-bg-base)}
 .wb-head:not([data-editing]) .wb-newboard{opacity:0;transition:opacity .15s}
 .wb-head:hover .wb-newboard,.wb-head .wb-newboard:focus-visible{opacity:1}
@@ -4364,8 +4363,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           };
 
           return h('div', {className: 'wb-page'},
-            h('div', {className: 'wb-inner', 'data-headless': headless ? '' : undefined},
-              headless ? null : h('div', {className: 'wb-head', 'data-editing': editing ? '' : undefined}, showTabs ? tabs : null, h('span', {className: 'wb-spacer'}), ...actions),
+            h('div', {className: 'wb-inner'},
+              h('div', {className: 'wb-head', 'data-editing': editing ? '' : undefined}, showTabs ? tabs : null, h('span', {className: 'wb-spacer'}), ...(headless ? [] : actions)),
               shownError ? h('div', {className: 'wb-error', role: 'alert'}, shownError) : null,
               board && cells.length === 0 && !editing ? h('div', {className: 'wb-empty'},
                 h('div', {className: 'wb-emptyacts'},
