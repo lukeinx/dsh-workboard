@@ -156,7 +156,7 @@ dsh-workboard
 - **模型行情**：[OpenRouter](https://openrouter.ai) 公开模型列表接口（无需 key）；用量 widget 开启「按 OpenRouter 公开价估算」时也读取同一接口；缓存 30 分钟
 - **大模型竞技场**：经 [Hugging Face Datasets Server](https://huggingface.co/docs/dataset-viewer) 读取 [LMArena](https://lmarena.ai) 官方发布的 [`lmarena-ai/leaderboard-dataset`](https://huggingface.co/datasets/lmarena-ai/leaderboard-dataset)（文本、WebDev、Agent、视觉、搜索）；缓存 60 分钟
 - **热门 MCP**：[npm 搜索接口](https://registry.npmjs.org)、[GitHub 仓库搜索接口](https://docs.github.com/rest/search) 与 [官方 MCP Registry](https://registry.modelcontextprotocol.io)；缓存 30 分钟
-- **发版追踪**：所填 GitHub 仓库的公开 `releases.atom` 订阅源（无需 key、不占 REST API 配额），默认预填 `anthropics/claude-code`、`modelcontextprotocol/servers`、`ollama/ollama` 与 `vercel/ai`；缓存 15 分钟
+- **发版追踪**：所填 GitHub 仓库的公开 `releases.atom` 订阅源（无需 key、不占 REST API 配额），默认预填 `anthropics/claude-code`、`badlogic/pi-mono` 与 `deepseek-ai/deepseek-harness`；缓存 15 分钟
 - **包下载量**：npm（`registry.npmjs.org` 与 `api.npmjs.org`）、[PyPI](https://pypi.org) 与 [PyPI Stats](https://pypistats.org)、[Crates.io](https://crates.io) 公开接口，默认预填 `dsh-workboard`、`@modelcontextprotocol/sdk`、`pypi:openai` 与 `crate:tokio`；缓存 30 分钟
 - **节假日**：经 jsDelivr 读取 [holiday-cn](https://github.com/NateScarlet/holiday-cn) 今明两年的数据，失败时回退至 GitHub raw；缓存 12 小时
 - **历史上的今天 / 每日壁纸**：[Wikimedia Feed API](https://api.wikimedia.org/wiki/Feed_API)（历史上的今天与每日图片）、百度百科历史上的今天月度 JSON（`baike.baidu.com`，非官方）与 Bing 每日壁纸接口（`www.bing.com/HPImageArchive.aspx`，非官方）；壁纸图片由 Host 代理成 data URL；列表缓存 2 小时、图片缓存 6 小时
