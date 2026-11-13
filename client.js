@@ -888,7 +888,7 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-amb[data-size=w] .wb-amctl{width:200px}
 .wb-amctl input{flex:1;min-width:0;accent-color:var(--dsw-alias-brand-primary)}
 .wb-amplay{width:28px;height:28px;border-radius:14px;flex:none;display:grid;place-items:center;background:var(--dsw-alias-brand-primary);${onBrand('color')}}
-.wb-vstrip{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;flex:1;min-height:0;scrollbar-width:thin}
+.wb-vstrip{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;flex:1;min-height:0}
 .wb-vtile{position:relative;flex:none;height:100%;aspect-ratio:16/9;border-radius:8px;overflow:hidden;background:var(--dsw-alias-bg-layer-2);color:#fff;text-decoration:none}
 .wb-vtile>div{position:absolute;left:0;right:0;bottom:0;padding:16px 8px 6px;background:linear-gradient(transparent,rgba(0,0,0,.75));font-size:12px;line-height:1.35}
 .wb-vtile b{font-weight:500;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -966,6 +966,12 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-heat i[data-future]{background:none}
 .wb-heat i[data-day]:hover{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--dsw-alias-label-primary) 60%,transparent)}
 .wb-heat i[data-today]{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--dsw-alias-label-primary) 30%,transparent)}
+.wb-list,.wb-events,.wb-rows,.wb-links,.wb-quotes,.wb-chips,.wb-table,.wb-vgrid,.wb-vlist{margin-right:-8px;padding-right:8px}
+.wb-card ::-webkit-scrollbar{width:4px;height:4px}
+.wb-card ::-webkit-scrollbar-track,.wb-card ::-webkit-scrollbar-corner{background:transparent}
+.wb-card ::-webkit-scrollbar-thumb{background:transparent;border-radius:2px}
+.wb-card:hover ::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--dsw-alias-label-secondary) 28%,transparent)}
+.wb-card ::-webkit-scrollbar-thumb:hover,.wb-card ::-webkit-scrollbar-thumb:active{background:color-mix(in srgb,var(--dsw-alias-label-secondary) 50%,transparent)}
 `;
 
     const pad = n => String(n).padStart(2, '0');
@@ -1040,8 +1046,11 @@ button:disabled{opacity:.5;cursor:default}
 button.primary{background:var(--accent);border-color:transparent;color:var(--on-accent)}
 input,select,textarea{min-width:0;background:var(--layer);border:1px solid var(--border);border-radius:8px;padding:5px 8px;outline:none}
 input:focus,select:focus,textarea:focus{border-color:var(--accent)}
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:3px}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track,::-webkit-scrollbar-corner{background:transparent}
+::-webkit-scrollbar-thumb{background:transparent;border-radius:2px}
+html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{background:color-mix(in srgb,var(--muted) 28%,transparent)}
+::-webkit-scrollbar-thumb:hover,::-webkit-scrollbar-thumb:active{background:color-mix(in srgb,var(--muted) 50%,transparent)}
 `;
 
     // 在 iframe 里运行（按源码序列化注入），不能引用外层变量。
