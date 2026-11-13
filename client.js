@@ -88,7 +88,7 @@ window.__ModuleLoader__.load({
       waitingYou: '等你确认', running: '运行中', untitledSession: '未命名会话', newSession: '新会话', schedules: '定时任务', executing: '执行中',
       noSessions: '还没有会话', noActive: '没有进行中的会话', agentsUnavailable: '当前 Harness 不支持读取会话', activeCount: '{n} 个进行中',
       f_showRecent: '显示最近会话', f_showSchedules: '显示定时任务',
-      f_feeds: '订阅地址（每行一个 RSS / Atom）', defaultFeeds: 'https://www.ifanr.com/feed\nhttps://www.ruanyifeng.com/blog/atom.xml', feedError: '{n} 个订阅加载失败', noItems: '没有内容',
+      f_feeds: '订阅地址（每行一个 RSS / Atom，支持 rsshub://路由）', f_rsshub: 'RSSHub 实例地址（留空用 rsshub.app，建议填自建实例）', defaultFeeds: 'https://www.ifanr.com/feed\nhttps://www.ruanyifeng.com/blog/atom.xml', feedError: '{n} 个订阅加载失败', noItems: '没有内容',
       markAllRead: '全部已读', unreadCount: '{n} 条未读', f_hideRead: '隐藏已读',
       addHabit: '添加习惯，回车保存', noHabits: '在下方添加一个习惯，每天点对应日期的格子打卡', streak: '连续 {n} 天', markDay: '{d} 打卡', todayShort: '今',
       prompt: 'Prompt 快启', usage: '用量', running: '运行中', git: 'Git 工作区', github: 'GitHub', system: '系统状态', photo: '相框', market: '行情',
@@ -231,7 +231,7 @@ window.__ModuleLoader__.load({
       waitingYou: 'Needs you', running: 'Running', untitledSession: 'Untitled session', newSession: 'New session', schedules: 'Scheduled', executing: 'Running',
       noSessions: 'No sessions yet', noActive: 'Nothing running', agentsUnavailable: 'This Harness does not expose sessions', activeCount: '{n} active',
       f_showRecent: 'Show recent sessions', f_showSchedules: 'Show scheduled tasks',
-      f_feeds: 'Feed URLs, one RSS or Atom feed per line', defaultFeeds: 'https://hnrss.org/frontpage', feedError: '{n} feed(s) failed to load', noItems: 'Nothing here',
+      f_feeds: 'Feed URLs, one RSS or Atom feed per line (rsshub://route supported)', f_rsshub: 'RSSHub instance URL (empty uses rsshub.app; self-hosted recommended)', defaultFeeds: 'https://hnrss.org/frontpage', feedError: '{n} feed(s) failed to load', noItems: 'Nothing here',
       markAllRead: 'Mark all read', unreadCount: '{n} unread', f_hideRead: 'Hide read items',
       addHabit: 'Add a habit, press Enter', noHabits: 'Add a habit below, then tick the box for each day you do it', streak: '{n}-day streak', markDay: 'Check in for {d}', todayShort: 'Today',
       prompt: 'Quick prompt', usage: 'Usage', running: 'Running', git: 'Git repos', github: 'GitHub', system: 'System', photo: 'Photo frame', market: 'Markets',
@@ -2470,7 +2470,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           useLocale();
           const now = useNow();
           const urls = String(config?.urls || t('defaultFeeds')).split(/\s+/).filter(Boolean);
-          const res = useRemote('feed.get', {urls, limit: 40}, FEED_MS);
+          const rsshub = String(config?.rsshub ?? '').trim();
+          const res = useRemote('feed.get', {urls, rsshub, limit: 40}, FEED_MS);
           const all = res.value?.items ?? [];
           const failed = res.value?.errors?.length ?? 0;
           const many = urls.length > 1;
@@ -2494,6 +2495,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_feed'),
           settings: [
             {key: 'urls', type: 'textarea', label: () => t('f_feeds'), default: () => t('defaultFeeds')},
+            {key: 'rsshub', type: 'text', label: () => t('f_rsshub'), placeholder: 'https://rsshub.example.com'},
             {key: 'hideRead', type: 'toggle', default: false, label: () => t('f_hideRead')},
           ],
         };

@@ -2,7 +2,7 @@
 import {FetchError, createFetcher} from './lib/http.js';
 import {getWeather, searchPlaces} from './lib/weather.js';
 import {parseICS, expandEvents} from './lib/ics.js';
-import {parseFeed} from './lib/feed.js';
+import {parseFeed, resolveFeedUrl} from './lib/feed.js';
 import {createUsage} from './lib/usage.js';
 import {createRunner} from './lib/exec.js';
 import {createSystemCalendar} from './lib/syscal.js';
@@ -432,19 +432,20 @@ function createCalendar(fetcher, systemCalendar = null) {
 
 function createFeeds(fetcher) {
   const parsed = new Map();
-  return async ({urls, limit}) => {
+  return async ({urls, rsshub, limit}) => {
     const list = (Array.isArray(urls) ? urls : String(urls ?? '').split(/\s+/)).map(u => String(u).trim()).filter(Boolean).slice(0, 8);
     const max = Math.min(Math.max(Number(limit) || 30, 1), 60);
     const errors = [];
     const items = [];
-    await Promise.all(list.map(async (url, source) => {
+    await Promise.all(list.map(async (raw, source) => {
       try {
+        const url = resolveFeedUrl(raw, rsshub);
         const text = await fetcher.get(url, {ttlMs: FEED_TTL, type: 'text', maxBytes: FEED_MAX_BYTES, timeoutMs: 15_000});
         let hit = parsed.get(url);
         if (!hit || hit.text !== text) { hit = {text, feed: parseFeed(text)}; parsed.set(url, hit); }
         for (const item of hit.feed.items) items.push({...item, source, feed: hit.feed.title});
       } catch (error) {
-        errors.push({url, message: String(error?.message || error)});
+        errors.push({url: raw, message: String(error?.message || error)});
       }
     }));
     items.sort((a, b) => b.date - a.date || a.source - b.source);
@@ -832,7 +833,7 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
   const attention = services.attention ?? createAttention({agents, running: services.running, github: services.github, store});
   return {
     'dsh-workboard/quote.get': p => quotes.get({day: p?.day, n: p?.n}),
-    'dsh-workboard/feed.get': p => feeds({urls: p?.urls, limit: p?.limit}),
+    'dsh-workboard/feed.get': p => feeds({urls: p?.urls, rsshub: p?.rsshub, limit: p?.limit}),
     'dsh-workboard/attention.get': p => attention({dayStart: p?.dayStart, github: p?.github !== false, todos: p?.todos !== false}),
     'dsh-workboard/agent.overview': () => (agents ? agents.overview() : {sessions: null, schedules: null}),
     'dsh-workboard/agent.start': async p => {
