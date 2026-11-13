@@ -38,6 +38,7 @@ window.__ModuleLoader__.load({
     const APP_LIST_MS = 60_000;
     const STATUS_MS = 2 * 60_000;
     const PAPERS_MS = 30 * 60_000;
+    const MODELS_MS = 30 * 60_000;
     const HOLIDAY_MS = 6 * 3600_000;
     const MAX_PINNED = 20;
     const MAX_APPS = 32;
@@ -119,6 +120,7 @@ window.__ModuleLoader__.load({
       u_vs: '昨日 {n}', u_range_1: '今天', u_range_7: '7 天', u_range_30: '30 天', u_model: '模型', u_req: '请求', u_tok: 'token',
       u_unreported: '{n} 次请求未上报 token（{p}）', u_none: '这段时间没有请求', u_day: '{d}：{t} token，{r} 次请求',
       f_prices: '单价（每行一个：模型 输入 输出 [缓存读] [缓存写]，美元 / 百万 token；模型可写前缀）',
+      f_orPrices: '未填单价的模型按 OpenRouter 公开价估算', u_costOr: '约 ${n}（按 OpenRouter 公开价）',
       d_prompt: '一句话或预设模板直接开新会话',
       promptPlaceholder: '让 Agent 做点什么，回车发送', sending: '发送中…', f_presets: '预设（每行一个：名称 | prompt）', f_cwd: '工作目录（留空用默认）', ws_label: '工作区', ws_default: '默认工作区',
       defaultPresets: '今日计划 | 读取我工作台上的待办和日程，帮我排出今天最该做的三件事\n周报草稿 | 读取我工作台上本周完成的待办，写一份简短的周报草稿',
@@ -177,6 +179,9 @@ window.__ModuleLoader__.load({
       papers: 'AI 论文', d_papers: 'Hugging Face 每日论文与热门模型，论文可交给 Agent 解读',
       pp_papers: '论文', pp_models: '模型', pp_votes: '{n} 人点赞', pp_likes: '{n} 人喜欢', pp_downloads: '{n} 下载', f_ppModels: '显示热门模型',
       pp_prompt: '读一下这篇论文：{title}\n{url}\n用中文讲清楚它要解决的问题、核心方法、主要结果和局限，最后说说可能的应用场景。',
+      models: '模型行情', d_models: 'OpenRouter 本周热门与最新上架的模型，附价格与上下文长度',
+      md_top: '热门', md_new: '最新', md_free: '免费', md_price: '输入 ${i} · 输出 ${o}（美元 / 百万 token）', md_ctx: '{n} 上下文', md_none: '没有匹配的模型',
+      f_mdVendors: '只看这些厂商（空格分隔，如 deepseek anthropic openai；留空看全部）',
       holiday: '节假日', d_holiday: '中国大陆法定节假日、调休上班日与农历',
       hd_now: '放假中', hd_off: '放假 {n} 天', hd_work: '{d} 上班', hd_todayOff: '今天放假（{name}）', hd_todayWork: '今天调休上班（{name}）', hd_none: '暂无已公布的假期安排',
       activity: '活跃热力图', d_activity: '过去一年每天的 Agent 用量，按 token 或请求数着色',
@@ -255,6 +260,7 @@ window.__ModuleLoader__.load({
       u_vs: 'Yesterday {n}', u_range_1: 'Today', u_range_7: '7 days', u_range_30: '30 days', u_model: 'Model', u_req: 'Requests', u_tok: 'Tokens',
       u_unreported: '{n} requests reported no tokens ({p})', u_none: 'No requests in this period', u_day: '{d}: {t} tokens, {r} requests',
       f_prices: 'Prices, one per line: model input output [cache read] [cache write], USD per million tokens; a model prefix matches',
+      f_orPrices: 'Estimate models without a price from OpenRouter list prices', u_costOr: '≈ ${n} (OpenRouter list price)',
       d_prompt: 'Start a new session from a line of text or a preset',
       promptPlaceholder: 'Ask the agent something, Enter to send', sending: 'Sending…', f_presets: 'Presets, one per line: name | prompt', f_cwd: 'Working directory (empty uses the default)', ws_label: 'Workspace', ws_default: 'Default workspace',
       defaultPresets: 'Plan today | Read my Workboard to-dos and calendar and pick the three things I should do today\nWeekly note | Read the to-dos I completed on Workboard this week and draft a short weekly update',
@@ -313,6 +319,9 @@ window.__ModuleLoader__.load({
       papers: 'AI papers', d_papers: 'Hugging Face daily papers and trending models; hand a paper to the agent to explain',
       pp_papers: 'Papers', pp_models: 'Models', pp_votes: '{n} upvotes', pp_likes: '{n} likes', pp_downloads: '{n} downloads', f_ppModels: 'Show trending models',
       pp_prompt: 'Read this paper: {title}\n{url}\nExplain the problem it tackles, the core method, the main results and the limitations, then suggest where it could be applied.',
+      models: 'Models', d_models: 'Trending and newest models on OpenRouter, with prices and context length',
+      md_top: 'Trending', md_new: 'Newest', md_free: 'Free', md_price: 'Input ${i} · output ${o} (USD per million tokens)', md_ctx: '{n} context', md_none: 'No matching models',
+      f_mdVendors: 'Only these vendors, space-separated (e.g. deepseek anthropic openai); empty shows all',
       holiday: 'China holidays', d_holiday: 'Public holidays and make-up workdays in mainland China',
       hd_now: 'On break', hd_off: '{n} days off', hd_work: 'work on {d}', hd_todayOff: 'Day off today ({name})', hd_todayWork: 'Make-up workday today ({name})', hd_none: 'No holidays announced yet',
       activity: 'Activity', d_activity: 'Daily agent usage over the past year, shaded by tokens or requests',
@@ -2926,7 +2935,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const n = rest.map(Number);
           return model && n.length >= 2 && n.every(Number.isFinite) ? {model, input: n[0], output: n[1], cacheRead: n[2] ?? n[0], cacheWrite: n[3] ?? n[0]} : null;
         }).filter(Boolean);
-        const priceOf = (prices, model) => prices.filter(p => model === p.model || model.startsWith(p.model)).sort((a, b) => b.model.length - a.model.length)[0];
+        // 手填单价优先；开启 OpenRouter 估算时，没填的模型按规范化后的名字精确匹配公开价（见 lib/models.js 的 modelKey）。
+        const modelKey = s => String(s ?? '').toLowerCase().trim().replace(/^.*\//, '').replace(/[._\s]+/g, '-');
+        const priceOf = (prices, model, fallback) => prices.filter(p => model === p.model || model.startsWith(p.model)).sort((a, b) => b.model.length - a.model.length)[0]
+          ?? (fallback && Object.hasOwn(fallback, modelKey(model)) ? {...fallback[modelKey(model)], fromOr: true} : undefined);
         const tokensOf = r => r.input + r.output + r.cacheRead + r.cacheWrite;
         const costOf = (r, p) => (p ? (r.input * p.input + r.output * p.output + r.cacheRead * p.cacheRead + r.cacheWrite * p.cacheWrite) / 1e6 : 0);
         const shiftDay = (key, n) => { const d = keyDate(key); d.setDate(d.getDate() + n); return dayKey(d); };
@@ -2935,12 +2947,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           useLocale();
           const [range, setRange] = useState(7);
           const res = useRemote('usage.get', {days: 30}, USAGE_MS);
+          const orRes = useRemote('models.get', config?.orPrices ? {kind: 'prices'} : null, MODELS_MS);
           const v = res.value;
           if (!v) return h('div', {className: 'wb-blank'}, res.error || '…');
           const prices = parsePrices(config?.prices);
+          const fallback = config?.orPrices ? orRes.value?.prices : null;
           const sum = rows => rows.reduce((a, r) => {
             for (const k of ['requests', 'reported', 'input', 'output', 'cacheRead', 'cacheWrite']) a[k] += r[k];
-            a.cost += costOf(r, priceOf(prices, r.model));
+            a.cost += costOf(r, priceOf(prices, r.model, fallback));
             return a;
           }, {requests: 0, reported: 0, input: 0, output: 0, cacheRead: 0, cacheWrite: 0, cost: 0});
           const today = sum(v.rows.filter(r => r.day === v.today));
@@ -2981,18 +2995,21 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             table.length ? h('div', {className: 'wb-table wb-num'},
               h('span', {className: 'wb-th'}, t('u_model')), h('span', {className: 'wb-th'}, t('u_req')), h('span', {className: 'wb-th'}, t('u_tok')),
               table.flatMap(m => {
-                const p = priceOf(prices, m.model);
+                const p = priceOf(prices, m.model, fallback);
                 return [
                   h('span', {key: `${m.provider}${m.model}n`, title: `${m.provider} / ${m.model}`}, m.model || m.provider, size === 't' ? null : h('small', null, m.provider)),
                   h('span', {key: `${m.provider}${m.model}r`}, m.requests),
-                  h('span', {key: `${m.provider}${m.model}t`, title: p ? fill(t('u_cost'), {n: m.cost.toFixed(2)}) : undefined}, m.reported ? compact(tokensOf(m)) : '–'),
+                  h('span', {key: `${m.provider}${m.model}t`, title: p ? fill(t(p.fromOr ? 'u_costOr' : 'u_cost'), {n: m.cost.toFixed(2)}) : undefined}, m.reported ? compact(tokensOf(m)) : '–'),
                 ];
               })) : h('div', {className: 'wb-blank'}, t('u_none')),
             silentReq ? h('div', {className: 'wb-foot-note', title: silentBy}, fill(t('u_unreported'), {n: silentReq, p: silentBy})) : null);
         }
         Usage.workboard = {
           apiVersion: 1, sizes: ['l', 't', 'm', 'w', 's'], defaultSize: 'm', description: () => t('d_usage'),
-          settings: [{key: 'prices', type: 'textarea', label: () => t('f_prices'), placeholder: 'claude-opus 15 75 1.5 18.75'}],
+          settings: [
+            {key: 'prices', type: 'textarea', label: () => t('f_prices'), placeholder: 'claude-opus 15 75 1.5 18.75'},
+            {key: 'orPrices', type: 'toggle', default: false, label: () => t('f_orPrices')},
+          ],
         };
 
         const duration = ms => {
@@ -4022,6 +4039,33 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           settings: [{key: 'models', type: 'toggle', default: true, label: () => t('f_ppModels')}],
         };
 
+        const usd = v => (v >= 100 ? v.toFixed(0) : v >= 1 ? v.toFixed(2).replace(/\.?0+$/, '') : String(Number(v.toPrecision(2))));
+        function Models({size, config}) {
+          useLocale();
+          const [kind, setKind] = useState('top');
+          const res = useRemote('models.get', {kind, vendors: String(config?.vendors ?? '')}, MODELS_MS);
+          const v = res.value?.kind === kind ? res.value : null;
+          const read = useRead(v ? v.items.map(it => it.url) : []);
+          const lang = t('lang');
+          const compact = new Intl.NumberFormat(lang, {notation: 'compact', maximumFractionDigits: 1});
+          const priced = it => it.input != null && it.output != null;
+          const price = it => (it.free ? t('md_free') : priced(it) ? `$${usd(it.input)} / $${usd(it.output)}` : '—');
+          const meta = it => [kind === 'new' && it.created ? new Date(it.created).toLocaleDateString(lang, {month: 'short', day: 'numeric'}) : '', it.vendor,
+            it.context ? fill(t('md_ctx'), {n: compact.format(it.context)}) : ''].filter(Boolean).join(' · ');
+          const row = (it, i) => h('a', {key: it.id, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer',
+            title: [it.id, meta(it), priced(it) && !it.free ? fill(t('md_price'), {i: usd(it.input), o: usd(it.output)}) : ''].filter(Boolean).join('\n')},
+            h('span', {className: 'wb-rank wb-num', 'data-top': kind === 'top' && i < 3 ? '' : undefined}, i + 1),
+            h('div', null, h('b', null, it.name), size === 'm' ? null : h('small', null, meta(it))),
+            size === 't' ? null : h('span', {className: 'wb-num'}, price(it)));
+          return h('div', {className: 'wb-trend'},
+            h('div', {className: 'wb-seg', role: 'tablist'}, ['top', 'new'].map(k => h('button', {key: k, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': k === kind, onClick: () => setKind(k)}, t(`md_${k}`)))),
+            h('div', {className: 'wb-rows'}, v ? (v.items.length ? v.items.map(row) : blank(t('md_none'))) : blank(res.error || '…')));
+        }
+        Models.workboard = {
+          apiVersion: 1, sizes: ['l', 't', 'm', 'w'], defaultSize: 'l', description: () => t('d_models'),
+          settings: [{key: 'vendors', type: 'text', label: () => t('f_mdVendors'), placeholder: 'deepseek anthropic openai'}],
+        };
+
         // 连续、同名的放假日合成一个假期；同名的上班日即该假期的调休。
         function holidayPeriods(days) {
           const periods = [];
@@ -4168,12 +4212,12 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           ['workboard.nowplaying', 'nowplaying', NowPlaying], ['workboard.ambient', 'ambient', Ambient], ['workboard.videos', 'videos', Videos],
           ['workboard.attention', 'attention', Attention], ['workboard.brief', 'brief', Brief],
           ['workboard.ports', 'ports', Ports], ['workboard.status', 'status', Status], ['workboard.papers', 'papers', Papers], ['workboard.holiday', 'holiday', Holiday], ['workboard.activity', 'activity', Activity],
-          ['workboard.apps', 'apps', Apps],
+          ['workboard.apps', 'apps', Apps], ['workboard.models', 'models', Models],
         ];
         const BUILTIN_CATEGORY = {
           daily: ['today', 'clock', 'worldclock', 'weather', 'countdown', 'holiday', 'progress', 'habits', 'photo', 'nowplaying'],
           agent: ['attention', 'agents', 'running', 'brief', 'prompt', 'usage', 'activity', 'status', 'outputs', 'tasks', 'pinned'],
-          news: ['trending', 'feed', 'papers', 'videos', 'market', 'quote'],
+          news: ['trending', 'feed', 'papers', 'models', 'videos', 'market', 'quote'],
           tools: ['todo', 'note', 'calendar', 'focus', 'ambient', 'links', 'apps', 'git', 'github', 'system', 'files', 'clipboard', 'network', 'ports'],
         };
         for (const [category, keys] of Object.entries(BUILTIN_CATEGORY)) {

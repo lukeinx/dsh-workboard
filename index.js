@@ -29,6 +29,7 @@ import {createPorts} from './lib/ports.js';
 import {createApps} from './lib/apps.js';
 import {createStatus} from './lib/status.js';
 import {createPapers} from './lib/papers.js';
+import {createModels} from './lib/models.js';
 import {createHolidays} from './lib/holiday.js';
 import {CONTEXT_SECTIONS, createContext} from './lib/context.js';
 import {stat} from 'node:fs/promises';
@@ -78,6 +79,7 @@ export const BUILTIN_WIDGETS = [
   'workboard.outputs', 'workboard.schedules', 'workboard.pinned', 'workboard.files', 'workboard.clipboard', 'workboard.network',
   'workboard.nowplaying', 'workboard.ambient', 'workboard.videos', 'workboard.attention', 'workboard.brief',
   'workboard.ports', 'workboard.status', 'workboard.papers', 'workboard.holiday', 'workboard.activity', 'workboard.apps',
+  'workboard.models',
 ];
 
 export function defaultBoard(id) {
@@ -1003,6 +1005,10 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       if (!services.papers) throw new UserError('unavailable', 'papers are not available');
       return services.papers.list({kind: String(p?.kind ?? '')});
     },
+    'dsh-workboard/models.get': async p => {
+      if (!services.models) throw new UserError('unavailable', 'models are not available');
+      return services.models.list({kind: String(p?.kind ?? ''), vendors: String(p?.vendors ?? '')});
+    },
     'dsh-workboard/holiday.get': async p => {
       if (!services.holidays) throw new UserError('unavailable', 'holidays are not available');
       return services.holidays.list({year: p?.year});
@@ -1272,6 +1278,7 @@ export function apply(ctx) {
     apps: createApps({run, cacheDir: join(tmpdir(), 'dsh-workboard-appicons')}),
     status: createStatus(fetcher),
     papers: createPapers(fetcher),
+    models: createModels(fetcher),
     holidays: createHolidays(fetcher),
   };
   const handlers = createHandlers(store, fetcher, createAgentWatch(ctx), createLauncher(ctx), services);

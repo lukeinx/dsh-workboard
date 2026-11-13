@@ -30,6 +30,7 @@ import {createContext, localIso, streakOf} from '../lib/context.js';
 import {createPorts, isAppProcess, parseCwd, parseLsof, parsePs} from '../lib/ports.js';
 import {bilingual, createStatus, parseFlashcat, parseSources, parseSummary} from '../lib/status.js';
 import {createPapers, parseModels, parsePapers} from '../lib/papers.js';
+import {createModels, modelKey} from '../lib/models.js';
 import {createHolidays} from '../lib/holiday.js';
 import {createApps, parseRunning, parseWinApps, winTarget} from '../lib/apps.js';
 import {createRunner as createExecRunner} from '../lib/exec.js';
@@ -1010,6 +1011,29 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   const pl = await createHandlers(createStore({}), undefined, null, null, {papers: pp})['dsh-workboard/papers.get']({kind: 'papers'});
   assert.deepEqual([pl.via, pl.items.length, hfUrls.length], ['hf-mirror.com', 2, 2]);
   await assert.rejects(pp.list({kind: '__proto__'}), /unknown list/);
+}
+
+// 模型行情：热门保持 OpenRouter 顺序、最新按上架时间倒序，去掉 :free 等变体并可按厂商过滤；价格换算为每百万 token，供用量按规范化名字匹配。
+{
+  const body = {data: [
+    {id: 'deepseek/deepseek-v4', name: 'DeepSeek: DeepSeek V4', created: 100, context_length: 1048576, pricing: {prompt: '0.0000003', completion: '0.0000012', input_cache_read: '0.00000001'}},
+    {id: 'anthropic/claude-opus-5.5', name: 'Anthropic: Claude Opus 5.5', created: 300, pricing: {prompt: '0.000004', completion: '0.00002', input_cache_write: '0.000005'}},
+    {id: 'anthropic/claude-opus-5.5:free', name: 'free variant', created: 400, pricing: {prompt: '0', completion: '0'}},
+    {id: 'openrouter/auto', name: 'Auto Router', created: 200, pricing: {prompt: '-1', completion: '-1'}},
+    {id: 'bad id', name: 'Bad'},
+  ]};
+  const urls = [];
+  const md = createModels({get: async url => { urls.push(url); return body; }});
+  const top = await createHandlers(createStore({}), undefined, null, null, {models: md})['dsh-workboard/models.get']({kind: 'top'});
+  assert.deepEqual(top.items.map(m => [m.id, m.name, m.input, m.output]), [['deepseek/deepseek-v4', 'DeepSeek V4', 0.3, 1.2], ['anthropic/claude-opus-5.5', 'Claude Opus 5.5', 4, 20], ['openrouter/auto', 'Auto Router', null, null]]);
+  assert.deepEqual((await md.list({kind: 'new'})).items.map(m => m.id), ['anthropic/claude-opus-5.5', 'openrouter/auto', 'deepseek/deepseek-v4']);
+  assert.deepEqual((await md.list({kind: 'new', vendors: 'DeepSeek, x'})).items.map(m => m.id), ['deepseek/deepseek-v4']);
+  const {prices} = await md.list({kind: 'prices'});
+  assert.deepEqual(prices[modelKey('claude-opus-5-5')], {input: 4, output: 20, cacheRead: 4, cacheWrite: 5});
+  assert.deepEqual(prices[modelKey('deepseek-v4')], {input: 0.3, output: 1.2, cacheRead: 0.01, cacheWrite: 0.3});
+  assert.equal(prices.auto, undefined);
+  assert.ok(urls.includes('https://openrouter.ai/api/v1/models?sort=top-weekly') && urls.includes('https://openrouter.ai/api/v1/models'));
+  await assert.rejects(md.list({kind: '__proto__'}), /unknown list/);
 }
 
 // 节假日：今年加明年，jsDelivr 失败时走 GitHub raw；明年未公布只返回今年，今年缺失则报错。
