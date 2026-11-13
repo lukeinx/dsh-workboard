@@ -87,28 +87,29 @@ If you are an agent interacting with Workboard:
 | Quick prompt | `m` `w` `l` `t` `s` | Type a prompt or pick a preset to launch a new session right away in the chosen workspace |
 | Usage | `l` `t` `m` `w` `s` | Token counts, request totals, cache hit rate, and per-model breakdown from local session logs, plus cost estimates from prices you set or OpenRouter list prices |
 | Activity | `w` `l` `m` | A year of daily agent usage as a heatmap, shaded by tokens or requests, with active days and streaks |
-| Service status | `t` `l` `m` `s` `w` | Status of DeepSeek, Claude, OpenAI, GitHub, npm, or any Statuspage you add; services with incidents float to the top |
-| Popular MCPs | `l` `t` `m` `w` | Top MCP servers by npm weekly downloads, GitHub stars, and newest entries on the Official MCP Registry, filterable by keyword |
 | Outputs | `t` `l` `m` `w` | Deliverables presented by the agent, newest first; open, reveal in Finder, or jump to the source session |
 | Scheduled tasks | `t` `l` `m` `w` | All scheduled tasks with recurrence and next run time; run now, pause, resume, or delete |
 | Pinned sessions | `t` `l` `m` `w` | Your pinned sessions with a preview of each session's latest message |
-| **Productivity & tools** | | |
+| **Productivity** | | |
 | To-do | `l` `m` `t` | Open items on top, completed items collapsed; unfinished items from earlier days are badged as carried over |
 | Notes | `l` `t` `m` `s` | Autosaving scratchpad; turn the current line into a to-do with one click |
 | Calendar | `t` `l` `s` `m` | Month grid and selected day's schedule from one or more ICS subscriptions, including recurring events |
+| Habits | `m` `l` `t` `w` | Check in for any day of the past week and track your current streak |
 | Focus | `m` `s` | Pomodoro timer that keeps running across boards and panels, sends a system notification when done, and tracks today's completed sessions |
 | Ambient sound | `m` `s` `w` `t` | Rain, waves, wind, fire, and pink / brown noise synthesized in the page; mix several, keeps playing across boards and panels, and can start with Focus |
 | Links | `m` `s` `w` `t` `l` | One `name URL` per line (`http`, `https`, and `mailto` only) |
 | Apps | `m` `s` `w` `t` `l` | Pick installed apps from a searchable list and open them in one click; running apps get a dot (macOS and Windows) |
+| Recent files | `t` `l` `m` `w` | Newest files in `~/Downloads`, `~/Desktop`, or custom folders; open, reveal, or hand a file to the agent |
+| Clipboard | `t` `l` `m` `w` | Text copied while the panel is open; copy again or send to the agent with a preset like Translate |
+| **Developer** | | |
 | Git repos | `t` `l` `m` `w` | Current branch, uncommitted changes, ahead / behind counts, and branches whose upstream is gone; defaults to your Harness workspaces |
 | GitHub | `t` `l` `m` `w` | PRs awaiting your review, your open PRs, and issues assigned to you via your signed-in `gh` CLI |
 | Releases | `t` `l` `m` `w` | Latest GitHub releases and release notes across repositories you track, with an option to hide pre-releases |
 | Packages | `t` `m` `l` `s` `w` | Weekly and monthly download counts and latest version for npm, PyPI (`pypi:name`), and Crates.io (`crate:name`) packages |
-| System | `m` `s` `t` `l` `w` | CPU, memory, disk, battery, and a 5-minute CPU load sparkline |
-| Recent files | `t` `l` `m` `w` | Newest files in `~/Downloads`, `~/Desktop`, or custom folders; open, reveal, or hand a file to the agent |
-| Clipboard | `t` `l` `m` `w` | Text copied while the panel is open; copy again or send to the agent with a preset like Translate |
-| Network | `m` `s` `t` `l` `w` | Live download / upload throughput, local and public IP, system proxy status, and latency to configured hosts |
 | Ports | `t` `l` `m` `w` | TCP ports listening on this machine and the dev servers behind them, with project folder; open in the browser, reveal the folder, or stop the process (apps and system processes hidden by default) |
+| System | `m` `s` `t` `l` `w` | CPU, memory, disk, battery, and a 5-minute CPU load sparkline |
+| Network | `m` `s` `t` `l` `w` | Live download / upload throughput, local and public IP, system proxy status, and latency to configured hosts |
+| Service status | `t` `l` `m` `s` `w` | Status of DeepSeek, Claude, OpenAI, GitHub, npm, or any Statuspage you add; services with incidents float to the top |
 | **Daily** | | |
 | Today | `bar` | Time, greeting, date, ISO week, current weather, and a daily quote (built-in, Hitokoto, or custom; click for another) |
 | Clock | `m` `s` | Current time, greeting, date, and year progress |
@@ -119,8 +120,8 @@ If you are an agent interacting with Workboard:
 | China holidays | `m` `s` `t` | Next public holidays in mainland China with days off and make-up workdays |
 | On this day | `t` `l` `m` `w` `s` | Historical events on today's date from Wikipedia and Baidu Baike, newest year first |
 | Classical poetry | `m` `t` `l` `s` `w` | Masterpieces of Tang & Song poetry, Pre-Qin classics, and Shijing, with full text, Jinrishici recommendations, and one-click agent commentary |
+| Quote | `m` `w` `s` | A daily quote (click for another), sharing its source setting with the Today banner |
 | Time progress | `m` `s` `w` | Percentage of today, this week, this month, and this year elapsed |
-| Habits | `m` `l` `t` `w` | Check in for any day of the past week and track your current streak |
 | Photo frame | `l` `m` `s` `t` `w` | Cycles through photos from a local folder (`~/Pictures` by default), every 1 minute to 1 day or only on click |
 | Daily wallpaper | `l` `m` `s` `t` `w` | Bing daily wallpaper and Wikimedia Picture of the Day; click to cycle the last 8 days |
 | Now playing | `m` `s` `w` `t` | Track, artwork, and progress of whatever macOS reports as now playing (Music, Spotify, QQ Music, browsers…), with play / pause and skip |
@@ -131,10 +132,10 @@ If you are an agent interacting with Workboard:
 | AI papers | `l` `t` `m` `w` | Hugging Face daily papers, latest arXiv preprints by category, and trending Spaces; hand a paper to the agent to explain |
 | Models | `l` `t` `m` `w` | Trending and newest models on OpenRouter with input / output prices and context length, filterable by vendor |
 | LLM Arena | `l` `t` `m` `w` | LMArena blind-test leaderboards (Text, WebDev, Agent, Vision, Search), filterable by open-weight license and vendor |
+| Popular MCPs | `l` `t` `m` `w` | Top MCP servers by npm weekly downloads, GitHub stars, and newest entries on the Official MCP Registry, filterable by keyword |
 | Videos | `l` `t` `m` `w` | Latest uploads from YouTube channels (link, `UC…` ID, or `@handle`), Bilibili creators (space link or UID), and RSS feeds with images, with thumbnails |
 | Podcasts | `l` `t` `m` `w` | Latest episodes from Podcast RSS / `rsshub://`, Apple Podcasts (link, `apple:ID`, or name), and Xiaoyuzhou plus Tech podcast charts, with cross-platform in-card playback and one-click agent episode summaries |
 | Markets | `t` `m` `s` `l` `w` | Forex (`USD/CNY`), China / HK / US equities (`sh600519`, `hk00700`, `usAAPL`), and crypto (`BTC`, `cg:<id>`) |
-| Quote | `m` `w` `s` | A daily quote (click for another), sharing its source setting with the Today banner |
 
 Note: Agent, Quick prompt, Attention, and Daily brief share the same default workspace selection; PRs in Attention reuse the GitHub widget's query and cache. Shared preferences (your name, week start day, city, temperature unit, and quote source) can also be configured under **Settings → Workboard**. New built-in widgets added in future updates appear in the gallery without altering existing boards.
 

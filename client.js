@@ -53,7 +53,7 @@ window.__ModuleLoader__.load({
     // 尺寸档位：[列, 行]，行单位 80px；「横栏」半高，其余行数成对。
     const SIZES = {bar: [4, 1], s: [1, 2], m: [2, 2], t: [1, 4], l: [2, 4], w: [4, 2]};
     // 组件库分类；未声明或不在表内的归入 plugin。
-    const CATEGORIES = ['daily', 'agent', 'news', 'tools', 'mine', 'plugin'];
+    const CATEGORIES = ['daily', 'agent', 'news', 'tools', 'dev', 'mine', 'plugin'];
 
     const zh = {
       lang: 'zh-CN', title: '工作台', loadFailed: '加载失败', empty: '看板上还没有 widget',
@@ -73,7 +73,7 @@ window.__ModuleLoader__.load({
       edit: '编辑', doneEdit: '完成', addWidget: '添加 widget', added: '已添加', add: '添加', settings: '设置', save: '保存', cancel: '取消',
       saved: '已保存', cfg_personal: '个人', openSettings: '打开设置',
       intro: '点这里编辑看板：添加 widget、拖动排序、调整尺寸', introOk: '知道了',
-      searchWidget: '搜索 widget', cat_all: '全部', cat_daily: '日常', cat_agent: 'DeepSeek', cat_news: '资讯', cat_tools: '效率与工具', cat_plugin: '插件',
+      searchWidget: '搜索 widget', cat_all: '全部', cat_daily: '日常', cat_agent: 'DeepSeek', cat_news: '资讯', cat_tools: '效率', cat_dev: '开发', cat_plugin: '插件',
       deleteBoard: '删除看板', confirmDelete: '确认删除', size: '尺寸', drag: '拖动排序',
       size_bar: '横栏', size_s: '小 1×1', size_m: '中 2×1', size_t: '竖 1×2', size_l: '大 2×2', size_w: '通栏 4×1',
       f_name: '称呼', f_location: '城市', f_unit: '温度单位', f_showWeather: '显示天气', f_showQuote: '显示格言', f_urls: 'ICS 订阅地址（每行一个）', f_weekStart: '每周开始于',
@@ -262,7 +262,7 @@ window.__ModuleLoader__.load({
       edit: 'Edit', doneEdit: 'Done', addWidget: 'Add widget', added: 'Added', add: 'Add', settings: 'Settings', save: 'Save', cancel: 'Cancel',
       saved: 'Saved', cfg_personal: 'Personal', openSettings: 'Open settings',
       intro: 'Edit this board here: add widgets, drag to reorder, resize', introOk: 'Got it',
-      searchWidget: 'Search widgets', cat_all: 'All', cat_daily: 'Daily', cat_agent: 'DeepSeek', cat_news: 'News', cat_tools: 'Productivity & tools', cat_plugin: 'Plugins',
+      searchWidget: 'Search widgets', cat_all: 'All', cat_daily: 'Daily', cat_agent: 'DeepSeek', cat_news: 'News', cat_tools: 'Productivity', cat_dev: 'Developer', cat_plugin: 'Plugins',
       deleteBoard: 'Delete board', confirmDelete: 'Confirm delete', size: 'Size', drag: 'Drag to reorder',
       size_bar: 'Banner', size_s: 'Small 1×1', size_m: 'Medium 2×1', size_t: 'Tall 1×2', size_l: 'Large 2×2', size_w: 'Wide 4×1',
       f_name: 'Your name', f_location: 'City', f_unit: 'Temperature unit', f_showWeather: 'Show weather', f_showQuote: 'Show quote', f_urls: 'ICS subscription URLs, one per line', f_weekStart: 'Week starts on',
@@ -5196,10 +5196,11 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           ['workboard.poetry', 'poetry', Poetry], ['workboard.weread', 'weread', Weread], ['workboard.podcasts', 'podcasts', Podcasts],
         ];
         const BUILTIN_CATEGORY = {
-          daily: ['today', 'clock', 'worldclock', 'weather', 'astronomy', 'countdown', 'holiday', 'onthisday', 'poetry', 'progress', 'habits', 'photo', 'wallpaper', 'nowplaying'],
-          agent: ['attention', 'agents', 'running', 'brief', 'prompt', 'usage', 'activity', 'status', 'mcps', 'outputs', 'tasks', 'pinned'],
-          news: ['trending', 'feed', 'weread', 'papers', 'models', 'leaderboard', 'videos', 'podcasts', 'market', 'quote'],
-          tools: ['todo', 'note', 'calendar', 'focus', 'ambient', 'links', 'apps', 'git', 'github', 'releases', 'packages', 'system', 'files', 'clipboard', 'network', 'ports'],
+          daily: ['today', 'clock', 'worldclock', 'weather', 'astronomy', 'countdown', 'holiday', 'onthisday', 'poetry', 'quote', 'progress', 'photo', 'wallpaper', 'nowplaying'],
+          agent: ['attention', 'agents', 'running', 'brief', 'prompt', 'usage', 'activity', 'outputs', 'tasks', 'pinned'],
+          news: ['trending', 'feed', 'weread', 'papers', 'models', 'leaderboard', 'mcps', 'videos', 'podcasts', 'market'],
+          tools: ['todo', 'note', 'calendar', 'habits', 'focus', 'ambient', 'links', 'apps', 'files', 'clipboard'],
+          dev: ['git', 'github', 'releases', 'packages', 'ports', 'system', 'network', 'status'],
         };
         for (const [category, keys] of Object.entries(BUILTIN_CATEGORY)) {
           for (const key of keys) {
