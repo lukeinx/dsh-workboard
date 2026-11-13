@@ -168,7 +168,7 @@ window.__ModuleLoader__.load({
       pt_none: '没有开发服务在监听端口', pt_unsupported: '当前系统不支持', pt_lsof: '需要 lsof', pt_stop: '停止', pt_confirm: '确认停止',
       pt_lan: '局域网可访问', pt_count: '{n} 个端口', pt_hidden: '另有 {n} 个 App 端口', f_ptApps: '显示 App 与系统进程',
       apps: '快捷应用', d_apps: '常用的本机应用一键打开，正在运行的带圆点',
-      ap_add: '添加应用', ap_search: '搜索应用', ap_none: '没有匹配的应用', ap_count: '已选 {n} 个', ap_missing: '已卸载', ap_unsupported: '仅支持 macOS',
+      ap_add: '添加应用', ap_search: '搜索应用', ap_none: '没有匹配的应用', ap_count: '已选 {n} 个', ap_missing: '已卸载', ap_unsupported: '仅支持 macOS 与 Windows',
       status: '服务状态', d_status: 'DeepSeek、Claude、OpenAI、GitHub 等服务的状态页，有故障时标出',
       st_empty: '在设置里添加状态页', st_none: '运行正常', st_maintenance: '维护中', st_minor: '部分降级', st_major: '部分中断', st_critical: '严重中断',
       st_all: '全部正常', st_issues: '{n} 个服务异常', st_error: '无法读取',
@@ -303,8 +303,8 @@ window.__ModuleLoader__.load({
       ports: 'Ports', d_ports: 'Ports listening on this machine and the dev servers behind them; open, reveal the folder or stop the process',
       pt_none: 'No dev server is listening', pt_unsupported: 'Not supported on this system', pt_lsof: 'Needs lsof', pt_stop: 'Stop', pt_confirm: 'Confirm',
       pt_lan: 'Reachable on LAN', pt_count: '{n} port(s)', pt_hidden: '{n} app port(s) hidden', f_ptApps: 'Show apps and system processes',
-      apps: 'Apps', d_apps: 'Open the Mac apps you use most; running ones get a dot',
-      ap_add: 'Add apps', ap_search: 'Search apps', ap_none: 'No matching apps', ap_count: '{n} selected', ap_missing: 'Not installed', ap_unsupported: 'macOS only',
+      apps: 'Apps', d_apps: 'Open the apps you use most; running ones get a dot',
+      ap_add: 'Add apps', ap_search: 'Search apps', ap_none: 'No matching apps', ap_count: '{n} selected', ap_missing: 'Not installed', ap_unsupported: 'macOS and Windows only',
       status: 'Service status', d_status: 'Status pages of DeepSeek, Claude, OpenAI, GitHub and more, flagged when something is down',
       st_empty: 'Add status pages in settings', st_none: 'Operational', st_maintenance: 'Maintenance', st_minor: 'Degraded', st_major: 'Partial outage', st_critical: 'Major outage',
       st_all: 'All operational', st_issues: '{n} service(s) with issues', st_error: 'Unavailable',
@@ -2089,6 +2089,8 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
 
         // 卡片上省掉厂商前缀（Microsoft Word → Word），完整名称放在 title 里。
         const appShort = name => name.replace(/^(Microsoft|Google|Adobe|Tencent)\s+(?=\S)/, '');
+        // macOS 上是 .app 路径，Windows 上是 AppID。
+        const appFallback = id => id.replace(/!.*$/, '').split(/[\\/]/).filter(Boolean).pop()?.replace(/\.(app|exe)$|_[a-z0-9]{13}$/i, '') || id;
 
         // 选中的应用存在全局偏好里，各看板共用一份。
         function Apps() {
@@ -2111,7 +2113,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             const known = new Set(installed.map(a => a.path));
             const lang = t('lang');
             const items = [
-              ...paths.filter(p => !known.has(p)).map(p => ({path: p, name: baseName(p).replace(/\.app$/i, ''), missing: true})),
+              ...paths.filter(p => !known.has(p)).map(p => ({path: p, name: appFallback(p), missing: true})),
               ...[...installed].sort((a, b) => a.name.localeCompare(b.name, lang)),
             ].filter(a => !q || `${a.name} ${baseName(a.path)}`.toLowerCase().includes(q));
             const full = paths.length >= MAX_APPS;
@@ -2123,7 +2125,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
                   return h('button', {key: a.path, type: 'button', className: 'wb-btn wb-row wb-rowbtn', 'aria-pressed': on, 'data-dim': a.missing ? '' : undefined, disabled: !on && full, title: a.path,
                     onClick: () => save(on ? paths.filter(p => p !== a.path) : [...paths, a.path])},
                     on ? h(Icon.check) : h(Icon.plus),
-                    h('div', null, h('b', null, a.name), h('small', null, a.missing ? t('ap_missing') : parentName(a.path))));
+                    h('div', null, h('b', null, a.name), h('small', null, a.missing ? t('ap_missing') : a.path.startsWith('/') ? parentName(a.path) : '')));
                 }) : blank(t('ap_none'))),
               h('div', {className: 'wb-notefoot'}, h('span', null, fill(t('ap_count'), {n: paths.length})),
                 h('button', {type: 'button', className: 'wb-btn', onClick: () => { setPicking(false); setQuery(''); }}, t('doneEdit'))));

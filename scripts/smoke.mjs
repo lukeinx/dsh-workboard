@@ -31,7 +31,8 @@ import {createPorts, isAppProcess, parseCwd, parseLsof, parsePs} from '../lib/po
 import {bilingual, createStatus, parseFlashcat, parseSources, parseSummary} from '../lib/status.js';
 import {createPapers, parseModels, parsePapers} from '../lib/papers.js';
 import {createHolidays} from '../lib/holiday.js';
-import {createApps, parseRunning} from '../lib/apps.js';
+import {createApps, parseRunning, parseWinApps, winTarget} from '../lib/apps.js';
+import {createRunner as createExecRunner} from '../lib/exec.js';
 
 const routes = new Map();
 const tools = new Map();
@@ -1063,6 +1064,46 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   assert.deepEqual(await createApps({os: 'linux', run: async () => '' }).list(), {supported: false, items: []});
   const ah = createHandlers(createStore({}), undefined, null, null, {apps});
   await assert.rejects(ah['dsh-workboard/apps.launch']({path: '/bin/sh'}), e => e.code === 'not-found');
+
+  const winEnv = {ProgramW6432: 'C:\\Program Files', SystemRoot: 'C:\\Windows'};
+  assert.equal(winTarget('{6D809377-6AF0-444B-8957-A3773F02200E}\\Foo\\foo.exe', null, winEnv), 'C:\\Program Files\\Foo\\foo.exe');
+  assert.equal(winTarget('{1ac14e77-02e7-4e5d-b744-2eb1ae5198b7}\\notepad.exe', '', winEnv), 'C:\\Windows\\System32\\notepad.exe');
+  assert.equal(winTarget('Microsoft.WindowsCalculator_8wekyb3d8bbwe!App', null, winEnv), null);
+  assert.deepEqual(parseWinApps('{"id":"Chrome","name":"Google Chrome","target":"C:\\\\x\\\\chrome.exe"}'), [{path: 'Chrome', name: 'Google Chrome', target: 'C:\\x\\chrome.exe'}]);
+  const winRows = [
+    {id: 'Microsoft.WindowsCalculator_8wekyb3d8bbwe!App', name: '计算器', target: null},
+    {id: '{6D809377-6AF0-444B-8957-A3773F02200E}\\Foo\\foo.exe', name: 'Foo', target: null},
+    {id: 'Chrome', name: 'Google Chrome', target: 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'},
+    {id: 'https://example.com/', name: 'Example', target: null},
+    {id: '{6D809377-6AF0-444B-8957-A3773F02200E}\\Foo\\unins000.exe', name: 'Remove Foo', target: null},
+    {id: 'FooUninstaller', name: 'Uninstall Foo', target: null},
+  ];
+  const winCalls = [];
+  const winApps = createApps({os: 'win32', env: winEnv, cacheDir: join(appRoot, 'winicons'), run: async (cmd, args, opts) => {
+    winCalls.push([cmd, args, opts]);
+    if (cmd === 'explorer.exe') return Buffer.from('');
+    const script = Buffer.from(args.at(-1), 'base64').toString('utf16le');
+    if (script.includes('AppsFolder')) return Buffer.from('\uFEFF' + JSON.stringify(winRows));
+    if (script.includes('Get-Process')) return Buffer.from('C:\\Program Files\\Google\\Chrome\\Application\\CHROME.EXE\r\nC:\\Windows\\explorer.exe\r\n');
+    if (script.includes('System.Drawing')) {
+      const job = JSON.parse(Buffer.from(/FromBase64String\('([^']+)'\)/.exec(script)[1], 'base64').toString('utf8'));
+      for (const x of job.items) writeFileSync(join(job.dir, `${x.k}.png`), 'png');
+      return Buffer.from('');
+    }
+    throw new Error('unexpected script');
+  }});
+  assert.deepEqual((await winApps.list()).items.map(a => a.name), ['计算器', 'Foo', 'Google Chrome']);
+  assert.ok(!('target' in (await winApps.list()).items[0]));
+  const wg = await winApps.get({paths: ['Chrome', 'Microsoft.WindowsCalculator_8wekyb3d8bbwe!App', 'Gone!App']});
+  assert.deepEqual(wg.items.map(a => [a.name, Boolean(a.running), Boolean(a.missing)]), [['Google Chrome', true, false], ['计算器', false, false], ['Gone', false, true]]);
+  const wi = await winApps.icons({paths: ['Chrome', 'Microsoft.WindowsCalculator_8wekyb3d8bbwe!App', '{6D809377-6AF0-444B-8957-A3773F02200E}\\Foo\\foo.exe']});
+  assert.deepEqual(Object.keys(wi).sort(), ['Chrome', '{6D809377-6AF0-444B-8957-A3773F02200E}\\Foo\\foo.exe']);
+  await assert.rejects(winApps.launch({path: 'C:\\Windows\\System32\\cmd.exe'}), e => e.code === 'not-found');
+  await winApps.launch({path: 'Chrome'});
+  assert.deepEqual(winCalls.at(-1).slice(0, 2), ['explorer.exe', ['shell:AppsFolder\\Chrome']]);
+  assert.equal(winCalls.at(-1)[2].partial, true);
+  assert.ok(winCalls.filter(c => c[0] === 'powershell.exe').every(c => c[1].includes('-NoProfile') && c[1].includes('-EncodedCommand')));
+  assert.equal(typeof createExecRunner({os: 'win32', env: {Path: 'C:\\Windows'}}), 'function');
   rmSync(appRoot, {recursive: true, force: true});
 }
 

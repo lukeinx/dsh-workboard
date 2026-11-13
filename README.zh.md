@@ -100,7 +100,7 @@ dsh-workboard
 | 专注 | `m` `s` | 番茄钟，切换看板或离开面板不中断，到点发送系统通知并统计今日专注次数 |
 | 白噪音 | `m` `s` `w` `t` | 在页面内合成雨声、海浪、风声、篝火与粉噪 / 棕噪，可叠加；切换看板或离开面板不中断，可在专注时自动播放 |
 | 快捷链接 | `m` `s` `w` `t` `l` | 每行一条「名称 网址」，仅允许 `http`、`https` 与 `mailto` |
-| 快捷应用 | `m` `s` `w` `t` `l` | 从可搜索的本机应用列表中挑选常用 App，一键打开；正在运行的带圆点（仅 macOS） |
+| 快捷应用 | `m` `s` `w` `t` `l` | 从可搜索的本机应用列表中挑选常用 App，一键打开；正在运行的带圆点（支持 macOS 与 Windows） |
 | Git 工作区 | `t` `l` `m` `w` | 展示各仓库当前分支、未提交改动、领先 / 落后提交数及上游已删除分支；默认读取 Harness 工作区 |
 | GitHub | `t` `l` `m` `w` | 复用本机已登录的 `gh` CLI，展示待你 Review 的 PR、你发起的 PR 以及指派给你的 Issue |
 | 系统状态 | `m` `s` `t` `l` `w` | 实时查看 CPU、内存、磁盘、电池状态及最近 5 分钟 CPU 负载曲线 |
@@ -159,7 +159,7 @@ dsh-workboard
 - **相框**：在 macOS 上用 `sips` 生成缩略图并缓存在系统临时目录
 - **正在播放**：通过内置的 [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter)（`vendor/`，BSD-3-Clause）读取系统「正在播放」，它由 `/usr/bin/perl` 运行，无需授权；此路不通时退回用 `osascript` 查询已在运行的「音乐」或 Spotify，首次使用时 macOS 会请求自动化权限
 - **端口**：在 macOS 与 Linux 上调用 `lsof` 和 `ps` 列出监听中的 TCP 端口、工作目录与命令行；「停止」仅向仍在监听该端口的进程发送 `SIGTERM`，无需额外授权
-- **快捷应用**：在 macOS 上列出 `/Applications`、`/System/Applications`、`~/Applications` 及其 `Utilities` 子目录顶层的应用，用 `osascript`（JavaScript for Automation）读取 Finder 显示名与图标，用 `ps` 判断是否在运行；只用 `open -a` 打开上述目录内的应用，无需授权
+- **快捷应用**：在 macOS 上列出 `/Applications`、`/System/Applications`、`~/Applications` 及其 `Utilities` 子目录顶层的应用，用 `osascript`（JavaScript for Automation）读取 Finder 显示名与图标，用 `ps` 判断是否在运行；只用 `open -a` 打开上述目录内的应用，无需授权；在 Windows 上通过 PowerShell 读取「开始」菜单的应用列表（`shell:AppsFolder`，含商店应用），图标取自快捷方式指向的程序，用 `Get-Process` 判断是否在运行，只经 `explorer.exe` 打开列表内的应用；商店应用不显示图标与运行圆点
 - **白噪音**：在页面内用 Web Audio 合成，不读文件、不联网
 - **最近文件**：仅列出目标文件夹顶层文件，不递归扫描
 - **剪贴板**：仅在卡片可见期间每 2 秒读取一次 `pbpaste`（macOS）或 `wl-paste` / `xclip`（Linux），历史仅保存在内存中，不落盘

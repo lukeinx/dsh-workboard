@@ -100,7 +100,7 @@ If you are an agent interacting with Workboard:
 | Focus | `m` `s` | Pomodoro timer that keeps running across boards and panels, sends a system notification when done, and tracks today's completed sessions |
 | Ambient sound | `m` `s` `w` `t` | Rain, waves, wind, fire, and pink / brown noise synthesized in the page; mix several, keeps playing across boards and panels, and can start with Focus |
 | Links | `m` `s` `w` `t` `l` | One `name URL` per line (`http`, `https`, and `mailto` only) |
-| Apps | `m` `s` `w` `t` `l` | Pick installed Mac apps from a searchable list and open them in one click; running apps get a dot (macOS only) |
+| Apps | `m` `s` `w` `t` `l` | Pick installed apps from a searchable list and open them in one click; running apps get a dot (macOS and Windows) |
 | Git repos | `t` `l` `m` `w` | Current branch, uncommitted changes, ahead / behind counts, and branches whose upstream is gone; defaults to your Harness workspaces |
 | GitHub | `t` `l` `m` `w` | PRs awaiting your review, your open PRs, and issues assigned to you via your signed-in `gh` CLI |
 | System | `m` `s` `t` `l` `w` | CPU, memory, disk, battery, and a 5-minute CPU load sparkline |
@@ -159,7 +159,7 @@ Widgets that only read local state:
 - **Photo frame**: uses `sips` on macOS to generate thumbnails cached in the system temp directory
 - **Now playing**: reads the system now-playing session through the bundled [mediaremote-adapter](https://github.com/ungive/mediaremote-adapter) (`vendor/`, BSD-3-Clause), which runs under `/usr/bin/perl` and needs no permission; if that fails it falls back to asking Music or Spotify via `osascript` when already running, for which macOS asks once for Automation permission
 - **Ports**: runs `lsof` and `ps` on macOS and Linux to list listening TCP ports, their working folder, and command line; **Stop** sends `SIGTERM` only to a process that is still listening on that port, with no extra permission
-- **Apps**: on macOS, lists the top level of `/Applications`, `/System/Applications`, `~/Applications` and their `Utilities` folders, with Finder display names and icons via `osascript` (JavaScript for Automation), and running state via `ps`; it opens only apps found in those folders, with `open -a`, and needs no permission
+- **Apps**: on macOS, lists the top level of `/Applications`, `/System/Applications`, `~/Applications` and their `Utilities` folders, with Finder display names and icons via `osascript` (JavaScript for Automation), and running state via `ps`; it opens only apps found in those folders, with `open -a`, and needs no permission. On Windows, it reads the Start menu app list (`shell:AppsFolder`, including Store apps) through PowerShell, takes icons from each shortcut's target program, checks running state with `Get-Process`, and opens only apps from that list through `explorer.exe`; Store apps show no icon or running dot
 - **Ambient sound**: synthesized with Web Audio in the page, with no files or network
 - **Recent files**: lists only the top level of each configured folder
 - **Clipboard**: polls `pbpaste` (macOS) or `wl-paste` / `xclip` (Linux) every 2 seconds while the card is visible; history stays in memory only
