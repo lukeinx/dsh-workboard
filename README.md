@@ -121,7 +121,7 @@ dsh-workboard
 | 每日壁纸 | `l` `m` `s` `t` `w` | Bing 每日壁纸与维基共享资源每日图片，点击切换最近 8 天 |
 | 正在播放 | `m` `s` `w` `t` | macOS 系统「正在播放」的曲目、封面与进度（「音乐」、Spotify、QQ 音乐、浏览器等），可播放 / 暂停和切歌 |
 | **资讯与行情** | | |
-| 热榜 | `l` `t` `m` `w` | 多信源分标签聚合：微博、知乎、36 氪、少数派、Hacker News、GitHub Trending（可筛时间段与语言）、Product Hunt、Reddit（可选 B 站、V2EX，或接入自建 DailyHotApi / NewsNow） |
+| 热榜 | `l` `t` `m` `w` | 多信源分标签聚合：微博、知乎、36 氪、少数派、Hacker News、GitHub Trending、Product Hunt、Reddit（可选 B 站、V2EX） |
 | 订阅 | `t` `l` `m` `w` | 聚合多个 RSS / Atom 订阅源并按时间混排，支持 `rsshub://` 路由简写与自建实例，已读条目自动变灰 |
 | AI 论文 | `l` `t` `m` `w` | Hugging Face 每日论文、arXiv 分类最新论文与热门 Spaces，论文可一键交给 Agent 解读 |
 | 模型行情 | `l` `t` `m` `w` | OpenRouter 本周热门与最新上架的模型，附输入 / 输出单价与上下文长度，可按厂商筛选 |
@@ -143,11 +143,11 @@ dsh-workboard
 - **日历与订阅**：仅请求列表中的 ICS 与 RSS / Atom 地址（`rsshub://` 路由展开到所填的 [RSSHub](https://docs.rsshub.app) 实例，留空时回退 `rsshub.app`）；订阅 widget 默认预填爱范儿与阮一峰的网络日志（英文界面为 [hnrss.org](https://hnrss.org) 首页），可在设置中修改
 - **行情**：股票走腾讯行情接口（`qt.gtimg.cn`），汇率走 [open.er-api.com](https://open.er-api.com)，加密货币走 [CoinGecko](https://www.coingecko.com)
 - **GitHub**：调用本机 `gh` CLI，复用其已有登录态
-- **热榜**：微博、知乎、36 氪、少数派、B 站、V2EX 使用各站公开网页接口（非官方，站点改版可能失效）；Hacker News 使用 [HN Algolia API](https://hn.algolia.com/api)；GitHub 读取 Trending 页面（支持时间段与语言路径）；Product Hunt 与 Reddit 读取官方订阅源；配置了自定义聚合服务时额外请求所填的 DailyHotApi 或 NewsNow 实例；结果缓存 10 分钟
+- **热榜**：微博、知乎、36 氪、少数派、B 站、V2EX 使用各站公开网页接口（非官方，站点改版可能失效）；Hacker News 使用 [HN Algolia API](https://hn.algolia.com/api)；GitHub 读取 Trending 页面；Product Hunt 与 Reddit 读取官方订阅源；结果缓存 10 分钟
 - **视频订阅**：YouTube 频道 RSS（仅在解析 `@handle` 时请求频道页）、B 站 UP 主投稿公开接口（非官方，偶尔限频），封面由 Host 代理成 data URL；缓存 15 分钟
 - **网络**：公网 IP 查询使用 [ipinfo.io](https://ipinfo.io)（失败时回退至 [ip.sb](https://ip.sb)），站点延迟通过 `curl` 测算（配置了系统代理时自动走代理），默认测百度、GitHub 与 Google（英文界面为 Google、GitHub 与 Cloudflare）
 - **服务状态**：请求各状态页的 Statuspage 接口 `/api/v2/summary.json`；DeepSeek 状态页托管在 Flashcat，没有公开接口，改为解析页面内嵌数据（非官方，页面改版可能失效）；默认 DeepSeek、Claude、OpenAI、GitHub 与 npm；缓存 2 分钟
-- **AI 论文**：[Hugging Face](https://huggingface.co) 每日论文与热门 Spaces 接口（huggingface.co 不通时改走 [hf-mirror.com](https://hf-mirror.com) 镜像），以及 [arXiv API](https://info.arxiv.org/help/api/index.html) 分类最新论文（默认 `cs.AI cs.CL cs.LG`）；缓存 30 分钟
+- **AI 论文**：[Hugging Face](https://huggingface.co) 每日论文与热门 Spaces 接口（huggingface.co 不通时改走 [hf-mirror.com](https://hf-mirror.com) 镜像），以及 [arXiv API](https://info.arxiv.org/help/api/index.html) 按领域筛选的最新论文；缓存 30 分钟
 - **模型行情**：[OpenRouter](https://openrouter.ai) 公开模型列表接口（无需 key）；用量 widget 开启「按 OpenRouter 公开价估算」时也读取同一接口；缓存 30 分钟
 - **节假日**：经 jsDelivr 读取 [holiday-cn](https://github.com/NateScarlet/holiday-cn) 今明两年的数据，失败时回退至 GitHub raw；缓存 12 小时
 - **历史上的今天 / 每日维基 / 每日壁纸**：[Wikimedia Feed API](https://api.wikimedia.org/wiki/Feed_API)（特色条目、最热阅读、历史上的今天与每日图片）、百度百科历史上的今天月度 JSON（`baike.baidu.com`，非官方）与 Bing 每日壁纸接口（`www.bing.com/HPImageArchive.aspx`，非官方）；壁纸图片由 Host 代理成 data URL；列表缓存 2 小时、图片缓存 6 小时
@@ -254,7 +254,7 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 | [Wikimedia Foundation](https://api.wikimedia.org/wiki/Feed_API)（Wikipedia / Wikimedia Commons） | 每日维基、历史上的今天与 Wikimedia 每日图片 | 公开 API（内容遵循 CC BY-SA 4.0） |
 | 百度百科（`baike.baidu.com`） | 中文历史上的今天 | 非官方接口 |
 | Microsoft Bing（`www.bing.com`） | Bing 每日壁纸 | 非官方接口（图片版权归原摄影师与版权方） |
-| [RSSHub](https://docs.rsshub.app)、[DailyHotApi](https://github.com/imsyy/DailyHotApi)、[NewsNow](https://github.com/ourongxing/newsnow) | 可选的 `rsshub://` 订阅路由与自定义热榜聚合协议 | MIT（均由用户自建实例提供服务） |
+| [RSSHub](https://docs.rsshub.app) | 可选的 `rsshub://` 订阅路由协议 | MIT（由用户自建实例提供服务） |
 | 经典文献（老子、孔子、荀子等） | 内置格言库 | 公有领域 |
 
 ## 许可

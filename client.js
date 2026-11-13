@@ -98,9 +98,6 @@ window.__ModuleLoader__.load({
       trending: '热榜', d_trending: '微博、知乎、36 氪、Hacker News、GitHub 等国内外热榜', tr_none: '在设置里选择信源',
       tr_weibo: '微博', tr_zhihu: '知乎', tr_36kr: '36 氪', tr_sspai: '少数派', tr_bilibili: 'B 站', tr_v2ex: 'V2EX',
       tr_hn: 'Hacker News', tr_github: 'GitHub', tr_producthunt: 'Product Hunt', tr_reddit: 'Reddit',
-      f_ghSince: 'GitHub 时间段', gh_daily: '今日', gh_weekly: '本周', gh_monthly: '本月', f_ghLang: 'GitHub 语言（如 typescript、python；留空看全部）',
-      f_hubType: '自定义聚合服务', hub_none: '不使用', hub_dailyhot: 'DailyHotApi', hub_newsnow: 'NewsNow',
-      f_hubUrl: '聚合实例地址', f_hubSources: '聚合信源（每行一个：源ID 显示名，如 juejin 掘金）',
       d_photo: '轮播本机文件夹里的照片，点击换下一张', f_photoDir: '照片文件夹', f_shuffle: '随机顺序', f_every: '切换间隔', every_m: '{n} 分钟', every_h: '{n} 小时', every_d: '{n} 天', every_off: '不自动切换',
       ph_empty: '这个文件夹里没有照片', ph_pick: '选择文件夹',
       d_system: '本机 CPU、内存、磁盘和电池', s_cpu: 'CPU', s_mem: '内存', s_disk: '磁盘', s_battery: '电池', s_cores: '{n} 核 · 负载 {l}', s_free: '剩余 {n}',
@@ -180,9 +177,11 @@ window.__ModuleLoader__.load({
       st_all: '全部正常', st_issues: '{n} 个服务异常', st_error: '无法读取',
       f_statusSources: '状态页（每行一个：名称 地址；支持 Statuspage 与 DeepSeek 状态页）',
       defaultStatus: 'DeepSeek https://status.deepseek.com\nClaude https://status.claude.com\nOpenAI https://status.openai.com\nGitHub https://www.githubstatus.com\nnpm https://status.npmjs.org',
-      papers: 'AI 论文', d_papers: 'Hugging Face 每日论文、arXiv 最新论文与热门 Spaces，论文可交给 Agent 解读',
-      pp_papers: 'HF 每日', pp_arxiv: 'arXiv', pp_spaces: 'Spaces', pp_votes: '{n} 人点赞', pp_likes: '{n} 人喜欢',
-      f_ppCats: 'arXiv 分类（空格分隔，如 cs.AI cs.CL cs.LG）', f_ppSpaces: '显示热门 Spaces',
+      papers: 'AI 论文', d_papers: 'Hugging Face 每日精选、arXiv 最新论文与热门 Spaces 应用，论文可交给 Agent 解读',
+      pp_papers: '每日精选', pp_arxiv: 'arXiv 最新', pp_spaces: '热门应用', pp_votes: '{n} 人点赞', pp_likes: '{n} 人喜欢',
+      f_ppCats: 'arXiv 论文领域', pp_cat_default: '综合 AI（人工智能 · 语言 · 机器学习）', pp_cat_cl: '自然语言与大模型（NLP）',
+      pp_cat_lg: '机器学习（ML）', pp_cat_cv: '计算机视觉（CV）', pp_cat_ro: '机器人与具身智能', pp_cat_ir: '信息检索与推荐（IR）',
+      pp_cat_se: '软件工程与代码（SE）', pp_cat_all: '全部 AI 相关领域', f_ppSpaces: '显示 Hugging Face 热门应用（Spaces）',
       pp_prompt: '读一下这篇论文：{title}\n{url}\n用中文讲清楚它要解决的问题、核心方法、主要结果和局限，最后说说可能的应用场景。',
       models: '模型行情', d_models: 'OpenRouter 本周热门与最新上架的模型，附价格与上下文长度',
       md_top: '热门', md_new: '最新', md_free: '免费', md_price: '输入 ${i} · 输出 ${o}（美元 / 百万 token）', md_ctx: '{n} 上下文', md_none: '没有匹配的模型',
@@ -248,9 +247,6 @@ window.__ModuleLoader__.load({
       trending: 'Trending', d_trending: 'Hot lists from Hacker News, GitHub, Reddit, Weibo, Zhihu and more', tr_none: 'Choose sources in settings',
       tr_weibo: 'Weibo', tr_zhihu: 'Zhihu', tr_36kr: '36Kr', tr_sspai: 'sspai', tr_bilibili: 'Bilibili', tr_v2ex: 'V2EX',
       tr_hn: 'Hacker News', tr_github: 'GitHub', tr_producthunt: 'Product Hunt', tr_reddit: 'Reddit',
-      f_ghSince: 'GitHub range', gh_daily: 'Today', gh_weekly: 'This week', gh_monthly: 'This month', f_ghLang: 'GitHub language (e.g. typescript, python; empty for all)',
-      f_hubType: 'Custom aggregator', hub_none: 'Off', hub_dailyhot: 'DailyHotApi', hub_newsnow: 'NewsNow',
-      f_hubUrl: 'Aggregator URL', f_hubSources: 'Aggregator sources, one per line: id label (e.g. juejin Juejin)',
       d_photo: 'Cycles through photos in a local folder; click for the next one', f_photoDir: 'Photo folder', f_shuffle: 'Shuffle', f_every: 'Change every', every_m: '{n} min', every_h: '{n} h', every_d: '{n} day', every_off: 'Never',
       ph_empty: 'No photos in this folder', ph_pick: 'Choose folder',
       d_system: 'CPU, memory, disk and battery of this machine', s_cpu: 'CPU', s_mem: 'Memory', s_disk: 'Disk', s_battery: 'Battery', s_cores: '{n} cores · load {l}', s_free: '{n} free',
@@ -330,9 +326,11 @@ window.__ModuleLoader__.load({
       st_all: 'All operational', st_issues: '{n} service(s) with issues', st_error: 'Unavailable',
       f_statusSources: 'Status pages, one per line: name URL (Statuspage or the DeepSeek status page)',
       defaultStatus: 'DeepSeek https://status.deepseek.com\nClaude https://status.claude.com\nOpenAI https://status.openai.com\nGitHub https://www.githubstatus.com\nnpm https://status.npmjs.org',
-      papers: 'AI papers', d_papers: 'Hugging Face daily papers, latest arXiv preprints and trending Spaces; hand a paper to the agent to explain',
-      pp_papers: 'HF daily', pp_arxiv: 'arXiv', pp_spaces: 'Spaces', pp_votes: '{n} upvotes', pp_likes: '{n} likes',
-      f_ppCats: 'arXiv categories, space-separated (e.g. cs.AI cs.CL cs.LG)', f_ppSpaces: 'Show trending Spaces',
+      papers: 'AI papers', d_papers: 'Hugging Face daily picks, latest arXiv preprints and trending Spaces apps; hand a paper to the agent to explain',
+      pp_papers: 'Daily picks', pp_arxiv: 'Latest arXiv', pp_spaces: 'Spaces apps', pp_votes: '{n} upvotes', pp_likes: '{n} likes',
+      f_ppCats: 'arXiv subject area', pp_cat_default: 'General AI (AI · NLP · ML)', pp_cat_cl: 'Language & LLMs (NLP)',
+      pp_cat_lg: 'Machine learning (ML)', pp_cat_cv: 'Computer vision (CV)', pp_cat_ro: 'Robotics', pp_cat_ir: 'Information retrieval (IR)',
+      pp_cat_se: 'Software engineering (SE)', pp_cat_all: 'All AI areas', f_ppSpaces: 'Show trending Hugging Face Spaces',
       pp_prompt: 'Read this paper: {title}\n{url}\nExplain the problem it tackles, the core method, the main results and the limitations, then suggest where it could be applied.',
       models: 'Models', d_models: 'Trending and newest models on OpenRouter, with prices and context length',
       md_top: 'Trending', md_new: 'Newest', md_free: 'Free', md_price: 'Input ${i} · output ${o} (USD per million tokens)', md_ctx: '{n} context', md_none: 'No matching models',
@@ -3466,32 +3464,20 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         const TR_OFF = new Set(['bilibili', 'v2ex']);
         const trSources = () => (t('lang').startsWith('zh') ? [...TR_CN, ...TR_INTL] : [...TR_INTL, ...TR_CN]);
         const trKey = id => `src_${id}`;
-        const parseHubSources = text => String(text ?? '').split('\n').map(l => {
-          const m = /^([\w.-]{1,40})(?:\s+(.+))?$/.exec(l.trim());
-          return m ? {id: `hub:${m[1]}`, label: (m[2] || m[1]).trim()} : null;
-        }).filter(Boolean).slice(0, 12);
 
         function Trending({size, config, openSettings}) {
           useLocale();
-          const hubType = config?.hub === 'dailyhot' || config?.hub === 'newsnow' ? config.hub : '';
-          const hubUrl = String(config?.hubUrl ?? '').trim();
-          const hubs = hubType && hubUrl ? parseHubSources(config?.hubSources) : [];
-          const hubLabels = Object.fromEntries(hubs.map(x => [x.id, x.label]));
-          const enabled = [...trSources().filter(id => config?.[trKey(id)] ?? !TR_OFF.has(id)), ...hubs.map(x => x.id)];
+          const enabled = trSources().filter(id => config?.[trKey(id)] ?? !TR_OFF.has(id));
           const [picked, setPicked] = useState(null);
           const source = enabled.includes(picked) ? picked : enabled[0];
-          const payload = !source ? null : source === 'github'
-            ? {source, since: String(config?.ghSince || 'daily'), lang: String(config?.ghLang ?? '').trim()}
-            : source.startsWith('hub:') ? {source, hub: hubType, hubUrl} : {source};
-          const res = useRemote('trending.get', payload, TRENDING_MS);
+          const res = useRemote('trending.get', source ? {source} : null, TRENDING_MS);
           const v = source && res.value?.source === source ? res.value : null;
           const read = useRead(v ? v.items.map(it => it.url).filter(Boolean) : []);
           if (!source) return h('div', {className: 'wb-photo-msg'}, h('button', {type: 'button', className: 'wb-btn wb-cta', onClick: openSettings}, t('tr_none')));
           const compact = new Intl.NumberFormat(t('lang'), {notation: 'compact', maximumFractionDigits: 1});
           const hot = n => (n == null ? '' : `${v.metric === 'stars' ? '+' : ''}${compact.format(n)}`);
-          const labelOf = id => hubLabels[id] ?? t(`tr_${id}`);
           return h('div', {className: 'wb-trend'},
-            enabled.length > 1 ? h('div', {className: 'wb-seg', role: 'tablist'}, enabled.map(id => h('button', {key: id, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': id === source, onClick: () => setPicked(id)}, labelOf(id)))) : null,
+            enabled.length > 1 ? h('div', {className: 'wb-seg', role: 'tablist'}, enabled.map(id => h('button', {key: id, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': id === source, onClick: () => setPicked(id)}, t(`tr_${id}`)))) : null,
             h('div', {className: 'wb-rows'},
               v ? v.items.map((it, i) => h('a', {key: `${i}${it.url}`, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer', title: [it.title, it.meta].filter(Boolean).join('\n')},
                 h('span', {className: 'wb-rank wb-num', 'data-top': i < 3 ? '' : undefined}, i + 1),
@@ -3502,14 +3488,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         }
         Trending.workboard = {
           apiVersion: 1, sizes: ['l', 't', 'm', 'w'], defaultSize: 'l', description: () => t('d_trending'),
-          settings: [
-            ...[...TR_CN, ...TR_INTL].map(id => ({key: trKey(id), type: 'toggle', default: !TR_OFF.has(id), label: () => t(`tr_${id}`)})),
-            {key: 'ghSince', type: 'select', default: 'daily', label: () => t('f_ghSince'), options: ['daily', 'weekly', 'monthly'].map(v => ({value: v, label: () => t(`gh_${v}`)}))},
-            {key: 'ghLang', type: 'text', label: () => t('f_ghLang'), placeholder: 'typescript'},
-            {key: 'hub', type: 'select', default: '', label: () => t('f_hubType'), options: [{value: '', label: () => t('hub_none')}, {value: 'dailyhot', label: () => t('hub_dailyhot')}, {value: 'newsnow', label: () => t('hub_newsnow')}]},
-            {key: 'hubUrl', type: 'text', label: () => t('f_hubUrl'), placeholder: 'https://hot.example.com'},
-            {key: 'hubSources', type: 'textarea', label: () => t('f_hubSources'), placeholder: 'juejin 掘金\nithome IT之家\nlinuxdo Linux.do'},
-          ],
+          settings: [...TR_CN, ...TR_INTL].map(id => ({key: trKey(id), type: 'toggle', default: !TR_OFF.has(id), label: () => t(`tr_${id}`)})),
         };
 
         const blank = text => h('div', {className: 'wb-blank'}, text);
@@ -4051,6 +4030,24 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           settings: [{key: 'sources', type: 'textarea', label: () => t('f_statusSources'), default: () => t('defaultStatus')}],
         };
 
+        const ARXIV_LABELS = {
+          'cs.AI': ['人工智能', 'AI'], 'cs.CL': ['自然语言', 'NLP'], 'cs.LG': ['机器学习', 'ML'],
+          'cs.CV': ['计算机视觉', 'Vision'], 'cs.RO': ['机器人', 'Robotics'], 'cs.IR': ['信息检索', 'IR'],
+          'cs.SE': ['软件工程', 'SE'], 'cs.HC': ['人机交互', 'HCI'], 'cs.CR': ['安全', 'Security'],
+          'cs.MA': ['多智能体', 'Multi-agent'], 'stat.ML': ['统计学习', 'Stat ML'],
+        };
+        const arxivCatName = (code, zh) => ARXIV_LABELS[code]?.[zh ? 0 : 1] || code;
+        const PP_CAT_OPTIONS = [
+          ['cs.AI cs.CL cs.LG', 'pp_cat_default'],
+          ['cs.CL', 'pp_cat_cl'],
+          ['cs.LG', 'pp_cat_lg'],
+          ['cs.CV', 'pp_cat_cv'],
+          ['cs.RO', 'pp_cat_ro'],
+          ['cs.IR', 'pp_cat_ir'],
+          ['cs.SE', 'pp_cat_se'],
+          ['all', 'pp_cat_all'],
+        ];
+
         function Papers({size, config}) {
           useLocale();
           const ws = useWorkspace();
@@ -4063,6 +4060,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const v = res.value?.kind === kind ? res.value : null;
           const read = useRead(v ? v.items.map(it => it.url) : []);
           const lang = t('lang');
+          const zh = lang.startsWith('zh');
           const compact = new Intl.NumberFormat(lang, {notation: 'compact', maximumFractionDigits: 1});
           const isPaper = kind === 'papers' || kind === 'arxiv';
           const ask = (e, it) => {
@@ -4072,7 +4070,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           };
           const meta = it => {
             if (kind === 'papers') return [size === 'l' ? it.summary : it.keywords.join(', ')].filter(Boolean).join(' · ');
-            if (kind === 'arxiv') return [size === 'l' ? it.summary : (it.authors ?? []).join(', '), (it.keywords ?? []).join(', ')].filter(Boolean).join(' · ');
+            if (kind === 'arxiv') {
+              const tags = [...new Set((it.keywords ?? []).map(c => arxivCatName(c, zh)))].join(' / ');
+              return [tags, size === 'l' ? it.summary : (it.authors ?? []).join(', ')].filter(Boolean).join(' · ');
+            }
             return [it.id, it.sdk, size === 'l' ? it.summary : ''].filter(Boolean).join(' · ');
           };
           const right = it => {
@@ -4095,7 +4096,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         Papers.workboard = {
           apiVersion: 1, sizes: ['l', 't', 'm', 'w'], defaultSize: 'l', description: () => t('d_papers'),
           settings: [
-            {key: 'cats', type: 'text', default: 'cs.AI cs.CL cs.LG', label: () => t('f_ppCats'), placeholder: 'cs.AI cs.CL cs.LG'},
+            {key: 'cats', type: 'select', default: 'cs.AI cs.CL cs.LG', label: () => t('f_ppCats'), options: PP_CAT_OPTIONS.map(([value, k]) => ({value, label: () => t(k)}))},
             {key: 'spaces', type: 'toggle', default: true, label: () => t('f_ppSpaces')},
           ],
         };

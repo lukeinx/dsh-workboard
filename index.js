@@ -874,10 +874,7 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
     },
     'dsh-workboard/trending.get': async p => {
       if (!services.trending) throw new UserError('unavailable', 'trending lists are not available');
-      return services.trending.list({
-        source: String(p?.source ?? ''), since: String(p?.since ?? ''), lang: String(p?.lang ?? ''),
-        hub: String(p?.hub ?? ''), hubUrl: String(p?.hubUrl ?? ''),
-      });
+      return services.trending.list({source: String(p?.source ?? '')});
     },
     'dsh-workboard/nowplaying.get': async p => {
       if (!services.nowPlaying) throw new UserError('unavailable', 'now playing is not available');

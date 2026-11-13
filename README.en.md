@@ -121,7 +121,7 @@ If you are an agent interacting with Workboard:
 | Daily wallpaper | `l` `m` `s` `t` `w` | Bing daily wallpaper and Wikimedia Picture of the Day; click to cycle the last 8 days |
 | Now playing | `m` `s` `w` `t` | Track, artwork, and progress of whatever macOS reports as now playing (Music, Spotify, QQ Music, browsers…), with play / pause and skip |
 | **News & markets** | | |
-| Trending | `l` `t` `m` `w` | Tabbed hot lists from Weibo, Zhihu, 36Kr, sspai, Hacker News, GitHub Trending (with time range and language filter), Product Hunt, and Reddit (Bilibili, V2EX, and self-hosted DailyHotApi / NewsNow optional) |
+| Trending | `l` `t` `m` `w` | Tabbed hot lists from Weibo, Zhihu, 36Kr, sspai, Hacker News, GitHub Trending, Product Hunt, and Reddit (Bilibili and V2EX optional) |
 | Feeds | `t` `l` `m` `w` | Multiple RSS / Atom feeds merged chronologically, with `rsshub://` route shorthand and custom instance URL; visited items dim automatically |
 | AI papers | `l` `t` `m` `w` | Hugging Face daily papers, latest arXiv preprints by category, and trending Spaces; hand a paper to the agent to explain |
 | Models | `l` `t` `m` `w` | Trending and newest models on OpenRouter with input / output prices and context length, filterable by vendor |
@@ -143,11 +143,11 @@ All external network requests are made and cached by the Host:
 - **Calendars & feeds**: the ICS and RSS / Atom URLs you configure (`rsshub://` routes expand against your [RSSHub](https://docs.rsshub.app) instance URL, or `rsshub.app` when left empty); the Feeds widget starts with [hnrss.org](https://hnrss.org) front page (ifanr and Ruan Yifeng's blog in Chinese), editable in its settings
 - **Markets**: Tencent Finance (`qt.gtimg.cn`) for equities, [open.er-api.com](https://open.er-api.com) for exchange rates, and [CoinGecko](https://www.coingecko.com) for crypto
 - **GitHub**: uses your local `gh` CLI and its existing sign-in
-- **Trending**: public web endpoints for Weibo, Zhihu, 36Kr, sspai, Bilibili, and V2EX (unofficial and may break if a site changes), the [HN Algolia API](https://hn.algolia.com/api), the GitHub Trending page (with time range and language path), official Product Hunt and Reddit feeds, plus your self-hosted DailyHotApi or NewsNow instance when configured; cached for 10 minutes
+- **Trending**: public web endpoints for Weibo, Zhihu, 36Kr, sspai, Bilibili, and V2EX (unofficial and may break if a site changes), the [HN Algolia API](https://hn.algolia.com/api), the GitHub Trending page, and official Product Hunt and Reddit feeds; cached for 10 minutes
 - **Videos**: YouTube channel RSS feeds (channel pages only to resolve an `@handle`), Bilibili's public creator archive endpoint (unofficial, rate-limited at times), and thumbnails proxied as data URLs; cached for 15 minutes
 - **Network**: public IP from [ipinfo.io](https://ipinfo.io) (falling back to [ip.sb](https://ip.sb)) and host latency via `curl`, respecting the system proxy when set; tests Google, GitHub, and Cloudflare by default (Baidu, GitHub, and Google in Chinese)
 - **Service status**: each configured page's Statuspage `/api/v2/summary.json`; the DeepSeek status page (hosted on Flashcat) has no public API, so its embedded page data is parsed (unofficial, may break if the page changes); defaults to DeepSeek, Claude, OpenAI, GitHub, and npm; cached for 2 minutes
-- **AI papers**: the [Hugging Face](https://huggingface.co) daily papers and trending Spaces APIs (falling back to [hf-mirror.com](https://hf-mirror.com) when huggingface.co is unreachable) and the [arXiv API](https://info.arxiv.org/help/api/index.html) for latest preprints by category (`cs.AI cs.CL cs.LG` by default); cached for 30 minutes
+- **AI papers**: the [Hugging Face](https://huggingface.co) daily papers and trending Spaces APIs (falling back to [hf-mirror.com](https://hf-mirror.com) when huggingface.co is unreachable) and the [arXiv API](https://info.arxiv.org/help/api/index.html) for latest preprints by subject area; cached for 30 minutes
 - **Models**: the public [OpenRouter](https://openrouter.ai) models API (no key needed); the Usage widget reads the same API when "Estimate from OpenRouter list prices" is on; cached for 30 minutes
 - **China holidays**: [holiday-cn](https://github.com/NateScarlet/holiday-cn) data for this year and next via jsDelivr, falling back to GitHub raw; cached for 12 hours
 - **On this day, Daily Wikipedia & Daily wallpaper**: the [Wikimedia Feed API](https://api.wikimedia.org/wiki/Feed_API) (featured article, most-read, on-this-day events, and Picture of the Day), Baidu Baike's monthly on-this-day JSON (`baike.baidu.com`, unofficial), and Bing's wallpaper archive (`www.bing.com/HPImageArchive.aspx`, unofficial); wallpaper images are proxied by the Host as data URLs; feeds cached for 2 hours, images for 6 hours
@@ -254,7 +254,7 @@ Workboard builds on the following projects and services. Feed and trending conte
 | [Wikimedia Foundation](https://api.wikimedia.org/wiki/Feed_API) (Wikipedia / Wikimedia Commons) | Daily Wikipedia, On this day, and Wikimedia Picture of the Day | Public API (content under CC BY-SA 4.0) |
 | Baidu Baike (`baike.baidu.com`) | Chinese On this day events | Unofficial endpoint |
 | Microsoft Bing (`www.bing.com`) | Bing daily wallpaper | Unofficial endpoint (photo copyright belongs to the respective photographers) |
-| [RSSHub](https://docs.rsshub.app), [DailyHotApi](https://github.com/imsyy/DailyHotApi), [NewsNow](https://github.com/ourongxing/newsnow) | Optional `rsshub://` feed routes and custom trending aggregator protocols | MIT (served by user-hosted instances) |
+| [RSSHub](https://docs.rsshub.app) | Optional `rsshub://` feed route protocol | MIT (served by user-hosted instances) |
 | Classical texts (Laozi, Confucius, Xunzi, and others) | Built-in quotes | Public domain |
 
 ## License
