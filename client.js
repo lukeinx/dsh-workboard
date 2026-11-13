@@ -4072,7 +4072,12 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           'cs.SE': ['软件工程', 'SE'], 'cs.HC': ['人机交互', 'HCI'], 'cs.CR': ['安全', 'Security'],
           'cs.MA': ['多智能体', 'Multi-agent'], 'stat.ML': ['统计学习', 'Stat ML'],
         };
-        const arxivCatName = (code, zh) => ARXIV_LABELS[code]?.[zh ? 0 : 1] || code;
+        const splitPaperTitle = raw => {
+          const s = String(raw ?? '').replace(/\$+([^$]+)\$+/g, '$1').replace(/\s+/g, ' ').trim();
+          const m = /^([^:?]{2,80}?)(?::\s+|\?\s+)(.+)$/.exec(s);
+          if (!m) return [s, ''];
+          return [m[1].trim() + (s[m[1].length] === '?' ? '?' : ''), m[2].trim()];
+        };
         const PP_CAT_OPTIONS = [
           ['cs.AI cs.CL cs.LG', 'pp_cat_default'],
           ['cs.CL', 'pp_cat_cl'],
@@ -4104,26 +4109,25 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
             e.stopPropagation();
             launch(fill(t('pp_prompt'), {url: it.url, title: it.title}), ws.path, ws.id).then(() => setError(''), err => setError(String(err?.message || err)));
           };
-          const meta = it => {
-            if (kind === 'papers') return [size === 'l' ? it.summary : it.keywords.join(', ')].filter(Boolean).join(' · ');
-            if (kind === 'arxiv') {
-              const tags = [...new Set((it.keywords ?? []).map(c => arxivCatName(c, zh)))].join(' / ');
-              return [tags, size === 'l' ? it.summary : (it.authors ?? []).join(', ')].filter(Boolean).join(' · ');
-            }
-            return [it.id, it.sdk, size === 'l' ? it.summary : ''].filter(Boolean).join(' · ');
-          };
           const right = it => {
             if (size === 't') return null;
             if (kind === 'arxiv') return it.at ? h('span', {className: 'wb-num'}, new Date(it.at).toLocaleDateString(lang, {month: 'short', day: 'numeric'})) : null;
             const n = kind === 'papers' ? it.votes : it.likes;
             return h('span', {className: 'wb-num', title: fill(t(kind === 'papers' ? 'pp_votes' : 'pp_likes'), {n})}, `▲ ${compact.format(n)}`);
           };
-          const row = (it, i) => h('a', {key: it.id, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer',
-            title: [it.title, it.summary || meta(it)].filter(Boolean).join('\n')},
-            h('span', {className: 'wb-rank wb-num', 'data-top': kind !== 'arxiv' && i < 3 ? '' : undefined}, i + 1),
-            h('div', null, h('b', null, it.title), size === 'm' || !meta(it) ? null : h('small', null, meta(it))),
-            isPaper && size !== 'm' ? h('button', {type: 'button', className: 'wb-btn wb-rowact', onClick: e => ask(e, it)}, t('toAgent')) : null,
-            right(it));
+          const row = (it, i) => {
+            const [head, sub] = isPaper && size !== 'm' ? splitPaperTitle(it.title) : [it.title, ''];
+            const tags = kind === 'arxiv' ? [...new Set((it.keywords ?? []).map(c => ARXIV_LABELS[c]?.[zh ? 0 : 1]).filter(Boolean))].slice(0, 2).join(' · ') : '';
+            const desc = kind === 'papers' ? (sub || (it.keywords ?? []).slice(0, 2).join(' · '))
+              : kind === 'arxiv' ? (sub || tags || (it.keywords ?? [])[0] || '')
+              : (it.summary || it.id.split('/')[0]);
+            return h('a', {key: it.id, className: 'wb-row wb-rowbtn', ...readProps(read, it.url), href: it.url, target: '_blank', rel: 'noopener noreferrer',
+              title: [it.title, it.summary || desc].filter(Boolean).join('\n')},
+              h('span', {className: 'wb-rank wb-num', 'data-top': kind !== 'arxiv' && i < 3 ? '' : undefined}, i + 1),
+              h('div', null, h('b', null, head), size === 'm' || !desc ? null : h('small', null, desc)),
+              isPaper && size !== 'm' ? h('button', {type: 'button', className: 'wb-btn wb-rowact', onClick: e => ask(e, it)}, t('toAgent')) : null,
+              right(it));
+          };
           return h('div', {className: 'wb-trend'},
             h('div', {className: 'wb-seg', role: 'tablist'}, kinds.map(k => h('button', {key: k, type: 'button', role: 'tab', className: 'wb-btn', 'aria-pressed': k === kind, onClick: () => setPicked(k)}, t(`pp_${k}`)))),
             h('div', {className: 'wb-rows'}, v ? v.items.map(row) : blank(res.error || '…')),
