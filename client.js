@@ -4176,6 +4176,14 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         }
         const BUILTIN_IDS = new Set(builtins.map(([id]) => id));
 
+        const SCROLL_KEY = 'dsh-workboard:scroll';
+        const readScroll = () => { try { return JSON.parse(localStorage.getItem(SCROLL_KEY)) || {}; } catch { return {}; } };
+        const scrollMemory = readScroll();
+        const rememberScroll = (id, top) => {
+          scrollMemory[id] = Math.round(top);
+          try { localStorage.setItem(SCROLL_KEY, JSON.stringify(scrollMemory)); } catch {}
+        };
+
         function Panel({renderSlot}) {
           useLocale();
           const list = useSyncExternalStore(widgets.subscribe, widgets.getSnapshot, widgets.getSnapshot);
@@ -4191,9 +4199,39 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const [drag, setDrag] = useState(null);
           const [error, setError] = useState('');
           const fail = e => setError(String(e?.message || e));
+          const pageRef = useRef(null);
+          const restoring = useRef(false);
 
           useEffect(() => { void prefsStore.load(); }, []);
           useEffect(() => customs.start(), []);
+          // widget 内容异步撑高页面：内容尺寸变化时重试，到位、用户操作或超时后停止。
+          useEffect(() => {
+            const el = pageRef.current;
+            const target = board ? scrollMemory[board.id] ?? 0 : 0;
+            if (!el || !target) return undefined;
+            restoring.current = true;
+            const inputs = ['wheel', 'touchstart', 'pointerdown', 'keydown'];
+            let ro = null;
+            let timer = 0;
+            const stop = () => {
+              restoring.current = false;
+              ro?.disconnect();
+              clearTimeout(timer);
+              inputs.forEach(n => el.removeEventListener(n, stop));
+            };
+            const apply = () => {
+              el.scrollTop = target;
+              if (Math.abs(el.scrollTop - target) < 2) stop();
+            };
+            inputs.forEach(n => el.addEventListener(n, stop, {passive: true}));
+            timer = setTimeout(stop, 5000);
+            if (typeof ResizeObserver === 'function' && el.firstElementChild) {
+              ro = new ResizeObserver(apply);
+              ro.observe(el.firstElementChild);
+            }
+            apply();
+            return stop;
+          }, [board?.id]);
           useEffect(() => { call('board.list').then(setBoards, fail); }, []);
           useEffect(() => {
             if (!boards?.length || !prefsSnap.loaded || (activeId && boards.some(b => b.id === activeId))) return;
@@ -4339,7 +4377,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             h('div', {className: 'wb-body'}, renderSlot(SLOT, {size, config: cell.config ?? {}, editing, openSettings}, {only: cell.id})));
           };
 
-          return h('div', {className: 'wb-page'},
+          return h('div', {className: 'wb-page', ref: pageRef, onScroll: e => { if (board && !restoring.current) rememberScroll(board.id, e.currentTarget.scrollTop); }},
             h('div', {className: 'wb-inner'},
               h('div', {className: 'wb-head', 'data-editing': editing ? '' : undefined}, showTabs ? tabs : null, h('span', {className: 'wb-spacer'}), ...(headless ? [] : actions)),
               shownError ? h('div', {className: 'wb-error', role: 'alert'}, shownError) : null,
