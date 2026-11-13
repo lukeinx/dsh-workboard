@@ -19,27 +19,19 @@ Open the widget gallery, search, and drop cards straight onto your board across 
 
 Most widgets work with zero configuration; a few only ask for essentials like your city, an ICS calendar URL, or ticker symbols.
 
-![Widget gallery](docs/images/gallery-en.png)
-
 ### Your agent builds the rest
 
 Describe the card you want in a sentence and click **Hand to agent**. The agent writes the widget and places it directly onto your open board. Click the sparkle button on any custom card to ask for changes, or **Ask agent to fix** to hand runtime errors back to the agent.
 
 Custom widgets run inside an isolated sandbox with no access to the host page, cookies, or undeclared network endpoints — they can only fetch URL prefixes explicitly declared by the widget.
 
-![Generate a widget with the agent](docs/images/generate-en.png)
-
 ### Built for agent workflows
 
 Monitor sessions waiting for your approval, active goals and background jobs, token usage, deliverables, and scheduled tasks on a single board. Going the other way, your agent can read and update your to-dos, notes, and custom widgets from any conversation using built-in tools.
 
-![Agent widgets](docs/images/agent-en.png)
-
 ### Modular, adaptive, minimal
 
 Cards snap to a four-column grid across six sizes. Drag to rearrange, resize on the fly, and organize widgets across tabbed boards. The layout reflows smoothly to narrow windows and follows the Harness light and dark themes. Each card does one job with zero visual clutter.
-
-<img src="docs/images/narrow-en.png" alt="Narrow window in dark theme" width="480">
 
 ### Local and private
 
