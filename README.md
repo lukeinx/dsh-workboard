@@ -1,6 +1,6 @@
 # 工作台 Workboard
 
-**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 42 个 widget，开箱即用；不够用的，让 Agent 现做。**
+**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 41 个 widget，开箱即用；不够用的，让 Agent 现做。**
 
 [English](README.en.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
@@ -8,11 +8,11 @@
 
 ## 亮点
 
-### 内置 42 个 widget，开箱即用
+### 内置 41 个 widget，开箱即用
 
 覆盖四大场景，打开组件库即可搜索、预览并连续添加到看板：
 
-- **Agent 协作**：待确认与运行中会话、长程目标与后台作业、Prompt 快启、收集箱、Token 用量与费用估算、产出物、定时任务、收藏会话
+- **Agent 协作**：待确认与运行中会话、长程目标与后台作业、Prompt 快启、Token 用量与费用估算、产出物、定时任务、收藏会话
 - **效率与开发**：待办、速记、ICS 日历、专注番茄钟、白噪音、快捷链接、Git 工作区、GitHub（PR / Issue）、系统状态、网络测速、剪贴板、最近文件
 - **日常桌面**：今日横栏、时钟、世界时钟、天气、倒数日、时间进度、习惯打卡、本机相框、正在播放
 - **资讯与行情**：多源热榜、RSS / Atom 订阅、视频订阅、A 股 / 港股 / 美股 / 汇率 / 加密货币行情、每日格言
@@ -31,7 +31,7 @@
 
 ### 专为 Agent 工作流打造
 
-一块看板集中呈现需要你确认的会话、进行中的长程目标与后台作业、Token 用量、交付产出物和定时任务。反过来，Agent 也能在任意对话中通过内置工具直接读写你的待办、速记、收集箱与自定义卡片。
+一块看板集中呈现需要你确认的会话、进行中的长程目标与后台作业、Token 用量、交付产出物和定时任务。反过来，Agent 也能在任意对话中通过内置工具直接读写你的待办、速记与自定义卡片。
 
 ![Agent 类 widget](docs/images/agent-zh.png)
 
@@ -65,9 +65,8 @@ dsh-workboard
 - **内置工具**：
   - `workboard_todos`：`list` · `add` · `complete` · `reopen` · `remove`
   - `workboard_note`：`read` · `append` · `replace`
-  - `workboard_inbox`：`list` · `add` · `remove` · `clear`
   - `workboard_widget`：`list` · `get` · `create` · `update` · `set_data` · `remove`
-  - `workboard_context`：只读，一次读取待处理、日程、天气、待办、习惯、收集箱、速记、会话、运行中、定时任务、产出物、用量、Git 与 GitHub，可用 `sections` 只取部分
+  - `workboard_context`：只读，一次读取待处理、日程、天气、待办、习惯、速记、会话、运行中、定时任务、产出物、用量、Git 与 GitHub，可用 `sections` 只取部分
   - `workboard_brief`：`read` · `write`（每日简报，Markdown）
 - **构建自定义 widget**：调用 `workboard_widget` 前先加载 `workboard-widget` skill（[`skills/workboard-widget.md`](skills/workboard-widget.md)），内含尺寸规范、`window.workboard` API、沙箱约束与主题变量。
 - **配额与同步**：最多 50 个自定义 widget，单个 widget 的 HTML 与数据各不超过 200 KB。前端每 5 秒轮询一次，修改无需刷新页面即可生效。
@@ -76,17 +75,16 @@ dsh-workboard
 ## 参考
 
 <details>
-<summary><b>全部 42 个内置 widget</b></summary>
+<summary><b>全部 41 个内置 widget</b></summary>
 
 | Widget | 档位 | 说明 |
 |---|---|---|
 | **DeepSeek（Agent 协作）** | | |
-| 待处理 | `l` `t` `m` `w` | 等你确认的会话、卡住的目标、失败的后台作业、待 Review 的 PR、结转待办与收集箱按紧急程度排成一列，可直接跳转会话、完成待办或交给 Agent |
+| 待处理 | `l` `t` `m` `w` | 等你确认的会话、卡住的目标、失败的后台作业、待 Review 的 PR 与结转待办按紧急程度排成一列，可直接跳转会话或完成待办 |
 | Agent | `t` `l` `m` `w` | 等你确认的会话置顶，其次为运行中和最近会话；展示即将触发的定时任务，支持一键新开会话 |
 | 运行中 | `t` `l` `m` `w` | 汇总各会话的长程目标（Goals）与后台作业（Jobs），可直接跳转会话或停止作业 |
 | 每日简报 | `l` `t` `w` `m` | Agent 汇总工作台数据写成的今日简报；可随时生成，也可开启每天定时生成 |
 | Prompt 快启 | `m` `w` `l` `t` `s` | 输入提示词或点击预设，直接在指定工作区新开会话并发送 |
-| 收集箱 | `t` `l` `m` `w` | 随手记下的想法与链接，一键交给 Agent 归类整理 |
 | 用量 | `l` `t` `m` `w` `s` | 从本机会话日志统计 Token、请求数、缓存命中率及各模型占比；填入单价后可估算花费 |
 | 活跃热力图 | `w` `l` `m` | 过去一年每天的 Agent 用量热力图，按 token 或请求数着色，附活跃天数与连续天数 |
 | 服务状态 | `t` `l` `m` `s` `w` | DeepSeek、Claude、OpenAI、GitHub、npm 及任意 Statuspage 状态页，有故障的服务置顶 |
@@ -117,7 +115,7 @@ dsh-workboard
 | 节假日 | `m` `s` `t` | 中国大陆接下来的法定节假日、放假天数与调休上班日，附今日农历 |
 | 时间进度 | `m` `s` `w` | 今日、本周、本月与本年已度过的百分比 |
 | 习惯打卡 | `m` `l` `t` `w` | 支持最近一周打卡与补卡，自动计算当前连续达成天数 |
-| 相框 | `m` `s` `t` `l` `w` | 轮播本机文件夹（默认 `~/Pictures`）中的照片 |
+| 相框 | `l` `m` `s` `t` `w` | 轮播本机文件夹（默认 `~/Pictures`）中的照片，切换间隔可选 1 分钟到 1 天或只在点击时切换 |
 | 正在播放 | `m` `s` `w` `t` | macOS 系统「正在播放」的曲目、封面与进度（「音乐」、Spotify、QQ 音乐、浏览器等），可播放 / 暂停和切歌 |
 | **资讯与行情** | | |
 | 热榜 | `l` `t` `m` `w` | 多信源分标签聚合：微博、知乎、36 氪、少数派、Hacker News、GitHub Trending、Product Hunt、Reddit（可选 B 站、V2EX） |
@@ -127,7 +125,7 @@ dsh-workboard
 | 行情 | `t` `m` `s` `l` `w` | 支持汇率（`USD/CNY`）、A 股 / 港股 / 美股（`sh600519`、`hk00700`、`usAAPL`）与加密货币（`BTC`、`cg:<id>`） |
 | 格言 | `m` `w` `s` | 每日一句，点击换一条，信源与今日横栏共享 |
 
-注：Agent、Prompt 快启、收集箱、待处理与每日简报共用同一个默认工作区选择；待处理里的 PR 复用 GitHub widget 的查询与缓存。多个组件共用的偏好（称呼、每周起始日、城市、温度单位、格言来源）也可在「设置 → 工作台」中统一修改。版本升级新增的内置 widget 仅加入组件库，不会改动已有看板。
+注：Agent、Prompt 快启、待处理与每日简报共用同一个默认工作区选择；待处理里的 PR 复用 GitHub widget 的查询与缓存。多个组件共用的偏好（称呼、每周起始日、城市、温度单位、格言来源）也可在「设置 → 工作台」中统一修改。版本升级新增的内置 widget 仅加入组件库，不会改动已有看板。
 
 </details>
 
@@ -152,7 +150,7 @@ dsh-workboard
 仅读取本机数据的组件：
 
 - **用量 / 活跃热力图 / 产出物**：读取 `~/.dsh/sessions` 下的会话日志
-- **待处理**：汇总 Harness 的会话、目标与后台作业状态，以及本地待办与收集箱；开启 GitHub 时调用本机 `gh` CLI（与 GitHub widget 共用 5 分钟缓存）
+- **待处理**：汇总 Harness 的会话、目标与后台作业状态，以及本地待办；开启 GitHub 时调用本机 `gh` CLI（与 GitHub widget 共用 5 分钟缓存）
 - **每日简报**：由 Agent 在新会话里调用 `workboard_context` 读取上述本机数据后写入；开启「每天自动生成」时在 Harness 定时任务里新建一个每日任务，关闭即删除
 - **Git 工作区**：默认仅执行 `git status`，点击「获取远端」时才执行 `git fetch`
 - **系统状态**：在 macOS 上调用 `vm_stat` 与 `pmset`
@@ -217,7 +215,7 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 ```
 
 - `index.js`：Host 端 `/api/dsh-workboard/*` 路由、数据存储与 Agent 工具注册
-- `client.js`：侧栏入口、看板容器与 42 个内置 widget
+- `client.js`：侧栏入口、看板容器与 41 个内置 widget
 - `lib/`：各数据源请求、解析与系统采样模块
 - `skills/workboard-widget.md`：供 Agent 编写自定义 widget 的规范指南
 

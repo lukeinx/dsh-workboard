@@ -59,8 +59,6 @@ const MAX_BOARDS = 12;
 const MAX_HABITS = 30;
 const HABIT_DAYS_KEPT = 400;
 const DAY_KEY = /^\d{4}-\d{2}-\d{2}$/;
-const MAX_INBOX = 200;
-const MAX_INBOX_TEXT = 4000;
 const READ_KEEP_MS = 90 * 86400_000;
 const MAX_READS = 5000;
 const MAX_READ_BATCH = 200;
@@ -76,7 +74,7 @@ export const BUILTIN_WIDGETS = [
   'workboard.today', 'workboard.todo', 'workboard.note', 'workboard.calendar', 'workboard.weather', 'workboard.clock',
   'workboard.quote', 'workboard.countdown', 'workboard.worldclock', 'workboard.focus', 'workboard.links', 'workboard.progress',
   'workboard.agents', 'workboard.feed', 'workboard.habits',
-  'workboard.prompt', 'workboard.inbox', 'workboard.usage', 'workboard.running', 'workboard.git', 'workboard.github', 'workboard.system', 'workboard.photo', 'workboard.market', 'workboard.trending',
+  'workboard.prompt', 'workboard.usage', 'workboard.running', 'workboard.git', 'workboard.github', 'workboard.system', 'workboard.photo', 'workboard.market', 'workboard.trending',
   'workboard.outputs', 'workboard.schedules', 'workboard.pinned', 'workboard.files', 'workboard.clipboard', 'workboard.network',
   'workboard.nowplaying', 'workboard.ambient', 'workboard.videos', 'workboard.attention', 'workboard.brief',
   'workboard.ports', 'workboard.status', 'workboard.papers', 'workboard.holiday', 'workboard.activity', 'workboard.apps',
@@ -303,26 +301,6 @@ export function createStore(ctx) {
       if (!table('habits').get(String(id))) throw new UserError('not-found', `no habit with id ${id}`);
       await table('habits').delete(String(id));
       return true;
-    },
-
-    listInbox: () => [...table('inbox').entries()].map(([, v]) => v).sort((a, b) => a.createdAt - b.createdAt),
-    async addInbox(text) {
-      const value = String(text ?? '').trim().slice(0, MAX_INBOX_TEXT);
-      if (!value) throw new UserError('empty-text', 'text is required');
-      if ([...table('inbox').entries()].length >= MAX_INBOX) throw new UserError('too-many', `at most ${MAX_INBOX} inbox items`);
-      const item = {id: newId(), text: value, createdAt: Date.now()};
-      await table('inbox').put(item.id, item);
-      return item;
-    },
-    async removeInbox(id) {
-      if (!table('inbox').get(String(id))) throw new UserError('not-found', `no inbox item with id ${id}`);
-      await table('inbox').delete(String(id));
-      return true;
-    },
-    async clearInbox() {
-      const ids = [...table('inbox').entries()].map(([k]) => k);
-      for (const id of ids) await table('inbox').delete(id);
-      return ids.length;
     },
 
     readOf: urls => readUrls(urls).filter(u => table('reads').get(readKey(u))),
@@ -853,7 +831,7 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
   return {
     'dsh-workboard/quote.get': p => quotes.get({day: p?.day, n: p?.n}),
     'dsh-workboard/feed.get': p => feeds({urls: p?.urls, limit: p?.limit}),
-    'dsh-workboard/attention.get': p => attention({dayStart: p?.dayStart, github: p?.github !== false, todos: p?.todos !== false, inbox: p?.inbox !== false}),
+    'dsh-workboard/attention.get': p => attention({dayStart: p?.dayStart, github: p?.github !== false, todos: p?.todos !== false}),
     'dsh-workboard/agent.overview': () => (agents ? agents.overview() : {sessions: null, schedules: null}),
     'dsh-workboard/agent.start': async p => {
       if (!launch) throw new UserError('unavailable', 'this Harness cannot start sessions');
@@ -884,7 +862,7 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
     'dsh-workboard/photo.next': async p => {
       if (!services.photos) throw new UserError('unavailable', 'photos are not available');
       const dir = await resolveDir(p?.dir || '~/Pictures');
-      return services.photos.next({dir, index: Number.isInteger(p?.index) ? p.index : undefined, shuffle: p?.shuffle !== false});
+      return services.photos.next({dir, index: Number.isInteger(p?.index) ? p.index : undefined, shuffle: p?.shuffle !== false, current: typeof p?.current === 'string' ? p.current : ''});
     },
     'dsh-workboard/market.quotes': async p => {
       if (!services.market) throw new UserError('unavailable', 'market data is not available');
@@ -1029,10 +1007,6 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
       if (!services.holidays) throw new UserError('unavailable', 'holidays are not available');
       return services.holidays.list({year: p?.year});
     },
-    'dsh-workboard/inbox.list': () => store.listInbox(),
-    'dsh-workboard/inbox.add': p => store.addInbox(p?.text),
-    'dsh-workboard/inbox.remove': p => store.removeInbox(p?.id),
-    'dsh-workboard/inbox.clear': () => store.clearInbox(),
     'dsh-workboard/read.check': p => store.readOf(p?.urls),
     'dsh-workboard/read.mark': p => store.markRead(p?.urls, p?.read !== false),
     'dsh-workboard/habit.list': () => store.listHabits(),
@@ -1163,30 +1137,6 @@ export function createTools(store, {context} = {}) {
       },
     },
     {
-      name: 'workboard_inbox',
-      description: 'Read or change the inbox on the user\'s Workboard dashboard, where the user drops links, ideas and requests to deal with later. `list` returns items oldest first, each with an id; `add` stores `text`; `remove` deletes one item by `id` once it has been handled; `clear` deletes every item.',
-      parameters: {
-        type: 'object',
-        properties: {
-          action: {type: 'string', enum: ['list', 'add', 'remove', 'clear']},
-          text: {type: 'string', description: 'Item text, for add.'},
-          id: {type: 'string', description: 'Item id from list, for remove.'},
-        },
-        required: ['action'],
-        additionalProperties: false,
-      },
-      output: {schema: {type: 'object'}, render: (_args, value) => textResult(value)},
-      async execute(args) {
-        await store.ready;
-        const {action, text, id} = args ?? {};
-        if (action === 'list') return {items: store.listInbox().map(({id, text, createdAt}) => ({id, text, addedAt: new Date(createdAt).toISOString()}))};
-        if (action === 'add') return {added: await store.addInbox(text)};
-        if (action === 'remove') return {removed: await store.removeInbox(id)};
-        if (action === 'clear') return {cleared: await store.clearInbox()};
-        throw new Error(`unknown action ${action}`);
-      },
-    },
-    {
       name: 'workboard_brief',
       description: 'Read or replace the daily brief card on the user\'s Workboard dashboard. `read` returns the current brief and when it was written; `write` replaces it with `text`: short Markdown (headings, bullet lists, bold, inline code, links) in the user\'s language. Gather the day\'s data with `workboard_context` before writing.',
       parameters: {
@@ -1270,7 +1220,7 @@ export function createTools(store, {context} = {}) {
     },
     ...(context ? [{
       name: 'workboard_context',
-      description: 'Read what is on the user\'s Workboard dashboard in one call: what needs them now (sessions waiting for approval, blocked goals, failed jobs, PRs to review, carried-over to-dos, unsorted inbox), calendar, weather, to-dos, habits, inbox, scratch note, recent sessions, running goals and jobs, scheduled tasks, recent deliverables, token usage, Git repositories and GitHub. Read-only. Use it to plan the user\'s day or answer what they should do next; pass `sections` to read only some. Times are local ISO 8601 with offset; a section that cannot be read carries `error`.',
+      description: 'Read what is on the user\'s Workboard dashboard in one call: what needs them now (sessions waiting for approval, blocked goals, failed jobs, PRs to review, carried-over to-dos), calendar, weather, to-dos, habits, scratch note, recent sessions, running goals and jobs, scheduled tasks, recent deliverables, token usage, Git repositories and GitHub. Read-only. Use it to plan the user\'s day or answer what they should do next; pass `sections` to read only some. Times are local ISO 8601 with offset; a section that cannot be read carries `error`.',
       parameters: {
         type: 'object',
         properties: {

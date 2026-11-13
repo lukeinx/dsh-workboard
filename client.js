@@ -89,13 +89,13 @@ window.__ModuleLoader__.load({
       f_feeds: '订阅地址（每行一个 RSS / Atom）', defaultFeeds: 'https://www.ifanr.com/feed\nhttps://www.ruanyifeng.com/blog/atom.xml', feedError: '{n} 个订阅加载失败', noItems: '没有内容',
       markAllRead: '全部已读', unreadCount: '{n} 条未读', f_hideRead: '隐藏已读',
       addHabit: '添加习惯，回车保存', noHabits: '在下方添加一个习惯，每天点对应日期的格子打卡', streak: '连续 {n} 天', markDay: '{d} 打卡', todayShort: '今',
-      prompt: 'Prompt 快启', inbox: '收集箱', usage: '用量', running: '运行中', git: 'Git 工作区', github: 'GitHub', system: '系统状态', photo: '相框', market: '行情',
+      prompt: 'Prompt 快启', usage: '用量', running: '运行中', git: 'Git 工作区', github: 'GitHub', system: '系统状态', photo: '相框', market: '行情',
       d_market: '汇率、A 股 / 港股 / 美股和加密货币报价', f_symbols: '代码（每行一个，后面可加名称）', f_upColor: '涨跌颜色', up_red: '红涨绿跌', up_green: '绿涨红跌',
       mk_symbols: 'USD/CNY\nHKD/CNY\nhk00700 腾讯\nBTC', mk_none: '在设置里添加代码', mk_unknown: '无法识别', mk_missing: '未找到',
       trending: '热榜', d_trending: '微博、知乎、36 氪、Hacker News、GitHub 等国内外热榜', tr_none: '在设置里选择信源',
       tr_weibo: '微博', tr_zhihu: '知乎', tr_36kr: '36 氪', tr_sspai: '少数派', tr_bilibili: 'B 站', tr_v2ex: 'V2EX',
       tr_hn: 'Hacker News', tr_github: 'GitHub', tr_producthunt: 'Product Hunt', tr_reddit: 'Reddit',
-      d_photo: '轮播本机文件夹里的照片，点击换下一张', f_photoDir: '照片文件夹', f_shuffle: '随机顺序', f_every: '切换间隔', every_m: '{n} 分钟', every_h: '1 小时',
+      d_photo: '轮播本机文件夹里的照片，点击换下一张', f_photoDir: '照片文件夹', f_shuffle: '随机顺序', f_every: '切换间隔', every_m: '{n} 分钟', every_h: '{n} 小时', every_d: '{n} 天', every_off: '不自动切换',
       ph_empty: '这个文件夹里没有照片', ph_pick: '选择文件夹',
       d_system: '本机 CPU、内存、磁盘和电池', s_cpu: 'CPU', s_mem: '内存', s_disk: '磁盘', s_battery: '电池', s_cores: '{n} 核 · 负载 {l}', s_free: '剩余 {n}',
       s_charging: '充电中', s_plugged: '已接电源', s_left: '剩 {t}', s_uptime: '已运行 {t}', s_load: '负载 {l}',
@@ -109,8 +109,8 @@ window.__ModuleLoader__.load({
       r_round: '第 {n}/{m} 轮', r_active: '进行中', r_paused: '已暂停', r_blocked: '受阻', r_complete: '已完成', r_disarmed: '等待恢复',
       r_running: '已运行 {t}', r_stopping: '正在停止', r_completed: '已完成', r_killed: '已停止', r_failed: '失败', r_kill: '停止', r_count: '{g} 个目标 · {j} 个任务',
       attention: '待处理', d_attention: '等你确认的会话、卡住的目标、失败的作业、待 Review 的 PR 和结转待办，按紧急程度排成一列',
-      a_waiting: '等你确认', a_blocked: '目标卡住', a_failed: '作业失败', a_review: '待 Review', a_todo: '结转待办', a_inbox: '收集箱有 {n} 条待整理',
-      a_clear: '没有需要你处理的事', a_count: '{n} 项待处理', f_attnGithub: '包含待 Review 的 PR', f_attnTodos: '包含结转待办', f_attnInbox: '包含收集箱',
+      a_waiting: '等你确认', a_blocked: '目标卡住', a_failed: '作业失败', a_review: '待 Review', a_todo: '结转待办',
+      a_clear: '没有需要你处理的事', a_count: '{n} 项待处理', f_attnGithub: '包含待 Review 的 PR', f_attnTodos: '包含结转待办',
       brief: '每日简报', d_brief: 'Agent 汇总工作台数据写成的今日简报，可每天定时生成', b_empty: '还没有简报', b_generate: '生成', b_regenerate: '重新生成', b_generating: '生成中…',
       b_session: '查看会话', b_auto: '每天 {t}', b_autoOff: '每天自动生成', f_briefTime: '每天自动生成的时间（HH:MM）', briefTaskTitle: '工作台每日简报',
       briefPrompt: '生成今天的工作简报：先调用 workboard_context 读取工作台数据，再用 workboard_brief 的 write 写入一份 Markdown 简报，最后只回复一句已完成。简报用中文，300 字以内，依次是：需要我先处理的事（按紧急程度）、今天的日程、最近 24 小时的产出与用量、值得留意的 Git / GitHub 状态。没有内容的部分直接省略；不寒暄，不复述数据来源。',
@@ -118,11 +118,10 @@ window.__ModuleLoader__.load({
       u_vs: '昨日 {n}', u_range_1: '今天', u_range_7: '7 天', u_range_30: '30 天', u_model: '模型', u_req: '请求', u_tok: 'token',
       u_unreported: '{n} 次请求未上报 token（{p}）', u_none: '这段时间没有请求', u_day: '{d}：{t} token，{r} 次请求',
       f_prices: '单价（每行一个：模型 输入 输出 [缓存读] [缓存写]，美元 / 百万 token；模型可写前缀）',
-      d_prompt: '一句话或预设模板直接开新会话', d_inbox: '随手收集链接和想法，一键交给 Agent 处理；Agent 可读写',
+      d_prompt: '一句话或预设模板直接开新会话',
       promptPlaceholder: '让 Agent 做点什么，回车发送', sending: '发送中…', f_presets: '预设（每行一个：名称 | prompt）', f_cwd: '工作目录（留空用默认）', ws_label: '工作区', ws_default: '默认工作区',
-      defaultPresets: '今日计划 | 读取我工作台上的待办和收集箱，帮我排出今天最该做的三件事\n整理收集箱 | 用 workboard_inbox 读取我的收集箱，逐条整理成待办或给出处理建议，处理完的条目移除\n周报草稿 | 读取我工作台上本周完成的待办，写一份简短的周报草稿',
-      inboxPlaceholder: '收集一条，回车保存', inboxEmpty: '收集箱是空的', toAgent: '交给 Agent', inboxCount: '{n} 条',
-      inboxPrompt: '用 workboard_inbox 工具读取我的收集箱，逐条处理：能直接回答或完成的就完成；需要我跟进的用 workboard_todos 转成待办；链接先读一下再给一句话摘要。处理完的条目用 workboard_inbox remove 移除，最后汇总你做了什么。',
+      defaultPresets: '今日计划 | 读取我工作台上的待办和日程，帮我排出今天最该做的三件事\n周报草稿 | 读取我工作台上本周完成的待办，写一份简短的周报草稿',
+      toAgent: '交给 Agent', itemCount: '{n} 条',
       cat_mine: '我的', gen_card: '用 Agent 生成', gen_hint: '说一句想要什么，Agent 做好后放到当前看板',
       gen_title: '用 Agent 生成 widget', gen_go: '交给 Agent', gen_placeholder: '想在工作台上看到什么？写清楚数据和样子，回车发送',
       gen_examples: '离下班还有多久，下班时间可以设置\n比特币和以太坊的价格与 24 小时涨跌\n我关注的 GitHub 仓库的 Star 数\n喝水记录：点一下记一杯，显示今天喝了几杯\n人民币与常用外币的换算器',
@@ -225,13 +224,13 @@ window.__ModuleLoader__.load({
       f_feeds: 'Feed URLs, one RSS or Atom feed per line', defaultFeeds: 'https://hnrss.org/frontpage', feedError: '{n} feed(s) failed to load', noItems: 'Nothing here',
       markAllRead: 'Mark all read', unreadCount: '{n} unread', f_hideRead: 'Hide read items',
       addHabit: 'Add a habit, press Enter', noHabits: 'Add a habit below, then tick the box for each day you do it', streak: '{n}-day streak', markDay: 'Check in for {d}', todayShort: 'Today',
-      prompt: 'Quick prompt', inbox: 'Inbox', usage: 'Usage', running: 'Running', git: 'Git repos', github: 'GitHub', system: 'System', photo: 'Photo frame', market: 'Markets',
+      prompt: 'Quick prompt', usage: 'Usage', running: 'Running', git: 'Git repos', github: 'GitHub', system: 'System', photo: 'Photo frame', market: 'Markets',
       d_market: 'Exchange rates, China / Hong Kong / US stocks and crypto prices', f_symbols: 'Symbols, one per line, optionally followed by a name', f_upColor: 'Gain colour', up_red: 'Red for gains', up_green: 'Green for gains',
       mk_symbols: 'EUR/USD\nUSD/JPY\nusAAPL Apple\nBTC', mk_none: 'Add symbols in settings', mk_unknown: 'Unrecognized', mk_missing: 'Not found',
       trending: 'Trending', d_trending: 'Hot lists from Hacker News, GitHub, Reddit, Weibo, Zhihu and more', tr_none: 'Choose sources in settings',
       tr_weibo: 'Weibo', tr_zhihu: 'Zhihu', tr_36kr: '36Kr', tr_sspai: 'sspai', tr_bilibili: 'Bilibili', tr_v2ex: 'V2EX',
       tr_hn: 'Hacker News', tr_github: 'GitHub', tr_producthunt: 'Product Hunt', tr_reddit: 'Reddit',
-      d_photo: 'Cycles through photos in a local folder; click for the next one', f_photoDir: 'Photo folder', f_shuffle: 'Shuffle', f_every: 'Change every', every_m: '{n} min', every_h: '1 hour',
+      d_photo: 'Cycles through photos in a local folder; click for the next one', f_photoDir: 'Photo folder', f_shuffle: 'Shuffle', f_every: 'Change every', every_m: '{n} min', every_h: '{n} h', every_d: '{n} day', every_off: 'Never',
       ph_empty: 'No photos in this folder', ph_pick: 'Choose folder',
       d_system: 'CPU, memory, disk and battery of this machine', s_cpu: 'CPU', s_mem: 'Memory', s_disk: 'Disk', s_battery: 'Battery', s_cores: '{n} cores · load {l}', s_free: '{n} free',
       s_charging: 'Charging', s_plugged: 'Plugged in', s_left: '{t} left', s_uptime: 'Up {t}', s_load: 'Load {l}',
@@ -245,8 +244,8 @@ window.__ModuleLoader__.load({
       r_round: 'Round {n}/{m}', r_active: 'Active', r_paused: 'Paused', r_blocked: 'Blocked', r_complete: 'Complete', r_disarmed: 'Waiting to resume',
       r_running: 'Running for {t}', r_stopping: 'Stopping', r_completed: 'Completed', r_killed: 'Stopped', r_failed: 'Failed', r_kill: 'Stop', r_count: '{g} goals · {j} jobs',
       attention: 'Attention', d_attention: 'Sessions waiting for you, stuck goals, failed jobs, PRs to review and carried-over to-dos, in one queue by urgency',
-      a_waiting: 'Needs you', a_blocked: 'Goal blocked', a_failed: 'Job failed', a_review: 'Review requested', a_todo: 'Carried-over to-do', a_inbox: '{n} inbox items to sort',
-      a_clear: 'Nothing needs you', a_count: '{n} to handle', f_attnGithub: 'Include PRs to review', f_attnTodos: 'Include carried-over to-dos', f_attnInbox: 'Include the inbox',
+      a_waiting: 'Needs you', a_blocked: 'Goal blocked', a_failed: 'Job failed', a_review: 'Review requested', a_todo: 'Carried-over to-do',
+      a_clear: 'Nothing needs you', a_count: '{n} to handle', f_attnGithub: 'Include PRs to review', f_attnTodos: 'Include carried-over to-dos',
       brief: 'Daily brief', d_brief: 'A brief of your day that the agent writes from the dashboard, optionally every morning', b_empty: 'No brief yet', b_generate: 'Generate', b_regenerate: 'Regenerate', b_generating: 'Writing…',
       b_session: 'Open session', b_auto: 'Daily at {t}', b_autoOff: 'Every day', f_briefTime: 'Daily time (HH:MM)', briefTaskTitle: 'Workboard daily brief',
       briefPrompt: 'Write today\'s work brief: call workboard_context to read the dashboard, save a Markdown brief with workboard_brief (action write), then reply with one line once done. Keep it under 150 words, in English, in this order: what needs me first (by urgency), today\'s calendar, output and usage over the last 24 hours, Git / GitHub worth noticing. Skip empty parts; no greetings, no restating where the data came from.',
@@ -254,11 +253,10 @@ window.__ModuleLoader__.load({
       u_vs: 'Yesterday {n}', u_range_1: 'Today', u_range_7: '7 days', u_range_30: '30 days', u_model: 'Model', u_req: 'Requests', u_tok: 'Tokens',
       u_unreported: '{n} requests reported no tokens ({p})', u_none: 'No requests in this period', u_day: '{d}: {t} tokens, {r} requests',
       f_prices: 'Prices, one per line: model input output [cache read] [cache write], USD per million tokens; a model prefix matches',
-      d_prompt: 'Start a new session from a line of text or a preset', d_inbox: 'Collect links and ideas, then hand them to the agent; the agent can read and edit',
+      d_prompt: 'Start a new session from a line of text or a preset',
       promptPlaceholder: 'Ask the agent something, Enter to send', sending: 'Sending…', f_presets: 'Presets, one per line: name | prompt', f_cwd: 'Working directory (empty uses the default)', ws_label: 'Workspace', ws_default: 'Default workspace',
-      defaultPresets: 'Plan today | Read my Workboard to-dos and inbox and pick the three things I should do today\nSort inbox | Use workboard_inbox to read my inbox, turn each item into a to-do or a suggestion, and remove the items you handled\nWeekly note | Read the to-dos I completed on Workboard this week and draft a short weekly update',
-      inboxPlaceholder: 'Capture something, Enter to save', inboxEmpty: 'Inbox is empty', toAgent: 'Hand to agent', inboxCount: '{n} items',
-      inboxPrompt: 'Use the workboard_inbox tool to read my inbox and work through it: finish what you can answer or do directly; turn anything I need to follow up into a to-do with workboard_todos; read links and give a one-line summary. Remove handled items with workboard_inbox remove, then summarize what you did.',
+      defaultPresets: 'Plan today | Read my Workboard to-dos and calendar and pick the three things I should do today\nWeekly note | Read the to-dos I completed on Workboard this week and draft a short weekly update',
+      toAgent: 'Hand to agent', itemCount: '{n} items',
       cat_mine: 'Mine', gen_card: 'Generate with agent', gen_hint: 'Describe what you want; the agent builds it and puts it on this board',
       gen_title: 'Generate a widget with the agent', gen_go: 'Hand to agent', gen_placeholder: 'What should this card show? Describe the data and the look, Enter to send',
       gen_examples: 'Time left until I finish work, with the end time as a setting\nBitcoin and Ether prices with 24-hour change\nStar count of the GitHub repositories I follow\nWater log: tap to add a glass, show today\'s count\nCurrency converter for the currencies I use',
@@ -815,14 +813,18 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-spark polyline.wb-up{stroke:var(--dsw-alias-label-secondary);opacity:.7}
 .wb-np{display:flex;gap:14px;align-items:center;height:100%;min-width:0}
 .wb-np[data-size=t]{flex-direction:column;align-items:stretch;gap:10px}
-.wb-np[data-size=s]{gap:10px}
+.wb-np[data-size=s]{flex-direction:column;align-items:stretch;justify-content:space-between;gap:8px}
 .wb-npart{appearance:none;border:0;padding:0;height:100%;aspect-ratio:1;flex:none;border-radius:8px;background:var(--dsw-alias-bg-layer-2) center/cover no-repeat;display:grid;place-items:center;color:var(--dsw-alias-label-secondary);cursor:pointer}
 .wb-np[data-size=t] .wb-npart{height:auto;width:100%}
-.wb-np[data-size=s] .wb-npart{height:56px;align-self:flex-start}
+.wb-np[data-size=s] .wb-npart{height:52px}
+.wb-nphead{display:flex;align-items:center;gap:10px;min-width:0}
+.wb-nphead>div{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.wb-np>.wb-pbar{height:3px}
+.wb-np>.wb-pbar i{background:var(--dsw-alias-label-primary);opacity:.6}
 .wb-npmain{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:6px}
 .wb-npmain>div:first-child{display:flex;flex-direction:column;min-width:0}
-.wb-npmain b{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.wb-npmain small{font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-npmain b,.wb-nphead b{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wb-npmain small,.wb-nphead small{font-size:12px;color:var(--dsw-alias-label-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wb-nptime{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--dsw-alias-label-secondary)}
 .wb-nptime .wb-pbar{flex:1;height:4px}
 .wb-nptime .wb-pbar i{background:var(--dsw-alias-label-primary);opacity:.6}
@@ -831,7 +833,8 @@ textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
 .wb-npctl button:hover{background:var(--dsw-alias-bg-layer-2)}
 .wb-npctl button[data-primary]{background:var(--dsw-alias-brand-primary);${onBrand('color')}}
 .wb-npctl button:disabled{opacity:.4;cursor:default}
-.wb-np[data-size=t] .wb-npctl{justify-content:center}
+.wb-np[data-size=t] .wb-npctl,.wb-np[data-size=s] .wb-npctl{justify-content:center}
+.wb-np[data-size=s] .wb-npctl{gap:12px}
 .wb-amb{display:flex;flex-direction:column;gap:8px;height:100%;min-height:0}
 .wb-amb[data-size=w]{flex-direction:row;align-items:stretch;gap:16px}
 .wb-amtiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;flex:1;min-height:0}
@@ -2594,53 +2597,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           ],
         };
 
-        function Inbox({size}) {
-          useLocale();
-          const now = useNow();
-          const [items, setItems] = useState(null);
-          const [text, setText] = useState('');
-          const [error, setError] = useState('');
-          const [busy, setBusy] = useState(false);
-          const ws = useWorkspace();
-          const fail = e => setError(String(e?.message || e));
-          const load = () => { if (!document.hidden) call('inbox.list').then(list => { setItems(list); setError(''); }, fail); };
-          useEffect(() => {
-            load();
-            const id = setInterval(load, POLL_MS);
-            window.addEventListener('focus', load);
-            return () => { clearInterval(id); window.removeEventListener('focus', load); };
-          }, []);
-          const submit = e => {
-            if (e.key !== 'Enter' || e.nativeEvent.isComposing || !text.trim()) return;
-            const value = text.trim();
-            setText('');
-            call('inbox.add', {text: value}).then(item => setItems(list => [...(list ?? []), item]), err => { setText(value); fail(err); });
-          };
-          const remove = item => {
-            setItems(list => list.filter(x => x.id !== item.id));
-            call('inbox.remove', {id: item.id}).catch(e => { fail(e); load(); });
-          };
-          const handOff = () => {
-            setBusy(true);
-            launch(t('inboxPrompt'), ws.path, ws.id).catch(fail).finally(() => setBusy(false));
-          };
-          const list = items ?? [];
-          return h(React.Fragment, null,
-            h('div', {className: 'wb-rows'},
-              items && !list.length ? h('div', {className: 'wb-blank'}, t('inboxEmpty')) : null,
-              [...list].reverse().map(item => h('div', {key: item.id, className: 'wb-inrow', title: item.text},
-                h('span', null, item.text),
-                size === 't' ? null : h('small', null, relTime(item.createdAt, now.getTime())),
-                h('button', {type: 'button', className: 'wb-btn wb-del', 'aria-label': t('remove'), title: t('remove'), onClick: () => remove(item)}, h(Icon.x))))),
-            error ? h('div', {className: 'wb-calerr'}, error) : null,
-            h('label', {className: 'wb-add'}, h(Icon.plus),
-              h('input', {value: text, placeholder: t('inboxPlaceholder'), enterKeyHint: 'done', onChange: e => setText(e.target.value), onKeyDown: submit})),
-            list.length ? h('div', {className: 'wb-notefoot'}, h('span', null, fill(t('inboxCount'), {n: list.length})),
-              h('div', {className: 'wb-footact'}, h(WorkspaceSelect, {ws}),
-                h('button', {type: 'button', className: 'wb-btn', disabled: busy, onClick: handOff}, busy ? t('sending') : t('toAgent')))) : null);
-        }
-        Inbox.workboard = {apiVersion: 1, sizes: ['t', 'l', 'm', 'w'], description: () => t('d_inbox')};
-
         // 自定义 widget：Agent 用 workboard_widget 写入的 HTML，跑在无同源权限的沙箱 iframe 里，只能通过 postMessage 桥接访问工作台。
         // iframe 拿不到宿主的主题变量：由父页面读出实际值传进去，切换明暗时重发。
         const readTheme = el => {
@@ -3093,12 +3049,10 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           useLocale();
           const now = useNow();
           const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
-          const res = useRemote('attention.get', {dayStart, github: config?.github !== false, todos: config?.todos !== false, inbox: config?.inbox !== false}, AGENT_MS);
+          const res = useRemote('attention.get', {dayStart, github: config?.github !== false, todos: config?.todos !== false}, AGENT_MS);
           const [handled, setHandled] = useState(() => new Set());
-          const [busy, setBusy] = useState(false);
           const [error, setError] = useState('');
           const ui = ctx.get?.('uiWorkspace');
-          const ws = useWorkspace();
           const v = res.value;
           if (!v) return h('div', {className: 'wb-blank'}, res.error || '…');
           const nowMs = now.getTime();
@@ -3108,22 +3062,17 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
             setHandled(set => new Set([...set, x.id]));
             data.setDone(x.todoId, true).then(res.reload, e => { fail(e); res.reload(); });
           };
-          const sortInbox = () => {
-            setBusy(true);
-            launch(t('inboxPrompt'), ws.path, ws.id).catch(fail).finally(() => setBusy(false));
-          };
           const row = x => {
             const state = ATTENTION_STATE[x.kind];
-            const label = x.kind === 'inbox' ? fill(t('a_inbox'), {n: x.count}) : t(`a_${x.kind}`);
-            const sub = x.kind === 'inbox' ? [] : [label, size === 'm' ? '' : x.kind === 'waiting' ? baseName(x.detail) : x.detail, x.at ? relTime(x.at, nowMs) : ''].filter(Boolean);
-            const body = h('div', null, h('b', null, x.kind === 'inbox' ? label : x.title || t('untitledSession')), sub.length ? h('small', null, sub.join(' · ')) : null);
+            const label = t(`a_${x.kind}`);
+            const sub = [label, size === 'm' ? '' : x.kind === 'waiting' ? baseName(x.detail) : x.detail, x.at ? relTime(x.at, nowMs) : ''].filter(Boolean);
+            const body = h('div', null, h('b', null, x.title || t('untitledSession')), sub.length ? h('small', null, sub.join(' · ')) : null);
             const dot = h('span', {className: 'wb-dot', 'data-state': state});
             const rowState = state === 'blocked' ? 'blocked' : undefined;
             if (x.url) return h('a', {key: x.id, className: 'wb-row wb-rowbtn', 'data-state': rowState, href: x.url, target: '_blank', rel: 'noopener noreferrer', title: x.title}, dot, body);
             if (x.sessionId) return h('button', {key: x.id, type: 'button', className: 'wb-btn wb-row wb-rowbtn', 'data-state': rowState, title: x.title, onClick: () => ui?.openSession?.(x.sessionId)}, dot, body);
             return h('div', {key: x.id, className: 'wb-row', title: x.title}, dot, body,
-              x.kind === 'todo' ? h('button', {type: 'button', className: 'wb-btn wb-rowact', onClick: () => complete(x)}, t('complete')) : null,
-              x.kind === 'inbox' ? h('button', {type: 'button', className: 'wb-btn wb-rowact', disabled: busy, onClick: sortInbox}, busy ? t('sending') : t('toAgent')) : null);
+              x.kind === 'todo' ? h('button', {type: 'button', className: 'wb-btn wb-rowact', onClick: () => complete(x)}, t('complete')) : null);
           };
           return h(React.Fragment, null,
             h('div', {className: 'wb-rows'}, items.length ? items.map(row) : h('div', {className: 'wb-blank'}, t('a_clear'))),
@@ -3135,7 +3084,6 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           settings: [
             {key: 'github', type: 'toggle', default: true, label: () => t('f_attnGithub')},
             {key: 'todos', type: 'toggle', default: true, label: () => t('f_attnTodos')},
-            {key: 'inbox', type: 'toggle', default: true, label: () => t('f_attnInbox')},
           ],
         };
 
@@ -3369,40 +3317,61 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         }
         System.workboard = {apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], description: () => t('d_system')};
 
+        // 上次展示的照片按文件夹记在偏好里，重新进入页面时未到间隔就继续显示同一张；every 为 0 表示只在点击时切换。
+        const PHOTO_PREF = 'photoFrame';
+        const PHOTO_EVERY = [1, 5, 10, 15, 30, 60, 120, 180, 360, 720, 1440, 0];
+        const photoEveryLabel = n => (n === 0 ? t('every_off') : n % 1440 === 0 ? fill(t('every_d'), {n: n / 1440}) : n % 60 === 0 ? fill(t('every_h'), {n: n / 60}) : fill(t('every_m'), {n}));
         function Photo({config, openSettings}) {
           useLocale();
           const dir = String(config?.dir ?? '');
           const shuffle = config?.shuffle !== false;
-          const minutes = Math.max(1, Number(config?.every) || 5);
+          const every = Number(String(config?.every ?? '') || 5);
+          const minutes = PHOTO_EVERY.includes(every) ? every : 5;
+          const key = dir.trim() || '~/Pictures';
           const [photo, setPhoto] = useState(null);
           const [error, setError] = useState('');
           const index = useRef(undefined);
+          const shownAt = useRef(0);
           const busy = useRef(false);
-          const next = useCallback(() => {
+          const show = useCallback(current => {
             if (busy.current) return;
             busy.current = true;
-            call('photo.next', {dir, shuffle, index: index.current}).then(v => {
+            call('photo.next', {dir, shuffle, index: index.current, current}).then(v => {
               index.current = v.index;
               setPhoto(v);
               setError('');
+              if (!v.name) return;
+              const saved = prefsStore.getSnapshot().values[PHOTO_PREF] ?? {};
+              shownAt.current = v.kept ? saved[key]?.at ?? Date.now() : Date.now();
+              if (v.kept) return;
+              const others = Object.entries(saved).filter(([k]) => k !== key).slice(-7);
+              prefsStore.put({[PHOTO_PREF]: {...Object.fromEntries(others), [key]: {name: v.name, at: shownAt.current}}}).catch(() => {});
             }, e => setError(String(e?.message || e))).finally(() => { busy.current = false; });
-          }, [dir, shuffle]);
+          }, [dir, shuffle, key]);
           useEffect(() => {
+            let live = true;
             index.current = undefined;
-            next();
-            const id = setInterval(() => { if (!document.hidden) next(); }, minutes * 60_000);
-            return () => clearInterval(id);
-          }, [next, minutes]);
+            shownAt.current = 0;
+            prefsStore.load().then(() => {
+              if (!live) return;
+              const saved = prefsStore.getSnapshot().values[PHOTO_PREF]?.[key];
+              const fresh = saved?.name && (minutes === 0 || Date.now() - saved.at < minutes * 60_000);
+              show(fresh ? saved.name : '');
+            });
+            const due = () => shownAt.current && Date.now() - shownAt.current >= minutes * 60_000;
+            const id = minutes ? setInterval(() => { if (!document.hidden && due()) show(''); }, Math.min(minutes * 60_000, 30_000)) : 0;
+            return () => { live = false; clearInterval(id); };
+          }, [show, minutes, key]);
           if (error || photo?.count === 0) return h('div', {className: 'wb-photo-msg'}, h('span', null, error || t('ph_empty')), h('button', {type: 'button', className: 'wb-btn wb-cta', onClick: openSettings}, t('ph_pick')));
           if (!photo) return h('div', {className: 'wb-photo'});
-          return h('div', {className: 'wb-photo', title: photo.name, onClick: next}, h('img', {src: photo.src, alt: photo.name, draggable: false}));
+          return h('div', {className: 'wb-photo', title: photo.name, onClick: () => show('')}, h('img', {src: photo.src, alt: photo.name, draggable: false}));
         }
         Photo.workboard = {
-          apiVersion: 1, sizes: ['m', 's', 't', 'l', 'w'], title: false, description: () => t('d_photo'),
+          apiVersion: 1, sizes: ['l', 'm', 's', 't', 'w'], defaultSize: 'l', title: false, description: () => t('d_photo'),
           settings: [
             {key: 'dir', type: 'text', label: () => t('f_photoDir'), placeholder: '~/Pictures'},
             {key: 'shuffle', type: 'toggle', default: true, label: () => t('f_shuffle')},
-            {key: 'every', type: 'select', default: '5', label: () => t('f_every'), options: [1, 5, 15, 30].map(n => ({value: String(n), label: () => fill(t('every_m'), {n})})).concat({value: '60', label: () => t('every_h')})},
+            {key: 'every', type: 'select', default: '5', label: () => t('f_every'), options: PHOTO_EVERY.map(n => ({value: String(n), label: () => photoEveryLabel(n)}))},
           ],
         };
 
@@ -3738,7 +3707,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
                 h('button', {type: 'button', className: 'wb-btn wb-del', 'data-plain': '', 'aria-label': t('cb_copy'), title: t('cb_copy'), onClick: e => { e.stopPropagation(); copy(x); }}, h(CopyIcon)),
                 h('button', {type: 'button', className: 'wb-btn wb-del', 'aria-label': t('remove'), title: t('remove'), onClick: e => { e.stopPropagation(); remove(x); }}, h(Icon.x)))) : blank(t('cb_empty'))),
             chips, status,
-            h('div', {className: 'wb-notefoot'}, h('span', null, items.length ? fill(t('inboxCount'), {n: items.length}) : ''),
+            h('div', {className: 'wb-notefoot'}, h('span', null, items.length ? fill(t('itemCount'), {n: items.length}) : ''),
               h('div', {className: 'wb-footact'}, h(WorkspaceSelect, {ws}),
                 items.length ? h('button', {type: 'button', className: 'wb-btn', onClick: clear}, t('cb_clear')) : null)));
         }
@@ -3837,18 +3806,26 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           const position = Math.min(track.duration || Infinity, track.position + (playing ? Math.max(0, now.getTime() - v.at) : 0));
           const sub = [track.artist, size === 's' ? '' : track.album].filter(Boolean).join(' — ');
           const ctl = (key, label, icon, primary) => h('button', {key, type: 'button', className: 'wb-btn', 'data-primary': primary ? '' : undefined, disabled: busy, 'aria-label': label, title: label, onClick: () => act(key)}, fillIcon(primary ? 16 : 14, icon));
-          return h('div', {className: 'wb-np', 'data-size': size},
-            h('button', {type: 'button', className: 'wb-npart', title: fill(t('np_open'), {app: appLabel(track)}), style: track.art ? {backgroundImage: `url("${track.art}")`} : undefined, onClick: () => act('open')},
-              track.art ? null : svg(size === 's' ? 20 : 28, NOTE_ICON, 1.6)),
-            h('div', {className: 'wb-npmain'},
-              h('div', null, h('b', {title: track.title}, track.title), sub ? h('small', {title: sub}, sub) : null),
-              size === 's' || !track.duration ? null : h('div', {className: 'wb-nptime wb-num'}, h('span', null, clockText(position)),
-                h('div', {className: 'wb-pbar'}, h('i', {style: {width: `${Math.min(100, position / track.duration * 100)}%`}})), h('span', null, clockText(track.duration))),
-              h('div', {className: 'wb-npctl'},
-                size === 's' ? null : ctl('previous', t('np_prev'), MEDIA.prev),
-                ctl('toggle', playing ? t('np_pause') : t('np_play'), playing ? MEDIA.pause : MEDIA.play, true),
-                ctl('next', t('np_next'), MEDIA.next)),
-              error ? h('div', {className: 'wb-calerr', title: error}, error) : null));
+          const art = h('button', {type: 'button', className: 'wb-npart', title: fill(t('np_open'), {app: appLabel(track)}), style: track.art ? {backgroundImage: `url("${track.art}")`} : undefined, onClick: () => act('open')},
+            track.art ? null : svg(size === 's' ? 20 : 28, NOTE_ICON, 1.6));
+          const head = h('div', null, h('b', {title: track.title}, track.title), sub ? h('small', {title: sub}, sub) : null);
+          const pct = track.duration ? Math.min(100, position / track.duration * 100) : 0;
+          const controls = h('div', {className: 'wb-npctl'},
+            ctl('previous', t('np_prev'), MEDIA.prev),
+            ctl('toggle', playing ? t('np_pause') : t('np_play'), playing ? MEDIA.pause : MEDIA.play, true),
+            ctl('next', t('np_next'), MEDIA.next));
+          const err = error ? h('div', {className: 'wb-calerr', title: error}, error) : null;
+          if (size === 's') {
+            return h('div', {className: 'wb-np', 'data-size': size},
+              h('div', {className: 'wb-nphead'}, art, head),
+              track.duration ? h('div', {className: 'wb-pbar'}, h('i', {style: {width: `${pct}%`}})) : null,
+              controls, err);
+          }
+          return h('div', {className: 'wb-np', 'data-size': size}, art,
+            h('div', {className: 'wb-npmain'}, head,
+              track.duration ? h('div', {className: 'wb-nptime wb-num'}, h('span', null, clockText(position)),
+                h('div', {className: 'wb-pbar'}, h('i', {style: {width: `${pct}%`}})), h('span', null, clockText(track.duration))) : null,
+              controls, err));
         }
         NowPlaying.workboard = {
           apiVersion: 1, sizes: ['m', 's', 'w', 't'], title: false, description: () => t('d_nowplaying'),
@@ -4175,7 +4152,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
           ['workboard.weather', 'weather', Weather], ['workboard.clock', 'clock', Clock], ['workboard.quote', 'quote', Quote], ['workboard.countdown', 'countdown', Countdown],
           ['workboard.worldclock', 'worldclock', WorldClock], ['workboard.focus', 'focus', Focus], ['workboard.links', 'links', Links], ['workboard.progress', 'progress', Progress],
           ['workboard.agents', 'agents', Agents], ['workboard.feed', 'feed', Feed], ['workboard.habits', 'habits', Habits],
-          ['workboard.prompt', 'prompt', Prompt], ['workboard.inbox', 'inbox', Inbox], ['workboard.usage', 'usage', Usage], ['workboard.running', 'running', Running],
+          ['workboard.prompt', 'prompt', Prompt], ['workboard.usage', 'usage', Usage], ['workboard.running', 'running', Running],
           ['workboard.git', 'git', Git], ['workboard.github', 'github', GitHub], ['workboard.system', 'system', System], ['workboard.photo', 'photo', Photo], ['workboard.market', 'market', Market],
           ['workboard.trending', 'trending', Trending],
           ['workboard.outputs', 'outputs', Outputs], ['workboard.schedules', 'tasks', Schedules], ['workboard.pinned', 'pinned', Pinned],
@@ -4187,7 +4164,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent)}
         ];
         const BUILTIN_CATEGORY = {
           daily: ['today', 'clock', 'worldclock', 'weather', 'countdown', 'holiday', 'progress', 'habits', 'photo', 'nowplaying'],
-          agent: ['attention', 'agents', 'running', 'brief', 'prompt', 'inbox', 'usage', 'activity', 'status', 'outputs', 'tasks', 'pinned'],
+          agent: ['attention', 'agents', 'running', 'brief', 'prompt', 'usage', 'activity', 'status', 'outputs', 'tasks', 'pinned'],
           news: ['trending', 'feed', 'papers', 'videos', 'market', 'quote'],
           tools: ['todo', 'note', 'calendar', 'focus', 'ambient', 'links', 'apps', 'git', 'github', 'system', 'files', 'clipboard', 'network', 'ports'],
         };

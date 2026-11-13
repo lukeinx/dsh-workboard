@@ -224,17 +224,7 @@ assert.equal(await pending, 'allowed-once');
 assert.equal(createAgentWatch(agentCtx).waiting.size, 0);
 assert.deepEqual(await createHandlers(createStore({}), feedFetcher)['dsh-workboard/agent.overview'](), {sessions: null, schedules: null});
 
-// 收集箱：保留换行、工具增删清空。
-const inboxItem = await value('inbox.add', {text: '  https://example.com\nread later  '});
-assert.equal(inboxItem.text, 'https://example.com\nread later');
-assert.equal((await call('inbox.add', {text: ' '})).error.code, 'dsh-workboard/empty-text');
-const inboxTool = tools.get('workboard_inbox');
-await inboxTool.execute({action: 'add', text: 'idea'});
-assert.deepEqual((await inboxTool.execute({action: 'list'})).items.map(i => i.text), ['https://example.com\nread later', 'idea']);
-await inboxTool.execute({action: 'remove', id: inboxItem.id});
-assert.deepEqual((await value('inbox.list')).map(i => i.text), ['idea']);
-assert.equal((await inboxTool.execute({action: 'clear'})).cleared, 1);
-assert.deepEqual(await value('inbox.list'), []);
+assert.equal(tools.get('workboard_inbox'), undefined);
 
 // 新开会话：先 create 再 prompt，cwd 必须是已存在的绝对目录。
 const created = [];
@@ -340,7 +330,7 @@ assert.equal(ghCalls.length, 6);
 const missing = createGithub(async () => { const e = new Error('spawn gh ENOENT'); e.code = 'not-found'; throw e; });
 await assert.rejects(missing({}), /not installed/);
 
-// 待处理：等确认 > 卡住的目标 > 失败作业 > 待 Review > 结转待办 > 收集箱；gh 慢或缺失时不拖住其余来源。
+// 待处理：等确认 > 卡住的目标 > 失败作业 > 待 Review > 结转待办；gh 慢或缺失时不拖住其余来源。
 const attnListeners = new Map();
 const attnCtx = {
   on: (name, fn) => { attnListeners.set(name, fn); return () => {}; },
@@ -349,19 +339,18 @@ const attnCtx = {
 const blockedCtx = {get: key => (key === 'goals' ? {get: a => (a.id === 's2' ? {objective: 'Stuck goal', phase: 'blocked', blockedReason: {message: 'needs token'}, updatedAt: nowMs} : undefined)} : runCtx.get(key))};
 const attnStore = createStore({});
 const oldTodo = await attnStore.addTodo('carry me');
-await attnStore.addInbox('later');
 const attnHandlers = createHandlers(attnStore, feedFetcher, createAgentWatch(attnCtx), null, {running: createRunning(blockedCtx, () => nowMs), github: createGithub(fakeGh)});
 let release;
 const waitingReq = attnListeners.get('approval/request')({agent: {id: 's3'}}, () => new Promise(r => { release = r; }));
 const attn = await attnHandlers['dsh-workboard/attention.get']({dayStart: Date.now() + 1000});
 assert.deepEqual(attn.items.map(i => [i.kind, i.title]), [
-  ['waiting', ''], ['blocked', 'Stuck goal'], ['failed', 'free'], ['review', 'Fix'], ['todo', 'carry me'], ['inbox', ''],
+  ['waiting', ''], ['blocked', 'Stuck goal'], ['failed', 'free'], ['review', 'Fix'], ['todo', 'carry me'],
 ]);
-assert.deepEqual([attn.items[0].sessionId, attn.items[1].detail, attn.items[3].url, attn.items[4].todoId, attn.items[5].count], ['s3', 'needs token', 'https://github.com/o/r/pull/7', oldTodo.id, 1]);
+assert.deepEqual([attn.items[0].sessionId, attn.items[1].detail, attn.items[3].url, attn.items[4].todoId], ['s3', 'needs token', 'https://github.com/o/r/pull/7', oldTodo.id]);
 assert.deepEqual(attn.sources, {sessions: true, running: true, github: 'ok'});
 release('allowed-once');
 await waitingReq;
-const quiet = await attnHandlers['dsh-workboard/attention.get']({github: false, inbox: false});
+const quiet = await attnHandlers['dsh-workboard/attention.get']({github: false, todos: false});
 assert.deepEqual(quiet.items.map(i => i.kind), ['waiting', 'blocked', 'failed']);
 assert.equal(quiet.sources.github, 'off');
 const slowGh = createAttention({store: createStore({}), github: () => new Promise(() => {}), githubWaitMs: 20});
@@ -379,10 +368,10 @@ await attnStore.putNote('hello note');
 const context = createContext({store: attnStore, call: (m, p) => attnHandlers[`dsh-workboard/${m}`](p)});
 const snapshot = await context({});
 assert.match(snapshot.now, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}[+-]\d{2}:\d{2}$/);
-assert.deepEqual(snapshot.attention.map(x => x.kind), ['waiting', 'blocked', 'failed', 'review', 'inbox']);
+assert.deepEqual(snapshot.attention.map(x => x.kind), ['waiting', 'blocked', 'failed', 'review']);
 assert.deepEqual(snapshot.todos.open.map(x => [x.text, x.carriedOver ?? false]), [['carry me', false]]);
 assert.deepEqual(snapshot.habits, [{name: 'Run', doneToday: true, streak: 3}]);
-assert.deepEqual(snapshot.inbox.map(x => x.text), ['later']);
+assert.equal(snapshot.inbox, undefined);
 assert.equal(snapshot.note.text, 'hello note');
 assert.deepEqual(snapshot.calendar, {events: []});
 assert.deepEqual(snapshot.weather, {note: 'no city set'});
@@ -392,8 +381,8 @@ assert.deepEqual(snapshot.github.reviewRequested.map(x => [x.ref, x.url]), [['o/
 assert.deepEqual(snapshot.sessions.map(s => s.id), ['s1', 's3', 's2']);
 assert.match(snapshot.schedules.error, /not available/);
 assert.match(snapshot.git.error, /git is not available/);
-const some = await context({sections: ['todos', 'bogus', 'inbox']});
-assert.deepEqual(Object.keys(some), ['now', 'weekday', 'timeZone', 'todos', 'inbox']);
+const some = await context({sections: ['todos', 'bogus', 'inbox', 'note']});
+assert.deepEqual(Object.keys(some), ['now', 'weekday', 'timeZone', 'todos', 'note']);
 const stuck = createContext({store: attnStore, call: () => new Promise(() => {}), timeoutMs: 20});
 assert.deepEqual((await stuck({sections: ['sessions', 'todos']})).sessions, {error: 'sessions timed out'});
 const ctxTool = tools.get('workboard_context');
@@ -468,6 +457,10 @@ const p0 = await plain.next({dir: picRoot, shuffle: false});
 assert.deepEqual([p0.count, p0.index, p0.name, p0.src], [3, 0, '1.jpg', `data:image/jpeg;base64,${Buffer.from('1.jpg').toString('base64')}`]);
 assert.equal((await plain.next({dir: picRoot, index: 0, shuffle: false})).name, 'a/2.PNG');
 assert.equal((await plain.next({dir: picRoot, index: 1, shuffle: false})).name, '1.jpg');
+const kept = await plain.next({dir: picRoot, index: 0, shuffle: true, current: 'a/2.PNG'});
+assert.deepEqual([kept.name, kept.index, kept.kept], ['a/2.PNG', 1, true]);
+const gone = await plain.next({dir: picRoot, index: 1, shuffle: false, current: 'missing.jpg'});
+assert.deepEqual([gone.name, gone.kept], ['1.jpg', false]);
 const sipsCalls = [];
 const sips = createPhotos({os: 'darwin', cacheDir: join(picRoot, '.cache'), run: async (cmd, args) => { sipsCalls.push(args.at(-3)); writeFileSync(args.at(-1), 'JPEG'); return Buffer.alloc(0); }});
 const p2 = await sips.next({dir: picRoot, index: 1, shuffle: false});
@@ -476,6 +469,7 @@ await sips.next({dir: picRoot, index: 1, shuffle: false});
 assert.equal(sipsCalls.length, 1);
 const photoHandlers = createHandlers(createStore({}), feedFetcher, null, null, {photos: plain});
 assert.equal((await photoHandlers['dsh-workboard/photo.next']({dir: picRoot, shuffle: false})).name, '1.jpg');
+assert.equal((await photoHandlers['dsh-workboard/photo.next']({dir: picRoot, current: 'a/2.PNG'})).name, 'a/2.PNG');
 await assert.rejects(photoHandlers['dsh-workboard/photo.next']({dir: join(picRoot, 'missing')}), /not a directory/);
 rmSync(picRoot, {recursive: true, force: true});
 
