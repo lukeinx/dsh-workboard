@@ -1,6 +1,6 @@
 # 工作台 Workboard
 
-**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 45 个 widget，开箱即用；不够用的，让 Agent 现做。**
+**[DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) 的模块化工作台插件。内置 44 个 widget，开箱即用；不够用的，让 Agent 现做。**
 
 [English](README.en.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
@@ -8,7 +8,7 @@
 
 ## 亮点
 
-### 内置 45 个 widget，开箱即用
+### 内置 44 个 widget，开箱即用
 
 覆盖四大场景，打开组件库即可搜索、预览并连续添加到看板：
 
@@ -75,7 +75,7 @@ dsh-workboard
 ## 参考
 
 <details>
-<summary><b>全部 45 个内置 widget</b></summary>
+<summary><b>全部 44 个内置 widget</b></summary>
 
 | Widget | 档位 | 说明 |
 |---|---|---|
@@ -114,7 +114,6 @@ dsh-workboard
 | 倒数日 | `m` `s` `t` | 距离周末、月底、年底及自定义日期的天数；不带年份（如 `12-25`）时按每年重复计算 |
 | 节假日 | `m` `s` `t` | 中国大陆接下来的法定节假日、放假天数与调休上班日，附今日农历 |
 | 历史上的今天 | `t` `l` `m` `w` `s` | 百度百科与维基百科记载的今日历史事件，按年份倒序排列 |
-| 每日维基 | `l` `t` `m` `w` | 维基百科今日特色条目与最热阅读榜，可切换中英文 |
 | 时间进度 | `m` `s` `w` | 今日、本周、本月与本年已度过的百分比 |
 | 习惯打卡 | `m` `l` `t` `w` | 支持最近一周打卡与补卡，自动计算当前连续达成天数 |
 | 相框 | `l` `m` `s` `t` `w` | 轮播本机文件夹（默认 `~/Pictures`）中的照片，切换间隔可选 1 分钟到 1 天或只在点击时切换 |
@@ -150,7 +149,7 @@ dsh-workboard
 - **AI 论文**：[Hugging Face](https://huggingface.co) 每日论文与热门 Spaces 接口（huggingface.co 不通时改走 [hf-mirror.com](https://hf-mirror.com) 镜像），以及 [arXiv API](https://info.arxiv.org/help/api/index.html) 按领域筛选的最新论文；缓存 30 分钟
 - **模型行情**：[OpenRouter](https://openrouter.ai) 公开模型列表接口（无需 key）；用量 widget 开启「按 OpenRouter 公开价估算」时也读取同一接口；缓存 30 分钟
 - **节假日**：经 jsDelivr 读取 [holiday-cn](https://github.com/NateScarlet/holiday-cn) 今明两年的数据，失败时回退至 GitHub raw；缓存 12 小时
-- **历史上的今天 / 每日维基 / 每日壁纸**：[Wikimedia Feed API](https://api.wikimedia.org/wiki/Feed_API)（特色条目、最热阅读、历史上的今天与每日图片）、百度百科历史上的今天月度 JSON（`baike.baidu.com`，非官方）与 Bing 每日壁纸接口（`www.bing.com/HPImageArchive.aspx`，非官方）；壁纸图片由 Host 代理成 data URL；列表缓存 2 小时、图片缓存 6 小时
+- **历史上的今天 / 每日壁纸**：[Wikimedia Feed API](https://api.wikimedia.org/wiki/Feed_API)（历史上的今天与每日图片）、百度百科历史上的今天月度 JSON（`baike.baidu.com`，非官方）与 Bing 每日壁纸接口（`www.bing.com/HPImageArchive.aspx`，非官方）；壁纸图片由 Host 代理成 data URL；列表缓存 2 小时、图片缓存 6 小时
 - **自定义 widget**：仅可请求各自在 `fetch` 字段声明的 `http(s)` 地址前缀，Host 缓存 30 秒
 
 仅读取本机数据的组件：
@@ -221,7 +220,7 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 ```
 
 - `index.js`：Host 端 `/api/dsh-workboard/*` 路由、数据存储与 Agent 工具注册
-- `client.js`：侧栏入口、看板容器与 45 个内置 widget
+- `client.js`：侧栏入口、看板容器与 44 个内置 widget
 - `lib/`：各数据源请求、解析与系统采样模块
 - `skills/workboard-widget.md`：供 Agent 编写自定义 widget 的规范指南
 
@@ -251,7 +250,7 @@ npm run check   # 语法检查 + Host 冒烟测试 + ICS 解析测试
 | [arXiv](https://arxiv.org) | 分类最新论文订阅 | 公开 API（需署名） |
 | [OpenRouter](https://openrouter.ai) | 模型行情与用量的公开价估算 | 公开 API |
 | [holiday-cn](https://github.com/NateScarlet/holiday-cn) | 中国法定节假日与调休数据，经 [jsDelivr](https://www.jsdelivr.com) 分发 | MIT |
-| [Wikimedia Foundation](https://api.wikimedia.org/wiki/Feed_API)（Wikipedia / Wikimedia Commons） | 每日维基、历史上的今天与 Wikimedia 每日图片 | 公开 API（内容遵循 CC BY-SA 4.0） |
+| [Wikimedia Foundation](https://api.wikimedia.org/wiki/Feed_API)（Wikipedia / Wikimedia Commons） | 历史上的今天与 Wikimedia 每日图片 | 公开 API（内容遵循 CC BY-SA 4.0） |
 | 百度百科（`baike.baidu.com`） | 中文历史上的今天 | 非官方接口 |
 | Microsoft Bing（`www.bing.com`） | Bing 每日壁纸 | 非官方接口（图片版权归原摄影师与版权方） |
 | [RSSHub](https://docs.rsshub.app) | 可选的 `rsshub://` 订阅路由协议 | MIT（由用户自建实例提供服务） |

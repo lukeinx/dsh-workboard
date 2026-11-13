@@ -1,7 +1,7 @@
 {
   "name": "dsh-workboard",
   "version": "0.3.0",
-  "description": "DeepSeek Harness plugin: a modular dashboard with 45 built-in widgets, plus widgets your agent builds for you.",
+  "description": "DeepSeek Harness plugin: a modular dashboard with 44 built-in widgets, plus widgets your agent builds for you.",
   "type": "module",
   "license": "MIT",
   "author": "lukeinx",

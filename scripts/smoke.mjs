@@ -31,7 +31,7 @@ import {createPorts, isAppProcess, parseCwd, parseLsof, parsePs} from '../lib/po
 import {bilingual, createStatus, parseFlashcat, parseSources, parseSummary} from '../lib/status.js';
 import {arxivUrl, createPapers, parseArxiv, parsePapers, parseSpaces} from '../lib/papers.js';
 import {createModels, modelKey} from '../lib/models.js';
-import {createDaily, parseBaiduOnThisDay, parseBingWallpapers, parseWikiFeatured, parseWikiImage, parseWikiOnThisDay} from '../lib/daily.js';
+import {createDaily, parseBaiduOnThisDay, parseBingWallpapers, parseWikiImage, parseWikiOnThisDay} from '../lib/daily.js';
 import {createHolidays} from '../lib/holiday.js';
 import {createApps, parseRunning, parseWinApps, winTarget} from '../lib/apps.js';
 import {createRunner as createExecRunner} from '../lib/exec.js';
@@ -1044,20 +1044,15 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   await assert.rejects(md.list({kind: '__proto__'}), /unknown list/);
 }
 
-// 历史上的今天、每日维基与每日壁纸：百度与维基解析、特色条目与热读、Bing 与 Wikimedia 壁纸代理成 data: URL。
+// 历史上的今天与每日壁纸：百度与维基解析、Bing 与 Wikimedia 壁纸代理成 data: URL。
 {
   const bd = {'11': {'1113': [{year: '1587', title: '<b>海瑞</b>逝世', desc: '明代清官', link: 'https://baike.baidu.com/item/1', type: 'death'}, {year: '1995', title: '事件', link: 'javascript:bad'}]}};
   assert.deepEqual(parseBaiduOnThisDay(bd, '1113').map(x => [x.year, x.title, x.url]), [[1995, '事件', ''], [1587, '海瑞逝世', 'https://baike.baidu.com/item/1']]);
   const wk = {
-    tfa: {titles: {normalized: 'Featured Title'}, extract: 'Summary text', description: 'Short', content_urls: {desktop: {page: 'https://en.wikipedia.org/wiki/F'}}},
-    mostread: {articles: [{titles: {normalized: 'Hot'}, extract: 'E', description: 'D', views: 99, content_urls: {desktop: {page: 'https://en.wikipedia.org/wiki/H'}}}]},
     onthisday: [{year: 2001, text: 'Wikipedia launched', pages: [{extract: 'Online encyclopedia', content_urls: {desktop: {page: 'https://en.wikipedia.org/wiki/W'}}}]}],
     image: {title: 'File:Bird.jpg', thumbnail: {source: 'https://upload.wikimedia.org/bird.jpg'}, description: {text: 'A bird'}, artist: {text: 'Bob'}, file_page: 'https://commons.wikimedia.org/wiki/File:Bird.jpg'},
   };
   assert.deepEqual(parseWikiOnThisDay(wk), [{year: 2001, title: 'Wikipedia launched', desc: 'Online encyclopedia', url: 'https://en.wikipedia.org/wiki/W', type: 'event'}]);
-  const wf = parseWikiFeatured(wk);
-  assert.equal(wf.featured.title, 'Featured Title');
-  assert.equal(wf.mostread[0].views, 99);
   assert.equal(parseWikiImage(wk, '2026-11-13').credit, 'A bird · © Bob');
   const bing = parseBingWallpapers({images: [{url: '/th?id=OHR.Lake.jpg', title: '冰下秘境', copyright: '亚伯拉罕湖 (© Photographer)', enddate: '20261113', copyrightlink: 'https://www.bing.com/search?q=x'}]});
   assert.deepEqual(bing[0], {title: '冰下秘境', credit: '亚伯拉罕湖 · © Photographer', date: '2026-11-13', pageUrl: 'https://www.bing.com/search?q=x', imageUrl: 'https://www.bing.com/th?id=OHR.Lake.jpg'});
@@ -1070,7 +1065,6 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
   const dh = createHandlers(createStore({}), undefined, null, null, {daily});
   assert.equal((await dh['dsh-workboard/onthisday.get']({source: 'auto', lang: 'zh-CN', day: '2026-11-13'})).source, 'baidu');
   assert.equal((await dh['dsh-workboard/onthisday.get']({source: 'auto', lang: 'en-US', day: '2026-11-13'})).source, 'wiki');
-  assert.equal((await dh['dsh-workboard/wiki.get']({lang: 'en', day: '2026-11-13'})).featured.title, 'Featured Title');
   assert.equal((await dh['dsh-workboard/wallpaper.get']({source: 'bing', index: 0, lang: 'zh'})).src, 'data:image/jpeg;base64,YWJj');
 }
 

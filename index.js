@@ -80,7 +80,7 @@ export const BUILTIN_WIDGETS = [
   'workboard.outputs', 'workboard.schedules', 'workboard.pinned', 'workboard.files', 'workboard.clipboard', 'workboard.network',
   'workboard.nowplaying', 'workboard.ambient', 'workboard.videos', 'workboard.attention', 'workboard.brief',
   'workboard.ports', 'workboard.status', 'workboard.papers', 'workboard.holiday', 'workboard.activity', 'workboard.apps',
-  'workboard.models', 'workboard.onthisday', 'workboard.wiki', 'workboard.wallpaper',
+  'workboard.models', 'workboard.onthisday', 'workboard.wallpaper',
 ];
 
 export function defaultBoard(id) {
@@ -1014,10 +1014,6 @@ export function createHandlers(store, fetcher = createFetcher(), agents = null, 
     'dsh-workboard/onthisday.get': async p => {
       if (!services.daily) throw new UserError('unavailable', 'on-this-day is not available');
       return services.daily.onThisDay({source: String(p?.source ?? 'auto'), lang: String(p?.lang ?? ''), day: p?.day});
-    },
-    'dsh-workboard/wiki.get': async p => {
-      if (!services.daily) throw new UserError('unavailable', 'wiki feed is not available');
-      return services.daily.wiki({lang: String(p?.lang ?? ''), day: p?.day});
     },
     'dsh-workboard/wallpaper.get': async p => {
       if (!services.daily) throw new UserError('unavailable', 'wallpaper is not available');

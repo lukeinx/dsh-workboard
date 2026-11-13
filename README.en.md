@@ -1,6 +1,6 @@
 # Workboard
 
-**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 45 widgets out of the box — and your agent builds the rest.**
+**A modular dashboard for [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness). 44 widgets out of the box — and your agent builds the rest.**
 
 [简体中文](README.md) · [![npm](https://img.shields.io/npm/v/dsh-workboard)](https://www.npmjs.com/package/dsh-workboard) [![license](https://img.shields.io/github/license/lukeinx/dsh-workboard)](LICENSE)
 
@@ -8,7 +8,7 @@
 
 ## Highlights
 
-### 45 widgets, ready to use
+### 44 widgets, ready to use
 
 Open the widget gallery, search, and drop cards straight onto your board across four categories:
 
@@ -75,7 +75,7 @@ If you are an agent interacting with Workboard:
 ## Reference
 
 <details>
-<summary><b>All 45 built-in widgets</b></summary>
+<summary><b>All 44 built-in widgets</b></summary>
 
 | Widget | Sizes | What it shows |
 |---|---|---|
@@ -114,7 +114,6 @@ If you are an agent interacting with Workboard:
 | Countdown | `m` `s` `t` | Days until the weekend, month end, year end, and custom dates (`MM-DD` without a year repeats annually) |
 | China holidays | `m` `s` `t` | Next public holidays in mainland China with days off and make-up workdays, plus today's lunar date |
 | On this day | `t` `l` `m` `w` `s` | Historical events on today's date from Wikipedia and Baidu Baike, newest year first |
-| Daily Wikipedia | `l` `t` `m` `w` | Wikipedia's featured article of the day and most-read articles, in English or Chinese |
 | Time progress | `m` `s` `w` | Percentage of today, this week, this month, and this year elapsed |
 | Habits | `m` `l` `t` `w` | Check in for any day of the past week and track your current streak |
 | Photo frame | `l` `m` `s` `t` `w` | Cycles through photos from a local folder (`~/Pictures` by default), every 1 minute to 1 day or only on click |
@@ -150,7 +149,7 @@ All external network requests are made and cached by the Host:
 - **AI papers**: the [Hugging Face](https://huggingface.co) daily papers and trending Spaces APIs (falling back to [hf-mirror.com](https://hf-mirror.com) when huggingface.co is unreachable) and the [arXiv API](https://info.arxiv.org/help/api/index.html) for latest preprints by subject area; cached for 30 minutes
 - **Models**: the public [OpenRouter](https://openrouter.ai) models API (no key needed); the Usage widget reads the same API when "Estimate from OpenRouter list prices" is on; cached for 30 minutes
 - **China holidays**: [holiday-cn](https://github.com/NateScarlet/holiday-cn) data for this year and next via jsDelivr, falling back to GitHub raw; cached for 12 hours
-- **On this day, Daily Wikipedia & Daily wallpaper**: the [Wikimedia Feed API](https://api.wikimedia.org/wiki/Feed_API) (featured article, most-read, on-this-day events, and Picture of the Day), Baidu Baike's monthly on-this-day JSON (`baike.baidu.com`, unofficial), and Bing's wallpaper archive (`www.bing.com/HPImageArchive.aspx`, unofficial); wallpaper images are proxied by the Host as data URLs; feeds cached for 2 hours, images for 6 hours
+- **On this day & Daily wallpaper**: the [Wikimedia Feed API](https://api.wikimedia.org/wiki/Feed_API) (on-this-day events and Picture of the Day), Baidu Baike's monthly on-this-day JSON (`baike.baidu.com`, unofficial), and Bing's wallpaper archive (`www.bing.com/HPImageArchive.aspx`, unofficial); wallpaper images are proxied by the Host as data URLs; feeds cached for 2 hours, images for 6 hours
 - **Custom widgets**: limited to the `http(s)` URL prefixes declared in each widget's `fetch` allowlist; cached for 30 seconds
 
 Widgets that only read local state:
@@ -221,7 +220,7 @@ npm run check   # syntax check, Host smoke test, and ICS parser tests
 ```
 
 - `index.js`: Host routes (`/api/dsh-workboard/*`), storage tables, and agent tools
-- `client.js`: sidebar entry, board container, and the 45 built-in widgets
+- `client.js`: sidebar entry, board container, and the 44 built-in widgets
 - `lib/`: data fetchers, parsers, and system probes
 - `skills/workboard-widget.md`: agent skill for building custom widgets
 
@@ -251,7 +250,7 @@ Workboard builds on the following projects and services. Feed and trending conte
 | [arXiv](https://arxiv.org) | Latest preprints by category | Public API (attribution required) |
 | [OpenRouter](https://openrouter.ai) | Models widget and list-price estimates in Usage | Public API |
 | [holiday-cn](https://github.com/NateScarlet/holiday-cn) | China public holidays and make-up workdays, via [jsDelivr](https://www.jsdelivr.com) | MIT |
-| [Wikimedia Foundation](https://api.wikimedia.org/wiki/Feed_API) (Wikipedia / Wikimedia Commons) | Daily Wikipedia, On this day, and Wikimedia Picture of the Day | Public API (content under CC BY-SA 4.0) |
+| [Wikimedia Foundation](https://api.wikimedia.org/wiki/Feed_API) (Wikipedia / Wikimedia Commons) | On this day and Wikimedia Picture of the Day | Public API (content under CC BY-SA 4.0) |
 | Baidu Baike (`baike.baidu.com`) | Chinese On this day events | Unofficial endpoint |
 | Microsoft Bing (`www.bing.com`) | Bing daily wallpaper | Unofficial endpoint (photo copyright belongs to the respective photographers) |
 | [RSSHub](https://docs.rsshub.app) | Optional `rsshub://` feed route protocol | MIT (served by user-hosted instances) |
