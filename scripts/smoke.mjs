@@ -1011,8 +1011,8 @@ assert.equal(parseHitokoto({hitokoto: ''}), null);
 
 // AI 论文：按赞排序，去掉非法 id；官方域名失败时改走镜像，链接仍指向 huggingface.co。
 {
-  const raw = [{paper: {id: '2611.01234', title: 'Low', upvotes: 1, summary: 'long  summary', ai_keywords: ['a', 'b']}}, {paper: {id: '2611.05678', title: 'High', upvotes: 9, ai_summary: 'short', githubRepo: 'https://github.com/x/y', githubStars: 3}}, {paper: {id: '../x', title: 'Bad'}}];
-  assert.deepEqual(parsePapers(raw).map(p => [p.id, p.votes, p.summary, p.github, p.url]), [['2611.05678', 9, 'short', 'https://github.com/x/y', 'https://huggingface.co/papers/2611.05678'], ['2611.01234', 1, 'long summary', '', 'https://huggingface.co/papers/2611.01234']]);
+  const raw = [{paper: {id: '2611.01234', title: 'Low', upvotes: 1, summary: 'long  summary', ai_keywords: ['a', 'b'], authors: [{name: 'Alice'}, {name: 'Bob'}]}}, {organization: {fullname: 'NVIDIA'}, paper: {id: '2611.05678', title: 'High', upvotes: 9, ai_summary: 'short', githubRepo: 'https://github.com/x/y', githubStars: 3}}, {paper: {id: '../x', title: 'Bad'}}];
+  assert.deepEqual(parsePapers(raw).map(p => [p.id, p.votes, p.summary, p.org, p.authors, p.github, p.url]), [['2611.05678', 9, 'short', 'NVIDIA', [], 'https://github.com/x/y', 'https://huggingface.co/papers/2611.05678'], ['2611.01234', 1, 'long summary', '', ['Alice', 'Bob'], '', 'https://huggingface.co/papers/2611.01234']]);
   assert.deepEqual(parseSpaces([{id: 'org/sp', likes: 5, trendingScore: 2, sdk: 'gradio', cardData: {title: 'My Space', short_description: 'demo'}}, {id: 'bad id'}]).map(s => [s.id, s.title, s.url, s.sdk, s.summary]), [['org/sp', 'My Space', 'https://huggingface.co/spaces/org/sp', 'gradio', 'demo']]);
   assert.equal(arxivUrl('cs.AI, ../bad NLP'), 'https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL&sortBy=submittedDate&sortOrder=descending&max_results=30');
   assert.equal(arxivUrl('all'), 'https://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:cs.CL+OR+cat:cs.LG+OR+cat:cs.CV+OR+cat:cs.RO+OR+cat:cs.IR&sortBy=submittedDate&sortOrder=descending&max_results=30');
