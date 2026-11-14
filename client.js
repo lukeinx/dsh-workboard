@@ -5498,6 +5498,9 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
         ctx.effect(() => ctx.slots.inject('settings.section', () => ctx.slots.register({
           name: 'settings.section', id: PANEL, order: 40, label: () => t('title'), locale: NS, inject: () => ({}),
         }, WorkboardSettings)), 'dsh-workboard: settings section');
+        ctx.effect(() => ctx.slots.inject('settings.section.icon', () => ctx.slots.register({
+          name: 'settings.section.icon', id: PANEL,
+        }, PanelIcon)), 'dsh-workboard: settings section icon');
 
         // 设置弹窗没有公开「打开指定栏目」的接口：插件详情页的按钮改为在主区域打开同一面板。
         if (typeof ctx.inject === 'function') {
