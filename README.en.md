@@ -129,7 +129,7 @@ If you are an agent interacting with Workboard:
 | Podcasts | `l` `t` `m` `w` | Latest episodes from Podcast RSS / `rsshub://`, Apple Podcasts (link, `apple:ID`, or name), and Xiaoyuzhou plus Tech podcast charts, with cross-platform in-card playback and one-click agent episode summaries |
 | Markets | `t` `m` `s` `l` `w` | Forex (`USD/CNY`), China / HK / US equities (`sh600519`, `hk00700`, `usAAPL`), and crypto (`BTC`, `cg:<id>`) |
 
-Note: Agent, Quick prompt, Attention, and Daily brief share the same default workspace selection; PRs in Attention reuse the GitHub widget's query and cache. Shared preferences (your name, week start day, city, temperature unit, and quote source) can also be configured under **Settings → Workboard**. New built-in widgets added in future updates appear in the gallery without altering existing boards.
+Note: every widget that hands work to the agent (Agent, Quick prompt, Attention, Daily brief, and others) shares one workspace selection; PRs in Attention reuse the GitHub widget's query and cache. Shared preferences (your name, week start day, city, temperature unit, and agent workspace) can also be configured under **Settings → Workboard**. New built-in widgets added in future updates appear in the gallery without altering existing boards.
 
 </details>
 

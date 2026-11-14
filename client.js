@@ -72,7 +72,7 @@ window.__ModuleLoader__.load({
       calConnect: '连接系统日历', calAsking: '等待授权…', calDenied: '在「系统设置 → 隐私与安全性 → 日历」里允许 DeepSeek Harness', f_systemCalendar: '显示 macOS 系统日历',
       defaultBoard: '默认', untitled: '未命名', newBoard: '看板 {n}', newBoardLabel: '新建看板', rename: '双击改名',
       edit: '编辑', doneEdit: '完成', addWidget: '添加 widget', added: '已添加', add: '添加', settings: '设置', save: '保存', cancel: '取消',
-      saved: '已保存', cfg_personal: '个人', openSettings: '打开设置',
+      saved: '已保存', cfg_personal: '个人', cfg_agent: 'Agent', openSettings: '打开设置',
       intro: '点这里编辑看板：添加 widget、拖动排序、调整尺寸', introOk: '知道了',
       searchWidget: '搜索 widget', cat_all: '全部', cat_daily: '日常', cat_agent: 'DeepSeek', cat_news: '资讯', cat_tools: '效率', cat_dev: '开发', cat_plugin: '插件',
       deleteBoard: '删除看板', confirmDelete: '确认删除', size: '尺寸', drag: '拖动排序',
@@ -132,7 +132,7 @@ window.__ModuleLoader__.load({
       f_prices: '单价（每行一个：模型 输入 输出 [缓存读] [缓存写]，美元 / 百万 token；模型可写前缀）',
       f_orPrices: '未填单价的模型按 OpenRouter 公开价估算', u_costOr: '约 ${n}（按 OpenRouter 公开价）',
       d_prompt: '一句话或预设模板直接开新会话',
-      promptPlaceholder: '让 Agent 做点什么，回车发送', sending: '发送中…', f_presets: '预设（每行一个：名称 | prompt）', f_cwd: '工作目录（留空用默认）', ws_label: '工作区', ws_default: '默认工作区',
+      promptPlaceholder: '让 Agent 做点什么，回车发送', sending: '发送中…', f_presets: '预设（每行一个：名称 | prompt）', ws_label: '工作区', ws_default: 'Harness 默认',
       defaultPresets: '今日计划 | 读取我工作台上的待办和日程，帮我排出今天最该做的三件事\n周报草稿 | 读取我工作台上本周完成的待办，写一份简短的周报草稿',
       toAgent: '交给 Agent', itemCount: '{n} 条',
       cat_mine: '我的', gen_card: '用 Agent 生成', gen_hint: '说一句想要什么，Agent 做好后放到当前看板',
@@ -262,7 +262,7 @@ window.__ModuleLoader__.load({
       calConnect: 'Connect system calendar', calAsking: 'Waiting for permission…', calDenied: 'Allow DeepSeek Harness in System Settings → Privacy & Security → Calendars', f_systemCalendar: 'Show macOS system calendar',
       defaultBoard: 'Default', untitled: 'Untitled', newBoard: 'Board {n}', newBoardLabel: 'New board', rename: 'Double-click to rename',
       edit: 'Edit', doneEdit: 'Done', addWidget: 'Add widget', added: 'Added', add: 'Add', settings: 'Settings', save: 'Save', cancel: 'Cancel',
-      saved: 'Saved', cfg_personal: 'Personal', openSettings: 'Open settings',
+      saved: 'Saved', cfg_personal: 'Personal', cfg_agent: 'Agent', openSettings: 'Open settings',
       intro: 'Edit this board here: add widgets, drag to reorder, resize', introOk: 'Got it',
       searchWidget: 'Search widgets', cat_all: 'All', cat_daily: 'Daily', cat_agent: 'DeepSeek', cat_news: 'News', cat_tools: 'Productivity', cat_dev: 'Developer', cat_plugin: 'Plugins',
       deleteBoard: 'Delete board', confirmDelete: 'Confirm delete', size: 'Size', drag: 'Drag to reorder',
@@ -322,7 +322,7 @@ window.__ModuleLoader__.load({
       f_prices: 'Prices, one per line: model input output [cache read] [cache write], USD per million tokens; a model prefix matches',
       f_orPrices: 'Estimate models without a price from OpenRouter list prices', u_costOr: '≈ ${n} (OpenRouter list price)',
       d_prompt: 'Start a new session from a line of text or a preset',
-      promptPlaceholder: 'Ask the agent something, Enter to send', sending: 'Sending…', f_presets: 'Presets, one per line: name | prompt', f_cwd: 'Working directory (empty uses the default)', ws_label: 'Workspace', ws_default: 'Default workspace',
+      promptPlaceholder: 'Ask the agent something, Enter to send', sending: 'Sending…', f_presets: 'Presets, one per line: name | prompt', ws_label: 'Workspace', ws_default: 'Harness default',
       defaultPresets: 'Plan today | Read my Workboard to-dos and calendar and pick the three things I should do today\nWeekly note | Read the to-dos I completed on Workboard this week and draft a short weekly update',
       toAgent: 'Hand to agent', itemCount: '{n} items',
       cat_mine: 'Mine', gen_card: 'Generate with agent', gen_hint: 'Describe what you want; the agent builds it and puts it on this board',
@@ -2488,12 +2488,22 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
               h('b', null, r.name), ' ', h('span', {className: 'wb-muted'}, r.region))) : h('span', {className: 'wb-muted'}, t('noResults'))) : null);
         }
 
+        function WorkspaceField({value, onChange}) {
+          const list = useRemote('workspace.list', {}, WORKSPACE_MS).value ?? [];
+          const extra = value && !list.some(w => w.path === value);
+          return h('select', {className: 'wb-input', value: value ?? '', onChange: e => onChange(e.target.value)},
+            h('option', {value: ''}, t('ws_default')),
+            extra ? h('option', {value}, value) : null,
+            list.map(w => h('option', {key: w.id, value: w.path, title: w.path}, w.title || baseName(w.path))));
+        }
+
         const fieldDefault = f => (typeof f.default === 'function' ? f.default() : f.default);
         const fieldView = (f, v, set) => {
           const label = resolveText(f.label) || f.key;
           if (f.type === 'toggle') return h('label', {key: f.key, className: 'wb-check'}, h('input', {type: 'checkbox', checked: v !== false && v != null, onChange: e => set(f.key, e.target.checked)}), label);
           let control;
           if (f.type === 'location') control = h(LocationField, {value: v, onChange: x => set(f.key, x)});
+          else if (f.type === 'workspace') control = h(WorkspaceField, {value: v, onChange: x => set(f.key, x)});
           else if (f.type === 'select') control = h('select', {className: 'wb-input', value: v ?? '', onChange: e => set(f.key, e.target.value)},
             (f.options ?? []).map(o => h('option', {key: o.value, value: o.value}, resolveText(o.label) || o.value)));
           else if (f.type === 'textarea') control = h('textarea', {className: 'wb-input', value: v ?? '', placeholder: f.placeholder, spellCheck: false, onChange: e => set(f.key, e.target.value)});
@@ -2531,7 +2541,7 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
         const SETTING_GROUPS = [
           ['cfg_personal', [NAME_FIELD, WEEK_START_FIELD]],
           ['weather', LOCATION_FIELDS],
-          ['quote', QUOTE_FIELDS],
+          ['cfg_agent', [{key: 'agentWorkspace', type: 'workspace', scope: 'global', default: '', label: () => t('ws_label')}]],
         ];
         const SETTING_FIELDS = SETTING_GROUPS.flatMap(([, fields]) => fields);
 
@@ -2609,11 +2619,11 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
         const baseName = path => String(path ?? '').split('/').filter(Boolean).pop() ?? '';
 
         // 新会话的工作区：各 Agent widget 共用一个选择，存在 prefs.agentWorkspace（目录路径，'' 为默认）。
-        const useWorkspace = fallback => {
+        const useWorkspace = () => {
           const prefs = usePrefs();
           const res = useRemote('workspace.list', {}, WORKSPACE_MS);
           const list = res.value ?? [];
-          const path = prefs.agentWorkspace ?? fallback ?? '';
+          const path = prefs.agentWorkspace ?? '';
           return {list, path, id: list.find(w => w.path === path)?.id, set: p => { void prefsStore.put({agentWorkspace: p}); }};
         };
         function WorkspaceSelect({ws}) {
@@ -2802,7 +2812,7 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           const [busy, setBusy] = useState(false);
           const [error, setError] = useState('');
           const presets = parsePresets(config?.presets ?? t('defaultPresets'));
-          const ws = useWorkspace(config?.cwd);
+          const ws = useWorkspace();
           const send = prompt => {
             if (busy || !prompt.trim()) return;
             setBusy(true);
@@ -2825,7 +2835,6 @@ html:hover::-webkit-scrollbar-thumb,html:hover ::-webkit-scrollbar-thumb{backgro
           apiVersion: 1, sizes: ['m', 'w', 'l', 't', 's'], description: () => t('d_prompt'),
           settings: [
             {key: 'presets', type: 'textarea', label: () => t('f_presets'), default: () => t('defaultPresets')},
-            {key: 'cwd', type: 'text', label: () => t('f_cwd'), placeholder: '~/Vibe/project'},
           ],
         };
 
