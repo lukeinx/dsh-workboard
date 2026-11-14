@@ -72,7 +72,7 @@ window.__ModuleLoader__.load({
       calConnect: '连接系统日历', calAsking: '等待授权…', calDenied: '在「系统设置 → 隐私与安全性 → 日历」里允许 DeepSeek Harness', f_systemCalendar: '显示 macOS 系统日历',
       defaultBoard: '默认', untitled: '未命名', newBoard: '看板 {n}', newBoardLabel: '新建看板', rename: '双击改名',
       edit: '编辑', doneEdit: '完成', addWidget: '添加 widget', added: '已添加', add: '添加', settings: '设置', save: '保存', cancel: '取消',
-      saved: '已保存', cfg_personal: '个人', cfg_agent: 'Agent', openSettings: '打开设置',
+      saved: '已保存', cfg_personal: '个人', cfg_agent: '交给 Agent 时', openSettings: '打开设置',
       intro: '点这里编辑看板：添加 widget、拖动排序、调整尺寸', introOk: '知道了',
       searchWidget: '搜索 widget', cat_all: '全部', cat_daily: '日常', cat_agent: 'DeepSeek', cat_news: '资讯', cat_tools: '效率', cat_dev: '开发', cat_plugin: '插件',
       deleteBoard: '删除看板', confirmDelete: '确认删除', size: '尺寸', drag: '拖动排序',
@@ -262,7 +262,7 @@ window.__ModuleLoader__.load({
       calConnect: 'Connect system calendar', calAsking: 'Waiting for permission…', calDenied: 'Allow DeepSeek Harness in System Settings → Privacy & Security → Calendars', f_systemCalendar: 'Show macOS system calendar',
       defaultBoard: 'Default', untitled: 'Untitled', newBoard: 'Board {n}', newBoardLabel: 'New board', rename: 'Double-click to rename',
       edit: 'Edit', doneEdit: 'Done', addWidget: 'Add widget', added: 'Added', add: 'Add', settings: 'Settings', save: 'Save', cancel: 'Cancel',
-      saved: 'Saved', cfg_personal: 'Personal', cfg_agent: 'Agent', openSettings: 'Open settings',
+      saved: 'Saved', cfg_personal: 'Personal', cfg_agent: 'Handing off to the agent', openSettings: 'Open settings',
       intro: 'Edit this board here: add widgets, drag to reorder, resize', introOk: 'Got it',
       searchWidget: 'Search widgets', cat_all: 'All', cat_daily: 'Daily', cat_agent: 'DeepSeek', cat_news: 'News', cat_tools: 'Productivity', cat_dev: 'Developer', cat_plugin: 'Plugins',
       deleteBoard: 'Delete board', confirmDelete: 'Confirm delete', size: 'Size', drag: 'Drag to reorder',
@@ -668,6 +668,7 @@ window.__ModuleLoader__.load({
 .wb-input{box-sizing:border-box;width:100%;background:var(--dsw-alias-bg-layer-2);border:1px solid var(--dsw-alias-border-l1);border-radius:8px;color:var(--dsw-alias-label-primary);font:inherit;padding:7px 10px;outline:none}
 .wb-input:focus{border-color:var(--dsw-alias-brand-primary)}
 textarea.wb-input{resize:vertical;min-height:84px;line-height:1.5}
+select.wb-input{appearance:none;-webkit-appearance:none;padding-right:34px;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5 6 7.5 9 4.5' fill='none' stroke='%238e8e93' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:12px}
 .wb-loc{display:flex;align-items:center;gap:8px}
 .wb-loc b{font-weight:600}
 .wb-results{display:flex;flex-direction:column}
